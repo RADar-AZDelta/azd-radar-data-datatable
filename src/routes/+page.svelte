@@ -1,5 +1,5 @@
 <script lang="ts">
-    import DataTableDataView from "$lib/components/DataTableDataView.svelte";
+    import DataTableRenderer from "$lib/components/DataTableRenderer.svelte";
     export var data: [string, any][][]; data = [
         Object.entries({ name: "John", age: 35, country: "USA" }),
         Object.entries({ name: "Jane", age: 25, country: "Canada" }),
@@ -12,4 +12,4 @@
 <p>Create your package using @sveltejs/package and preview/showcase your work with SvelteKit</p>
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 
-<DataTableDataView bind:data />
+<DataTableRenderer bind:data />
