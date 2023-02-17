@@ -7,9 +7,9 @@
 Run these commands to get started:
 
 ```bash
-git clone https://github.com/RADar-AZDelta/RADar-DataTable.git
+git clone git@github.com:RADar-AZDelta/RADar-DataTable.git
 cd RADar-DataTable
-npm install
+pnpm install
 ```
 
-To run the example app, run `npm run dev -- --open` from the project root.
+To run the example app, run `pnpm run dev --open` from the project root.
