@@ -1,70 +1,121 @@
 <script lang="ts">
-    import type { ColumnMetadata } from "../classes/ColumnMetadata";
     import type ITable from "../interfaces/ITable";
-    import type IPaginated from "../interfaces/IPaginated";
-    import type {ISort} from "../interfaces/ISort";
-    import type {IFilter} from "../interfaces/IFilter";
+    import { sorting, pagination } from "$lib/store"
 
     export let table: ITable;
-    let columnFilters: IFilter[];
-    let columnSorts: ISort[];
-    let tablePagination: IPaginated;
-    // export let data: any[];
 
-    // export let columns: ColumnMetadata
+    const updateSorting = (col: string) => {
+        /*
+            Update the column sort
+        */
+        table.setColumnSort({
+            column: col,
+            direction: $sorting.filter(obj => obj.column == col)[0].times + 1
+        })
+    }
+
+    const changePage = (page: number) => {
+        /*
+            Update the pagination
+        */
+        table.setTablePagination({
+            currentPage: page,
+            totalPages: $pagination.totalPages,
+            rowsPerPage: $pagination.rowsPerPage
+        })
+    }
 </script>
-<table>
-<!--
-    getData(columnFilters?: IFilter[], columnSorts?: ISort[], tablePagination?: IPaginated): Promise<ITableData>;-->
-    {#await table.getData()}
-        <tr>
-            <td>Loading...</td>
-        </tr>
-    {:then data}
-        <h1>Hi!</h1>
-        <script>
-            console.log("\n\n\n\n\n\n\n\n\n\n\n"+data);
-        </script>
-        {#each data[0] as col}
-            <th>{col[0]}</th>
-        {/each}
-        {#each data as row}
-            <tr class="row">
-                {#each row as cell}
-                    <td class="cell">
-                        {cell[1]}
-                    </td>
+<section>
+        {#await table.getData()}
+            <p>Loading...</p>
+        {:then data}
+            <table>
+                <tr>
+                    {#each data.scheme as info}
+                        <th>
+                            <button on:click={() => {
+                                updateSorting(info.column)
+                            }} class="table-head">
+                                <p>{info.column}</p>
+                                {#if $sorting.filter(obj => obj.column == info.column)[0].times == 0}
+                                    <img src="/no-filter.svg" alt="No filter icon"/>
+                                {:else if $sorting.filter(obj => obj.column == info.column)[0].times == 1}
+                                    <img src="/ascending-filter.svg" alt="Ascending filter icon"/>
+                                {:else if $sorting.filter(obj => obj.column == info.column)[0].times == 2}
+                                    <img src="/descending-filter.svg" alt="Descending filter icon"/>
+                                {:else}
+                                    <p>Something went wrong!</p>
+                                {/if}
+                            </button>
+                        </th>
+                    {/each}
+                </tr>
+                {#each Array($pagination.rowsPerPage) as _, i}
+                <tr class="row">
+                    {#each data.data[i] as cell}
+                        <td>{cell}</td>
+                    {/each}
+                </tr>
                 {/each}
-            </tr>
-        {/each}
-    {/await}
-    <!--{#each data[0] as col}-->
-    <!--    <th>{col[0]}</th>-->
-    <!--{/each}-->
-    <!--{#each data as row}-->
-    <!--    <tr class="row">-->
-    <!--        {#each row as cell}-->
-    <!--            <td class="cell">-->
-    <!--                {cell[1]}-->
-    <!--            </td>-->
-    <!--        {/each}-->
-    <!--    </tr>-->
-    <!--{/each}-->
-</table>
+            </table>
+            <div class="pagination">
+                <img src="/arrow-left.svg" alt="Arrow left">
+                {#each Array($pagination.totalPages) as _, i}
+                    <button on:click={() => {changePage(i+1)}} class="pagination-page">
+                        {i + 1}
+                    </button>
+                {/each}
+                <img src="/arrow-right.svg" alt="Arrow right">
+            </div>
+        {/await}
+</section>
 <style>
     table {
         border-spacing: 0;
     }
-    .row:first-child {
-        background-color: rgba(0,255,0,0.41);
+
+    td {
+        padding: 1rem;
     }
-    .row:nth-child(even) {
-        background-color: rgba(255,0,216,0.41);
+    
+    th {
+        width: max-content
     }
-    .row:nth-child(odd) {
-        background-color: rgba(100,0,255,0.41);
+
+    .table-head {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        gap: 0.5rem;
+        border: none;
+        background-color: inherit;
+        cursor: pointer;
     }
-    .cell {
-        padding-right: 10px;
+
+    .table-head:hover {
+        background-color: #e2e8f0;
+    }
+
+    .row:nth-child(2n+1) {
+        background-color: inherit;
+    }
+    .row:nth-child(2n) {
+        background-color: #e2e8f0
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .pagination-page {
+        border: none;
+        background-color: inherit;
+        cursor: pointer;
+    }
+
+    .pagination-page:hover {
+        font-weight: 800;
     }
 </style>

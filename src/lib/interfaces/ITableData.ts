@@ -1,4 +1,6 @@
+import type { IScheme } from './IScheme';
+
 export interface ITableData {
-    data: never[][];
-    columns: string[];
+	data: any[][];
+	scheme: IScheme[];
 }
