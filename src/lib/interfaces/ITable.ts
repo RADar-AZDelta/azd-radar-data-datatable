@@ -7,7 +7,6 @@ import type { ITableData } from './ITableData';
  * defines the basic structure of a table
  */
 export default interface ITable {
-	setData(): void;
 	getData(
 		columnFilters?: IFilter[],
 		columnSorts?: ISort[],

@@ -120,9 +120,6 @@
             pagination.set(tablePagination)
             console.log($pagination)
         },
-        setData(): void {
-            return;
-        },
         getData(columnFilters?: IFilter[], columnSorts?: ISort[], tablePagination?: IPaginated): Promise<ITableData> {
             return new Promise(async(resolve, reject) => {
                 const columns = await getColumnsFromData()

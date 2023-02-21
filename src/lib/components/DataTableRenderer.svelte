@@ -18,6 +18,8 @@
         /*
             Update the pagination
         */
+       if(page > $pagination.totalPages) page--
+       if(page < 1) page = 1
         table.setTablePagination({
             currentPage: page,
             totalPages: $pagination.totalPages,
@@ -50,22 +52,22 @@
                         </th>
                     {/each}
                 </tr>
-                {#each Array($pagination.rowsPerPage) as _, i}
-                <tr class="row">
-                    {#each data.data[i] as cell}
-                        <td>{cell}</td>
-                    {/each}
-                </tr>
+                {#each Array(data.data.length - ($pagination.rowsPerPage * ($pagination.currentPage)) > 0? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - data.data.length) ) as _, i}
+                    <tr class="row">
+                        {#each data.data[i + ($pagination.rowsPerPage * ($pagination.currentPage - 1))] as row}
+                            <td>{row}</td>
+                        {/each}
+                    </tr>
                 {/each}
             </table>
             <div class="pagination">
-                <img src="/arrow-left.svg" alt="Arrow left">
+                <button on:click={() => changePage($pagination.currentPage - 1)} class="arrow-button"><img src="/arrow-left.svg" alt="Arrow left"></button >
                 {#each Array($pagination.totalPages) as _, i}
                     <button on:click={() => {changePage(i+1)}} class="pagination-page">
-                        {i + 1}
+                        <p>{i + 1}</p>
                     </button>
                 {/each}
-                <img src="/arrow-right.svg" alt="Arrow right">
+                <button on:click={() => changePage($pagination.currentPage + 1)} class="arrow-button"><img src="/arrow-right.svg" alt="Arrow right"></button >
             </div>
         {/await}
 </section>
@@ -117,5 +119,11 @@
 
     .pagination-page:hover {
         font-weight: 800;
+    }
+    
+    .arrow-button {
+        background-color: inherit;
+        border: none;
+        cursor: pointer;
     }
 </style>
