@@ -3,5 +3,5 @@
  */
 export interface IFilter {
 	column: string;
-	filter?: string | RegExp;
+	filter?: string | RegExp | number;
 }

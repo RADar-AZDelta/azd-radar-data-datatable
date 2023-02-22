@@ -8,6 +8,9 @@
 	import type { IScheme } from "$lib/interfaces/IScheme";
     import { sorting, pagination } from "$lib/store"
 	import type ISorting from "$lib/interfaces/ISorting";
+	import { writable } from "svelte/store";
+
+    const filters = writable<Array<IFilter>>([])
 
     /*
         Get the column names out of the data
@@ -45,14 +48,66 @@
     /*
         Get the filtered data without the column names in it
     */
-    const FilterData = async() =>{
+    const filterData = async(columns?: string[] ,filters?: Array<string|number|RegExp|undefined>) =>{
         let filteredData: [string, any][][] = []
+        
+        /*
+            Filter column name out of data
+        */
         for(let person of data){
             let personInfo = []
             for(let information of person){
                 personInfo.push(information[1])
             }
             filteredData.push(personInfo)
+        }
+
+        /*
+            Apply extra filters if given
+        */
+        if(filters && columns){
+            const extraFilteredData: [string, any][][] = filteredData
+            const columns = await getColumnsFromData()
+            for(let filter of filters){
+                const colIndex = columns.findIndex(obj => obj.column == columns[filters.indexOf(filter)].column)
+                switch(typeof(filter)){
+                    case 'string':
+                        for(let person of extraFilteredData) {
+                            if(String(person[colIndex]).toLowerCase().includes(filter.toLowerCase()) != true){
+                                delete extraFilteredData[extraFilteredData.indexOf(person)]
+                            }
+                        }
+                        break;
+                    
+                    case 'number':
+                        for(let person of extraFilteredData) {
+                            if(Number(person[colIndex]) != filter){
+                                delete extraFilteredData[extraFilteredData.indexOf(person)]
+                            }
+                        }
+                        break;
+
+                    case 'boolean':
+                        for(let person of extraFilteredData) {
+                            if(Boolean(person[colIndex]) != filter){
+                                delete extraFilteredData[extraFilteredData.indexOf(person)]
+                            }
+                        }
+                        break;
+
+                    default:
+                        if(filter instanceof RegExp){
+                            for(let person of extraFilteredData) {
+                                if(filter.test(String(person[colIndex])) == false){
+                                    delete extraFilteredData[extraFilteredData.indexOf(person)]
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+
+            filteredData = Array.from(new Set(extraFilteredData)).filter(elem => elem != undefined)
         }
         return filteredData
     }
@@ -82,11 +137,25 @@
         })
     }
 
+    const updateSortingStore = async(value: ISort) => {
+        sorting.update((sort): ISorting[] => {
+                const sorting = sort
+                const index = sorting.findIndex(obj => obj.column == value.column)
+                sorting[index] = {
+                    column: value.column,
+                    times: sorting[index].times + 1
+                }
+                return sorting
+            })
+            if($sorting.filter(obj => obj.column == value.column)[0].times > 2 || $sorting.filter(obj => obj.column == value.column)[0].times < 0) $sorting.filter(obj => obj.column == value.column)[0].times = 0
+    }
+
     /*
         Some test data
     */
     export var data: [string, any][][]; data = [
         Object.entries({ name: "Rory", age: 35, country: "USA", telephone: "0800-123-524-634", address: "123 Main Street, New York, NY 10001" }),
+        Object.entries({ name: "Rory2", age: 45, country: "Belgium", telephone: "0800-123-524-634", address: "123 Main Street, New York, NY 10001" }),
         Object.entries({ name: "Amethyst", age: 35, country: "USA", telephone: "0800-123-524-634", address: "123 Main Street, New York, NY 10001" }),
         Object.entries({ name: "Bob", age: 35, country: "USA", telephone: "0800-123-524-634", address: "123 Main Street, New York, NY 10001" }),
         Object.entries({ name: "Cindy", age: 35, country: "USA", telephone: "0800-123-524-634", address: "123 Main Street, New York, NY 10001" }),
@@ -102,30 +171,26 @@
 
     export var table: ITable = {
         setColumnFilter(value: IFilter): void {
-            return;
-        }, 
-        setColumnSort(value: ISort): void {           
-            sorting.update((sort): ISorting[] => {
-                const sorting = sort
-                const index = sorting.findIndex(obj => obj.column == value.column)
-                sorting[index] = {
-                    column: value.column,
-                    times: sorting[index].times + 1
-                }
-                return sorting
+            //TODO: filter the chosen column here
+            $filters.push({
+                column: value.column,
+                filter: value.filter
             })
-            if($sorting.filter(obj => obj.column == value.column)[0].times > 2 || $sorting.filter(obj => obj.column == value.column)[0].times < 0) $sorting.filter(obj => obj.column == value.column)[0].times = 0
+        }, 
+        setColumnSort(value: ISort): void {      
+            updateSortingStore(value)     
+            //TODO: sort the chosen column here
         },
         setTablePagination(tablePagination: IPaginated): void {
             pagination.set(tablePagination)
-            console.log($pagination)
         },
         getData(columnFilters?: IFilter[], columnSorts?: ISort[], tablePagination?: IPaginated): Promise<ITableData> {
             return new Promise(async(resolve, reject) => {
                 const columns = await getColumnsFromData()
-                const filteredData = await FilterData()
+                let filteredData = await filterData()
                 fillSortingStore(columns)
                 updatePaginationStore(filteredData.length)
+                if($filters.length > 0) filteredData = await filterData($filters.map(obj => obj.column), $filters.map(obj => obj.filter))
                 return resolve({
                     data: filteredData,
                     scheme: columns 
