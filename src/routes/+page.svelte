@@ -93,16 +93,20 @@
 
 					case 'number':
 						for (let person of extraFilteredData) {
-							if (Number(person[colIndex]) != filter) {
-								delete extraFilteredData[extraFilteredData.indexOf(person)];
+							if (person != undefined) {
+								if (Number(person[colIndex]) != filter) {
+									delete extraFilteredData[extraFilteredData.indexOf(person)];
+								}
 							}
 						}
 						break;
 
 					case 'boolean':
 						for (let person of extraFilteredData) {
-							if (Boolean(person[colIndex]) != filter) {
-								delete extraFilteredData[extraFilteredData.indexOf(person)];
+							if (person != undefined) {
+								if (Boolean(person[colIndex]) != filter) {
+									delete extraFilteredData[extraFilteredData.indexOf(person)];
+								}
 							}
 						}
 						break;
@@ -110,8 +114,10 @@
 					default:
 						if (filter instanceof RegExp) {
 							for (let person of extraFilteredData) {
-								if (filter.test(String(person[colIndex])) == false) {
-									delete extraFilteredData[extraFilteredData.indexOf(person)];
+								if (person != undefined) {
+									if (filter.test(String(person[colIndex])) == false) {
+										delete extraFilteredData[extraFilteredData.indexOf(person)];
+									}
 								}
 							}
 						}
