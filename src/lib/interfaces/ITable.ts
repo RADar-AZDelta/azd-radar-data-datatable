@@ -15,4 +15,6 @@ export default interface ITable {
 	setColumnFilter(value: IFilter): void;
 	setColumnSort(value: ISort): void;
 	setTablePagination(tablePagination: IPaginated): void;
+	deleteAllFilters(): void;
+	deleteFilter(column: string): void;
 }
