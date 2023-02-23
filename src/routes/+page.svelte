@@ -11,6 +11,12 @@
 	import { writable } from 'svelte/store';
 	import type { SortDirection } from '$lib/classes/enums/SortDirection';
 
+	// TODO: place functionalities from +page.svelte to DataTableRenderer.svelte
+	// TODO: make a basic DataTableRenderer.svelte because the one that is used right now is for data for that specific scheme.
+	// TODO: delete --> Delete all filters funtionality because it is an extra that can be implemented later
+	// TODO: place code like the sorting button, filter input, pagination, ... in seperate components
+	// TODO: make extra tests for every component
+
 	const filters = writable<Array<IFilter>>([]);
 
 	/*
@@ -53,7 +59,7 @@
     */
 	const filterData = async (
 		columns?: string[],
-		filters?: Array<string | number | RegExp | undefined>
+		filters?: Array<string | number | RegExp | boolean | Date | undefined>
 	) => {
 		let filteredData: [string, any][][] = [];
 
@@ -152,12 +158,8 @@
 		columns: IScheme[]
 	) => {
 		const colIndex = columns.findIndex((obj) => obj.column == col);
-		let filteredData;
+		let filteredData = data;
 		switch (direction) {
-			case 0:
-				filteredData = data;
-				break;
-
 			case 1:
 				filteredData = data.sort(function (a, b) {
 					if (b[colIndex] > a[colIndex]) return -1;
@@ -208,6 +210,17 @@
 	/*
         Some test data
     */
+
+	// TODO: fix bug where header needs to be added to all elements when added to one --> and values need to be set to null/undefined
+	// export var columns;
+	// columns = [
+	// 	name,
+	// 	age,
+	// 	country,
+	// 	telephone,
+	// 	address
+	// ]
+
 	export var data: [string, any][][];
 	data = [
 		Object.entries({
@@ -215,14 +228,14 @@
 			age: 35,
 			country: 'USA',
 			telephone: '0800-123-524-634',
-			address: '123 Main Street, New York, NY 10001'
+			address: '123 Main Street, New York, NY 10001',
 		}),
 		Object.entries({
 			name: 'Amethyst',
 			age: 35,
 			country: 'USA',
 			telephone: '0800-123-524-634',
-			address: '123 Main Street, New York, NY 10001'
+			address: '123 Main Street, New York, NY 10001',
 		}),
 		Object.entries({
 			name: 'Bob',
@@ -347,6 +360,7 @@
 						$filters.map((obj) => obj.column),
 						$filters.map((obj) => obj.filter)
 					);
+					// elements that not need to be sorted --> delete item out of store
 				if ($sorting.length > 0) {
 					for (let col of $sorting) {
 						await sortData(col.column, col.times, filteredData, columns);

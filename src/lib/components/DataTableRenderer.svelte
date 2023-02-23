@@ -84,105 +84,110 @@
 		{#await table.getData()}
 			<p>Loading...</p>
 		{:then data}
-			<table>
-				<tr>
-					{#each data.scheme as info}
-						<th>
-							<div class="table-header-element">
-								<button
-									on:click={() => {
-										updateSorting(info.column);
-									}}
-									class="table-head"
-								>
-									<p class="column-name">{info.column}</p>
-									{#if $sorting.filter((obj) => obj.column == info.column)[0].times == 0}
-										<img src="/no-filter.svg" alt="No filter icon" />
-									{:else if $sorting.filter((obj) => obj.column == info.column)[0].times == 1}
-										<img src="/ascending-filter.svg" alt="Ascending filter icon" />
-									{:else if $sorting.filter((obj) => obj.column == info.column)[0].times == 2}
-										<img src="/descending-filter.svg" alt="Descending filter icon" />
-									{:else}
-										<p>Something went wrong!</p>
-									{/if}
-								</button>
-								<button on:click={() => deleteFilter(info.column)} class="filter-deletion">
-									<p>Filter</p>
-									<img src="/x.svg" alt="Cross icon" />
-								</button>
-							</div>
-							<input
-								on:change={() => updateFiltering(event, info.type)}
-								class="input-filtering"
-								type={info.type == 0 ? 'text' : info.type == 1 ? 'number' : 'checkbox'}
-								placeholder="filter by {info.column}"
-							/>
-						</th>
-					{/each}
-				</tr>
-				{#each Array(data.data.length - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - data.data.length)) as _, i}
-					<tr class="row">
-						{#each data.data[i + $pagination.rowsPerPage * ($pagination.currentPage - 1)] as row}
-							<td>{row}</td>
+			<div class="table-comp">
+				<h2 class="table-title">Information Table</h2>
+				<table>
+					<tr>
+						{#each data.scheme as info}
+							<th>
+								<div class="table-header-element">
+									<button
+										on:click={() => {
+											updateSorting(info.column);
+										}}
+										class="table-head"
+									>
+										<p class="column-name">{info.column}</p>
+										{#if $sorting.filter((obj) => obj.column == info.column)[0].times == 0}
+											<img src="/no-filter.svg" alt="No filter icon" />
+										{:else if $sorting.filter((obj) => obj.column == info.column)[0].times == 1}
+											<img src="/ascending-filter.svg" alt="Ascending filter icon" />
+										{:else if $sorting.filter((obj) => obj.column == info.column)[0].times == 2}
+											<img src="/descending-filter.svg" alt="Descending filter icon" />
+										{:else}
+											<p>Something went wrong!</p>
+										{/if}
+										<!-- <Sorting bind:column bind:sortDirection/> -->
+									</button>
+									<button on:click={() => deleteFilter(info.column)} aria-label="{info.column} remove filter" class="filter-deletion">
+										<p>Filter</p>
+										<img src="/x.svg" alt="Cross icon" />
+									</button>
+								</div>
+								<input
+									on:change={() => updateFiltering(event, info.type)}
+									class="input-filtering"
+									name={info.column}
+									type={info.type == 0 ? 'text' : info.type == 1 ? 'number' : 'checkbox'}
+									placeholder="filter by {info.column}"
+								/>
+							</th>
 						{/each}
 					</tr>
-				{/each}
-			</table>
-			<section class="table-information">
-				<div class="table-rows">
-					<p>Rows:</p>
-					<select
-						bind:value={$rows}
-						class="table-rows-select"
-						id="rows"
-						on:change={() => updateRowsPerPage()}
-					>
-						<option value="10">10</option>
-						<option value="20">20</option>
-						<option value="50">50</option>
-						<option value="100">100</option>
-					</select>
-					<p>
-						{$pagination.rowsPerPage * $pagination.currentPage + 1 - $pagination.rowsPerPage}-{data
-							.data.length -
-							$pagination.rowsPerPage * $pagination.currentPage >
-						0
-							? $pagination.rowsPerPage
-							: $pagination.rowsPerPage -
-							  ($pagination.rowsPerPage * $pagination.currentPage - data.data.length) +
-							  $pagination.rowsPerPage * ($pagination.currentPage - 1)} of {data.data.length}
-					</p>
-				</div>
-				<button class="button-filters" on:click={deleteAllFiltering}>
-					<p>Delete filters</p>
-					<img src="/x.svg" alt="Cross icon" />
-				</button>
-				<div class="pagination">
-					<button
-						on:click={() => changePage($pagination.currentPage - 1)}
-						class={`arrow-button ${$pagination.currentPage == 1 ? 'arrow-button-disable' : null}`}
-						><img src="/arrow-left.svg" alt="Arrow left" /></button
-					>
-					{#each Array($pagination.totalPages) as _, i}
-						<button
-							on:click={() => {
-								changePage(i + 1);
-							}}
-							class="pagination-page"
-						>
-							<p class={`${i + 1 == $pagination.currentPage ? 'pagination-page-selected' : null}`}>
-								{i + 1}
-							</p>
-						</button>
+					{#each Array(data.data.length - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - data.data.length)) as _, i}
+						<tr class="row">
+							{#each data.data[i + $pagination.rowsPerPage * ($pagination.currentPage - 1)] as row}
+								<td>{row}</td>
+							{/each}
+						</tr>
 					{/each}
-					<button
-						on:click={() => changePage($pagination.currentPage + 1)}
-						class={`arrow-button ${
-							$pagination.currentPage == $pagination.totalPages ? 'arrow-button-disable' : null
-						}`}><img src="/arrow-right.svg" alt="Arrow right" /></button
-					>
-				</div>
-			</section>
+				</table>
+				<section class="table-information">
+					<div class="table-rows">
+						<p>Rows:</p>
+						<select
+							bind:value={$rows}
+							class="table-rows-select"
+							id="rows"
+							on:change={() => updateRowsPerPage()}
+						>
+							<option value="10">10</option>
+							<option value="20">20</option>
+							<option value="50">50</option>
+							<option value="100">100</option>
+						</select>
+						<p>
+							{$pagination.rowsPerPage * $pagination.currentPage + 1 - $pagination.rowsPerPage}-{data
+								.data.length -
+								$pagination.rowsPerPage * $pagination.currentPage >
+							0
+								? $pagination.rowsPerPage
+								: $pagination.rowsPerPage -
+								  ($pagination.rowsPerPage * $pagination.currentPage - data.data.length) +
+								  $pagination.rowsPerPage * ($pagination.currentPage - 1)} of {data.data.length}
+						</p>
+					</div>
+					<button class="button-filters" on:click={deleteAllFiltering}>
+						<p>Delete filters</p>
+						<img src="/x.svg" alt="Cross icon" />
+					</button>
+					<div class="pagination">
+						<button
+							on:click={() => changePage($pagination.currentPage - 1)}
+							class={`arrow-button ${$pagination.currentPage == 1 ? 'arrow-button-disable' : null}`}
+							><img src="/arrow-left.svg" alt="Arrow left" /></button
+						>
+						{#each Array($pagination.totalPages) as _, i}
+							<button
+								on:click={() => {
+									changePage(i + 1);
+								}}
+								class="pagination-page"
+							>
+								<p class={`${i + 1 == $pagination.currentPage ? 'pagination-page-selected' : null}`}>
+									{i + 1}
+								</p>
+							</button>
+						{/each}
+						<button
+							on:click={() => changePage($pagination.currentPage + 1)}
+							class={`arrow-button ${
+								$pagination.currentPage == $pagination.totalPages ? 'arrow-button-disable' : null
+							}`}><img src="/arrow-right.svg" alt="Arrow right" /></button
+						>
+					</div>
+				</section>
+			</div>
 		{/await}
 	{/key}
 </section>
@@ -191,7 +196,6 @@
 	table {
 		border-spacing: 0;
 		width: 100%;
-		padding: 4rem 1rem 2rem;
 	}
 
 	td {
@@ -200,6 +204,14 @@
 
 	th {
 		width: max-content;
+	}
+
+	.table-comp {
+		padding: 4rem 1rem 2rem;
+	}
+
+	.table-title {
+		font-size: 2rem;
 	}
 
 	.button-filters {

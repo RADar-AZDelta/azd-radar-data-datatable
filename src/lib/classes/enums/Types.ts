@@ -4,5 +4,6 @@
 export enum Types {
 	string,
 	number,
-	boolean
+	boolean,
+	Date
 }
