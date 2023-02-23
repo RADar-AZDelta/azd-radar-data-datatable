@@ -13,18 +13,20 @@
 
 	// TODO: place functionalities from +page.svelte to DataTableRenderer.svelte
 	// TODO: make a basic DataTableRenderer.svelte because the one that is used right now is for data for that specific scheme.
+	// TODO: not every column needs to be placed in the sorting store, only the ones that have been sorted
 	// TODO: delete --> Delete all filters funtionality because it is an extra that can be implemented later
-	// TODO: place code like the sorting button, filter input, pagination, ... in seperate components
 	// TODO: make extra tests for every component
+	// TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
 
 	const filters = writable<Array<IFilter>>([]);
 
 	/*
         Get the column names out of the data
     */
-	const getColumnsFromData = async () => {
+	const getColumnsFromData = async (times: number) => {
 		const columns: IScheme[] = [];
-		for (let info of data[0]) {
+		for(let i = 0;i++;i<times){
+			for (let info of data[i]) {
 			let typeFound: number = 0;
 			switch (typeof info[1]) {
 				case 'string':
@@ -50,6 +52,7 @@
 					type: typeFound
 				});
 			}
+		}
 		}
 		return columns;
 	};
@@ -81,7 +84,7 @@
 			const extraFilteredData: [string, any][][] = Array.from(new Set(filteredData)).filter(
 				(elem) => elem != undefined
 			);
-			const columnsData = await getColumnsFromData();
+			const columnsData = await getColumnsFromData(10);
 			for (let filter of filters) {
 				const colIndex = columnsData.findIndex(
 					(obj) => obj.column == columns[filters.indexOf(filter)]
@@ -210,16 +213,29 @@
 	/*
         Some test data
     */
-
-	// TODO: fix bug where header needs to be added to all elements when added to one --> and values need to be set to null/undefined
-	// export var columns;
-	// columns = [
-	// 	name,
-	// 	age,
-	// 	country,
-	// 	telephone,
-	// 	address
-	// ]
+	export var columns: IScheme[];
+	columns = [
+		{
+			column: "name",
+			type: 0
+		},
+		{
+			column: "age",
+			type: 1 
+		},
+		{
+			column: "country",
+			type: 0
+		},
+		{
+			column: "telephone",
+			type: 0
+		},
+		{
+			column: "address",
+			type: 0
+		}
+	]
 
 	export var data: [string, any][][];
 	data = [
@@ -331,10 +347,6 @@
 		},
 		setColumnSort(value: ISort): void {
 			updateSortingStore(value);
-			// if($sort.filter(obj => obj.column == value.column).length != 0){
-			//     $sort[$sort.indexOf($sort.filter(obj => obj.column == value.column)[0])].direction += 1
-			// }
-			//TODO: sort the chosen column here
 		},
 		setTablePagination(tablePagination: IPaginated): void {
 			pagination.set(tablePagination);
@@ -351,7 +363,11 @@
 			tablePagination?: IPaginated
 		): Promise<ITableData> {
 			return new Promise(async (resolve, reject) => {
-				const columns = await getColumnsFromData();
+				let col
+				// If there was no given scheme from the database or file, we'll guess the columns from looking at the data
+				if(!columns) {
+					col = await getColumnsFromData(10)
+				}
 				let filteredData = await filterData();
 				fillSortingStore(columns);
 				updatePaginationStore(filteredData.length);
