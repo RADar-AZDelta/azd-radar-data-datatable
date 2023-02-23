@@ -1,9 +1,9 @@
-import type { SortDirection } from '$lib/classes/enums/SortDirection';
+import type SortDirection from '$lib/classes/enums/SortDirection';
 
 /**
  * Defines how to sort a column
  */
-export interface ISort {
+export default interface ISort {
 	column: string;
 	direction: SortDirection;
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { ITableData } from '$lib/interfaces/ITableData';
-	import type IPaginated from '../../interfaces/IPaginated';
-
+	import type ITableData from '$lib/interfaces/ITableData';
+	import type IPaginated from '$lib/interfaces/IPaginated';
+ 
 	export let updateRowsPerPage: Function,
 		changePage: Function,
 		data: ITableData,

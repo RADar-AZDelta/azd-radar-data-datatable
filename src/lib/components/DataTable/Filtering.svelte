@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Types } from "$lib/classes/enums/Types";
+	import type Types from "$lib/classes/enums/Types";
 
     export let col: string, type: Types, updateFiltering: Function, deleteFilter: Function;
 </script>

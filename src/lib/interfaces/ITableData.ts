@@ -1,6 +1,6 @@
-import type { IScheme } from './IScheme';
+import type IScheme from './IScheme';
 
-export interface ITableData {
+export default interface ITableData {
 	data: any[][];
 	scheme: IScheme[];
 }

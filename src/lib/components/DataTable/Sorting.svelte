@@ -1,11 +1,11 @@
 <script lang="ts">
 	export let col: string, direction: number, updateSorting: Function;
 
-    const sortColumn = async() => {
-        if(direction == 2) direction = 0
-        else direction = direction++
-        updateSorting(col, direction)
-    }
+	const sortColumn = async () => {
+		if (direction == 2) direction = 0;
+		else direction = direction++;
+		updateSorting(col, direction);
+	};
 </script>
 
 <div class="table-header-element">

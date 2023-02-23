@@ -1,7 +1,7 @@
-import type { IFilter } from './IFilter';
-import type { ISort } from './ISort';
+import type IFilter from './IFilter';
+import type ISort from './ISort';
 import type IPaginated from './IPaginated';
-import type { ITableData } from './ITableData';
+import type ITableData from './ITableData';
 
 /**
  * defines the basic structure of a table

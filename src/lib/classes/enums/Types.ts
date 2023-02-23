@@ -7,3 +7,5 @@ export enum Types {
 	boolean,
 	Date
 }
+
+export default Types
