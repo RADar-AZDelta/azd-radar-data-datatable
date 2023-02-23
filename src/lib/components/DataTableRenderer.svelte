@@ -152,6 +152,7 @@
 				const sorting = Array.from(new Set(sort.filter((obj) => obj.column != col)));
 				return sorting;
 			});
+		changePage(1)
 		updateTable();
 	};
 
@@ -210,6 +211,7 @@
 	}
 
 	async function updateFiltering(event: any, type: any) {
+		changePage(1)
 		let filterValue = event.target.value;
 		const filterColumn: string = event.target.placeholder.split(' ')[2];
 		if (filterValue != undefined) {
@@ -244,7 +246,7 @@
 					$filters.map((obj) => obj.column),
 					$filters.map((obj) => obj.filter)
 				);
-			// elements that not need to be sorted --> delete item out of store
+				updatePaginationStore(filteredData.length)
 			if ($sorting.length > 0) {
 				for (let col of $sorting) {
 					await sortData(col.column, col.direction, filteredData, columns);
