@@ -1,31 +1,13 @@
 <script lang="ts">
 	import type ITableData from '$lib/interfaces/ITableData';
 	import type IPaginated from '$lib/interfaces/IPaginated';
-	import { writable } from 'svelte/store';
 
 	export let updateRowsPerPage: Function,
 		changePage: Function,
 		data: ITableData,
-		pagination: IPaginated;   
+		pagination: IPaginated;
 
-	// const skippedPages = writable<number>(0)
-	// let update = 0
-
-	// const updatePage = async() => {
-	// 	update += 1
-	// }
-
-	// const updatePagination = async(chosenPage: number) => {
-	// 	if (pagination.currentPage + 1 == chosenPage) skippedPages.update(n => n + 1)
-	// 	if (pagination.currentPage - 1 == chosenPage) skippedPages.update(n => n - 1)
-	// 	console.log(pagination.currentPage)
-	// 	console.log(chosenPage)
-	// 	console.log($skippedPages)
-	// 	changePage(chosenPage)
-	// 	updatePage()
-	// }
-
-	// pagination.totalPages = 20
+	let pagesShown = 7;
 </script>
 
 <section class="table-information">
@@ -37,10 +19,9 @@
 			id="rows"
 			on:change={() => updateRowsPerPage(event)}
 		>
-			<option value="10">10</option>
-			<option value="20">20</option>
-			<option value="50">50</option>
-			<option value="100">100</option>
+			{#each Array(5) as _, i}
+				<option value={(i + 1) * 10}>{(i + 1) * 10}</option>
+			{/each}
 		</select>
 		<p>
 			{pagination.rowsPerPage * pagination.currentPage + 1 - pagination.rowsPerPage}-{data.data
@@ -59,16 +40,48 @@
 			class={`arrow-button ${pagination.currentPage == 1 ? 'arrow-button-disable' : null}`}
 			><img src="/arrow-left.svg" alt="Arrow left" /></button
 		>
-		{#each Array(pagination.totalPages > 7?7:pagination.totalPages) as _, i}
+		{#each Array(pagination.totalPages > 7 ? 7 : pagination.totalPages) as _, i}
 			<button
 				on:click={() => {
-					changePage(i + 1);
+					if (
+						pagination.currentPage > Math.floor(pagesShown / 2) + 1 &&
+						pagination.currentPage + Math.floor(pagesShown / 2) + 1 <= pagination.totalPages
+					)
+						changePage(pagination.currentPage + i - Math.floor(pagesShown / 2));
+					else if (
+						pagination.currentPage > Math.floor(pagesShown / 2) + 1 &&
+						pagination.currentPage + Math.floor(pagesShown / 2) >= pagination.totalPages
+					)
+						changePage(pagination.totalPages + i - (pagesShown - 1));
+					else changePage(i + 1);
 				}}
 				class="pagination-page"
 			>
-				<p class={`${i + 1 == pagination.currentPage ? 'pagination-page-selected' : null}`}>
-					{i + 1}
-				</p>
+				{#if pagination.currentPage > Math.floor(pagesShown / 2) + 1 && pagination.currentPage + Math.floor(pagesShown / 2) + 1 <= pagination.totalPages}
+					<p
+						class={`${
+							pagination.currentPage == pagination.currentPage + i - Math.floor(pagesShown / 2)
+								? 'pagination-page-selected'
+								: null
+						}`}
+					>
+						{pagination.currentPage + i - Math.floor(pagesShown / 2)}
+					</p>
+				{:else if pagination.currentPage > Math.floor(pagesShown / 2) + 1 && pagination.currentPage + Math.floor(pagesShown / 2) >= pagination.totalPages}
+					<p
+						class={`${
+							pagination.currentPage == pagination.totalPages + i - (pagesShown - 1)
+								? 'pagination-page-selected'
+								: null
+						}`}
+					>
+						{pagination.totalPages + i - (pagesShown - 1)}
+					</p>
+				{:else}
+					<p class={`${pagination.currentPage == i + 1 ? 'pagination-page-selected' : null}`}>
+						{i + 1}
+					</p>
+				{/if}
 			</button>
 		{/each}
 		<button
@@ -81,13 +94,13 @@
 </section>
 
 <style>
-    .table-information {
+	.table-information {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 	}
 
-    .table-rows {
+	.table-rows {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -95,11 +108,11 @@
 
 	.table-rows-select {
 		padding: 1rem;
-		width: 8rem;
+		width: 6rem;
 		border-radius: 5px;
 	}
 
-    .pagination {
+	.pagination {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
@@ -111,7 +124,7 @@
 		cursor: pointer;
 	}
 
-    .arrow-button {
+	.arrow-button {
 		background-color: inherit;
 		border: none;
 		cursor: pointer;
@@ -119,9 +132,10 @@
 
 	.arrow-button-disable {
 		cursor: auto;
+		filter: invert(72%) sepia(9%) saturate(345%) hue-rotate(179deg) brightness(89%) contrast(89%);
 	}
 
-    .pagination-page {
+	.pagination-page {
 		border: none;
 		background-color: inherit;
 		cursor: pointer;

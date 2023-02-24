@@ -7,14 +7,8 @@ import type ITableData from './ITableData';
  * defines the basic structure of a table
  */
 export default interface ITable {
-	getData(
-		columnFilters?: IFilter[],
-		columnSorts?: ISort[],
-		tablePagination?: IPaginated
-	): Promise<ITableData>;
-	setColumnFilter(value: IFilter): void;
-	setColumnSort(value: ISort): void;
+	getData(): Promise<ITableData>;
+	setColumnFilters(value: IFilter[]): void;
+	setColumnSort(value: ISort[]): void;
 	setTablePagination(tablePagination: IPaginated): void;
-	deleteAllFilters(): void;
-	deleteFilter(column: string): void;
 }

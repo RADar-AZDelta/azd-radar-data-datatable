@@ -4,7 +4,6 @@
 	const sortColumn = async () => {
 		if (direction == 2) direction = 0;
 		else direction = direction++;
-		console.log("sorting from inner child ", col, direction)
 		updateSorting(col, direction);
 	};
 </script>

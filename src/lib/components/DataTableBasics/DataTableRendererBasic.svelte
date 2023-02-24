@@ -8,10 +8,10 @@
 	import type IFilter from '$lib/interfaces/IFilter';
 	import type IPaginated from '$lib/interfaces/IPaginated';
 
-	export let getData: Function;
-    export let filters: Writable<Array<IFilter>>
-    export let sorting: Writable<Array<ISort>>
-	export let pagination: Writable<IPaginated>
+	export let getData: Function,
+		filters: Writable<Array<IFilter>>,
+		sorting: Writable<Array<ISort>>,
+		pagination: Writable<IPaginated>;
 
 	let update = 0;
 
@@ -29,7 +29,7 @@
 		if (direction == 2) {
 			sorting.update((sort): ISort[] => {
 				const sorting = Array.from(new Set(sort.filter((obj) => obj.column != col)));
-                return sorting;
+				return sorting;
 			});
 		}
 		if ($sorting.filter((obj) => obj.column == col).length > 0) {
@@ -136,7 +136,7 @@
 										: 0}
 									{updateSorting}
 								/>
-								<Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} />
+								<Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} filter={$filters.filter(obj => obj.column == info.column)[0]} />
 							</th>
 						{/each}
 					</tr>
