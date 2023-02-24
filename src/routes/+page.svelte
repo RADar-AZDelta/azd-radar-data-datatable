@@ -1,10 +1,8 @@
 <script lang="ts">
-	import DataTableRenderer from '$lib/components/DataTableRenderer.svelte';
+	import DataTableRendererJs from '$lib/components/DataTable/DataTableRendererJS.svelte';
 	import type IScheme from '$lib/interfaces/IScheme';
 
-	// TODO: make a basic DataTableRenderer.svelte because the one that is used right now is for data for that specific scheme.
 	// TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
-	// TODO: make extra tests for every component
 	// TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
 
 	/*
@@ -136,4 +134,4 @@
 	This page demonstrates simple data, consisting of a matrix of key value pairs, also known as an
 	array of `Object.entries(myObject)`.
 </p>
-<DataTableRenderer bind:data bind:columns />
+<DataTableRendererJs bind:data bind:columns />

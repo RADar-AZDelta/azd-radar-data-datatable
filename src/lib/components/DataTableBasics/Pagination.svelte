@@ -1,11 +1,31 @@
 <script lang="ts">
 	import type ITableData from '$lib/interfaces/ITableData';
 	import type IPaginated from '$lib/interfaces/IPaginated';
- 
+	import { writable } from 'svelte/store';
+
 	export let updateRowsPerPage: Function,
 		changePage: Function,
 		data: ITableData,
 		pagination: IPaginated;   
+
+	// const skippedPages = writable<number>(0)
+	// let update = 0
+
+	// const updatePage = async() => {
+	// 	update += 1
+	// }
+
+	// const updatePagination = async(chosenPage: number) => {
+	// 	if (pagination.currentPage + 1 == chosenPage) skippedPages.update(n => n + 1)
+	// 	if (pagination.currentPage - 1 == chosenPage) skippedPages.update(n => n - 1)
+	// 	console.log(pagination.currentPage)
+	// 	console.log(chosenPage)
+	// 	console.log($skippedPages)
+	// 	changePage(chosenPage)
+	// 	updatePage()
+	// }
+
+	// pagination.totalPages = 20
 </script>
 
 <section class="table-information">
@@ -39,7 +59,7 @@
 			class={`arrow-button ${pagination.currentPage == 1 ? 'arrow-button-disable' : null}`}
 			><img src="/arrow-left.svg" alt="Arrow left" /></button
 		>
-		{#each Array(pagination.totalPages) as _, i}
+		{#each Array(pagination.totalPages > 7?7:pagination.totalPages) as _, i}
 			<button
 				on:click={() => {
 					changePage(i + 1);
