@@ -4,6 +4,7 @@
 
 	// TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
 	// TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
+	// TODO: place long calculations in a computed property (make it understandable for others)
 
 	/*
         Some test data
