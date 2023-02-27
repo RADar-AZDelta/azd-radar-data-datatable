@@ -8,7 +8,7 @@
 	import type IFilter from '$lib/interfaces/IFilter';
 	import type IPaginated from '$lib/interfaces/IPaginated';
 
-	export let getData: Function,
+	export let hasData: Function,
 		filters: Writable<Array<IFilter>>,
 		sorting: Writable<Array<ISort>>,
 		pagination: Writable<IPaginated>;
@@ -120,7 +120,7 @@
 
 <section>
 	{#key update}
-		{#await getData()}
+		{#await hasData()}
 			<p>Loading...</p>
 		{:then data}
 			<div class="table-comp">

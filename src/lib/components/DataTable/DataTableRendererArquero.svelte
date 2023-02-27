@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { loadCSV } from 'arquero';
 	import { onDestroy, onMount } from 'svelte';
 	import type IFilter from '$lib/interfaces/IFilter';
 	import type IPaginated from '$lib/interfaces/IPaginated';
@@ -8,6 +7,7 @@
 	import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte';
 	import type ITableData from '$lib/interfaces/ITableData';
 	import type IScheme from '$lib/interfaces/IScheme';
+	import { workerMess } from '$lib/store'
 
 	// https://www.infoworld.com/article/3678168/filter-javascript-objects-the-easy-way-with-arquero.html
 	// https://github.com/uwdata/arquero
@@ -27,43 +27,49 @@
 
 	const getData = async (): Promise<ITableData> => {
 		return new Promise(async (resolve, reject) => {
-			
-			if (worker != undefined) resolve({ data: $data, scheme: $columns });
-			else {
-				return new Promise((resolve) => setTimeout(resolve, 500)).then(() => {
-					if (worker != undefined) {
-						resolve({
-							data: $data,
-							scheme: $columns
-						});
-					} else {
-						reject("Worker doens't want to load")
-					}
-				});
-			}
+			$workerMess = false
+			resolve({
+				scheme: $columns,
+				data: $data
+			});
 		});
 	};
 
-	const onWorkerMessage = (data: any) => {
-		$columns = data.data.data.columns;
-		$data = data.data.data.data;
+	const hasData = (): Promise<ITableData> => {
+		return new Promise(async (resolve, reject) => {
+			worker?.postMessage({
+				filter: $filters,
+				order: $sorting,
+				pagination: $pagination
+			})
+			while($workerMess != true){
+				await new Promise(resolve => setTimeout(resolve, 50));
+			}
+			resolve(await getData())
+		});
+	};
+
+	const onWorkerMessage = async (data: any): Promise<void> => {
+		$columns = data.data.processedData.columns;
+		$data = data.data.processedData.data;
+		$workerMess = true
 	};
 
 	const loadWorker = async () => {
 		const w = await import('$lib/workers/csv.worker?worker');
 		worker = new w.default();
-		// TODO: ask for data from worker (with filters, sorting , pagination, number of rows per page)
-		const table = await await loadCSV('src/lib/data/usage-testdata.csv', { delimiter: ',' });
-		worker.postMessage({ file: table });
+		worker.postMessage({
+			filePath: 'src/lib/data/usage-testdata.csv',
+			filter: $filters,
+			order: $sorting,
+			pagination: $pagination
+		});
 		worker.onmessage = onWorkerMessage;
 	};
 
 	onMount(loadWorker);
-	onDestroy(() => {
-		if (worker) {
-			worker.terminate();
-		}
-	});
+
+	// Possible solution: wait on message in child --> await worker.onmessage and in the onmessage use getData()
 </script>
 
-<DataTableRendererBasic {getData} {filters} {sorting} {pagination} />
+<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />

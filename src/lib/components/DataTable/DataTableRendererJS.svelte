@@ -154,6 +154,12 @@
 			});
 		});
 	};
+	
+	const hasData = async () => {
+		return new Promise(async (resolve, reject) => {
+			resolve(await getData())
+		})
+	}
 </script>
 
-<DataTableRendererBasic {getData} {filters} {sorting} {pagination} />
+<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
