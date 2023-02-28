@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import type IFilter from '$lib/interfaces/IFilter';
 	import type IPaginated from '$lib/interfaces/IPaginated';
 	import type ISort from '$lib/interfaces/ISort';
@@ -39,7 +39,7 @@
 		return new Promise(async (resolve, reject) => {
 			worker?.postMessage({
 				filter: $filters,
-				order: $sorting,
+				ordering: $sorting,
 				pagination: $pagination
 			})
 			while($workerMess != true){
