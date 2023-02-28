@@ -61,7 +61,7 @@
 		const w = await import('$lib/workers/csv.worker?worker');
 		worker = new w.default();
 		worker.postMessage({
-			filePath: 'src/lib/data/usage-testdata.csv',
+			filePath: '../data/medicatie_usagi.csv',
 			filter: $filters,
 			order: $sorting,
 			pagination: $pagination

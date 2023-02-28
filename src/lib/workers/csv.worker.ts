@@ -2,7 +2,7 @@ import type IFilter from '$lib/interfaces/IFilter';
 import type IPaginated from '$lib/interfaces/IPaginated';
 import type IScheme from '$lib/interfaces/IScheme';
 import type ISort from '$lib/interfaces/ISort';
-import { desc, escape, loadCSV } from 'arquero';
+import { desc, escape, loadCSV, fromJSON } from 'arquero';
 
 let originalData: any;
 let cols: IScheme[];
@@ -110,7 +110,7 @@ const getColumns = async (): Promise<IScheme[]> => {
 };
 
 onmessage = async ({ data: { filePath, filter, ordering, pagination } }) => {
-	if (filePath) originalData = await loadCSV('../data/usage-testdata.csv', { delimiter: ',' });
+	if (filePath) originalData = await loadCSV(`${filePath}`, { delimiter: ',' });
 	cols = await getColumns();
 	let data = originalData;
 	if (ordering) {

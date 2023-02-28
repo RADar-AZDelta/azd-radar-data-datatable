@@ -108,7 +108,7 @@
 					data = $dataStore.sort(function (a, b) {
 						if (b[colIndex] > a[colIndex]) return -1;
 						if (b[colIndex] < a[colIndex]) return 1;
-						return 0;
+						return 0; 
 					});
 					break;
 
