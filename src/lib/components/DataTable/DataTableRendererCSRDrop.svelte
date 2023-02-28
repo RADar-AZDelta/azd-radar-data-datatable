@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type IFilter from '$lib/interfaces/IFilter';
 	import type IPaginated from '$lib/interfaces/IPaginated';
+	import type IScheme from '$lib/interfaces/IScheme';
 	import type ISort from '$lib/interfaces/ISort';
+	import type ITableData from '$lib/interfaces/ITableData';
+	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 	import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte';
-	import type ITableData from '$lib/interfaces/ITableData';
-	import type IScheme from '$lib/interfaces/IScheme';
-	import { workerMess } from '$lib/store'
+	import { workerMess } from '$lib/store';
 
-	// https://www.infoworld.com/article/3678168/filter-javascript-objects-the-easy-way-with-arquero.html
-	// https://github.com/uwdata/arquero
+	export let file: File | null,
+		dataType: string = 'CSV';
 
 	let worker: Worker | undefined = undefined;
 
@@ -26,9 +26,16 @@
 	const columns = writable<Array<IScheme>>([]);
 	const data = writable<any>([]);
 
+	/*
+        This is the Arquero component where we fetch all of the data (CSV or JSON) and manipulate it with Arquero.
+        With this version we need a webworker because we don't want to do the heavy lifting on our GUI thread (sorting, filtering, pagination).
+        The user needs to give some params to this component like URL to know where to fetch the data, fetchOptions to know how to fetch.
+        The last param is optional but recommended and this is a function the user creates to manipulate the data to the given format.
+    */
+
 	const getData = async (): Promise<ITableData> => {
 		return new Promise(async (resolve, reject) => {
-			$workerMess = false
+			$workerMess = false;
 			resolve({
 				scheme: $columns,
 				data: $data
@@ -36,17 +43,17 @@
 		});
 	};
 
-	const hasData = (): Promise<ITableData> => {
+	const hasData = async (): Promise<ITableData> => {
 		return new Promise(async (resolve, reject) => {
 			worker?.postMessage({
 				filter: $filters,
 				order: $sorting,
 				pagination: $pagination
-			})
-			while($workerMess != true){
-				await new Promise(resolve => setTimeout(resolve, 50));
+			});
+			while ($workerMess != true) {
+				await new Promise((resolve) => setTimeout(resolve, 50));
 			}
-			resolve(await getData())
+			resolve(await getData());
 		});
 	};
 
@@ -54,14 +61,16 @@
 		$columns = data.data.processedData.columns;
 		$data = data.data.processedData.data;
 		$pagination = data.data.processedData.pagination;
-		$workerMess = true
+		$workerMess = true;
 	};
 
 	const loadWorker = async () => {
-		const w = await import('$lib/workers/csv.worker?worker');
+		const w = await import('$lib/workers/csr.worker?worker');
 		worker = new w.default();
 		worker.postMessage({
-			filePath: '../data/medicatie_usagi.csv',
+			file: file,
+			fileType: dataType,
+			method: 'file',
 			filter: $filters,
 			order: $sorting,
 			pagination: $pagination
@@ -69,7 +78,19 @@
 		worker.onmessage = onWorkerMessage;
 	};
 
+	const terminateWorker = async () => {
+		worker?.terminate();
+	};
+
 	onMount(loadWorker);
+
+	$:{
+		console.log("new file ", file)
+		terminateWorker()
+		loadWorker()
+	}
 </script>
 
+{#key file}
 <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
+{/key}

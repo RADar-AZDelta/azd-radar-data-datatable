@@ -48,7 +48,6 @@
 	const hasData = async (): Promise<ITableData> => {
 		return new Promise(async (resolve, reject) => {
 			worker?.postMessage({
-				filePath: url,
 				filter: $filters,
 				order: $sorting,
 				pagination: $pagination
@@ -72,6 +71,7 @@
 		worker = new w.default();
 		worker.postMessage({
 			filePath: url,
+			method: 'REST',
 			fileType: dataType,
 			fetchOptions: fetchOptions,
 			filter: $filters,

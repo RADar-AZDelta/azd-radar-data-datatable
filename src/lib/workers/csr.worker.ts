@@ -109,27 +109,50 @@ const getColumns = async (): Promise<IScheme[]> => {
 	});
 };
 
-onmessage = async ({
-	data: { filePath, fileType, fetchOptions, filter, ordering, pagination }
-}) => {
-	if (filePath && fileType == 'CSV') {
-		const response = await fetch(filePath, fetchOptions);
-		const data = await response.text();
-		originalData = await fromCSV(data, { delimiter: ',' });
-	} else if (filePath && fileType == 'JSON') {
-		const response = await fetch(filePath, fetchOptions);
-		let data;
-		if (response.url.includes('data:application/json')) {
-			data = atob(response.url.substring(29));
-		} else {
-			data = await response.json();
+const getData = async (
+	filePath: string,
+	file: File,
+	method: string,
+	fileType: string,
+	fetchOptions: Object
+): Promise<any> => {
+	return new Promise(async (resolve, reject) => {
+		if (method == 'REST') {
+			if (filePath && fileType == 'CSV') {
+				const response = await fetch(filePath, fetchOptions);
+				const data = await response.text();
+				originalData = await fromCSV(data, { delimiter: ',' });
+			} else if (filePath && fileType == 'JSON') {
+				const response = await fetch(filePath, fetchOptions);
+				let data;
+				if (response.url.includes('data:application/json')) {
+					data = atob(response.url.substring(29));
+				} else {
+					data = await response.json();
+				}
+				originalData = await fromJSON(data, { autoType: true });
+			}
+		} else if (method == 'file') {
+			if (fileType == 'CSV') {
+				const text = await file.text();
+				originalData = await fromCSV(text, { delimiter: ',' });
+			} else if (fileType == 'JSON') {
+				const text = await file.text();
+				originalData = await fromJSON(text, { autoType: true });
+			}
 		}
-		originalData = await fromJSON(data, { autoType: true });
-	}
+		resolve(originalData);
+	});
+};
+
+onmessage = async ({
+	data: { filePath, file, method, fileType, fetchOptions, filter, order, pagination }
+}) => {
+	await getData(filePath, file, method, fileType, fetchOptions);
 	cols = await getColumns();
 	let data = originalData;
-	if (ordering) {
-		data = await orderData(originalData, ordering);
+	if (order) {
+		data = await orderData(originalData, order);
 	}
 	data = await filterData(data, filter);
 	if (pagination) {
