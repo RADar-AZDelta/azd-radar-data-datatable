@@ -2,7 +2,7 @@ import type IFilter from '$lib/interfaces/IFilter';
 import type IPaginated from '$lib/interfaces/IPaginated';
 import type IScheme from '$lib/interfaces/IScheme';
 import type ISort from '$lib/interfaces/ISort';
-import { desc, escape, fromCSV, load, loadCSV } from 'arquero';
+import { desc, escape, fromCSV, fromJSON, load, loadCSV, loadJSON } from 'arquero';
 
 let originalData: any;
 let cols: IScheme[];
@@ -116,6 +116,15 @@ onmessage = async ({
 		const response = await fetch(filePath, fetchOptions);
 		const data = await response.text();
 		originalData = await fromCSV(data, { delimiter: ',' });
+	} else if (filePath && fileType == 'JSON') {
+		const response = await fetch(filePath, fetchOptions);
+		let data;
+		if (response.url.includes('data:application/json')) {
+			data = atob(response.url.substring(29));
+		} else {
+			data = await response.json();
+		}
+		originalData = await fromJSON(data, { autoType: true });
 	}
 	cols = await getColumns();
 	let data = originalData;

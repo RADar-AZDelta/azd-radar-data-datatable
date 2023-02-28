@@ -82,7 +82,6 @@
 				type: typeEnum
 			});
 		}
-		console.log(scheme);
 		for (let obj in data) {
 			dataFound.push(Object.values(data[obj]));
 		}
