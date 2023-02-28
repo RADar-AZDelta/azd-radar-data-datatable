@@ -31,7 +31,7 @@
 				? pagination.rowsPerPage
 				: pagination.rowsPerPage -
 				  (pagination.rowsPerPage * pagination.currentPage - data.data.length) +
-				  pagination.rowsPerPage * (pagination.currentPage - 1)} of {data.data.length}
+				  pagination.rowsPerPage * (pagination.currentPage - 1)} of {pagination.totalRows}
 		</p>
 	</div>
 	<div class="pagination">

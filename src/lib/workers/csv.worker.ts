@@ -62,32 +62,51 @@ const orderData = async (table: any, sorts: ISort[]): Promise<any> => {
 	});
 };
 
-const updatePagination = async (data: [string, any][][], pagination: IPaginated) => {
-	const results = data.slice(0, pagination.rowsPerPage);
-	return results;
+const updatePagination = async (
+	data: [string, any][][],
+	pagination: IPaginated
+): Promise<Object> => {
+	return new Promise((resolve, reject) => {
+		let updatedPag: IPaginated = {
+			currentPage: pagination.currentPage,
+			rowsPerPage: pagination.rowsPerPage,
+			totalPages: Math.ceil(data.length / pagination.rowsPerPage),
+			totalRows: data.length
+		};
+		const results = data.slice(
+			pagination.currentPage * pagination.rowsPerPage - pagination.rowsPerPage,
+			pagination.rowsPerPage * pagination.currentPage
+		);
+		resolve({
+			data: results,
+			pag: updatedPag
+		});
+	});
 };
 
-const getColumns = async () => {
-	const cols = [];
-	const columns = originalData._names;
-	for (let col of columns) {
-		let type = 0;
-		if (/^\d+$/.test(originalData._data[col].data[0]) == true) type = 1;
-		else if (originalData._data[col].data[0] == true || originalData._data[col].data[0] == false)
-			type = 2;
-		else if (
-			/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(?:\.\d+)?Z?/.test(
-				originalData._data[col].data[0]
-			) == true
-		)
-			type = 3;
-		else type = 0;
-		cols.push({
-			column: col,
-			type: type
-		});
-	}
-	return cols;
+const getColumns = async (): Promise<IScheme[]> => {
+	return new Promise((resolve, reject) => {
+		let cols: IScheme[] = [];
+		const columns = originalData._names;
+		for (let col of columns) {
+			let type = 0;
+			if (/^\d+$/.test(originalData._data[col].data[0]) == true) type = 1;
+			else if (originalData._data[col].data[0] == true || originalData._data[col].data[0] == false)
+				type = 2;
+			else if (
+				/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(?:\.\d+)?Z?/.test(
+					originalData._data[col].data[0]
+				) == true
+			)
+				type = 3;
+			else type = 0;
+			cols.push({
+				column: col,
+				type: type
+			});
+		}
+		resolve(cols);
+	});
 };
 
 onmessage = async ({ data: { filePath, filter, ordering, pagination } }) => {
@@ -103,8 +122,9 @@ onmessage = async ({ data: { filePath, filter, ordering, pagination } }) => {
 	}
 	const message = {
 		processedData: {
-			data: data,
-			columns: cols
+			data: data.data == undefined ? data : data.data,
+			columns: cols,
+			pagination: data.pag == undefined ? data.pagination : data.pag
 		}
 	};
 	postMessage(message);

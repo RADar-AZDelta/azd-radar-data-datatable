@@ -19,7 +19,8 @@
 	const pagination = writable<IPaginated>({
 		currentPage: 1,
 		totalPages: 1,
-		rowsPerPage: 10
+		rowsPerPage: 10,
+		totalRows: 10
 	});
 
 	const columns = writable<Array<IScheme>>([]);
@@ -52,6 +53,7 @@
 	const onWorkerMessage = async (data: any): Promise<void> => {
 		$columns = data.data.processedData.columns;
 		$data = data.data.processedData.data;
+		$pagination = data.data.processedData.pagination;
 		$workerMess = true
 	};
 
@@ -68,8 +70,6 @@
 	};
 
 	onMount(loadWorker);
-
-	// Possible solution: wait on message in child --> await worker.onmessage and in the onmessage use getData()
 </script>
 
 <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />

@@ -16,7 +16,8 @@
 	const pagination = writable<IPaginated>({
 		currentPage: 1,
 		totalPages: 1,
-		rowsPerPage: 10
+		rowsPerPage: 10,
+		totalRows: data.length
 	});
 
 	const setColumnFilters = async (filters?: IFilter[]) => {
@@ -127,7 +128,8 @@
 		pagination.set({
 			currentPage: tablePagination.currentPage,
 			totalPages: Math.ceil($dataStore.length / tablePagination.rowsPerPage),
-			rowsPerPage: tablePagination.rowsPerPage
+			rowsPerPage: tablePagination.rowsPerPage,
+			totalRows: data.length
 		});
 	};
 
@@ -137,13 +139,15 @@
 			setTablePagination({
 				currentPage: $pagination.currentPage,
 				totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
-				rowsPerPage: $pagination.rowsPerPage
+				rowsPerPage: $pagination.rowsPerPage,
+				totalRows: data.length
 			});
 			if ($filters.length > 0) await setColumnFilters($filters);
 			setTablePagination({
 				currentPage: $pagination.currentPage,
 				totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
-				rowsPerPage: $pagination.rowsPerPage
+				rowsPerPage: $pagination.rowsPerPage,
+				totalRows: data.length
 			});
 			if ($sorting.length > 0) {
 				await setColumnSort($sorting);

@@ -73,7 +73,8 @@
 		pagination.set({
 			currentPage: page,
 			totalPages: $pagination.totalPages,
-			rowsPerPage: $pagination.rowsPerPage
+			rowsPerPage: $pagination.rowsPerPage,
+			totalRows: $pagination.totalRows
 		});
 		updateTable();
 	};
@@ -85,7 +86,8 @@
 		pagination.set({
 			currentPage: 1,
 			totalPages: $pagination.totalPages,
-			rowsPerPage: Number(event.target.value)
+			rowsPerPage: Number(event.target.value),
+			totalRows: $pagination.totalRows
 		});
 		updateTable();
 	}
@@ -136,15 +138,27 @@
 										: 0}
 									{updateSorting}
 								/>
-								<Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} filter={$filters.filter(obj => obj.column == info.column)[0]} />
+								<Filtering
+									col={info.column}
+									type={info.type}
+									{deleteFilter}
+									{updateFiltering}
+									filter={$filters.filter((obj) => obj.column == info.column)[0]}
+								/>
 							</th>
 						{/each}
 					</tr>
-					{#each Array(data.data.length - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - data.data.length)) as _, i}
+					{#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
 						<tr class="row">
-							{#each data.data[i + $pagination.rowsPerPage * ($pagination.currentPage - 1)] as row}
-								<td>{row}</td>
-							{/each}
+							{#if data.data.length == $pagination.totalRows}
+								{#each data.data[i + $pagination.rowsPerPage * ($pagination.currentPage - 1)] as row}
+									<td>{row}</td>
+								{/each}
+							{:else}
+								{#each data.data[i] as row}
+									<td>{row}</td>
+								{/each}
+							{/if}
 						</tr>
 					{/each}
 				</table>
