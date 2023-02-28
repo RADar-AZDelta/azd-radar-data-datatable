@@ -16,7 +16,8 @@
 	const pagination = writable<IPaginated>({
 		currentPage: 1,
 		totalPages: 1,
-		rowsPerPage: 10
+		rowsPerPage: 10,
+		totalRows: data.length
 	});
 
 	const setColumnFilters = async (filters?: IFilter[]) => {
@@ -107,7 +108,7 @@
 					data = $dataStore.sort(function (a, b) {
 						if (b[colIndex] > a[colIndex]) return -1;
 						if (b[colIndex] < a[colIndex]) return 1;
-						return 0;
+						return 0; 
 					});
 					break;
 
@@ -127,7 +128,8 @@
 		pagination.set({
 			currentPage: tablePagination.currentPage,
 			totalPages: Math.ceil($dataStore.length / tablePagination.rowsPerPage),
-			rowsPerPage: tablePagination.rowsPerPage
+			rowsPerPage: tablePagination.rowsPerPage,
+			totalRows: data.length
 		});
 	};
 
@@ -137,13 +139,15 @@
 			setTablePagination({
 				currentPage: $pagination.currentPage,
 				totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
-				rowsPerPage: $pagination.rowsPerPage
+				rowsPerPage: $pagination.rowsPerPage,
+				totalRows: data.length
 			});
 			if ($filters.length > 0) await setColumnFilters($filters);
 			setTablePagination({
 				currentPage: $pagination.currentPage,
 				totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
-				rowsPerPage: $pagination.rowsPerPage
+				rowsPerPage: $pagination.rowsPerPage,
+				totalRows: data.length
 			});
 			if ($sorting.length > 0) {
 				await setColumnSort($sorting);
@@ -154,6 +158,12 @@
 			});
 		});
 	};
+	
+	const hasData = async () => {
+		return new Promise(async (resolve, reject) => {
+			resolve(await getData())
+		})
+	}
 </script>
 
-<DataTableRendererBasic {getData} {filters} {sorting} {pagination} />
+<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />

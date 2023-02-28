@@ -24,14 +24,11 @@
 			{/each}
 		</select>
 		<p>
-			{pagination.rowsPerPage * pagination.currentPage + 1 - pagination.rowsPerPage}-{data.data
-				.length -
-				pagination.rowsPerPage * pagination.currentPage >
-			0
+			{pagination.rowsPerPage * pagination.currentPage + 1 - pagination.rowsPerPage}-
+			{data.data.length - pagination.rowsPerPage * pagination.currentPage > 0
 				? pagination.rowsPerPage
-				: pagination.rowsPerPage -
-				  (pagination.rowsPerPage * pagination.currentPage - data.data.length) +
-				  pagination.rowsPerPage * (pagination.currentPage - 1)} of {data.data.length}
+				: pagination.rowsPerPage * (pagination.currentPage) > data.data.length? pagination.totalRows : pagination.rowsPerPage * pagination.currentPage} 
+				of {pagination.totalRows}
 		</p>
 	</div>
 	<div class="pagination">
