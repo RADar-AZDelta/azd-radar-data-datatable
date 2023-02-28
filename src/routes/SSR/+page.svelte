@@ -12,13 +12,16 @@
 			'Content-Type': 'application/json'
 		}
 	};
+	
+	/*
+		These properties are examples and can be changed to your data
+	*/
 	const pagination: IPaginated = {
 		currentPage: 1,
 		totalPages: 3,
 		rowsPerPage: 10,
 		totalRows: 30
 	};
-
 	const filters: IFilter[] = [
 		{
 			column: 'title',

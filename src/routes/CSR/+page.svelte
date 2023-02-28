@@ -1,34 +1,22 @@
 <script lang="ts">
-    import type IFilter from '$lib/interfaces/IFilter';
-	import type IPaginated from '$lib/interfaces/IPaginated';
-	import type ISort from '$lib/interfaces/ISort';
+	import DataTableRendererCsr from '$lib/components/DataTable/DataTableRendererCSR.svelte';
 
-	const url = 'https://jsonplaceholder.typicode.com/posts';
-	const fetchOptions = {
+	const urlJSON = 'https://jsonplaceholder.typicode.com/posts';
+	const urlCSV =
+		'https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/observation/observation_concept_id/mzg_usagi.csv';
+	const fetchOptionsJSON = {
 		method: 'GET',
 		header: {
 			'Content-Type': 'application/json'
 		}
 	};
-	const pagination: IPaginated = {
-		currentPage: 1,
-		totalPages: 3,
-		rowsPerPage: 10,
-		totalRows: 30
+	const fetchOptionsCSV = {
+		method: 'GET',
+		header: {
+			'Content-Type': 'text/csv;charset=UTF-8'
+		}
 	};
 
-	const filters: IFilter[] = [
-		{
-			column: 'title',
-			filter: 'aut'
-		}
-	];
-	const sorting: ISort[] = [
-		{
-			column: 'id',
-			direction: 2
-		}
-	];
 	const transpileData = async (data: any) => {
 		/*
 			For Arquero column store
@@ -57,3 +45,10 @@
 		return dataFound;
 	};
 </script>
+
+<h1>RADar-DataTable Demo - REST data</h1>
+<p>
+	This page demonstrates how the already manipulated data gets fetched from the API and rendered in
+	the DataTable.
+</p>
+<DataTableRendererCsr url={urlCSV} fetchOptions={fetchOptionsCSV} />
