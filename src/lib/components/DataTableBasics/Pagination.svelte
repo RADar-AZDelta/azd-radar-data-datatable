@@ -10,12 +10,11 @@
 	let pagesShown = 7;
 </script>
 
-<section class="table-information">
-	<div class="table-rows">
+<section data-component="pagination">
+	<div data-component="pagination-rows">
 		<p>Rows:</p>
 		<select
 			bind:value={pagination.rowsPerPage}
-			class="table-rows-select"
 			id="rows"
 			on:change={() => updateRowsPerPage(event)}
 		>
@@ -31,10 +30,10 @@
 				of {pagination.totalRows}
 		</p>
 	</div>
-	<div class="pagination">
+	<div data-component="pagination-pages">
 		<button
 			on:click={() => changePage(pagination.currentPage - 1)}
-			class={`arrow-button ${pagination.currentPage == 1 ? 'arrow-button-disable' : null}`}
+			class={`${pagination.currentPage == 1 ? 'arrow-button-disable' : null}`}
 			><img src="/arrow-left.svg" alt="Arrow left" /></button
 		>
 		{#each Array(pagination.totalPages > 7 ? 7 : pagination.totalPages) as _, i}
@@ -52,7 +51,6 @@
 						changePage(pagination.totalPages + i - (pagesShown - 1));
 					else changePage(i + 1);
 				}}
-				class="pagination-page"
 			>
 				{#if pagination.currentPage > Math.floor(pagesShown / 2) + 1 && pagination.currentPage + Math.floor(pagesShown / 2) + 1 <= pagination.totalPages}
 					<p
@@ -83,66 +81,9 @@
 		{/each}
 		<button
 			on:click={() => changePage(pagination.currentPage + 1)}
-			class={`arrow-button ${
+			class={`${
 				pagination.currentPage == pagination.totalPages ? 'arrow-button-disable' : null
 			}`}><img src="/arrow-right.svg" alt="Arrow right" /></button
 		>
 	</div>
 </section>
-
-<style>
-	.table-information {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.table-rows {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.table-rows-select {
-		padding: 1rem;
-		width: 6rem;
-		border-radius: 5px;
-	}
-
-	.pagination {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	.pagination-page {
-		border: none;
-		background-color: inherit;
-		cursor: pointer;
-	}
-
-	.arrow-button {
-		background-color: inherit;
-		border: none;
-		cursor: pointer;
-	}
-
-	.arrow-button-disable {
-		cursor: auto;
-		filter: invert(72%) sepia(9%) saturate(345%) hue-rotate(179deg) brightness(89%) contrast(89%);
-	}
-
-	.pagination-page {
-		border: none;
-		background-color: inherit;
-		cursor: pointer;
-	}
-
-	.pagination-page:hover {
-		font-weight: 800;
-	}
-
-	.pagination-page-selected {
-		font-weight: 800;
-	}
-</style>

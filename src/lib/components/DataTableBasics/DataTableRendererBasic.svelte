@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '$lib/styles/table.scss'
 	import Sorting from './Sorting.svelte';
 	import Filtering from './Filtering.svelte';
 	import Pagination from './Pagination.svelte';
@@ -125,8 +126,8 @@
 		{#await hasData()}
 			<p>Loading...</p>
 		{:then data}
-			<div class="table-comp">
-				<h2 class="table-title">Information Table</h2>
+			<div data-component="tablerenderer">
+				<h2>Information Table</h2>
 				<table>
 					<tr>
 						{#each data.scheme as info}
@@ -149,7 +150,7 @@
 						{/each}
 					</tr>
 					{#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
-						<tr class="row">
+						<tr data-component="row">
 							{#if data.data.length == $pagination.totalRows}
 								{#each data.data[i + $pagination.rowsPerPage * ($pagination.currentPage - 1)] as row}
 									<td>{row}</td>
@@ -167,33 +168,3 @@
 		{/await}
 	{/key}
 </section>
-
-<style>
-	table {
-		border-spacing: 0;
-		width: 100%;
-	}
-
-	td {
-		padding: 1rem;
-	}
-
-	th {
-		width: max-content;
-	}
-
-	.table-comp {
-		padding: 4rem 1rem 2rem;
-	}
-
-	.table-title {
-		font-size: 2rem;
-	}
-
-	.row:nth-child(2n + 1) {
-		background-color: inherit;
-	}
-	.row:nth-child(2n) {
-		background-color: #e2e8f0;
-	}
-</style>
