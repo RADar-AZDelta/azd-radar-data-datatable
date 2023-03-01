@@ -19,6 +19,8 @@
 			'Content-Type': 'text/csv;charset=UTF-8'
 		}
 	};
+
+	const delimiter: string = "," // Specific for CSV
 </script>
 
 <h1>RADar-DataTable Demo - REST data</h1>
@@ -26,5 +28,5 @@
 	This page demonstrates how the already manipulated data gets fetched from the API and rendered in
 	the DataTable.
 </p>
-<!-- <DataTableRendererCsr url={urlCSV} fetchOptions={fetchOptionsCSV} dataType="CSV" /> -->
+<!-- <DataTableRendererCsr url={urlCSV} fetchOptions={fetchOptionsCSV} dataType="CSV" {delimiter} /> -->
 <DataTableRendererCsr url={urlJSON} fetchOptions={fetchOptionsJSON} dataType="JSON" />

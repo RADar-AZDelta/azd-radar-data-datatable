@@ -2,7 +2,7 @@
 	import type { Writable } from "svelte/store";
 
 
-	export let fileExtension: string = '.csv',
+	export let fileExtension: string,
 		file: Writable<File | null>
 
 	function dropHandler(event: DragEvent) {
@@ -15,7 +15,7 @@
 			for (let item of event.dataTransfer.items) {
 				if (item.kind === 'file') {
 					const f = item.getAsFile();
-					if(f?.name.includes(fileExtension)){
+					if(f?.name.toLowerCase().includes(fileExtension.toLowerCase())){
                         $file = f
                     }
 				}

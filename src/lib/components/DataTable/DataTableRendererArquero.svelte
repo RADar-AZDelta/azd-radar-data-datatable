@@ -12,6 +12,8 @@
 	// https://www.infoworld.com/article/3678168/filter-javascript-objects-the-easy-way-with-arquero.html
 	// https://github.com/uwdata/arquero
 
+	export let fileName: string, delimiter: string = ",";
+
 	let worker: Worker | undefined = undefined;
 
 	const filters = writable<Array<IFilter>>([]);
@@ -58,10 +60,12 @@
 	};
 
 	const loadWorker = async () => {
-		const w = await import('$lib/workers/csv.worker?worker');
+		const w = await import('$lib/workers/csr.worker?worker');
 		worker = new w.default();
 		worker.postMessage({
-			filePath: '../data/medicatie_usagi.csv',
+			filePath: `../data/${fileName}`,
+			delimiter: delimiter,
+			method: 'local',
 			filter: $filters,
 			order: $sorting,
 			pagination: $pagination

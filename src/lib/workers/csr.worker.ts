@@ -112,17 +112,18 @@ const getColumns = async (): Promise<IScheme[]> => {
 const getData = async (
 	filePath: string,
 	file: File,
+	delimiter: string,
 	method: string,
 	fileType: string,
 	fetchOptions: Object
 ): Promise<any> => {
 	return new Promise(async (resolve, reject) => {
 		if (method == 'REST') {
-			if (filePath && fileType == 'CSV') {
+			if (filePath && fileType.toLowerCase() == 'csv') {
 				const response = await fetch(filePath, fetchOptions);
 				const data = await response.text();
-				originalData = await fromCSV(data, { delimiter: ',' });
-			} else if (filePath && fileType == 'JSON') {
+				originalData = await fromCSV(data, { delimiter: delimiter });
+			} else if (filePath && fileType.toLowerCase() == 'json') {
 				const response = await fetch(filePath, fetchOptions);
 				let data;
 				if (response.url.includes('data:application/json')) {
@@ -133,22 +134,24 @@ const getData = async (
 				originalData = await fromJSON(data, { autoType: true });
 			}
 		} else if (method == 'file') {
-			if (fileType == 'CSV') {
+			if (fileType.toLowerCase() == 'csv') {
 				const text = await file.text();
-				originalData = await fromCSV(text, { delimiter: ',' });
-			} else if (fileType == 'JSON') {
+				originalData = await fromCSV(text, { delimiter: delimiter });
+			} else if (fileType.toLowerCase() == 'json') {
 				const text = await file.text();
 				originalData = await fromJSON(text, { autoType: true });
 			}
+		} else if (method == "local") {
+			originalData = await loadCSV(filePath, { delimiter: delimiter })
 		}
 		resolve(originalData);
 	});
 };
 
 onmessage = async ({
-	data: { filePath, file, method, fileType, fetchOptions, filter, order, pagination }
+	data: { filePath, file, delimiter, method, fileType, fetchOptions, filter, order, pagination }
 }) => {
-	await getData(filePath, file, method, fileType, fetchOptions);
+	await getData(filePath, file, delimiter, method, fileType, fetchOptions);
 	cols = await getColumns();
 	let data = originalData;
 	if (order) {

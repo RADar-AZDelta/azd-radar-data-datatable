@@ -9,10 +9,11 @@
 	import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte';
 	import { workerMess } from '$lib/store';
 
-	export let url: string,
-		fetchOptions: object,
-		transpileData: Function | undefined = undefined,
-		dataType: string = 'CSV';
+	export let url: string | null = null,
+		fetchOptions: object | null = null,
+		dataType: string,
+		delimiter: string = ',',
+		file: File | null = null;
 
 	let worker: Worker | undefined = undefined;
 
@@ -69,19 +70,44 @@
 	const loadWorker = async () => {
 		const w = await import('$lib/workers/csr.worker?worker');
 		worker = new w.default();
-		worker.postMessage({
-			filePath: url,
-			method: 'REST',
-			fileType: dataType,
-			fetchOptions: fetchOptions,
-			filter: $filters,
-			order: $sorting,
-			pagination: $pagination
-		});
+		if(url != null || url != undefined) {
+			worker.postMessage({
+				filePath: url,
+				method: 'REST',
+				fileType: dataType,
+				delimiter: delimiter,
+				fetchOptions: fetchOptions,
+				filter: $filters,
+				order: $sorting,
+				pagination: $pagination
+			});
+		} else if (file != null || file != undefined) {
+			worker.postMessage({
+				file: file,
+				method: 'file',
+				fileType: dataType,
+				delimiter: delimiter,
+				filter: $filters,
+				order: $sorting,
+				pagination: $pagination
+			});
+		}
 		worker.onmessage = onWorkerMessage;
 	};
+
+	const terminateWorker = async () => {
+		worker?.terminate();
+	};
+
+	$:{
+		console.log("new file ", file)
+		terminateWorker()
+		loadWorker()
+	}
 
 	onMount(loadWorker);
 </script>
 
+{#key file}
 <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
+{/key}

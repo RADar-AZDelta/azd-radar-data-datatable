@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SortDirection from '$lib/classes/enums/SortDirection';
 	import DataTableRendererSsr from '$lib/components/DataTable/DataTableRendererSSR.svelte';
 	import type IFilter from '$lib/interfaces/IFilter';
 	import type IPaginated from '$lib/interfaces/IPaginated';
@@ -31,7 +32,7 @@
 	const sorting: ISort[] = [
 		{
 			column: 'id',
-			direction: 2
+			direction: 1
 		}
 	];
 

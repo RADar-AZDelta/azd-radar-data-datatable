@@ -1,13 +1,14 @@
 <script lang="ts">
-	import DataTableRendererCsrDrop from "$lib/components/DataTable/DataTableRendererCSRDrop.svelte";
+	import DataTableRendererCsr from "$lib/components/DataTable/DataTableRendererCSR.svelte";
 	import DragAndDrop from '$lib/components/Extra/DragAndDrop.svelte';
 	import { writable } from "svelte/store";
 
 	const file = writable<File | null>(null);
 	const fileExtension = 'csv';
+	const delimiter = ",";
 </script>
 
 <DragAndDrop {file} {fileExtension} />
 {#if $file != null}
-    <DataTableRendererCsrDrop file={$file}/>
+    <DataTableRendererCsr file={$file} dataType={fileExtension} {delimiter}/>
 {/if}
