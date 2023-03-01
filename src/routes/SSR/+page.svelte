@@ -54,6 +54,12 @@
 				["a3", "b3"]
 			]
 
+			Example 2:
+			{
+				"column1": ["a", "b", "c"],
+				"column2": ["d", "e", "f"]
+			}
+
 			Here are the data and the scheme with the columns seperated
 		*/
 		const scheme: IScheme[] = [];

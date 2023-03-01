@@ -2,7 +2,6 @@
 	import DataTableRendererArquero from '$lib/components/DataTable/DataTableRendererArquero.svelte';
 	const fileName = "medicatie_usagi.csv"
 	const delimiter = ","
-	// TODO: implement drag & drop API
 </script>
 
 <main>

@@ -70,7 +70,7 @@
 	const loadWorker = async () => {
 		const w = await import('$lib/workers/csr.worker?worker');
 		worker = new w.default();
-		if(url != null || url != undefined) {
+		if (url != null || url != undefined) {
 			worker.postMessage({
 				filePath: url,
 				method: 'REST',
@@ -96,18 +96,22 @@
 	};
 
 	const terminateWorker = async () => {
-		worker?.terminate();
+		if (worker != undefined) {
+			worker?.terminate();
+		}
 	};
 
-	$:{
-		console.log("new file ", file)
-		terminateWorker()
-		loadWorker()
+	$: {
+		console.log('new file ', file);
+		if (file != null) {
+			terminateWorker();
+			loadWorker();
+		}
 	}
 
 	onMount(loadWorker);
 </script>
 
 {#key file}
-<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
+	<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
 {/key}
