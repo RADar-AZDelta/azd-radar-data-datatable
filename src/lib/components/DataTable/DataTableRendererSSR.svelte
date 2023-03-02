@@ -38,7 +38,7 @@
 
 	const hasData = async (): Promise<ITableData> => {
 		return new Promise(async (resolve, reject) => {
-			const data = await fetchData();
+			const data = await fetchData()
 			resolve(data);
 		});
 	};

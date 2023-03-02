@@ -1,24 +1,19 @@
 <script lang="ts">
+	import SortDirection from '$lib/classes/enums/SortDirection';
 	export let col: string, direction: number, updateSorting: Function;
-
-	const sortColumn = async () => {
-		if (direction == 2) direction = 0;
-		else direction = direction++;
-		updateSorting(col, direction);
-	};
 </script>
 
 <div data-component="sort">
-	<button on:click={sortColumn}>
+	<button on:click={updateSorting(col, direction)}>
 		<p data-component="column-name">{col}</p>
-		{#if direction == 0}
+		{#if direction == SortDirection.None}
 			<img src="/no-sort.svg" alt="No filter icon" />
-		{:else if direction == 1}
+		{:else if direction == SortDirection.Ascending}
 			<img src="/ascending-sort.svg" alt="Ascending filter icon" />
-		{:else if direction == 2}
+		{:else if direction == SortDirection.Descending}
 			<img src="/descending-sort.svg" alt="Descending filter icon" />
 		{:else}
-			<p>Something went wrong!</p>
+			<p>Error in sorting!</p>
 		{/if}
 	</button>
 </div>

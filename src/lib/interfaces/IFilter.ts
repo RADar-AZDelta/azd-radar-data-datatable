@@ -3,5 +3,5 @@
  */
 export default interface IFilter {
 	column: string;
-	filter?: string | RegExp | number | boolean | Date;
+	filter: string | RegExp | number | boolean | Date;
 }

@@ -13,7 +13,8 @@
 		fetchOptions: object | null = null,
 		dataType: string,
 		delimiter: string = ',',
-		file: File | null = null;
+		file: File | null = null,
+		fileName: string | null = null;
 
 	let worker: Worker | undefined = undefined;
 
@@ -29,12 +30,18 @@
 	const columns = writable<Array<IScheme>>([]);
 	const data = writable<any>([]);
 
+	let update = 0
+
 	/*
         This is the Arquero component where we fetch all of the data (CSV or JSON) and manipulate it with Arquero.
         With this version we need a webworker because we don't want to do the heavy lifting on our GUI thread (sorting, filtering, pagination).
         The user needs to give some params to this component like URL to know where to fetch the data, fetchOptions to know how to fetch.
         The last param is optional but recommended and this is a function the user creates to manipulate the data to the given format.
     */
+
+	const updateTable = () => {
+		update+= 1
+	}
 
 	const getData = async (): Promise<ITableData> => {
 		return new Promise(async (resolve, reject) => {
@@ -53,9 +60,12 @@
 				order: $sorting,
 				pagination: $pagination
 			});
+
+			// Wait for the worker to send a message
 			while ($workerMess != true) {
 				await new Promise((resolve) => setTimeout(resolve, 50));
 			}
+
 			resolve(await getData());
 		});
 	};
@@ -70,7 +80,7 @@
 	const loadWorker = async () => {
 		const w = await import('$lib/workers/csr.worker?worker');
 		worker = new w.default();
-		if (url != null || url != undefined) {
+		if (url != null && url != undefined) {
 			worker.postMessage({
 				filePath: url,
 				method: 'REST',
@@ -81,10 +91,20 @@
 				order: $sorting,
 				pagination: $pagination
 			});
-		} else if (file != null || file != undefined) {
+		} else if (file != null && file != undefined) {
 			worker.postMessage({
 				file: file,
 				method: 'file',
+				fileType: dataType,
+				delimiter: delimiter,
+				filter: $filters,
+				order: $sorting,
+				pagination: $pagination
+			});
+		} else if (fileName != null && fileName != undefined) {
+			worker.postMessage({
+				filePath: `../data/${fileName}`,
+				method: 'local',
 				fileType: dataType,
 				delimiter: delimiter,
 				filter: $filters,
@@ -102,16 +122,16 @@
 	};
 
 	$: {
-		console.log('new file ', file);
 		if (file != null) {
 			terminateWorker();
 			loadWorker();
+			updateTable()
 		}
 	}
 
 	onMount(loadWorker);
 </script>
 
-{#key file}
+{#key update}
 	<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
 {/key}

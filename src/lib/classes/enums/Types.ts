@@ -4,8 +4,9 @@
 export enum Types {
 	string,
 	number,
+	regex,
 	boolean,
-	Date
+	date
 }
 
 export default Types

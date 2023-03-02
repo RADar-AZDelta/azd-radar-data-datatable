@@ -6,6 +6,7 @@
 	import type ITableData from '$lib/interfaces/ITableData';
 	import type IPaginated from '$lib/interfaces/IPaginated';
 	import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte';
+	import SortDirection from '$lib/classes/enums/SortDirection';
 
 	export let data: [string, any][][], columns: IScheme[];
 
@@ -20,7 +21,7 @@
 		totalRows: data.length
 	});
 
-	const setColumnFilters = async (filters?: IFilter[]) => {
+	const setColumnFilters = async (filters: IFilter[]) => {
 		let filteredData: [string, any][][] = [];
 		/*
             Filter column name out of data
@@ -36,7 +37,7 @@
 		/*
             Apply extra filters if given
         */
-		if (filters) {
+		if (filters.length > 0) {
 			const extraFilteredData: [string, any][][] = Array.from(new Set(filteredData)).filter(
 				(elem) => elem != undefined
 			);
@@ -44,6 +45,7 @@
 				const colIndex = $columnsStore.findIndex(
 					(obj) => obj.column == filters[filters.indexOf(filter)].column
 				);
+				// Make sure the filter is of the correct type
 				switch (typeof filter.filter) {
 					case 'string':
 						for (let person of extraFilteredData) {
@@ -57,7 +59,6 @@
 							}
 						}
 						break;
-
 					case 'number':
 						for (let person of extraFilteredData) {
 							if (person != undefined) {
@@ -77,7 +78,6 @@
 							}
 						}
 						break;
-
 					default:
 						if (filter instanceof RegExp) {
 							for (let person of extraFilteredData) {
@@ -87,11 +87,20 @@
 									}
 								}
 							}
+						} else if (filter instanceof Date) {
+							for (let person of extraFilteredData) {
+								if (person != undefined) {
+									if (filter.getTime() != new Date(person[colIndex][0]).getTime()) {
+										delete extraFilteredData[extraFilteredData.indexOf(person)];
+									}
+								}
+							}
 						}
 						break;
 				}
 			}
 
+			// Filter undefinend data from array
 			filteredData = Array.from(new Set(extraFilteredData)).filter((elem) => elem != undefined);
 		}
 		$dataStore = filteredData;
@@ -104,15 +113,15 @@
 			const colIndex = $columnsStore.findIndex((obj) => obj.column == sort.column);
 			let data = filteredData;
 			switch (sort.direction) {
-				case 1:
+				case SortDirection.Ascending:
 					data = $dataStore.sort(function (a, b) {
 						if (b[colIndex] > a[colIndex]) return -1;
 						if (b[colIndex] < a[colIndex]) return 1;
-						return 0; 
+						return 0;
 					});
 					break;
 
-				case 2:
+				case SortDirection.Descending:
 					data = $dataStore.sort(function (a, b) {
 						if (b[colIndex] < a[colIndex]) return -1;
 						if (b[colIndex] > a[colIndex]) return 1;
@@ -125,6 +134,9 @@
 	};
 
 	const setTablePagination = async (tablePagination: IPaginated) => {
+		/*
+			Update pagination store
+		*/
 		pagination.set({
 			currentPage: tablePagination.currentPage,
 			totalPages: Math.ceil($dataStore.length / tablePagination.rowsPerPage),
@@ -135,35 +147,29 @@
 
 	const getData = async (): Promise<ITableData> => {
 		return new Promise(async (resolve, reject) => {
-			await setColumnFilters();
-			setTablePagination({
+			/*
+				First: Get column scheme
+				Second: Update pagination
+				Third: If needed, sort data
+				Finally: Resolve the data and scheme
+			*/
+
+			await setColumnFilters($filters).then(() => setTablePagination({
 				currentPage: $pagination.currentPage,
 				totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
 				rowsPerPage: $pagination.rowsPerPage,
 				totalRows: data.length
-			});
-			if ($filters.length > 0) await setColumnFilters($filters);
-			setTablePagination({
-				currentPage: $pagination.currentPage,
-				totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
-				rowsPerPage: $pagination.rowsPerPage,
-				totalRows: data.length
-			});
-			if ($sorting.length > 0) {
-				await setColumnSort($sorting);
-			}
-			resolve({
-				data: $dataStore,
-				scheme: $columnsStore
-			});
+			})).then(() => {
+				if($sorting.length > 0) setColumnSort($sorting)
+			}).finally(() => resolve({data: $dataStore, scheme: $columnsStore}))
 		});
 	};
-	
+
 	const hasData = async () => {
 		return new Promise(async (resolve, reject) => {
-			resolve(await getData())
-		})
-	}
+			resolve(await getData());
+		});
+	};
 </script>
 
 <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />

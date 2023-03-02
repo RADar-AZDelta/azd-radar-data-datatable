@@ -1,3 +1,5 @@
+import SortDirection from '$lib/classes/enums/SortDirection';
+import Types from '$lib/classes/enums/Types';
 import type IFilter from '$lib/interfaces/IFilter';
 import type IPaginated from '$lib/interfaces/IPaginated';
 import type IScheme from '$lib/interfaces/IScheme';
@@ -7,18 +9,22 @@ import { desc, escape, fromCSV, fromJSON, load, loadCSV, loadJSON } from 'arquer
 let originalData: any;
 let cols: IScheme[];
 
-const filterData = async (table: any, filters?: IFilter[]) => {
+const filterData = async (table: any, filters: IFilter[]) => {
 	return new Promise((resolve, reject) => {
 		let filteredData: [string, any][][] = [];
+
+		// If there are filters
 		if (filters != undefined && filters.length > 0) {
 			for (let filter of filters) {
 				table = table.filter(
 					escape((d: any) => {
 						const type = cols.filter((col) => col.column == filter.column)[0].type;
-						if (type == 0) {
-							if (d[filter.column] != null) return d[filter.column].includes(filter.filter);
-						} else if (type == 1 || type == 2) return d[filter.column] == filter.filter;
-						else if (type == 3)
+						if (type == Types.string) {
+							let t: any = type
+							if(t instanceof RegExp) return new RegExp(filter.filter.toString()).test(d[filter.column]);
+							else {if (d[filter.column] != null) return d[filter.column].includes(filter.filter)};
+						} else if (type == Types.number || type == Types.boolean) return d[filter.column] == filter.filter;
+						else if (type == Types.date)
 							return d[filter.column].getTime() == new Date(String(filter.filter)).getTime()!;
 					})
 				);
@@ -52,9 +58,9 @@ const orderData = async (table: any, sorts: ISort[]): Promise<any> => {
 	return new Promise((resolve, reject) => {
 		let orderedTable = table;
 		for (let sort of sorts) {
-			if (sort.direction == 1) {
+			if (sort.direction == SortDirection.Ascending) {
 				orderedTable = orderedTable.orderby(sort.column);
-			} else if (sort.direction == 2) {
+			} else if (sort.direction == SortDirection.Descending) {
 				orderedTable = orderedTable.orderby(desc(sort.column));
 			}
 		}
@@ -89,17 +95,16 @@ const getColumns = async (): Promise<IScheme[]> => {
 		let cols: IScheme[] = [];
 		const columns = originalData._names;
 		for (let col of columns) {
-			let type = 0;
-			if (/^\d+$/.test(originalData._data[col].data[0]) == true) type = 1;
+			let type = Types.string;
+			if (/^\d+$/.test(originalData._data[col].data[0]) == true) type = Types.number;
 			else if (originalData._data[col].data[0] == true || originalData._data[col].data[0] == false)
-				type = 2;
+				type = Types.boolean;
 			else if (
 				/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(?:\.\d+)?Z?/.test(
 					originalData._data[col].data[0]
 				) == true
 			)
-				type = 3;
-			else type = 0;
+				type = Types.date;
 			cols.push({
 				column: col,
 				type: type
@@ -141,8 +146,8 @@ const getData = async (
 				const text = await file.text();
 				originalData = await fromJSON(text, { autoType: true });
 			}
-		} else if (method == "local") {
-			originalData = await loadCSV(filePath, { delimiter: delimiter })
+		} else if (method == 'local') {
+			originalData = await loadCSV(filePath, { delimiter: delimiter });
 		}
 		resolve(originalData);
 	});
@@ -151,24 +156,29 @@ const getData = async (
 onmessage = async ({
 	data: { filePath, file, delimiter, method, fileType, fetchOptions, filter, order, pagination }
 }) => {
-	await getData(filePath, file, delimiter, method, fileType, fetchOptions);
-	cols = await getColumns();
-	let data = originalData;
-	if (order) {
-		data = await orderData(originalData, order);
-	}
-	data = await filterData(data, filter);
-	if (pagination) {
-		data = await updatePagination(data, pagination);
-	}
-	const message = {
-		processedData: {
-			data: data.data == undefined ? data : data.data,
-			columns: cols,
-			pagination: data.pag == undefined ? data.pagination : data.pag
-		}
-	};
-	postMessage(message);
+	let data: any = originalData;
+	await getData(filePath, file, delimiter, method, fileType, fetchOptions)
+		.then(async () => (cols = await getColumns()))
+		.then(async () => {
+			if (order) {
+				data = await orderData(originalData, order);
+			}
+		})
+		.then(async () => (data = await filterData(data, filter)))
+		.then(async () => {
+			if (pagination) {
+				data = await updatePagination(data, pagination);
+			}
+		})
+		.finally(() =>
+			postMessage({
+				processedData: {
+					data: data.data == undefined ? data : data.data,
+					columns: cols,
+					pagination: data.pag == undefined ? data.pagination : data.pag
+				}
+			})
+		);
 };
 
 export {};
