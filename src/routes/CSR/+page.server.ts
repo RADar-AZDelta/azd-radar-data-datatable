@@ -1,5 +1,5 @@
 const transpileData = async (data: any) => {
-    /*
+  /*
         For Arquero column store
         Example:
 
@@ -10,26 +10,29 @@ const transpileData = async (data: any) => {
 
         Here are "a" and "b" the columns and the values are the data
     */
-    const columns = [];
-    const dataFound: any = {};
-    for (let key in data[0]) {
-        columns.push(key);
+  const columns = []
+  const dataFound: any = {}
+  for (let key in data[0]) {
+    columns.push(key)
+  }
+  for (let col of columns) {
+    const d = []
+    for (let obj of data) {
+      d.push(obj[col])
     }
-    for (let col of columns) {
-        const d = [];
-        for (let obj of data) {
-            d.push(obj[col]);
-        }
-        dataFound[col] = d;
-    }
+    dataFound[col] = d
+  }
 
-    return dataFound;
-};
+  return dataFound
+}
 
 export const load = async (event: any) => {
-    const response = await fetch("https://jsonplaceholder.typicode.com/posts", { method: "GET", headers: { "Content-Type": "application/json" }});
-    const json = await response.json();
-    const data = await transpileData(json);
+  const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  const json = await response.json()
+  const data = await transpileData(json)
 
-    return {data}
+  return { data }
 }
