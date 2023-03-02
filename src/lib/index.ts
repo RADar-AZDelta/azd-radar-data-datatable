@@ -1,2 +1,2 @@
 // Reexport your entry components here
-export { default as DataTable } from './components/DataTableRenderer.svelte';
+export { default as DataTable } from './components/DataTableRenderer.svelte'

@@ -1,5 +1,5 @@
 export default interface IPaginated {
-    page: number;
-    pageSize: number;
-    totalRows: number;
+  page: number
+  pageSize: number
+  totalRows: number
 }

@@ -1,4 +1,4 @@
 export interface ITableData {
-    data: never[][];
-    columns: string[];
+  data: never[][]
+  columns: string[]
 }
