@@ -23,7 +23,7 @@ In the project there are the following types of the Data Table Renderer:
 - DataTableRendererJS
 
 ### DataTableRendererCSR
-The DataTableRendererCSR component gives you the ability to use a REST api to get data or you can drag and drop your file with the DragAndDrop component (make sure these two components are placed on the same +page.svelte). When you give CSV content through the API call everything will work fine, but be cautious with JSON content becaus it needs to be a column-store format.
+The DataTableRendererCSR component gives you the ability to use a REST api to get data, use a local file or you can drag and drop your file with the DragAndDrop component (make sure these two components are placed on the same +page.svelte). If you want to use a local file you need to place the CSV file in the data folder in lib. When you give CSV content through the API call everything will work fine, but be cautious with JSON content becaus it needs to be a column-store format.
 Example column-store format:
 ```json
 {
@@ -70,6 +70,19 @@ const delimiter = "," // If not given to the component "," is assumed
 {/if}
 ```
 
+Example 3 (local CSV file):
+```js
+<script lang="ts">
+const fileName: string = "information.csv"
+
+const dataType: string = "csv"
+
+const delimiter: string = "," // If not given to the component "," is assumed
+</script>
+
+<DataTableRendererCsr {fileName} {delimiter} {dataType}/>
+```
+
 ### DataTableRendererSSR
 The DataTableRendererSSR component gives you the ability to use a REST api to get your data. The properties you need to give to the component are the following:
 ```js
@@ -113,19 +126,6 @@ const sorting: ISort[] = [
 ```
 The DataTableRendererSSR expects already manipulated data (ex. already filtered). Only small portions of data are expected and if you want to put a lot of data in the mappingtool, use DataTableRendererCSR.
 The expected format for the JSON files is a column-store. In this DataTableRenderer you can't make a transpileData method so it needs to be the correct format.
-
-### DataTableRendererArquero
-This version of the DataTableRenderer uses static CSV file in the project structure. This file needs to be placed in src/lib/data.
-Example:
-```js
-<script lang="ts">
-const fileName = "test.csv"
-
-const delimiter = ","
-</script>
-
-<DataTableRendererArquero {fileName} {delimiter}/>
-```
 
 ### DataTableRendererJS
 This version of the DataTableRenderer uses simple JSON content for the data and for the columns.
