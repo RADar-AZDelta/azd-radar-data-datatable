@@ -135,7 +135,7 @@
 					column: filterColumn,
 					filter: filterValue
 				};
-			// If the filter does not exist --> add it
+				// If the filter does not exist --> add it
 			} else {
 				filters.push({
 					column: filterColumn,
@@ -195,7 +195,7 @@
 					{:else}
 						{#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
 							<tr>
-								{#each data.data[i + $pagination.rowsPerPage * ($pagination.currentPage - 1)] as row}
+								{#each data.data[i] as row}
 									<td>{row}</td>
 								{/each}
 							</tr>
