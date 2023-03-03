@@ -1,6 +1,5 @@
 <script lang="ts">
-  import SortDirection from '$lib/classes/enums/SortDirection'
-  import DataTableRendererSsr from '$lib/components/DataTable/DataTableRendererSSR.svelte'
+    import DataTableRendererSsr from '$lib/components/DataTable/DataTableRendererSSR.svelte'
   import type IFilter from '$lib/interfaces/IFilter'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type IScheme from '$lib/interfaces/IScheme'
