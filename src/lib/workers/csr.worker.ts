@@ -4,15 +4,39 @@ import type IFilter from '$lib/interfaces/IFilter'
 import type IPaginated from '$lib/interfaces/IPaginated'
 import type IScheme from '$lib/interfaces/IScheme'
 import type ISort from '$lib/interfaces/ISort'
-import { desc, escape, fromCSV, fromJSON, load, loadCSV, loadJSON } from 'arquero'
+import type ITableData from '$lib/interfaces/ITableData'
+import { desc, escape, fromCSV, fromJSON, loadCSV } from 'arquero'
 
 let originalData: any
 let cols: IScheme[]
 
-const filterData = async (table: any, filters: IFilter[]) => {
+const transpiler = async (table: any, cols: any, total: number): Promise<[string, any][][]> => {
   return new Promise((resolve, reject) => {
-    let filteredData: [string, any][][] = []
+    let filteredData: [string, any][][] = Array.from(new Set(table.objects()))
+    if (filteredData.length > 0) {
+      for (let i = 0; i < filteredData.length; i++) {
+        let data = []
+        for (let col of cols) {
+          data.push(filteredData[i][col])
+        }
+        filteredData[i] = data
+      }
+    } else {
+      for (let i = 0; i < total; i++) {
+        let data = []
+        for (let col of cols) {
+          data.push(table._data[col].data[i])
+        }
+        filteredData.push(data)
+      }
+    }
 
+    resolve(filteredData)
+  })
+}
+
+const filterData = async (table: any, filters: IFilter[]) => {
+  return new Promise(async (resolve, reject) => {
     // If there are filters
     if (filters != undefined && filters.length > 0) {
       for (let filter of filters) {
@@ -31,27 +55,10 @@ const filterData = async (table: any, filters: IFilter[]) => {
         )
       }
     }
-    filteredData = table.objects()
 
-    filteredData = Array.from(new Set(filteredData))
-    if (filteredData.length > 0) {
-      for (let i = 0; i < filteredData.length; i++) {
-        let data = []
-        for (let col of table._names) {
-          data.push(filteredData[i][col])
-        }
-        filteredData[i] = data
-      }
-    } else {
-      for (let i = 0; i < table._total; i++) {
-        let data = []
-        for (let col of table._names) {
-          data.push(table._data[col].data[i])
-        }
-        filteredData.push(data)
-      }
-    }
-    resolve(filteredData)
+    const transpiledData = await transpiler(table, table._names, table._total)
+
+    resolve(transpiledData)
   })
 }
 
