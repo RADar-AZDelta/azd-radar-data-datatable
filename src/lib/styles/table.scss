@@ -1,0 +1,123 @@
+div[data-component='tablerenderer'] {
+  padding: 4rem 1rem 2rem;
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  table {
+    border-spacing: 0;
+    width: 100%;
+  }
+
+  td {
+    padding: 1rem;
+  }
+
+  th {
+    width: max-content;
+  }
+
+  tr:nth-child(2n) {
+    background-color: #e2e8f0;
+  }
+
+  tr:nth-child(2n + 1) {
+    background-color: inherit;
+  }
+
+  div[data-component='filter'] {
+    display: flex;
+    align-items: center;
+
+    input {
+      width: 80%;
+      display: flex;
+      align-self: flex-start;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid black;
+    }
+
+    button {
+      position: relative;
+      display: flex;
+      align-items: center;
+      right: 2.5rem;
+      top: -0.25rem;
+      border: none;
+      background-color: inherit;
+      cursor: pointer;
+    }
+  }
+
+  section[data-component='pagination'] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    div[data-component='pagination-rows'] {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      select {
+        padding: 1rem;
+        width: 6rem;
+        border-radius: 5px;
+      }
+    }
+
+    div[data-component='pagination-pages'] {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      button {
+        border: none;
+        background-color: inherit;
+        cursor: pointer;
+      }
+
+      button:hover {
+        font-weight: 800;
+      }
+
+      .pagination-page-selected {
+        font-weight: 800;
+      }
+
+      .arrow-button-disable {
+        cursor: auto;
+        filter: invert(72%) sepia(9%) saturate(345%) hue-rotate(179deg) brightness(89%) contrast(89%);
+      }
+    }
+  }
+
+  div[data-component='sort'] {
+    width: 80%;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+
+    button {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.5rem 0;
+      gap: 0.5rem;
+      border: none;
+      background-color: inherit;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e2e8f0;
+    }
+
+    p[data-component='column-name'] {
+      font-weight: 800;
+      font-size: 1rem;
+    }
+  }
+}

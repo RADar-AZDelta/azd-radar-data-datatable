@@ -1,5 +1,9 @@
+/**
+ * Defines how to paginate a table
+ */
 export default interface IPaginated {
-  page: number
-  pageSize: number
+  currentPage: number
+  totalPages: number
+  rowsPerPage: number
   totalRows: number
 }
