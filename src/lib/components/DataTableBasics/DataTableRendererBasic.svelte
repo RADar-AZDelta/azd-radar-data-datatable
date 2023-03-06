@@ -13,7 +13,8 @@
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
-    pagination: Writable<IPaginated>
+    pagination: Writable<IPaginated>,
+    rowEvent: Function | null = null
 
   let update = 0
 
@@ -185,7 +186,11 @@
 
           {#if data.data.length < $pagination.rowsPerPage}
             {#each Array(data.data.length) as _, i}
-              <tr>
+              <tr
+                on:click={() => {
+                  if (rowEvent != null) rowEvent()
+                }}
+              >
                 {#each data.data[i] as row}
                   <td>{row}</td>
                 {/each}
@@ -193,7 +198,11 @@
             {/each}
           {:else}
             {#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
-              <tr>
+              <tr
+                on:click={() => {
+                  if (rowEvent != null) rowEvent(true)
+                }}
+              >
                 {#each data.data[i] as row}
                   <td>{row}</td>
                 {/each}

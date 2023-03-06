@@ -13,7 +13,8 @@
     dataType: string,
     delimiter: string = ',',
     file: File | null = null,
-    fileName: string | null = null
+    fileName: string | null = null,
+    rowEvent: Function | null = null
 
   let worker: Worker | undefined = undefined
 
@@ -134,5 +135,5 @@
 </script>
 
 {#key update}
-  <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
+  <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} {rowEvent} />
 {/key}
