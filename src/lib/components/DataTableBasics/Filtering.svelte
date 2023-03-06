@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Types from '$lib/classes/enums/Types'
-  import type IFilter from '$lib/interfaces/IFilter'
+  import Types from '../../classes/enums/Types'
+  import type IFilter from '../../interfaces/IFilter'
 
   export let col: string, type: Types, updateFiltering: Function, deleteFilter: Function, filter: IFilter
 </script>

@@ -7,7 +7,6 @@
   import { onMount } from 'svelte'
   import { writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
-  import { workerMess } from '$lib/store'
 
   export let url: string | null = null,
     fetchOptions: object | null = null,
@@ -29,6 +28,8 @@
 
   const columns = writable<Array<IScheme>>([])
   const data = writable<any>([])
+
+  const workerMess = writable<boolean>(false)
 
   let update = 0
 
@@ -78,7 +79,7 @@
   }
 
   const loadWorker = async () => {
-    const w = await import('$lib/workers/csr.worker?worker')
+    const w = await import('../../workers/csr.worker?worker')
     worker = new w.default()
     if (url != null && url != undefined) {
       worker.postMessage({

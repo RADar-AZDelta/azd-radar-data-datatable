@@ -1,10 +1,9 @@
-import SortDirection from '$lib/classes/enums/SortDirection'
-import Types from '$lib/classes/enums/Types'
+import SortDirection from '../classes/enums/SortDirection'
+import Types from '../classes/enums/Types'
 import type IFilter from '$lib/interfaces/IFilter'
 import type IPaginated from '$lib/interfaces/IPaginated'
 import type IScheme from '$lib/interfaces/IScheme'
 import type ISort from '$lib/interfaces/ISort'
-import type ITableData from '$lib/interfaces/ITableData'
 import { desc, escape, fromCSV, fromJSON, loadCSV } from 'arquero'
 
 let originalData: any

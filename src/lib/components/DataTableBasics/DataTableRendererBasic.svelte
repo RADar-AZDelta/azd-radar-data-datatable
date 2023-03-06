@@ -4,11 +4,11 @@
   import Filtering from './Filtering.svelte'
   import Pagination from './Pagination.svelte'
   import type ISort from '$lib/interfaces/ISort'
-  import SortDirection from '$lib/classes/enums/SortDirection'
+  import SortDirection from '../../classes/enums/SortDirection'
   import type { Writable } from 'svelte/store'
   import type IFilter from '$lib/interfaces/IFilter'
   import type IPaginated from '$lib/interfaces/IPaginated'
-  import Types from '$lib/classes/enums/Types'
+  import Types from '../../classes/enums/Types'
 
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
