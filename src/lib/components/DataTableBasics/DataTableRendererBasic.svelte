@@ -13,7 +13,10 @@
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
-    pagination: Writable<IPaginated>
+    pagination: Writable<IPaginated>,
+    editable: boolean = false,
+    ownEditorVisuals: any = null,
+    ownEditorMethods: any = null
 
   let update = 0
 
@@ -152,6 +155,54 @@
     $filters.splice($filters.indexOf($filters.filter(obj => obj.column == column)[0]), 1)
     updateTable()
   }
+
+  /*
+    Inline editor
+  */
+
+  let eventListener: string
+  let originalEvent: string
+  let parent: any
+  let updating: boolean = false
+
+  // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
+  // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
+  // TODO: place long calculations in a computed property (make it understandable for others)
+
+  const listener = async () => {
+    if (originalEvent == eventListener) {
+      if (parent.firstChild.nodeName == 'INPUT') {
+        return
+      } else {
+        parent?.firstChild?.remove()
+        parent?.appendChild(document.createElement('input'))
+        updating = true
+      }
+    }
+  }
+
+  const editor = async (event: any) => {
+    console.log("start")
+    parent = document.getElementById(event)
+    if (eventListener != event && updating == false) {
+      eventListener = event
+      parent?.addEventListener('click', listener)
+    } else if (eventListener != event && updating == true) {
+      parent?.removeEventListener('click', listener)
+      // @ts-ignore
+      const value = document.getElementById(eventListener)?.firstChild?.value
+      document.getElementById(eventListener)?.firstChild?.remove()
+      const tag = document.createElement('p')
+      tag.appendChild(document.createTextNode(value))
+      document.getElementById(eventListener)?.appendChild(tag)
+
+      eventListener = event
+      updating = false
+      parent?.addEventListener('click', listener, true)
+    } else {
+      originalEvent = event
+    }
+  }
 </script>
 
 <section>
@@ -187,7 +238,15 @@
             {#each Array(data.data.length) as _, i}
               <tr>
                 {#each data.data[i] as row}
-                  <td>{row}</td>
+                  <td
+                    id="{i}-{row}"
+                    on:click={function () {
+                      if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
+                    }}
+                    on:keypress={function () {
+                      if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
+                    }}>{row}</td
+                  >
                 {/each}
               </tr>
             {/each}
@@ -195,7 +254,15 @@
             {#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
               <tr>
                 {#each data.data[i] as row}
-                  <td>{row}</td>
+                  <td
+                    id="{i}-{row}"
+                    on:click={function () {
+                      if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
+                    }}
+                    on:keypress={function () {
+                      if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
+                    }}><p>{row}</p></td
+                  >
                 {/each}
               </tr>
             {/each}

@@ -8,7 +8,7 @@
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import SortDirection from '$lib/classes/enums/SortDirection'
 
-  export let data: [string, any][][], columns: IScheme[]
+  export let data: [string, any][][], columns: IScheme[], editable: boolean = false
 
   const columnsStore = writable<IScheme[]>(columns)
   const dataStore = writable<[string, any][][]>(data)
@@ -170,4 +170,4 @@
   }
 </script>
 
-<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
+<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} {editable} />
