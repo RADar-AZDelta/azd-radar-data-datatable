@@ -7,14 +7,14 @@
   import { onMount } from 'svelte'
   import { writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
-  import { workerMess } from '$lib/store'
 
   export let url: string | null = null,
     fetchOptions: object | null = null,
     dataType: string,
     delimiter: string = ',',
     file: File | null = null,
-    fileName: string | null = null
+    fileName: string | null = null,
+    rowEvent: Function | null = null
 
   let worker: Worker | undefined = undefined
 
@@ -29,6 +29,8 @@
 
   const columns = writable<Array<IScheme>>([])
   const data = writable<any>([])
+
+  const workerMess = writable<boolean>(false)
 
   let update = 0
 
@@ -78,7 +80,7 @@
   }
 
   const loadWorker = async () => {
-    const w = await import('$lib/workers/csr.worker?worker')
+    const w = await import('../../workers/csr.worker?worker')
     worker = new w.default()
     if (url != null && url != undefined) {
       worker.postMessage({
@@ -133,5 +135,5 @@
 </script>
 
 {#key update}
-  <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
+  <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} {rowEvent} />
 {/key}

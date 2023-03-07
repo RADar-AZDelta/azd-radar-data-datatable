@@ -4,19 +4,20 @@
   import Filtering from './Filtering.svelte'
   import Pagination from './Pagination.svelte'
   import type ISort from '$lib/interfaces/ISort'
-  import SortDirection from '$lib/classes/enums/SortDirection'
+  import SortDirection from '../../classes/enums/SortDirection'
   import type { Writable } from 'svelte/store'
   import type IFilter from '$lib/interfaces/IFilter'
   import type IPaginated from '$lib/interfaces/IPaginated'
-  import Types from '$lib/classes/enums/Types'
+  import Types from '../../classes/enums/Types'
 
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
     pagination: Writable<IPaginated>,
-    editable: boolean = false,
-    ownEditorVisuals: any = null,
-    ownEditorMethods: any = null
+      rowEvent: Function | null = null,
+      editable: boolean = false,
+      ownEditorVisuals: any = null,
+      ownEditorMethods: any = null
 
   let update = 0
 
@@ -236,7 +237,11 @@
 
           {#if data.data.length < $pagination.rowsPerPage}
             {#each Array(data.data.length) as _, i}
-              <tr>
+              <tr
+                on:click={() => {
+                  if (rowEvent != null) rowEvent()
+                }}
+              >
                 {#each data.data[i] as row}
                   <td
                     id="{i}-{row}"
@@ -252,7 +257,11 @@
             {/each}
           {:else}
             {#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
-              <tr>
+              <tr
+                on:click={() => {
+                  if (rowEvent != null) rowEvent(true)
+                }}
+              >
                 {#each data.data[i] as row}
                   <td
                     id="{i}-{row}"

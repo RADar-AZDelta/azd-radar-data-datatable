@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SortDirection from '$lib/classes/enums/SortDirection'
+  import SortDirection from '../../classes/enums/SortDirection'
   export let col: string, direction: number, updateSorting: Function
 </script>
 
