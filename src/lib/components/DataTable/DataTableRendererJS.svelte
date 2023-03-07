@@ -8,10 +8,13 @@
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import SortDirection from '$lib/classes/enums/SortDirection'
 
-  export let data: [string, any][][], columns: IScheme[], editable: boolean = false
+  export let data: [string, any][][],
+    columns: IScheme[],
+    editable: boolean = false
 
+  const originalData = writable<[string, any][][]>(data)
   const columnsStore = writable<IScheme[]>(columns)
-  const dataStore = writable<[string, any][][]>(data)
+  const dataStore = writable<[string, any][][]>()
   const filters = writable<Array<IFilter>>([])
   const sorting = writable<Array<ISort>>([])
   const pagination = writable<IPaginated>({
@@ -26,7 +29,7 @@
     /*
             Filter column name out of data
         */
-    for (let person of data) {
+    for (let person of $originalData) {
       let personInfo: [string, any][] = []
       for (let information of person) {
         personInfo.push(information[1])
@@ -168,6 +171,17 @@
       resolve(await getData())
     })
   }
+
+  // TODO: make it possible to update data with ex. only numbers
+  const updateData = async (index: string, value: string) => {
+    const indexes = index.split("-")
+    const row = Number(indexes[0])
+    const col = Number(indexes[1])
+    originalData.update((data) => {
+      data[row][col][1] = value
+      return data
+    })
+  }
 </script>
 
-<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} {editable} />
+<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} {editable} {updateData}/>

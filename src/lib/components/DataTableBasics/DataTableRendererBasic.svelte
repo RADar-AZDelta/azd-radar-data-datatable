@@ -17,7 +17,8 @@
       rowEvent: Function | null = null,
       editable: boolean = false,
       ownEditorVisuals: any = null,
-      ownEditorMethods: any = null
+      ownEditorMethods: any = null,
+      updateData: Function | null = null
 
   let update = 0
 
@@ -183,7 +184,7 @@
   }
 
   const editor = async (event: any) => {
-    console.log("start")
+    console.log(event)
     parent = document.getElementById(event)
     if (eventListener != event && updating == false) {
       eventListener = event
@@ -196,6 +197,9 @@
       const tag = document.createElement('p')
       tag.appendChild(document.createTextNode(value))
       document.getElementById(eventListener)?.appendChild(tag)
+      if(updateData != null){
+        updateData(eventListener, value)
+      }
 
       eventListener = event
       updating = false
@@ -242,9 +246,9 @@
                   if (rowEvent != null) rowEvent()
                 }}
               >
-                {#each data.data[i] as row}
+                {#each data.data[i] as row, j}
                   <td
-                    id="{i}-{row}"
+                    id="{i}-{j}"
                     on:click={function () {
                       if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
                     }}
@@ -262,9 +266,9 @@
                   if (rowEvent != null) rowEvent(true)
                 }}
               >
-                {#each data.data[i] as row}
+                {#each data.data[i] as row, j}
                   <td
-                    id="{i}-{row}"
+                    id="{i}-{j}"
                     on:click={function () {
                       if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
                     }}
