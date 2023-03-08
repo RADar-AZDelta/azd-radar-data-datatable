@@ -6,7 +6,6 @@
   import type ITableData from '$lib/interfaces/ITableData'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
-  import SortDirection from '$lib/classes/enums/SortDirection'
 
   export let data: [string, any][][],
     columns: IScheme[],
@@ -113,7 +112,7 @@
       const colIndex = $columnsStore.findIndex(obj => obj.column == sort.column)
       let data = filteredData
       switch (sort.direction) {
-        case SortDirection.Ascending:
+        case 1:
           data = $dataStore.sort(function (a, b) {
             if (b[colIndex] > a[colIndex]) return -1
             if (b[colIndex] < a[colIndex]) return 1
@@ -121,7 +120,7 @@
           })
           break
 
-        case SortDirection.Descending:
+        case 2:
           data = $dataStore.sort(function (a, b) {
             if (b[colIndex] < a[colIndex]) return -1
             if (b[colIndex] > a[colIndex]) return 1

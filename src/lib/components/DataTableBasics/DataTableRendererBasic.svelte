@@ -166,6 +166,7 @@
   let updatedParent: string[] = []
   let parent: any
   let updating: boolean = false
+  let editClick: boolean = false
 
   // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
   // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
@@ -241,20 +242,24 @@
             {#each Array(data.data.length) as _, i}
               <tr
                 on:click={() => {
-                  if (rowEvent != null) rowEvent()
+                  if (rowEvent != null && updating == false && editClick == false) rowEvent(true)
+                  editClick = false
                 }}
               >
                 {#each data.data[i] as row, j}
                   <td class="cell"
                     ><div class="cell-container">
                       <p id="{i}-{j}">{row}</p>
-                      <button
-                        on:click={function () {
-                          if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
-                            editor(`${i}-${j}`)
-                        }}
-                        class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
-                      >
+                      {#if editable == true}
+                        <button
+                          on:click={function () {
+                            editClick = true
+                            if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
+                              editor(`${i}-${j}`)
+                          }}
+                          class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
+                        >
+                      {/if}
                     </div></td
                   >
                 {/each}
@@ -264,20 +269,24 @@
             {#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
               <tr
                 on:click={() => {
-                  if (rowEvent != null) rowEvent(true)
+                  if (rowEvent != null && updating == false && editClick == false) rowEvent(true)
+                  editClick = false
                 }}
               >
                 {#each data.data[i] as row, j}
                   <td class="cell"
                     ><div class="cell-container">
                       <p id="{i}-{j}">{row}</p>
-                      <button
-                        on:click={function () {
-                          if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
-                            editor(`${i}-${j}`)
-                        }}
-                        class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
-                      >
+                      {#if editable == true}
+                        <button
+                          on:click={function () {
+                            editClick = true
+                            if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
+                              editor(`${i}-${j}`)
+                          }}
+                          class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
+                        >
+                      {/if}
                     </div></td
                   >
                 {/each}
