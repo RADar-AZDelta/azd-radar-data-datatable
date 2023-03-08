@@ -11,7 +11,8 @@
     transpileData: Function | undefined = undefined,
     pagination: IPaginated,
     filters: IFilter[],
-    sorting: ISort[]
+    sorting: ISort[],
+    rowEvent: Function | null = null
 
   const paginationStore = writable<IPaginated>(pagination)
   const filtersStore = writable<IFilter[]>(filters)
@@ -42,6 +43,14 @@
       resolve(data)
     })
   }
+
+  // Not editable because you get the data from REST and you would need to make a POST request (maybe in the future)
 </script>
 
-<DataTableRendererBasic {hasData} pagination={paginationStore} filters={filtersStore} sorting={sortingStore} />
+<DataTableRendererBasic
+  {hasData}
+  pagination={paginationStore}
+  filters={filtersStore}
+  sorting={sortingStore}
+  {rowEvent}
+/>

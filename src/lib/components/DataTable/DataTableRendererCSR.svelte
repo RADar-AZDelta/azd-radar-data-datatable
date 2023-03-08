@@ -14,7 +14,11 @@
     delimiter: string = ',',
     file: File | null = null,
     fileName: string | null = null,
-    rowEvent: Function | null = null
+    rowEvent: Function | null = null,
+    editable: boolean = false,
+    ownEditorVisuals: any = null,
+    ownEditorMethods: any = null,
+    updateData: Function | null = null
 
   let worker: Worker | undefined = undefined
 
@@ -132,8 +136,35 @@
   }
 
   onMount(loadWorker)
+
+  if (updateData == null) {
+    updateData = async (index: string, value: string) => {
+      const indexes = index.split('-')
+      const row = Number(indexes[0])
+      const col = Number(indexes[1])
+      worker?.postMessage({
+        editData: {
+          index: index,
+          value: value
+        },
+        filter: $filters,
+        order: $sorting,
+        pagination: $pagination,
+      })
+    }
+  }
 </script>
 
 {#key update}
-  <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} {rowEvent} />
+  <DataTableRendererBasic
+    {hasData}
+    {filters}
+    {sorting}
+    {pagination}
+    {rowEvent}
+    {editable}
+    {updateData}
+    {ownEditorVisuals}
+    {ownEditorMethods}
+  />
 {/key}

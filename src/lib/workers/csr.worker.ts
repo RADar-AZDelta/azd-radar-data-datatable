@@ -64,6 +64,8 @@ const filterData = async (table: any, filters: IFilter[]) => {
 const orderData = async (table: any, sorts: ISort[]): Promise<any> => {
   return new Promise((resolve, reject) => {
     let orderedTable = table
+    orderedTable._order = null
+    // TODO: fix bug that ordering doesn't work correctly when updating values in table
     for (let sort of sorts) {
       if (sort.direction == SortDirection.Ascending) {
         orderedTable = orderedTable.orderby(sort.column)
@@ -71,6 +73,7 @@ const orderData = async (table: any, sorts: ISort[]): Promise<any> => {
         orderedTable = orderedTable.orderby(desc(sort.column))
       }
     }
+    originalData = orderedTable
     resolve(orderedTable)
   })
 }
@@ -152,32 +155,57 @@ const getData = async (
   })
 }
 
+const updateTableData = async (data: any, index: string, value: string) => {
+  const indexes = index.split('-')
+  const row = indexes[0]
+  const col = indexes[1]
+  const colName = originalData._names[col]
+  data._data[colName].data[row] = value
+  return data
+}
+
 onmessage = async ({
-  data: { filePath, file, delimiter, method, fileType, fetchOptions, filter, order, pagination },
+  data: { filePath, file, delimiter, method, fileType, fetchOptions, filter, order, pagination, editData },
 }) => {
   let data: any = originalData
-  await getData(filePath, file, delimiter, method, fileType, fetchOptions)
-    .then(async () => (cols = await getColumns()))
-    .then(async () => {
-      if (order) {
-        data = await orderData(originalData, order)
-      }
-    })
-    .then(async () => (data = await filterData(data, filter)))
-    .then(async () => {
-      if (pagination) {
-        data = await updatePagination(data, pagination)
-      }
-    })
-    .finally(() =>
-      postMessage({
-        processedData: {
-          data: data.data == undefined ? data : data.data,
-          columns: cols,
-          pagination: data.pag == undefined ? data.pagination : data.pag,
-        },
+  if (originalData == undefined || originalData == null) {
+    await getData(filePath, file, delimiter, method, fileType, fetchOptions)
+      .then(async () => (cols = await getColumns()))
+      .then(async () => {
+        if (order) {
+          data = await orderData(originalData, order)
+        }
       })
-    )
+      .then(async () => (data = await filterData(data, filter)))
+      .then(async () => {
+        if (pagination) {
+          data = await updatePagination(data, pagination)
+        }
+      })
+      .finally(() =>
+        postMessage({
+          processedData: {
+            data: data.data == undefined ? data : data.data,
+            columns: cols,
+            pagination: data.pag == undefined ? data.pagination : data.pag,
+          },
+        })
+      )
+  } else {
+    if (editData != undefined || editData != null) {
+      await updateTableData(originalData, editData.index, editData.value)
+    }
+    data = await orderData(originalData, order)
+    data = await filterData(data, filter)
+    if (pagination) data = await updatePagination(data, pagination)
+    await postMessage({
+      processedData: {
+        data: data.data == undefined ? data : data.data,
+        columns: cols,
+        pagination: data.pag == undefined ? data.pagination : data.pag,
+      },
+    })
+  }
 }
 
 export {}

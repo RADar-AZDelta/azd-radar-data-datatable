@@ -10,7 +10,11 @@
 
   export let data: [string, any][][],
     columns: IScheme[],
-    editable: boolean = false
+    rowEvent: Function | null = null,
+    editable: boolean = false,
+    ownEditorVisuals: any = null,
+    ownEditorMethods: any = null,
+    updateData: Function | null = null
 
   const originalData = writable<[string, any][][]>(data)
   const columnsStore = writable<IScheme[]>(columns)
@@ -173,15 +177,27 @@
   }
 
   // TODO: make it possible to update data with ex. only numbers
-  const updateData = async (index: string, value: string) => {
-    const indexes = index.split("-")
-    const row = Number(indexes[0])
-    const col = Number(indexes[1])
-    originalData.update((data) => {
-      data[row][col][1] = value
-      return data
-    })
+  if (updateData == null) {
+    updateData = async (index: string, value: string) => {
+      const indexes = index.split('-')
+      const row = Number(indexes[0])
+      const col = Number(indexes[1])
+      originalData.update(data => {
+        data[row][col][1] = value
+        return data
+      })
+    }
   }
 </script>
 
-<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} {editable} {updateData}/>
+<DataTableRendererBasic
+  {hasData}
+  {filters}
+  {sorting}
+  {pagination}
+  {rowEvent}
+  {editable}
+  {updateData}
+  {ownEditorVisuals}
+  {ownEditorMethods}
+/>

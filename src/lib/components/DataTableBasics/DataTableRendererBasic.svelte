@@ -14,11 +14,11 @@
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
     pagination: Writable<IPaginated>,
-      rowEvent: Function | null = null,
-      editable: boolean = false,
-      ownEditorVisuals: any = null,
-      ownEditorMethods: any = null,
-      updateData: Function | null = null
+    rowEvent: Function | null = null,
+    editable: boolean = false,
+    ownEditorVisuals: any = null,
+    ownEditorMethods: any = null,
+    updateData: Function | null = null
 
   let update = 0
 
@@ -163,7 +163,7 @@
   */
 
   let eventListener: string
-  let originalEvent: string
+  let updatedParent: string[] = []
   let parent: any
   let updating: boolean = false
 
@@ -171,41 +171,39 @@
   // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
   // TODO: place long calculations in a computed property (make it understandable for others)
 
-  const listener = async () => {
-    if (originalEvent == eventListener) {
-      if (parent.firstChild.nodeName == 'INPUT') {
-        return
-      } else {
-        parent?.firstChild?.remove()
-        parent?.appendChild(document.createElement('input'))
-        updating = true
-      }
-    }
-  }
-
-  const editor = async (event: any) => {
-    console.log(event)
+  const editor = async (event: string) => {
     parent = document.getElementById(event)
     if (eventListener != event && updating == false) {
       eventListener = event
-      parent?.addEventListener('click', listener)
-    } else if (eventListener != event && updating == true) {
-      parent?.removeEventListener('click', listener)
+      let value: string
+      if (parent.firstChild.data == undefined) value = parent.firstChild.innerText
+      else value = parent.firstChild.data
+      parent?.firstChild.remove()
+      const input = document.createElement('input')
+      input.value = value
+      parent?.appendChild(input)
+      updating = true
+      if (updatedParent.filter(obj => obj == event).length == 0) {
+        updatedParent.push(event)
+        parent.addEventListener('keydown', (e: any) => {
+          if (e.key === 'Enter') {
+            editor(event)
+          }
+        })
+      }
+    } else if (eventListener == event && updating == true) {
       // @ts-ignore
-      const value = document.getElementById(eventListener)?.firstChild?.value
-      document.getElementById(eventListener)?.firstChild?.remove()
+      const value = document.getElementById(event)?.firstChild?.value
+      parent?.firstChild.remove()
       const tag = document.createElement('p')
       tag.appendChild(document.createTextNode(value))
-      document.getElementById(eventListener)?.appendChild(tag)
-      if(updateData != null){
-        updateData(eventListener, value)
+      parent?.appendChild(tag)
+      if (updateData != null) {
+        updateData(event, value)
       }
 
-      eventListener = event
       updating = false
-      parent?.addEventListener('click', listener, true)
-    } else {
-      originalEvent = event
+      eventListener = ''
     }
   }
 </script>
@@ -247,14 +245,17 @@
                 }}
               >
                 {#each data.data[i] as row, j}
-                  <td
-                    id="{i}-{j}"
-                    on:click={function () {
-                      if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
-                    }}
-                    on:keypress={function () {
-                      if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
-                    }}>{row}</td
+                  <td class="cell"
+                    ><div class="cell-container">
+                      <p id="{i}-{j}">{row}</p>
+                      <button
+                        on:click={function () {
+                          if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
+                            editor(`${i}-${j}`)
+                        }}
+                        class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
+                      >
+                    </div></td
                   >
                 {/each}
               </tr>
@@ -267,14 +268,17 @@
                 }}
               >
                 {#each data.data[i] as row, j}
-                  <td
-                    id="{i}-{j}"
-                    on:click={function () {
-                      if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
-                    }}
-                    on:keypress={function () {
-                      if (editable != false && ownEditorMethods == null && ownEditorVisuals == null) editor(this.id)
-                    }}><p>{row}</p></td
+                  <td class="cell"
+                    ><div class="cell-container">
+                      <p id="{i}-{j}">{row}</p>
+                      <button
+                        on:click={function () {
+                          if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
+                            editor(`${i}-${j}`)
+                        }}
+                        class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
+                      >
+                    </div></td
                   >
                 {/each}
               </tr>
@@ -286,3 +290,22 @@
     {/await}
   {/key}
 </section>
+
+<style>
+  .cell-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .button-edit {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none;
+  }
+
+  .cell:hover .button-edit {
+    display: block;
+  }
+</style>
