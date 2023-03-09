@@ -241,15 +241,15 @@
           {#if data.data.length < $pagination.rowsPerPage}
             {#each Array(data.data.length) as _, i}
               <tr
-                on:click={() => {
-                  if (rowEvent != null && updating == false && editClick == false) rowEvent(true)
+                on:click={function () {
+                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
                   editClick = false
                 }}
               >
                 {#each data.data[i] as row, j}
                   <td class="cell"
                     ><div class="cell-container">
-                      <p id="{i}-{j}">{row}</p>
+                      <p id="{i + ($pagination.rowsPerPage * ($pagination.currentPage - 1))}-{j}">{row}</p>
                       {#if editable == true}
                         <button
                           on:click={function () {
@@ -268,15 +268,15 @@
           {:else}
             {#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
               <tr
-                on:click={() => {
-                  if (rowEvent != null && updating == false && editClick == false) rowEvent(true)
+                on:click={function () {
+                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
                   editClick = false
                 }}
               >
                 {#each data.data[i] as row, j}
                   <td class="cell"
                     ><div class="cell-container">
-                      <p id="{i}-{j}">{row}</p>
+                      <p id="{i + ($pagination.rowsPerPage * ($pagination.currentPage - 1))}-{j}">{row}</p>
                       {#if editable == true}
                         <button
                           on:click={function () {

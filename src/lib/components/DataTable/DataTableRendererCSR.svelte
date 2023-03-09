@@ -18,7 +18,8 @@
     editable: boolean = false,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
-    updateData: Function | null = null
+    updateData: Function | null = null,
+    mapping: any | null = null
 
   let worker: Worker | undefined = undefined
 
@@ -79,8 +80,16 @@
   const onWorkerMessage = async (data: any): Promise<void> => {
     $columns = data.data.processedData.columns
     $data = data.data.processedData.data
-    $pagination = data.data.processedData.pagination
+    if(data.data.processedData.pagination != null || data.data.processedData.pagination != undefined) {
+      $pagination = data.data.processedData.pagination
+    }
     $workerMess = true
+    if(rowEvent != null){
+      rowEvent(null, false)
+      if(data.data.processedData.update == true){
+        updateTable()
+      }
+    }
   }
 
   const loadWorker = async () => {
@@ -150,6 +159,14 @@
         filter: $filters,
         order: $sorting,
         pagination: $pagination,
+      })
+    }
+  }
+
+  $: {
+    if (mapping != null) {
+      worker?.postMessage({
+        mapping: mapping
       })
     }
   }
