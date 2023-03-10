@@ -6,6 +6,7 @@
   import type ITableData from '$lib/interfaces/ITableData'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
+  import FileDownload from '../FileDownload/FileDownload.svelte'
 
   export let data: [string, any][][],
     columns: IScheme[],
@@ -200,3 +201,5 @@
   {ownEditorVisuals}
   {ownEditorMethods}
 />
+
+<FileDownload data={$originalData} />
