@@ -3,7 +3,8 @@
 
 
 	export let fileExtension: string,
-		file: Writable<File | null>
+		file: Writable<File | null>,
+		text: string = "Drop your file here"
 
 	function dropHandler(event: DragEvent) {
 		event.preventDefault();
@@ -28,17 +29,9 @@
 	}
 </script>
 
-<div class="drop" on:drop={dropHandler} on:dragover={dragOverHandler}>
-	<p>Drop a file with {fileExtension} extension here</p>
-</div>
-
-<style>
-    .drop {
-        width: 100%;
-        background-color: #f1f1f1;
-        padding: 4rem 0;
-        text-align: center;
-        font-weight: 700;
-        font-size: 1.5rem;
-    }
-</style>
+<div class={`${$file != null ? 'hidden' : null}`}>
+	<div data-component="drop" on:drop={dropHandler} on:dragover={dragOverHandler}>
+		<p>{text}</p>
+		<img src="drag.png" alt="">
+	</div>
+</div >

@@ -6,12 +6,18 @@
   import type ITableData from '$lib/interfaces/ITableData'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
-  import SortDirection from '$lib/classes/enums/SortDirection'
 
-  export let data: [string, any][][], columns: IScheme[]
+  export let data: [string, any][][],
+    columns: IScheme[],
+    rowEvent: Function | null = null,
+    editable: boolean = false,
+    ownEditorVisuals: any = null,
+    ownEditorMethods: any = null,
+    updateData: Function | null = null
 
+  const originalData = writable<[string, any][][]>(data)
   const columnsStore = writable<IScheme[]>(columns)
-  const dataStore = writable<[string, any][][]>(data)
+  const dataStore = writable<[string, any][][]>()
   const filters = writable<Array<IFilter>>([])
   const sorting = writable<Array<ISort>>([])
   const pagination = writable<IPaginated>({
@@ -26,7 +32,7 @@
     /*
             Filter column name out of data
         */
-    for (let person of data) {
+    for (let person of $originalData) {
       let personInfo: [string, any][] = []
       for (let information of person) {
         personInfo.push(information[1])
@@ -106,7 +112,7 @@
       const colIndex = $columnsStore.findIndex(obj => obj.column == sort.column)
       let data = filteredData
       switch (sort.direction) {
-        case SortDirection.Ascending:
+        case 1:
           data = $dataStore.sort(function (a, b) {
             if (b[colIndex] > a[colIndex]) return -1
             if (b[colIndex] < a[colIndex]) return 1
@@ -114,7 +120,7 @@
           })
           break
 
-        case SortDirection.Descending:
+        case 2:
           data = $dataStore.sort(function (a, b) {
             if (b[colIndex] < a[colIndex]) return -1
             if (b[colIndex] > a[colIndex]) return 1
@@ -168,6 +174,29 @@
       resolve(await getData())
     })
   }
+
+  // TODO: make it possible to update data with ex. only numbers
+  if (updateData == null) {
+    updateData = async (index: string, value: string) => {
+      const indexes = index.split('-')
+      const row = Number(indexes[0])
+      const col = Number(indexes[1])
+      originalData.update(data => {
+        data[row][col][1] = value
+        return data
+      })
+    }
+  }
 </script>
 
-<DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
+<DataTableRendererBasic
+  {hasData}
+  {filters}
+  {sorting}
+  {pagination}
+  {rowEvent}
+  {editable}
+  {updateData}
+  {ownEditorVisuals}
+  {ownEditorMethods}
+/>

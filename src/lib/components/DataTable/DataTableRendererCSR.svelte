@@ -13,7 +13,13 @@
     dataType: string,
     delimiter: string = ',',
     file: File | null = null,
-    fileName: string | null = null
+    fileName: string | null = null,
+    rowEvent: Function | null = null,
+    editable: boolean = false,
+    ownEditorVisuals: any = null,
+    ownEditorMethods: any = null,
+    updateData: Function | null = null,
+    mapping: any | null = null
 
   let worker: Worker | undefined = undefined
 
@@ -74,8 +80,16 @@
   const onWorkerMessage = async (data: any): Promise<void> => {
     $columns = data.data.processedData.columns
     $data = data.data.processedData.data
-    $pagination = data.data.processedData.pagination
+    if(data.data.processedData.pagination != null || data.data.processedData.pagination != undefined) {
+      $pagination = data.data.processedData.pagination
+    }
     $workerMess = true
+    if(rowEvent != null){
+      rowEvent(null, false)
+      if(data.data.processedData.update == true){
+        updateTable()
+      }
+    }
   }
 
   const loadWorker = async () => {
@@ -131,8 +145,43 @@
   }
 
   onMount(loadWorker)
+
+  if (updateData == null) {
+    updateData = async (index: string, value: string) => {
+      const indexes = index.split('-')
+      const row = Number(indexes[0])
+      const col = Number(indexes[1])
+      worker?.postMessage({
+        editData: {
+          index: index,
+          value: value
+        },
+        filter: $filters,
+        order: $sorting,
+        pagination: $pagination,
+      })
+    }
+  }
+
+  $: {
+    if (mapping != null) {
+      worker?.postMessage({
+        mapping: mapping
+      })
+    }
+  }
 </script>
 
 {#key update}
-  <DataTableRendererBasic {hasData} {filters} {sorting} {pagination} />
+  <DataTableRendererBasic
+    {hasData}
+    {filters}
+    {sorting}
+    {pagination}
+    {rowEvent}
+    {editable}
+    {updateData}
+    {ownEditorVisuals}
+    {ownEditorMethods}
+  />
 {/key}

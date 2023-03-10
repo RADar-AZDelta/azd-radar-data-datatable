@@ -13,7 +13,12 @@
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
-    pagination: Writable<IPaginated>
+    pagination: Writable<IPaginated>,
+    rowEvent: Function | null = null,
+    editable: boolean = false,
+    ownEditorVisuals: any = null,
+    ownEditorMethods: any = null,
+    updateData: Function | null = null
 
   let update = 0
 
@@ -152,6 +157,56 @@
     $filters.splice($filters.indexOf($filters.filter(obj => obj.column == column)[0]), 1)
     updateTable()
   }
+
+  /*
+    Inline editor
+  */
+
+  let eventListener: string
+  let updatedParent: string[] = []
+  let parent: any
+  let updating: boolean = false
+  let editClick: boolean = false
+
+  // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
+  // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
+  // TODO: place long calculations in a computed property (make it understandable for others)
+
+  const editor = async (event: string) => {
+    parent = document.getElementById(event)
+    if (eventListener != event && updating == false) {
+      eventListener = event
+      let value: string
+      if (parent.firstChild.data == undefined) value = parent.firstChild.innerText
+      else value = parent.firstChild.data
+      parent?.firstChild.remove()
+      const input = document.createElement('input')
+      input.value = value
+      parent?.appendChild(input)
+      updating = true
+      if (updatedParent.filter(obj => obj == event).length == 0) {
+        updatedParent.push(event)
+        parent.addEventListener('keydown', (e: any) => {
+          if (e.key === 'Enter') {
+            editor(event)
+          }
+        })
+      }
+    } else if (eventListener == event && updating == true) {
+      // @ts-ignore
+      const value = document.getElementById(event)?.firstChild?.value
+      parent?.firstChild.remove()
+      const tag = document.createElement('p')
+      tag.appendChild(document.createTextNode(value))
+      parent?.appendChild(tag)
+      if (updateData != null) {
+        updateData(event, value)
+      }
+
+      updating = false
+      eventListener = ''
+    }
+  }
 </script>
 
 <section>
@@ -160,7 +215,6 @@
       <p>Loading...</p>
     {:then data}
       <div data-component="tablerenderer">
-        <h2>Information Table</h2>
         <table>
           <tr>
             {#each data.scheme as info}
@@ -185,17 +239,55 @@
 
           {#if data.data.length < $pagination.rowsPerPage}
             {#each Array(data.data.length) as _, i}
-              <tr>
-                {#each data.data[i] as row}
-                  <td>{row}</td>
+              <tr
+                on:click={function () {
+                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
+                  editClick = false
+                }}
+              >
+                {#each data.data[i] as row, j}
+                  <td class="cell"
+                    ><div class="cell-container">
+                      <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
+                      {#if editable == true}
+                        <button
+                          on:click={function () {
+                            editClick = true
+                            if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
+                              editor(`${i}-${j}`)
+                          }}
+                          class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
+                        >
+                      {/if}
+                    </div></td
+                  >
                 {/each}
               </tr>
             {/each}
           {:else}
             {#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
-              <tr>
-                {#each data.data[i] as row}
-                  <td>{row}</td>
+              <tr
+                on:click={function () {
+                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
+                  editClick = false
+                }}
+              >
+                {#each data.data[i] as row, j}
+                  <td class="cell"
+                    ><div class="cell-container">
+                      <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
+                      {#if editable == true}
+                        <button
+                          on:click={function () {
+                            editClick = true
+                            if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
+                              editor(`${i}-${j}`)
+                          }}
+                          class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
+                        >
+                      {/if}
+                    </div></td
+                  >
                 {/each}
               </tr>
             {/each}
@@ -203,6 +295,26 @@
         </table>
         <Pagination {updateRowsPerPage} {changePage} {data} pagination={$pagination} />
       </div>
+      <!-- <Pagination {updateRowsPerPage} {changePage} {data} pagination={$pagination} /> -->
     {/await}
   {/key}
 </section>
+
+<style>
+  .cell-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .button-edit {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none;
+  }
+
+  .cell:hover .button-edit {
+    display: block;
+  }
+</style>
