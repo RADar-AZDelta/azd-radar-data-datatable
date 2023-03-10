@@ -240,6 +240,7 @@
           {#if data.data.length < $pagination.rowsPerPage}
             {#each Array(data.data.length) as _, i}
               <tr
+                id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
                 on:click={function () {
                   if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
                   editClick = false
@@ -267,6 +268,7 @@
           {:else}
             {#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
               <tr
+                id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
                 on:click={function () {
                   if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
                   editClick = false
