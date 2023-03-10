@@ -5,6 +5,7 @@
   import type ITableData from '$lib/interfaces/ITableData'
   import { writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
+  import FileDownload from '../FileDownload/FileDownload.svelte'
 
   export let url: string,
     fetchOptions: object,
@@ -17,6 +18,7 @@
   const paginationStore = writable<IPaginated>(pagination)
   const filtersStore = writable<IFilter[]>(filters)
   const sortingStore = writable<ISort[]>(sorting)
+  const originalData = writable<any>()
 
   /*
         This is the REST component where we fetch only a portion of the data with the params we sent to the API
@@ -40,6 +42,7 @@
   const hasData = async (): Promise<ITableData> => {
     return new Promise(async (resolve, reject) => {
       const data = await fetchData()
+      originalData.set(data)
       resolve(data)
     })
   }
@@ -54,3 +57,5 @@
   sorting={sortingStore}
   {rowEvent}
 />
+
+<FileDownload data={$originalData} />

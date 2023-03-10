@@ -162,15 +162,52 @@ const updateTableData = async (data: any, index: string, value: string) => {
   const row = indexes[0]
   const col = indexes[1]
   const colName = originalData._names[col]
-  data._data[colName].data[row] = value
-  return data
+  originalData._data[colName].data[row] = value
 }
 
 onmessage = async ({
-  data: { filePath, file, delimiter, method, fileType, fetchOptions, filter, order, pagination, editData, mapping },
+  data: {
+    filePath,
+    file,
+    delimiter,
+    method,
+    fileType,
+    fetchOptions,
+    filter,
+    order,
+    pagination,
+    editData,
+    mapping,
+    getCSV,
+  },
 }) => {
   let data: any = originalData
-  if (originalData == undefined || originalData == null) {
+  if (getCSV == true && originalData !== undefined && originalData !== null) {
+    const columns = []
+    const dataFound: any = {}
+    const originalObjects = originalData.objects()
+    for (let key in originalObjects[0]) {
+      columns.push(key)
+      if (cols.filter((col: any) => col.column == key).length == 0) {
+        cols.push({
+          column: key,
+          type: key == 'id' ? 1 : 0,
+        })
+      }
+    }
+    for (let col of columns) {
+      const d = []
+      for (let obj of originalObjects) {
+        d.push(obj[col])
+      }
+      dataFound[col] = d
+    }
+    postMessage({
+      processedData: {
+        data: dataFound,
+      },
+    })
+  } else if ((getCSV == undefined && originalData == undefined) || originalData == null) {
     await getData(filePath, file, delimiter, method, fileType, fetchOptions)
       .then(async () => (cols = await getColumns()))
       .then(async () => {
@@ -205,10 +242,10 @@ onmessage = async ({
     const dataFound: any = {}
     for (let key in mappedData[0]) {
       columns.push(key)
-      if(cols.filter((col: any) => col.column == key).length == 0){
+      if (cols.filter((col: any) => col.column == key).length == 0) {
         cols.push({
           column: key,
-          type: key == 'id'? 1 : 0
+          type: key == 'id' ? 1 : 0,
         })
       }
     }
@@ -225,8 +262,8 @@ onmessage = async ({
       processedData: {
         data: data,
         columns: cols,
-        update: true
-      }
+        update: true,
+      },
     })
   } else {
     if (editData != undefined || editData != null) {

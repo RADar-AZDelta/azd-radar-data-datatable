@@ -7,6 +7,7 @@
   import { onMount } from 'svelte'
   import { writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
+  import FileDownload from '../FileDownload/FileDownload.svelte'
 
   export let url: string | null = null,
     fetchOptions: object | null = null,
@@ -80,13 +81,13 @@
   const onWorkerMessage = async (data: any): Promise<void> => {
     $columns = data.data.processedData.columns
     $data = data.data.processedData.data
-    if(data.data.processedData.pagination != null || data.data.processedData.pagination != undefined) {
+    if (data.data.processedData.pagination != null || data.data.processedData.pagination != undefined) {
       $pagination = data.data.processedData.pagination
     }
     $workerMess = true
-    if(rowEvent != null){
+    if (rowEvent != null) {
       rowEvent(null, false)
-      if(data.data.processedData.update == true){
+      if (data.data.processedData.update == true) {
         updateTable()
       }
     }
@@ -149,12 +150,10 @@
   if (updateData == null) {
     updateData = async (index: string, value: string) => {
       const indexes = index.split('-')
-      const row = Number(indexes[0])
-      const col = Number(indexes[1])
       worker?.postMessage({
         editData: {
           index: index,
-          value: value
+          value: value,
         },
         filter: $filters,
         order: $sorting,
@@ -166,7 +165,7 @@
   $: {
     if (mapping != null) {
       worker?.postMessage({
-        mapping: mapping
+        mapping: mapping,
       })
     }
   }
@@ -184,4 +183,7 @@
     {ownEditorVisuals}
     {ownEditorMethods}
   />
+  {#if worker != undefined}
+    <FileDownload bind:worker />
+  {/if}
 {/key}
