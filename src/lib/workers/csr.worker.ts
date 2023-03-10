@@ -232,6 +232,7 @@ onmessage = async ({
       )
   } else if (mapping != undefined || mapping != null) {
     mappedData[mapping.row]['EQUIVALENCE'] = mapping.equivalence
+    mappedData[mapping.row]['Author'] = mapping.author
     for (let col of mapping.columns) {
       const colName: string = col.column
       const data: [string, any][] = Array.from(mapping.data)

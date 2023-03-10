@@ -20,7 +20,8 @@
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
     updateData: Function | null = null,
-    mapping: any | null = null
+    mapping: any | null = null,
+    map: boolean = false
 
   let worker: Worker | undefined = undefined
 
@@ -89,6 +90,9 @@
       rowEvent(null, false)
       if (data.data.processedData.update == true) {
         updateTable()
+        setTimeout(function () {
+          document.getElementById(mapping.row)?.classList.add('mapped')
+        }, 0)
       }
     }
   }
@@ -163,10 +167,11 @@
   }
 
   $: {
-    if (mapping != null) {
+    if (mapping != null && map == true) {
       worker?.postMessage({
         mapping: mapping,
       })
+      map = false
     }
   }
 </script>
