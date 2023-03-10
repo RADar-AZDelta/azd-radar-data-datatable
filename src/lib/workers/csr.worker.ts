@@ -153,22 +153,31 @@ const getData = async (
 }
 
 onmessage = async ({
-  data: { filePath, file, delimiter, method, fileType, fetchOptions, filter, order, pagination },
+  data: { filePath, file, delimiter, method, fileType, fetchOptions, filter, order, pagination,getCSV },
 }) => {
-  let data: any = originalData
-  await getData(filePath, file, delimiter, method, fileType, fetchOptions)
-    .then(async () => (cols = await getColumns()))
-    .then(async () => {
-      if (order) {
-        data = await orderData(originalData, order)
-      }
-    })
-    .then(async () => (data = await filterData(data, filter)))
-    .then(async () => {
-      if (pagination) {
-        data = await updatePagination(data, pagination)
-      }
-    })
+  if(getCSV==true)
+  {
+    if(originalData!==undefined && originalData !== null)
+    {
+      return originalData;
+    }
+  }
+  else
+  {
+    let data: any = originalData
+    await getData(filePath, file, delimiter, method, fileType, fetchOptions)
+      .then(async () => (cols = await getColumns()))
+      .then(async () => {
+        if (order) {
+          data = await orderData(originalData, order)
+        }
+      })
+      .then(async () => (data = await filterData(data, filter)))
+      .then(async () => {
+        if (pagination) {
+          data = await updatePagination(data, pagination)
+        }
+      })
     .finally(() =>
       postMessage({
         processedData: {
@@ -178,6 +187,7 @@ onmessage = async ({
         },
       })
     )
+  }
 }
 
 export {}
