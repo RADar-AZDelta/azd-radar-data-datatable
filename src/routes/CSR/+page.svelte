@@ -31,11 +31,11 @@
 
 <h1>RADar-DataTable Demo - REST data</h1>
 <p>This page demonstrates how the already manipulated data gets fetched from the API and rendered in the DataTable.</p>
-<DataTableRendererCsr url={urlCSV} fetchOptions={fetchOptionsCSV} dataType="CSV" {delimiter} editable={true}/>
+<!-- <DataTableRendererCsr url={urlCSV} fetchOptions={fetchOptionsCSV} dataType="CSV" {delimiter} editable={true}/> -->
 <!-- <DataTableRendererCsr url={urlJSON} fetchOptions={fetchOptionsJSON} dataType="JSON" /> -->
 <!-- <DataTableRendererCsr {fileName} {delimiter} dataType="csv"/> -->
 
-<!-- <DragAndDrop {file} fileExtension="csv" />
+<DragAndDrop {file} fileExtension="csv" />
 {#if $file != null}
-  <DataTableRendererCsr file={$file} dataType="csv" {delimiter} editable={true}/>
-{/if} -->
+  <DataTableRendererCsr file={$file} dataType="csv" {delimiter} editable={true} />
+{/if}

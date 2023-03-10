@@ -9,6 +9,8 @@
   import type IFilter from '$lib/interfaces/IFilter'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import Types from '../../classes/enums/Types'
+  import Spinner from '../Extra/Spinner.svelte'
+  import SkeletonTable from '../Extra/SkeletonTable.svelte'
 
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
@@ -209,10 +211,12 @@
   }
 </script>
 
+<!-- Create a table with readonly cells -->
 <section>
   {#key update}
     {#await hasData()}
-      <p>Loading...</p>
+      <!-- <SkeletonTable {deleteFilter} {updateFiltering} {updateSorting}/> -->
+      <Spinner />
     {:then data}
       <div data-component="tablerenderer">
         <table>
@@ -295,7 +299,6 @@
         </table>
         <Pagination {updateRowsPerPage} {changePage} {data} pagination={$pagination} />
       </div>
-      <!-- <Pagination {updateRowsPerPage} {changePage} {data} pagination={$pagination} /> -->
     {/await}
   {/key}
 </section>

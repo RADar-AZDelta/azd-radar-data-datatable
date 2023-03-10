@@ -190,6 +190,12 @@
   }
 </script>
 
+<div data-component="download-container">
+  {#if $originalData != undefined || $originalData != null}
+    <FileDownload data={$originalData} />
+  {/if}
+</div>
+
 <DataTableRendererBasic
   {hasData}
   {filters}
@@ -201,5 +207,3 @@
   {ownEditorVisuals}
   {ownEditorMethods}
 />
-
-<FileDownload data={$originalData} />

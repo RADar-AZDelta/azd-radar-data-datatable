@@ -4,14 +4,11 @@
   export let worker: Worker | null = null,
     data: any | null = null
 
-  // let worker: Worker | undefined = undefined
   let csv: any
   let delimiter = ','
   let tableData: any
 
   const loadWorker = async () => {
-    // const w = await import('../../workers/csr.worker?worker')
-    // worker = new w.default()
     if (worker != null) {
       worker.postMessage({
         getCSV: true,
@@ -75,7 +72,7 @@
     let url = URL.createObjectURL(file)
 
     a.href = url
-    a.download = 'test.csv'
+    a.download = 'mapped-data.csv'
     document.body.appendChild(a)
     a.click()
     setTimeout(function () {
@@ -85,4 +82,7 @@
   }
 </script>
 
-<button on:click={loadWorker}>Download CSV</button>
+<button data-component="button-download" on:click={loadWorker}>
+  <p>Download CSV</p>
+  <img src="/download.svg" alt="Download icon" />
+</button>

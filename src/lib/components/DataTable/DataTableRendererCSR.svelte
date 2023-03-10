@@ -171,6 +171,11 @@
   }
 </script>
 
+<div data-component="download-container">
+  {#if worker != undefined}
+    <FileDownload bind:worker />
+  {/if}
+</div>
 {#key update}
   <DataTableRendererBasic
     {hasData}
@@ -183,7 +188,4 @@
     {ownEditorVisuals}
     {ownEditorMethods}
   />
-  {#if worker != undefined}
-    <FileDownload bind:worker />
-  {/if}
 {/key}
