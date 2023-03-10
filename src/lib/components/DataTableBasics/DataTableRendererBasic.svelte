@@ -215,7 +215,6 @@
       <p>Loading...</p>
     {:then data}
       <div data-component="tablerenderer">
-        <h2>Information Table</h2>
         <table>
           <tr>
             {#each data.scheme as info}
@@ -249,7 +248,7 @@
                 {#each data.data[i] as row, j}
                   <td class="cell"
                     ><div class="cell-container">
-                      <p id="{i + ($pagination.rowsPerPage * ($pagination.currentPage - 1))}-{j}">{row}</p>
+                      <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
                       {#if editable == true}
                         <button
                           on:click={function () {
@@ -276,7 +275,7 @@
                 {#each data.data[i] as row, j}
                   <td class="cell"
                     ><div class="cell-container">
-                      <p id="{i + ($pagination.rowsPerPage * ($pagination.currentPage - 1))}-{j}">{row}</p>
+                      <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
                       {#if editable == true}
                         <button
                           on:click={function () {
@@ -296,6 +295,7 @@
         </table>
         <Pagination {updateRowsPerPage} {changePage} {data} pagination={$pagination} />
       </div>
+      <!-- <Pagination {updateRowsPerPage} {changePage} {data} pagination={$pagination} /> -->
     {/await}
   {/key}
 </section>

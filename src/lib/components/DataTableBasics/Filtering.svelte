@@ -19,7 +19,7 @@
       ? 'date'
       : 'text'}
     value={filter == undefined ? '' : filter.filter}
-    placeholder="filter by {col}"
+    placeholder="Filter"
   />
   <button on:click={deleteFilter(col)}><img src="/x.svg" alt="Cross icon" /></button>
 </div>
