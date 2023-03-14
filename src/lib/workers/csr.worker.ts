@@ -9,6 +9,8 @@ import { desc, escape, fromCSV, fromJSON, loadCSV, table } from 'arquero'
 let originalData: any
 let mappedData: any
 let cols: IScheme[]
+let sorts: ISort[]
+let filters: IFilter[]
 
 const createCSV = async (): Promise<any> => {
   const columns = []
@@ -20,7 +22,7 @@ const createCSV = async (): Promise<any> => {
       cols.push({
         column: key,
         type: key == 'id' ? 1 : 0,
-        editable: false
+        editable: false,
       })
     }
   }
@@ -51,7 +53,7 @@ const mappingData = async (mapping: any): Promise<any> => {
       cols.push({
         column: key,
         type: key == 'id' ? 1 : 0,
-        editable: true
+        editable: true,
       })
     }
   }
@@ -63,9 +65,8 @@ const mappingData = async (mapping: any): Promise<any> => {
     dataFound[col] = d
   }
   originalData = table(dataFound)
-  const data = await filterData(originalData, [])
   return {
-    data,
+    originalData,
     cols,
   }
 }
@@ -134,8 +135,18 @@ const orderData = async (table: any, sorts: ISort[]): Promise<any> => {
         orderedTable = orderedTable.orderby(desc(sort.column))
       }
     }
-    originalData = orderedTable
     resolve(orderedTable)
+  })
+}
+
+const getDataNeeded = async (data: [string, any][][], pagination: IPaginated): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const result = data.slice(
+      pagination.currentPage * pagination.rowsPerPage - pagination.rowsPerPage,
+      pagination.rowsPerPage * pagination.currentPage
+    )
+
+    resolve(result)
   })
 }
 
@@ -147,14 +158,7 @@ const updatePagination = async (data: [string, any][][], pagination: IPaginated)
       totalPages: Math.ceil(data.length / pagination.rowsPerPage),
       totalRows: data.length,
     }
-    const results = data.slice(
-      pagination.currentPage * pagination.rowsPerPage - pagination.rowsPerPage,
-      pagination.rowsPerPage * pagination.currentPage
-    )
-    resolve({
-      data: results,
-      pag: updatedPag,
-    })
+    resolve(updatedPag)
   })
 }
 
@@ -171,7 +175,7 @@ const getColumns = async (): Promise<IScheme[]> => {
       cols.push({
         column: col,
         type: type,
-        editable: false
+        editable: false,
       })
     }
     resolve(cols)
@@ -243,6 +247,8 @@ onmessage = async ({
   },
 }) => {
   let data: any = originalData
+  filter != undefined ? (filters = filter) : []
+  order != undefined ? (sorts = order) : []
   if ((getCSV == undefined && originalData == undefined) || originalData == null) {
     // First time loading data
     await getData(filePath, file, delimiter, method, fileType, fetchOptions)
@@ -250,20 +256,23 @@ onmessage = async ({
       .then(async () => {
         if (order) {
           data = await orderData(originalData, order)
+          data = await filterData(data, filters)
+        } else {
+          data = await filterData(originalData, filters)
         }
       })
-      .then(async () => (data = await filterData(data, filter)))
       .then(async () => {
         if (pagination) {
-          data = await updatePagination(data, pagination)
+          pagination = await updatePagination(data, pagination)
+          data = await getDataNeeded(data, pagination)
         }
       })
       .finally(() =>
         postMessage({
           processedData: {
-            data: data.data == undefined ? data : data.data,
+            data: data,
             columns: cols,
-            pagination: data.pag == undefined ? data.pagination : data.pag,
+            pagination: pagination,
           },
         })
       )
@@ -277,7 +286,9 @@ onmessage = async ({
     })
   } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
-    const { data, cols } = await mappingData(mapping)
+    const { originalData, cols } = await mappingData(mapping)
+    let data = await orderData(originalData, sorts)
+    data = await filterData(data, filters)
     await postMessage({
       processedData: {
         data: data,
@@ -285,20 +296,28 @@ onmessage = async ({
         update: true,
       },
     })
-  } else {
-    // When manipulation of the data has been done
-    if (editData != undefined || editData != null) {
-      await updateTableData(originalData, editData.index, editData.value)
-    }
-    // TODO: fix bug for filtering and ordering here
-    data = await orderData(originalData, order)
-    data = await filterData(data, filter)
-    if (pagination) data = await updatePagination(data, pagination)
+  } else if (editData != undefined || editData != null) {
+    // When a cell has been edited
+    await updateTableData(originalData, editData.index, editData.value)
+    data = await filterData(data, filters)
+    data = await getDataNeeded(data, pagination)
     await postMessage({
       processedData: {
-        data: data.data == undefined ? data : data.data,
+        data: data,
         columns: cols,
-        pagination: data.pag == undefined ? data.pagination : data.pag,
+      },
+    })
+  } else {
+    // When manipulation (filtering, sorting and pagination) has been done
+    data = await orderData(originalData, order)
+    data = await filterData(data, filter)
+    pagination = await updatePagination(data, pagination)
+    data = await getDataNeeded(data, pagination)
+    await postMessage({
+      processedData: {
+        data: data,
+        columns: cols,
+        pagination: pagination,
       },
     })
   }

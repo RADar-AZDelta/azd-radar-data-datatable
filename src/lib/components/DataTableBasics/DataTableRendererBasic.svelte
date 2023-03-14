@@ -5,61 +5,48 @@
   import Pagination from './Pagination.svelte'
   import type ISort from '$lib/interfaces/ISort'
   import SortDirection from '../../classes/enums/SortDirection'
-  import type { Writable } from 'svelte/store'
+  import { writable, type Writable } from 'svelte/store'
   import type IFilter from '$lib/interfaces/IFilter'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import Types from '../../classes/enums/Types'
   import Spinner from '../Extra/Spinner.svelte'
   import SkeletonTable from '../Extra/SkeletonTable.svelte'
+  import { onMount } from 'svelte'
+  import type ITableData from '$lib/interfaces/ITableData'
 
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
     pagination: Writable<IPaginated>,
+    mapped: Writable<boolean> = writable(false),
     rowEvent: Function | null = null,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
     updateData: Function | null = null
 
-  let update = 0
+  const data = writable<ITableData | null>(null)
 
-  const updateTable = async () => {
-    /*
-			Force an update of the table when sorting, filtering or pagination changes
-		*/
-    update += 1
-  }
+  let updated = false
 
   const updateSorting = async (col: string, direction: number) => {
     /*
-            Update the column sort
-        */
-
+      Update the column sort
+    */
     if (direction == SortDirection.Descending) {
       // If the previous direction was descending --> remove it from sorting because the next direction is none
-      sorting.update((sort): ISort[] => {
-        const sorting = Array.from(new Set(sort.filter(obj => obj.column != col)))
-        return sorting
-      })
+      $sorting = Array.from(new Set($sorting.filter(obj => obj.column != col)))
     } else if ($sorting.filter(obj => obj.column == col)[0] != undefined) {
       // If the column was already in the sorting --> update the direction + 1
-      sorting.update((sort): ISort[] => {
-        const index = sort.findIndex(obj => obj.column == col)
-        sort[index] = {
-          column: col,
-          direction: direction + 1,
-        }
-        return sort
-      })
+      const index = $sorting.findIndex(obj => obj.column == col)
+      $sorting[index] = {
+        column: col,
+        direction: direction + 1,
+      }
     } else {
       // If the column was not in the sorting --> add it to the sorting
-      sorting.update((sort): ISort[] => {
-        const sorting = sort
-        sorting.push({
-          column: col,
-          direction: 1,
-        })
-        return sorting
+      $sorting.push({
+        column: col,
+        direction: 1,
       })
     }
 
@@ -69,13 +56,10 @@
       ($sorting.filter(obj => obj.column == col)[0].direction > 2 ||
         $sorting.filter(obj => obj.column == col)[0].direction < 0)
     )
-      sorting.update((sort): ISort[] => {
-        const sorting = Array.from(new Set(sort.filter(obj => obj.column != col)))
-        return sorting
-      })
-
+      $sorting = Array.from(new Set($sorting.filter(obj => obj.column != col)))
+    sorting.update(() => $sorting)
+    updated = false
     changePage(1)
-    updateTable()
   }
 
   const changePage = async (page: number) => {
@@ -84,32 +68,30 @@
         */
     if (page > $pagination.totalPages) page--
     else if (page < 1) page = 1
-    pagination.set({
+    $pagination = {
       currentPage: page,
       totalPages: $pagination.totalPages,
       rowsPerPage: $pagination.rowsPerPage,
       totalRows: $pagination.totalRows,
-    })
-    updateTable()
+    }
   }
 
   async function updateRowsPerPage(event: any) {
     /*
-            Update the rows per page
-        */
-    pagination.set({
+      Update the rows per page
+    */
+    $pagination = {
       currentPage: 1,
       totalPages: $pagination.totalPages,
       rowsPerPage: Number(event.target.value),
       totalRows: $pagination.totalRows,
-    })
-    updateTable()
+    }
   }
 
   async function updateFiltering(event: any, type: any) {
     changePage(1)
     let filterValue = event.target.value
-    const filterColumn: string = event.target.placeholder.split(' ')[2]
+    const filterColumn: string = event.target.id
 
     switch (filterValue && type) {
       case filterValue != undefined && type == Types.number:
@@ -132,31 +114,29 @@
         break
     }
 
-    filters.update((filters): IFilter[] => {
-      const index = filters.indexOf(filters.filter((filter: IFilter) => filter.column == filterColumn)[0])
-      // If the filter does exists --> update it
-      if (index != -1) {
-        filters[index] = {
-          column: filterColumn,
-          filter: filterValue,
-        }
-        // If the filter does not exist --> add it
-      } else {
-        filters.push({
-          column: filterColumn,
-          filter: filterValue,
-        })
+    const index = $filters.indexOf($filters.filter((filter: IFilter) => filter.column == filterColumn)[0])
+    // If the filter does exists --> update it
+    if (index != -1) {
+      $filters[index] = {
+        column: filterColumn,
+        filter: filterValue,
       }
-      return filters
-    })
-
-    updateTable()
+      // If the filter does not exist --> add it
+    } else {
+      $filters.push({
+        column: filterColumn,
+        filter: filterValue,
+      })
+    }
+    filters.update(() => $filters)
+    updated = false
   }
 
   const deleteFilter = async (column: string) => {
     // Remove the filter from the filters array
     $filters.splice($filters.indexOf($filters.filter(obj => obj.column == column)[0]), 1)
-    updateTable()
+    filters.update(() => $filters)
+    updated = false
   }
 
   /*
@@ -201,6 +181,8 @@
       tag.appendChild(document.createTextNode(value))
       parent?.appendChild(tag)
       if (updateData != null) {
+        // TODO: edit
+        updated = true
         updateData(event, value)
       }
 
@@ -208,100 +190,117 @@
       eventListener = ''
     }
   }
+
+  const callbackFunction = async () => {
+    if ($data != null && (updated == false || $mapped == true)) {
+      $data = await hasData()
+      updated = true
+    }
+  }
+
+  $: {
+    $filters, $sorting, $pagination
+    callbackFunction()
+  }
+
+  $: {
+    if ($mapped == true || updated == false) {
+      callbackFunction()
+      $mapped = false
+    }
+  }
+
+  onMount(async () => {
+    await hasData().then((results: any) => {
+      data.set(results)
+      updated = true
+    })
+  })
 </script>
 
 <!-- Create a table with readonly cells -->
 <section>
-  {#key update}
-    {#await hasData()}
-      <!-- <SkeletonTable {deleteFilter} {updateFiltering} {updateSorting}/> -->
-      <Spinner />
-    {:then data}
-      <div data-component="tablerenderer">
-        <table>
-          <tr>
-            {#each data.scheme as info}
-              <th>
-                <Sorting
-                  col={info.column}
-                  direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
-                    ? $sorting.filter(obj => obj.column == info.column)[0].direction
-                    : 0}
-                  {updateSorting}
-                />
-                <Filtering
-                  col={info.column}
-                  type={info.type}
-                  {deleteFilter}
-                  {updateFiltering}
-                  filter={$filters.filter(obj => obj.column == info.column)[0]}
-                />
-              </th>
-            {/each}
-          </tr>
+  {#if $data != null}
+    <div data-component="tablerenderer">
+      <table>
+        <tr>
+          {#each $data.scheme as info}
+            <th>
+              <Sorting
+                col={info.column}
+                direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
+                  ? $sorting.filter(obj => obj.column == info.column)[0].direction
+                  : 0}
+                {updateSorting}
+              />
+              <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
+            </th>
+          {/each}
+        </tr>
 
-          {#if data.data.length < $pagination.rowsPerPage}
-            {#each Array(data.data.length) as _, i}
-              <tr
-                id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
-                on:click={function () {
-                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
-                  editClick = false
-                }}
-              >
-                {#each data.data[i] as row, j}
-                  <td class="cell"
-                    ><div class="cell-container">
-                      <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
-                      {#if data.scheme[j].editable == true}
-                        <button
-                          on:click={function () {
-                            editClick = true
-                            if (data.scheme[j].editable == true && ownEditorMethods == null && ownEditorVisuals == null)
-                              editor(`${i}-${j}`)
-                          }}
-                          class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
-                        >
-                      {/if}
-                    </div></td
-                  >
-                {/each}
-              </tr>
-            {/each}
-          {:else}
-            {#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
-              <tr
-                id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
-                on:click={function () {
-                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
-                  editClick = false
-                }}
-              >
-                {#each data.data[i] as row, j}
-                  <td class="cell"
-                    ><div class="cell-container">
-                      <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
-                      {#if data.scheme[j].editable == true}
-                        <button
-                          on:click={function () {
-                            editClick = true
-                            if (data.scheme[j].editable == true && ownEditorMethods == null && ownEditorVisuals == null)
-                              editor(`${i}-${j}`)
-                          }}
-                          class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
-                        >
-                      {/if}
-                    </div></td
-                  >
-                {/each}
-              </tr>
-            {/each}
-          {/if}
-        </table>
-        <Pagination {updateRowsPerPage} {changePage} {data} pagination={$pagination} />
-      </div>
-    {/await}
-  {/key}
+        {#if $data.data.length < $pagination.rowsPerPage}
+          {#each Array($data.data.length) as _, i}
+            <tr
+              id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
+              on:click={function () {
+                if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
+                editClick = false
+              }}
+            >
+              {#each $data.data[i] as row, j}
+                <td class="cell"
+                  ><div class="cell-container">
+                    <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
+                    {#if $data.scheme[j].editable == true}
+                      <button
+                        on:click={function () {
+                          editClick = true
+                          if ($data?.scheme[j].editable == true && ownEditorMethods == null && ownEditorVisuals == null)
+                            editor(`${i}-${j}`)
+                        }}
+                        class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
+                      >
+                    {/if}
+                  </div></td
+                >
+              {/each}
+            </tr>
+          {/each}
+        {:else}
+          {#each Array($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0 ? $pagination.rowsPerPage : $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)) as _, i}
+            <tr
+              id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
+              on:click={function () {
+                if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
+                editClick = false
+              }}
+            >
+              {#each $data.data[i] as row, j}
+                <td class="cell"
+                  ><div class="cell-container">
+                    <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
+                    {#if $data.scheme[j].editable == true}
+                      <button
+                        on:click={function () {
+                          editClick = true
+                          if ($data?.scheme[j].editable == true && ownEditorMethods == null && ownEditorVisuals == null)
+                            editor(`${i}-${j}`)
+                        }}
+                        class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
+                      >
+                    {/if}
+                  </div></td
+                >
+              {/each}
+            </tr>
+          {/each}
+        {/if}
+      </table>
+      <Pagination {updateRowsPerPage} {changePage} data={$data} bind:pagination />
+    </div>
+  {:else}
+    <Spinner />
+  {/if}
 </section>
 
 <style>
