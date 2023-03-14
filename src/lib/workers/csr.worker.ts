@@ -10,6 +10,66 @@ let originalData: any
 let mappedData: any
 let cols: IScheme[]
 
+const createCSV = async (): Promise<any> => {
+  const columns = []
+  const dataFound: any = {}
+  const originalObjects = originalData.objects()
+  for (let key in originalObjects[0]) {
+    columns.push(key)
+    if (cols.filter((col: any) => col.column == key).length == 0) {
+      cols.push({
+        column: key,
+        type: key == 'id' ? 1 : 0,
+        editable: false
+      })
+    }
+  }
+  for (let col of columns) {
+    const d = []
+    for (let obj of originalObjects) {
+      d.push(obj[col])
+    }
+    dataFound[col] = d
+  }
+  return dataFound
+}
+
+const mappingData = async (mapping: any): Promise<any> => {
+  mappedData[mapping.row]['EQUIVALENCE'] = mapping.equivalence
+  mappedData[mapping.row]['Author'] = mapping.author
+  for (let col of mapping.columns) {
+    const colName: string = col.column
+    const data: [string, any][] = Array.from(mapping.data)
+    const test = data.filter((arr: [string, any]) => arr[0] == colName)
+    mappedData[mapping.row][colName] = test[0][1]
+  }
+  const columns = []
+  const dataFound: any = {}
+  for (let key in mappedData[0]) {
+    columns.push(key)
+    if (cols.filter((col: any) => col.column == key).length == 0) {
+      cols.push({
+        column: key,
+        type: key == 'id' ? 1 : 0,
+        editable: true
+      })
+    }
+  }
+  for (let col of columns) {
+    const d = []
+    for (let obj of mappedData) {
+      d.push(obj[col])
+    }
+    dataFound[col] = d
+  }
+  originalData = table(dataFound)
+  const data = await filterData(originalData, [])
+  return {
+    data,
+    cols,
+  }
+}
+
 const transpiler = async (table: any, cols: any, total: number): Promise<[string, any][][]> => {
   return new Promise((resolve, reject) => {
     let filteredData: [string, any][][] = Array.from(new Set(table.objects()))
@@ -111,6 +171,7 @@ const getColumns = async (): Promise<IScheme[]> => {
       cols.push({
         column: col,
         type: type,
+        editable: false
       })
     }
     resolve(cols)
@@ -182,32 +243,8 @@ onmessage = async ({
   },
 }) => {
   let data: any = originalData
-  if (getCSV == true && originalData !== undefined && originalData !== null) {
-    const columns = []
-    const dataFound: any = {}
-    const originalObjects = originalData.objects()
-    for (let key in originalObjects[0]) {
-      columns.push(key)
-      if (cols.filter((col: any) => col.column == key).length == 0) {
-        cols.push({
-          column: key,
-          type: key == 'id' ? 1 : 0,
-        })
-      }
-    }
-    for (let col of columns) {
-      const d = []
-      for (let obj of originalObjects) {
-        d.push(obj[col])
-      }
-      dataFound[col] = d
-    }
-    postMessage({
-      processedData: {
-        data: dataFound,
-      },
-    })
-  } else if ((getCSV == undefined && originalData == undefined) || originalData == null) {
+  if ((getCSV == undefined && originalData == undefined) || originalData == null) {
+    // First time loading data
     await getData(filePath, file, delimiter, method, fileType, fetchOptions)
       .then(async () => (cols = await getColumns()))
       .then(async () => {
@@ -230,35 +267,17 @@ onmessage = async ({
           },
         })
       )
+  } else if (getCSV == true && originalData !== undefined && originalData !== null) {
+    // When download button was clicked
+    const CSVData = await createCSV()
+    postMessage({
+      processedData: {
+        data: CSVData,
+      },
+    })
   } else if (mapping != undefined || mapping != null) {
-    mappedData[mapping.row]['EQUIVALENCE'] = mapping.equivalence
-    mappedData[mapping.row]['Author'] = mapping.author
-    for (let col of mapping.columns) {
-      const colName: string = col.column
-      const data: [string, any][] = Array.from(mapping.data)
-      const test = data.filter((arr: [string, any]) => arr[0] == colName)
-      mappedData[mapping.row][colName] = test[0][1]
-    }
-    const columns = []
-    const dataFound: any = {}
-    for (let key in mappedData[0]) {
-      columns.push(key)
-      if (cols.filter((col: any) => col.column == key).length == 0) {
-        cols.push({
-          column: key,
-          type: key == 'id' ? 1 : 0,
-        })
-      }
-    }
-    for (let col of columns) {
-      const d = []
-      for (let obj of mappedData) {
-        d.push(obj[col])
-      }
-      dataFound[col] = d
-    }
-    originalData = table(dataFound)
-    data = await filterData(originalData, [])
+    // When a row has been mapped
+    const { data, cols } = await mappingData(mapping)
     await postMessage({
       processedData: {
         data: data,
@@ -267,9 +286,11 @@ onmessage = async ({
       },
     })
   } else {
+    // When manipulation of the data has been done
     if (editData != undefined || editData != null) {
       await updateTableData(originalData, editData.index, editData.value)
     }
+    // TODO: fix bug for filtering and ordering here
     data = await orderData(originalData, order)
     data = await filterData(data, filter)
     if (pagination) data = await updatePagination(data, pagination)

@@ -16,7 +16,6 @@
     file: File | null = null,
     fileName: string | null = null,
     rowEvent: Function | null = null,
-    editable: boolean = false,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
     updateData: Function | null = null,
@@ -55,6 +54,7 @@
   const getData = async (): Promise<ITableData> => {
     return new Promise(async (resolve, reject) => {
       $workerMess = false
+      console.log($columns)
       resolve({
         scheme: $columns,
         data: $data,
@@ -188,7 +188,6 @@
     {sorting}
     {pagination}
     {rowEvent}
-    {editable}
     {updateData}
     {ownEditorVisuals}
     {ownEditorMethods}

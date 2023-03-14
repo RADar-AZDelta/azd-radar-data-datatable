@@ -30,6 +30,8 @@
     csv = table(tableData).toCSV({ delimiter: delimiter })
 
     const file = new Blob([csv], { type: 'text/csv' })
+    // TODO: create CSV already in webworker (showsavefilepicker)
+    // https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker
     downloadCsv(file)
   }
 

@@ -17,7 +17,6 @@
     sorting: Writable<Array<ISort>>,
     pagination: Writable<IPaginated>,
     rowEvent: Function | null = null,
-    editable: boolean = false,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
     updateData: Function | null = null
@@ -254,11 +253,11 @@
                   <td class="cell"
                     ><div class="cell-container">
                       <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
-                      {#if editable == true}
+                      {#if data.scheme[j].editable == true}
                         <button
                           on:click={function () {
                             editClick = true
-                            if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
+                            if (data.scheme[j].editable == true && ownEditorMethods == null && ownEditorVisuals == null)
                               editor(`${i}-${j}`)
                           }}
                           class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
@@ -282,11 +281,11 @@
                   <td class="cell"
                     ><div class="cell-container">
                       <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
-                      {#if editable == true}
+                      {#if data.scheme[j].editable == true}
                         <button
                           on:click={function () {
                             editClick = true
-                            if (editable != false && ownEditorMethods == null && ownEditorVisuals == null)
+                            if (data.scheme[j].editable == true && ownEditorMethods == null && ownEditorVisuals == null)
                               editor(`${i}-${j}`)
                           }}
                           class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
