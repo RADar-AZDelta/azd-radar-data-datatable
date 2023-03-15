@@ -1,7 +1,11 @@
 <script lang="ts">
+  import type IFilter from '$lib/interfaces/IFilter'
+  import { writable } from 'svelte/store'
   import Filtering from '../DataTableBasics/Filtering.svelte'
   import Sorting from '../DataTableBasics/Sorting.svelte'
   export let updateSorting: Function, deleteFilter: Function, updateFiltering: Function
+
+  let filters = writable<IFilter[]>()
 </script>
 
 <div data-component="tablerenderer">
@@ -10,13 +14,7 @@
       {#each Array(5) as _, i}
         <th>
           <Sorting col={'Loading'} direction={0} {updateSorting} />
-          <Filtering
-            col={'Loading'}
-            {deleteFilter}
-            {updateFiltering}
-            type={0}
-            filter={{ column: 'Loading', filter: '' }}
-          />
+          <Filtering col={'Loading'} {deleteFilter} {updateFiltering} type={0} bind:filters />
         </th>
       {/each}
     </tr>

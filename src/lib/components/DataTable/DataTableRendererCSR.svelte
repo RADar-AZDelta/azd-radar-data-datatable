@@ -5,7 +5,7 @@
   import type ISort from '$lib/interfaces/ISort'
   import type ITableData from '$lib/interfaces/ITableData'
   import { onMount } from 'svelte'
-  import { writable } from 'svelte/store'
+  import { writable, type Writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
 
@@ -20,7 +20,8 @@
     ownEditorMethods: any = null,
     updateData: Function | null = null,
     mapping: any | null = null,
-    map: boolean = false
+    map: boolean = false,
+    selectedRow: Writable<string> = writable('')
 
   let worker: Worker | undefined = undefined
 
@@ -32,7 +33,7 @@
     rowsPerPage: 10,
     totalRows: 10,
   })
-  let mapped = writable<boolean>(false)
+  let parentChange = writable<boolean>(false)
 
   const columns = writable<Array<IScheme>>([])
   const data = writable<any>([])
@@ -96,7 +97,7 @@
     if (rowEvent != null) {
       rowEvent(null, false)
       if (data.data.processedData.update == true) {
-        mapped.set(true)
+        parentChange.set(true)
         setTimeout(function () {
           document.getElementById(mapping.row)?.classList.add('mapped')
         }, 0)
@@ -192,7 +193,8 @@
   bind:filters
   bind:sorting
   bind:pagination
-  bind:mapped
+  bind:parentChange
+  bind:selectedRow
   {updateData}
   {ownEditorVisuals}
   {ownEditorMethods}

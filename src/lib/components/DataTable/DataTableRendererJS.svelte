@@ -1,6 +1,6 @@
 <script lang="ts">
   import type ISort from '$lib/interfaces/ISort'
-  import { writable } from 'svelte/store'
+  import { writable, type Writable } from 'svelte/store'
   import type IFilter from '$lib/interfaces/IFilter'
   import type IScheme from '$lib/interfaces/IScheme'
   import type ITableData from '$lib/interfaces/ITableData'
@@ -8,31 +8,33 @@
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
 
-  export let data: [string, any][][],
+  export let data: Writable<[string, any][][]>,
     columns: IScheme[],
     rowEvent: Function | null = null,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
-    updateData: Function | null = null
+    updateData: Function | null = null,
+    pag: Writable<IPaginated> | undefined = undefined
 
-  const originalData = writable<[string, any][][]>(data)
+  // const originalData = writable<[string, any][][]>($data)
   const columnsStore = writable<IScheme[]>(columns)
   const dataStore = writable<[string, any][][]>()
   let filters = writable<Array<IFilter>>([])
   let sorting = writable<Array<ISort>>([])
-  let pagination = writable<IPaginated>({
+  let pagination = writable<IPaginated>(pag == undefined? {
     currentPage: 1,
     totalPages: 1,
-    rowsPerPage: 10,
-    totalRows: data.length,
-  })
+    rowsPerPage: 20,
+    totalRows: $data.length,
+  } : $pag)
+  let dataChanged = writable<boolean>(false)
 
   const setColumnFilters = async (filters: IFilter[]) => {
     let filteredData: [string, any][][] = []
     /*
             Filter column name out of data
         */
-    for (let person of $originalData) {
+    for (let person of $data) {
       let personInfo: [string, any][] = []
       for (let information of person) {
         personInfo.push(information[1])
@@ -140,7 +142,7 @@
       currentPage: tablePagination.currentPage,
       totalPages: Math.ceil($dataStore.length / tablePagination.rowsPerPage),
       rowsPerPage: tablePagination.rowsPerPage,
-      totalRows: data.length,
+      totalRows: $data.length,
     })
   }
 
@@ -152,20 +154,21 @@
 				Third: If needed, sort data
 				Finally: Resolve the data and scheme
 			*/
-
       await setColumnFilters($filters)
         .then(() =>
-          setTablePagination({
+          {if(pag == undefined){ setTablePagination({
             currentPage: $pagination.currentPage,
             totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
             rowsPerPage: $pagination.rowsPerPage,
-            totalRows: data.length,
-          })
+            totalRows: $data.length,
+          })}}
         )
         .then(() => {
           if ($sorting.length > 0) setColumnSort($sorting)
         })
-        .finally(() => resolve({ data: $dataStore, scheme: $columnsStore }))
+        .finally(() => {
+          resolve({ data: $dataStore, scheme: $columnsStore })
+        })
     })
   }
 
@@ -181,11 +184,21 @@
       const indexes = index.split('-')
       const row = Number(indexes[0])
       const col = Number(indexes[1])
-      originalData.update(data => {
+      data.update(data => {
         data[row][col][1] = value
         return data
       })
     }
+  }
+
+  $: {
+    $pagination
+    if(pag != undefined) pag.set($pagination)
+  }
+
+  $: {
+    $data
+    dataChanged.set(true)
   }
 </script>
 
@@ -201,6 +214,7 @@
   bind:filters
   bind:sorting
   bind:pagination
+  bind:parentChange={dataChanged}
   {updateData}
   {ownEditorVisuals}
   {ownEditorMethods}
