@@ -12,30 +12,6 @@ let cols: IScheme[]
 let sorts: ISort[]
 let filters: IFilter[]
 
-const createCSV = async (): Promise<any> => {
-  const columns = []
-  const dataFound: any = {}
-  const originalObjects = originalData.objects()
-  for (let key in originalObjects[0]) {
-    columns.push(key)
-    if (cols.filter((col: any) => col.column == key).length == 0) {
-      cols.push({
-        column: key,
-        type: key == 'id' ? 1 : 0,
-        editable: false,
-      })
-    }
-  }
-  for (let col of columns) {
-    const d = []
-    for (let obj of originalObjects) {
-      d.push(obj[col])
-    }
-    dataFound[col] = d
-  }
-  return dataFound
-}
-
 const mappingData = async (mapping: any): Promise<any> => {
   mappedData[mapping.row]['EQUIVALENCE'] = mapping.equivalence
   mappedData[mapping.row]['Author'] = mapping.author
@@ -278,10 +254,10 @@ onmessage = async ({
       )
   } else if (getCSV == true && originalData !== undefined && originalData !== null) {
     // When download button was clicked
-    const CSVData = await createCSV()
+    const file = originalData.toCSV({ delimiter: ',' })
     postMessage({
       processedData: {
-        data: CSVData,
+        data: file,
       },
     })
   } else if (mapping != undefined || mapping != null) {
