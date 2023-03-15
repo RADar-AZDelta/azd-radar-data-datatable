@@ -1,6 +1,7 @@
 <script lang="ts">
   import DataTableRendererJs from '$lib/components/DataTable/DataTableRendererJS.svelte'
   import type IScheme from '$lib/interfaces/IScheme'
+  import type { Writable } from 'svelte/store'
 
   // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
   // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
@@ -14,28 +15,33 @@
     {
       column: 'name',
       type: 0,
+      editable: false,
     },
     {
       column: 'age',
       type: 1,
+      editable: false,
     },
     {
       column: 'country',
       type: 0,
+      editable: false,
     },
     {
       column: 'telephone',
       type: 0,
+      editable: false,
     },
     {
       column: 'address',
       type: 0,
+      editable: false,
     },
   ]
 
-  export var data: [string, any][][]
+  export var data: Writable<[string, any][][]>
 
-  data = [
+  $data = [
     Object.entries({
       name: 'Rory',
       age: 35,
@@ -135,4 +141,4 @@
   This page demonstrates simple data, consisting of a matrix of key value pairs, also known as an array of
   `Object.entries(myObject)`.
 </p>
-<DataTableRendererJs {data} {columns} editable={true} />
+<DataTableRendererJs {data} {columns} />

@@ -18,13 +18,14 @@
     </select>
     <p>
       {$pagination.rowsPerPage * $pagination.currentPage + 1 - $pagination.rowsPerPage}-
-      {data.data.length - $pagination.rowsPerPage * $pagination.currentPage > 0
-        ? $pagination.rowsPerPage
-        : $pagination.rowsPerPage * $pagination.currentPage > data.data.length
+      {$pagination.totalRows - $pagination.rowsPerPage * ($pagination.currentPage - 1) > 0
+        ? $pagination.rowsPerPage * $pagination.currentPage
+        : $pagination.rowsPerPage * ($pagination.currentPage - 1) > $pagination.totalRows
         ? $pagination.totalRows
         : $pagination.rowsPerPage * $pagination.currentPage}
       of {$pagination.totalRows}
     </p>
+    <p>{$pagination.totalRows - $pagination.rowsPerPage * ($pagination.currentPage - 1)}</p>
   </div>
   <div data-component="pagination-pages">
     <button

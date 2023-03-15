@@ -32,7 +32,7 @@
     rowsPerPage: 10,
     totalRows: 10,
   })
-  let mapped = writable<boolean>(false)
+  let parentChange = writable<boolean>(false)
 
   const columns = writable<Array<IScheme>>([])
   const data = writable<any>([])
@@ -96,7 +96,7 @@
     if (rowEvent != null) {
       rowEvent(null, false)
       if (data.data.processedData.update == true) {
-        mapped.set(true)
+        parentChange.set(true)
         setTimeout(function () {
           document.getElementById(mapping.row)?.classList.add('mapped')
         }, 0)
@@ -192,7 +192,7 @@
   bind:filters
   bind:sorting
   bind:pagination
-  bind:mapped
+  bind:parentChange
   {updateData}
   {ownEditorVisuals}
   {ownEditorMethods}
