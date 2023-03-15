@@ -11,7 +11,6 @@
   export let data: [string, any][][],
     columns: IScheme[],
     rowEvent: Function | null = null,
-    editable: boolean = false,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
     updateData: Function | null = null
@@ -19,9 +18,9 @@
   const originalData = writable<[string, any][][]>(data)
   const columnsStore = writable<IScheme[]>(columns)
   const dataStore = writable<[string, any][][]>()
-  const filters = writable<Array<IFilter>>([])
-  const sorting = writable<Array<ISort>>([])
-  const pagination = writable<IPaginated>({
+  let filters = writable<Array<IFilter>>([])
+  let sorting = writable<Array<ISort>>([])
+  let pagination = writable<IPaginated>({
     currentPage: 1,
     totalPages: 1,
     rowsPerPage: 10,
@@ -190,19 +189,18 @@
   }
 </script>
 
-<div data-component="download-container">
+<!-- <div data-component="download-container">
   {#if $originalData != undefined || $originalData != null}
     <FileDownload data={$originalData} />
   {/if}
-</div>
+</div> -->
 
 <DataTableRendererBasic
   {hasData}
-  {filters}
-  {sorting}
-  {pagination}
   {rowEvent}
-  {editable}
+  bind:filters
+  bind:sorting
+  bind:pagination
   {updateData}
   {ownEditorVisuals}
   {ownEditorMethods}

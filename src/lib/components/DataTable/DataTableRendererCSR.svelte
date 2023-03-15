@@ -16,7 +16,6 @@
     file: File | null = null,
     fileName: string | null = null,
     rowEvent: Function | null = null,
-    editable: boolean = false,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
     updateData: Function | null = null,
@@ -25,21 +24,20 @@
 
   let worker: Worker | undefined = undefined
 
-  const filters = writable<Array<IFilter>>([])
-  const sorting = writable<Array<ISort>>([])
-  const pagination = writable<IPaginated>({
+  let filters = writable<Array<IFilter>>([])
+  let sorting = writable<Array<ISort>>([])
+  let pagination = writable<IPaginated>({
     currentPage: 1,
     totalPages: 1,
     rowsPerPage: 10,
     totalRows: 10,
   })
+  let mapped = writable<boolean>(false)
 
   const columns = writable<Array<IScheme>>([])
   const data = writable<any>([])
 
   const workerMess = writable<boolean>(false)
-
-  let update = 0
 
   /*
         This is the Arquero component where we fetch all of the data (CSV or JSON) and manipulate it with Arquero.
@@ -48,13 +46,9 @@
         The last param is optional but recommended and this is a function the user creates to manipulate the data to the given format.
     */
 
-  const updateTable = () => {
-    update += 1
-  }
-
   const getData = async (): Promise<ITableData> => {
     return new Promise(async (resolve, reject) => {
-      $workerMess = false
+      workerMess.set(false)
       resolve({
         scheme: $columns,
         data: $data,
@@ -69,27 +63,40 @@
         order: $sorting,
         pagination: $pagination,
       })
+      workerMess.set(false)
 
       // Wait for the worker to send a message
+      let count = 0
       while ($workerMess != true) {
         await new Promise(resolve => setTimeout(resolve, 50))
+        count += 1
+        if (count > 50) $workerMess = true
       }
-
-      resolve(await getData())
+      if ($workerMess == true) {
+        resolve(await getData())
+      }
     })
   }
 
   const onWorkerMessage = async (data: any): Promise<void> => {
-    $columns = data.data.processedData.columns
-    $data = data.data.processedData.data
-    if (data.data.processedData.pagination != null || data.data.processedData.pagination != undefined) {
-      $pagination = data.data.processedData.pagination
+    if (data.data.processedData.columns != $columns) $columns = data.data.processedData.columns
+    if (data.data.processedData.data != $data) $data = data.data.processedData.data
+    const pag = data.data.processedData.pagination
+    if (pag != undefined) {
+      if (
+        pag.currentPage != $pagination.currentPage ||
+        pag.rowsPerPage != $pagination.rowsPerPage ||
+        pag.totalPages != $pagination.totalPages ||
+        pag.totalRows != $pagination.totalRows
+      ) {
+        $pagination = data.data.processedData.pagination
+      }
     }
-    $workerMess = true
+    workerMess.set(true)
     if (rowEvent != null) {
       rowEvent(null, false)
       if (data.data.processedData.update == true) {
-        updateTable()
+        mapped.set(true)
         setTimeout(function () {
           document.getElementById(mapping.row)?.classList.add('mapped')
         }, 0)
@@ -145,7 +152,6 @@
     if (file != null) {
       terminateWorker()
       loadWorker()
-      updateTable()
     }
   }
 
@@ -153,7 +159,6 @@
 
   if (updateData == null) {
     updateData = async (index: string, value: string) => {
-      const indexes = index.split('-')
       worker?.postMessage({
         editData: {
           index: index,
@@ -181,16 +186,14 @@
     <FileDownload bind:worker />
   {/if}
 </div>
-{#key update}
-  <DataTableRendererBasic
-    {hasData}
-    {filters}
-    {sorting}
-    {pagination}
-    {rowEvent}
-    {editable}
-    {updateData}
-    {ownEditorVisuals}
-    {ownEditorMethods}
-  />
-{/key}
+<DataTableRendererBasic
+  {hasData}
+  {rowEvent}
+  bind:filters
+  bind:sorting
+  bind:pagination
+  bind:mapped
+  {updateData}
+  {ownEditorVisuals}
+  {ownEditorMethods}
+/>
