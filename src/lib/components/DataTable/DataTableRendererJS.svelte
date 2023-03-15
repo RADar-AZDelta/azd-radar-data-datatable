@@ -21,13 +21,18 @@
   const dataStore = writable<[string, any][][]>()
   let filters = writable<Array<IFilter>>([])
   let sorting = writable<Array<ISort>>([])
-  let pagination = writable<IPaginated>(pag == undefined? {
-    currentPage: 1,
-    totalPages: 1,
-    rowsPerPage: 20,
-    totalRows: $data.length,
-  } : $pag)
+  let pagination = writable<IPaginated>(
+    pag == undefined
+      ? {
+          currentPage: 1,
+          totalPages: 1,
+          rowsPerPage: 20,
+          totalRows: $data.length,
+        }
+      : $pag
+  )
   let dataChanged = writable<boolean>(false)
+  let selectedRow = writable<string>()
 
   const setColumnFilters = async (filters: IFilter[]) => {
     let filteredData: [string, any][][] = []
@@ -155,14 +160,16 @@
 				Finally: Resolve the data and scheme
 			*/
       await setColumnFilters($filters)
-        .then(() =>
-          {if(pag == undefined){ setTablePagination({
-            currentPage: $pagination.currentPage,
-            totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
-            rowsPerPage: $pagination.rowsPerPage,
-            totalRows: $data.length,
-          })}}
-        )
+        .then(() => {
+          if (pag == undefined) {
+            setTablePagination({
+              currentPage: $pagination.currentPage,
+              totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
+              rowsPerPage: $pagination.rowsPerPage,
+              totalRows: $data.length,
+            })
+          }
+        })
         .then(() => {
           if ($sorting.length > 0) setColumnSort($sorting)
         })
@@ -193,7 +200,7 @@
 
   $: {
     $pagination
-    if(pag != undefined) pag.set($pagination)
+    if (pag != undefined) pag.set($pagination)
   }
 
   $: {
@@ -215,6 +222,7 @@
   bind:sorting
   bind:pagination
   bind:parentChange={dataChanged}
+  bind:selectedRow
   {updateData}
   {ownEditorVisuals}
   {ownEditorMethods}

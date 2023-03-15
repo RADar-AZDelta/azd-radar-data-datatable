@@ -11,8 +11,9 @@ let mappedData: any
 let cols: IScheme[]
 let sorts: ISort[]
 let filters: IFilter[]
+let tablePagination: IPaginated
 
-const GetDateTime =()=>{
+const GetDateTime = () => {
   let currentdate = new Date()
   let datetime =
     currentdate.getDate() +
@@ -24,23 +25,61 @@ const GetDateTime =()=>{
     currentdate.getHours() +
     ':' +
     currentdate.getMinutes()
-    return datetime
+  return datetime
 }
 
-const approveMapping =async (approving:any): Promise<any>=>{
-mappedData[approving.row]['assignedReviewer']=approving.approvedBy
-const columns = []
+const flagRow = async (flagged: any): Promise<any> => {
+  mappedData[flagged.row]['mappingStatus'] = 'FLAGGED'
+  mappedData[flagged.row]['assignedReviewer'] = flagged.flaggedBy
+  let mappedDataPart = mappedData.slice(0, tablePagination.rowsPerPage)
+  let columns = []
   const dataFound: any = {}
-  for (let key in mappedData[0]) {
-    columns.push(key)
-    if (cols.filter((col: any) => col.column == key).length == 0) {
-      cols.push({
-        column: key,
-        type: key == 'id' ? 1 : 0,
-        editable: true,
-      })
+  for (let map of mappedDataPart) {
+    for (let key in map) {
+      columns.push(key)
+      if (cols.filter((col: any) => col.column == key).length == 0) {
+        cols.push({
+          column: key,
+          type: key == 'id' ? 1 : 0,
+          editable: true,
+        })
+      }
     }
   }
+  columns = Array.from(new Set(columns))
+  for (let col of columns) {
+    const d = []
+    for (let obj of mappedData) {
+      d.push(obj[col])
+    }
+    dataFound[col] = d
+  }
+  originalData = table(dataFound)
+  return {
+    originalData,
+    cols,
+  }
+}
+
+const approveMapping = async (approving: any): Promise<any> => {
+  mappedData[approving.row]['mappingStatus'] = 'APPROVED'
+  mappedData[approving.row]['assignedReviewer'] = approving.approvedBy
+  let mappedDataPart = mappedData.slice(0, tablePagination.rowsPerPage)
+  let columns = []
+  const dataFound: any = {}
+  for (let map of mappedDataPart) {
+    for (let key in map) {
+      columns.push(key)
+      if (cols.filter((col: any) => col.column == key).length == 0) {
+        cols.push({
+          column: key,
+          type: key == 'id' ? 1 : 0,
+          editable: true,
+        })
+      }
+    }
+  }
+  columns = Array.from(new Set(columns))
   for (let col of columns) {
     const d = []
     for (let obj of mappedData) {
@@ -58,7 +97,7 @@ const columns = []
 const mappingData = async (mapping: any): Promise<any> => {
   mappedData[mapping.row]['Equivalence'] = mapping.equivalence
   mappedData[mapping.row]['createdBy'] = mapping.author
-  mappedData[mapping.row]['createdOn']= GetDateTime
+  mappedData[mapping.row]['createdOn'] = GetDateTime
   for (let col of mapping.columns) {
     const colName: string = col.column
     const data: [string, any][] = Array.from(mapping.data)
@@ -264,7 +303,8 @@ onmessage = async ({
     editData,
     mapping,
     getCSV,
-    approving
+    approving,
+    flagged,
   },
 }) => {
   let data: any = originalData
@@ -285,6 +325,7 @@ onmessage = async ({
       .then(async () => {
         if (pagination) {
           pagination = await updatePagination(data, pagination)
+          tablePagination = pagination
           data = await getDataNeeded(data, pagination)
         }
       })
@@ -305,8 +346,7 @@ onmessage = async ({
         data: file,
       },
     })
-    
-  }else if (approving.approved == true && originalData !== undefined && originalData !== null ){
+  } else if (approving && originalData !== undefined && originalData !== null) {
     //When approve button was clicked
     const { originalData, cols } = await approveMapping(approving)
     let data = await orderData(originalData, sorts)
@@ -315,11 +355,20 @@ onmessage = async ({
       processedData: {
         data: data,
         columns: cols,
-        update: true,
       },
     })
-
-  }else if (mapping != undefined || mapping != null) {
+  } else if (flagged && originalData !== undefined && originalData !== null) {
+    //When flag button was clicked
+    const { originalData, cols } = await flagRow(flagged)
+    let data = await orderData(originalData, sorts)
+    data = await filterData(data, filters)
+    await postMessage({
+      processedData: {
+        data: data,
+        columns: cols,
+      },
+    })
+  } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
     const { originalData, cols } = await mappingData(mapping)
     let data = await orderData(originalData, sorts)
@@ -347,6 +396,7 @@ onmessage = async ({
     data = await orderData(originalData, order)
     data = await filterData(data, filter)
     pagination = await updatePagination(data, pagination)
+    tablePagination = pagination
     data = await getDataNeeded(data, pagination)
     await postMessage({
       processedData: {

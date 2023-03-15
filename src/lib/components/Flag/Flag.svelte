@@ -23,9 +23,9 @@
   const loadWorker = async () => {
     if (worker != undefined) {
       worker.postMessage({
-        approving: {
-          approved: true,
-          approvedBy: author,
+        flagged: {
+          flag: true,
+          flaggedBy: author,
           row: $selectedRow,
         },
       })
@@ -34,4 +34,4 @@
   }
 </script>
 
-<button data-component="button-approve" on:click={loadWorker}>Approve</button>
+<button data-component="button-flag" on:click={loadWorker}>Flag</button>

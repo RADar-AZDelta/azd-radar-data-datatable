@@ -144,6 +144,30 @@ button[data-component='button-download'] {
     filter: brightness(0) invert(1);
   }
 }
+button[data-component='button-approve'] {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 5px;
+  border: 1px solid orange;
+  filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.25));
+  background-color: orange;
+  color: white;
+  cursor: pointer;
+}
+button[data-component='button-flag'] {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 5px;
+  border: 1px solid orange;
+  filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.25));
+  background-color: orange;
+  color: white;
+  cursor: pointer;
+}
 
 .skeleton {
   width: calc(100vw / 5);

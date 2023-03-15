@@ -1,10 +1,13 @@
 <script lang="ts">
+  import Approve from '$lib/components/Approve/Approve.svelte'
   import DataTableRendererCsr from '$lib/components/DataTable/DataTableRendererCSR.svelte'
   import DragAndDrop from '$lib/components/Extra/DragAndDrop.svelte'
   import { writable } from 'svelte/store'
   import type { PageData } from './$types'
 
   export let data: PageData
+
+  let selectedRow = writable<string>()
 
   const urlJSON = 'data:application/json;base64,' + btoa(JSON.stringify(data.data))
   const urlCSV =

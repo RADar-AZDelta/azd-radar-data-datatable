@@ -198,6 +198,7 @@
     if ($data != null && (updated == false || $parentChange == true)) {
       $data = await hasData()
       updated = true
+      $parentChange = false
     }
   }
 
@@ -208,6 +209,7 @@
 
   $: {
     if ($parentChange == true || updated == false) {
+      console.log('CHANGE IN CHILD')
       callbackFunction()
       $parentChange = false
     }

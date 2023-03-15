@@ -6,8 +6,10 @@
   import type ITableData from '$lib/interfaces/ITableData'
   import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
+  import Approve from '../Approve/Approve.svelte'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
+  import Flag from '../Flag/Flag.svelte'
 
   export let url: string | null = null,
     fetchOptions: object | null = null,
@@ -20,9 +22,9 @@
     ownEditorMethods: any = null,
     updateData: Function | null = null,
     mapping: any | null = null,
-    map: boolean = false,
-    selectedRow: Writable<string> = writable('')
+    map: boolean = false
 
+  let selectedRow = writable<string>()
   let worker: Worker | undefined = undefined
 
   let filters = writable<Array<IFilter>>([])
@@ -199,3 +201,6 @@
   {ownEditorVisuals}
   {ownEditorMethods}
 />
+
+<Approve bind:selectedRow bind:worker bind:parentChange />
+<Flag bind:selectedRow bind:worker bind:parentChange />
