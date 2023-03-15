@@ -13,17 +13,17 @@
   import SkeletonTable from '../Extra/SkeletonTable.svelte'
   import { onMount } from 'svelte'
   import type ITableData from '$lib/interfaces/ITableData'
+  import FilteringGeneral from './FilteringGeneral.svelte'
 
   export let hasData: Function,
-    filters: Writable<Array<IFilter>>,
-    sorting: Writable<Array<ISort>>,
+    filter: Writable<string>,
+    sorting: Writable<ISort>,
     pagination: Writable<IPaginated>,
     parentChange: Writable<boolean> = writable(false),
     rowEvent: Function | null = null,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
-    updateData: Function | null = null,
-    selectedRow: Writable<string>
+    updateData: Function | null = null
 
   const data = writable<ITableData | null>(null)
 
@@ -31,33 +31,38 @@
 
   const updateSorting = async (col: string, direction: number) => {
     /*
-      Update the column sort
-    */
+        Update the column sort
+      */
     if (direction == SortDirection.Descending) {
-      // If the previous direction was descending --> remove it from sorting because the next direction is none
-      $sorting = Array.from(new Set($sorting.filter(obj => obj.column != col)))
-    } else if ($sorting.filter(obj => obj.column == col)[0] != undefined) {
-      // If the column was already in the sorting --> update the direction + 1
-      const index = $sorting.findIndex(obj => obj.column == col)
-      $sorting[index] = {
+      $sorting = {
         column: col,
-        direction: direction + 1,
+        direction: SortDirection.None,
+      }
+    } else if ($sorting != undefined || $sorting != null) {
+      if ($sorting.column == undefined || $sorting.column == null || $sorting.column != col) {
+        $sorting = {
+          column: col,
+          direction: 1,
+        }
+      } else {
+        $sorting = {
+          column: col,
+          direction: direction + 1,
+        }
       }
     } else {
-      // If the column was not in the sorting --> add it to the sorting
-      $sorting.push({
+      $sorting = {
         column: col,
         direction: 1,
-      })
+      }
     }
 
-    // Fallback for when it goes out of bounds --> remove it from sorting, so start from none
-    if (
-      $sorting.filter(obj => obj.column == col).length > 0 &&
-      ($sorting.filter(obj => obj.column == col)[0].direction > 2 ||
-        $sorting.filter(obj => obj.column == col)[0].direction < 0)
-    )
-      $sorting = Array.from(new Set($sorting.filter(obj => obj.column != col)))
+    if ($sorting.direction < 0 || $sorting.direction > 2) {
+      $sorting = {
+        column: col,
+        direction: SortDirection.None,
+      }
+    }
     sorting.update(() => $sorting)
     updated = false
     changePage(1)
@@ -65,8 +70,8 @@
 
   const changePage = async (page: number) => {
     /*
-            Update the pagination
-        */
+        Update the pagination
+    */
     if (page > $pagination.totalPages) page--
     else if (page < 1) page = 1
     $pagination = {
@@ -80,7 +85,7 @@
 
   async function updateRowsPerPage(event: any) {
     /*
-      Update the rows per page
+        Update the rows per page
     */
     $pagination = {
       currentPage: 1,
@@ -94,7 +99,6 @@
   async function updateFiltering(event: any, type: any) {
     changePage(1)
     let filterValue = event.target.value
-    const filterColumn: string = event.target.id
 
     switch (filterValue && type) {
       case filterValue != undefined && type == Types.number:
@@ -117,28 +121,15 @@
         break
     }
 
-    const index = $filters.indexOf($filters.filter((filter: IFilter) => filter.column == filterColumn)[0])
-    // If the filter does exists --> update it
-    if (index != -1) {
-      $filters[index] = {
-        column: filterColumn,
-        filter: filterValue,
-      }
-      // If the filter does not exist --> add it
-    } else {
-      $filters.push({
-        column: filterColumn,
-        filter: filterValue,
-      })
-    }
-    filters.update(() => $filters)
+    $filter = filterValue
+    filter.update(() => $filter)
     updated = false
   }
 
-  const deleteFilter = async (column: string) => {
+  const deleteFilter = async () => {
     // Remove the filter from the filters array
-    $filters.splice($filters.indexOf($filters.filter(obj => obj.column == column)[0]), 1)
-    filters.update(() => $filters)
+    $filter = ''
+    filter.update(() => $filter)
     updated = false
   }
 
@@ -202,7 +193,7 @@
   }
 
   $: {
-    $filters, $sorting, $pagination
+    $filter, $sorting, $pagination
     callbackFunction()
   }
 
@@ -221,22 +212,21 @@
   })
 </script>
 
-<!-- Create a table with readonly cells -->
 <section>
   {#if $data != null}
     <div data-component="tablerenderer">
+      <div>
+        <FilteringGeneral bind:filter {deleteFilter} {updateFiltering} />
+      </div>
       <table>
         <tr>
           {#each $data.scheme as info}
             <th>
               <Sorting
                 col={info.column}
-                direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
-                  ? $sorting.filter(obj => obj.column == info.column)[0].direction
-                  : 0}
+                direction={$sorting == undefined ? 0 : $sorting.column == info.column ? $sorting.direction : 0}
                 {updateSorting}
               />
-              <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
             </th>
           {/each}
         </tr>
@@ -246,18 +236,9 @@
             <tr
               id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
               on:click={function () {
-                if ($selectedRow != String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))) {
-                  $selectedRow = String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
-                } else {
-                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
-                  editClick = false
-                }
+                if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
+                editClick = false
               }}
-              class={`${
-                $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
-                  ? 'selected-row'
-                  : ''
-              }`}
             >
               {#each $data.data[i] as row, j}
                 <td class="cell"
@@ -283,18 +264,9 @@
             <tr
               id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
               on:click={function () {
-                if ($selectedRow != String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))) {
-                  $selectedRow = String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
-                } else {
-                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
-                  editClick = false
-                }
+                if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
+                editClick = false
               }}
-              class={`${
-                $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
-                  ? 'selected-row'
-                  : ''
-              }`}
             >
               {#each $data.data[i] as row, j}
                 <td class="cell"
@@ -340,9 +312,5 @@
 
   .cell:hover .button-edit {
     display: block;
-  }
-
-  .selected-row {
-    background-color: #b2b2b2;
   }
 </style>
