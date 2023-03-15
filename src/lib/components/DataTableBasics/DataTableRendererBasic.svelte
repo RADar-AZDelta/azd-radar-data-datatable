@@ -317,7 +317,7 @@
           {/each}
         {/if}
       </table>
-      <Pagination {updateRowsPerPage} {changePage} data={$data} bind:pagination />
+      <Pagination {updateRowsPerPage} {changePage} bind:pagination />
     </div>
   {:else}
     <Spinner />

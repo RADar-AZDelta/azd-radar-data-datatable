@@ -1,7 +1,7 @@
 <script lang="ts">
   import DataTableRendererJs from '$lib/components/DataTable/DataTableRendererJS.svelte'
   import type IScheme from '$lib/interfaces/IScheme'
-  import type { Writable } from 'svelte/store'
+  import { writable, type Writable } from 'svelte/store'
 
   // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
   // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
@@ -39,7 +39,7 @@
     },
   ]
 
-  export var data: Writable<[string, any][][]>
+  let data = writable<[string, any][][]>()
 
   $data = [
     Object.entries({

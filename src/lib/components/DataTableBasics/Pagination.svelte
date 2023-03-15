@@ -1,9 +1,8 @@
 <script lang="ts">
-  import type ITableData from '$lib/interfaces/ITableData'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type { Writable } from 'svelte/store'
 
-  export let updateRowsPerPage: Function, changePage: Function, data: ITableData, pagination: Writable<IPaginated>
+  export let updateRowsPerPage: Function, changePage: Function, pagination: Writable<IPaginated>
 
   let pagesShown = 7
 </script>
