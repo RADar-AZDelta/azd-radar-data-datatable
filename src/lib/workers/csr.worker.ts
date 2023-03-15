@@ -12,14 +12,23 @@ let cols: IScheme[]
 let sorts: ISort[]
 let filters: IFilter[]
 
-const approveMapping =async (mapping:any): Promise<any>=>{
-mappedData[mapping.row]['assignedReviewer']=mapping.assignedReviewer
-for (let col of mapping.columns){
-  const colName: string = col.column
-  const data: [string,any][] = Array.from(mapping.data)
-  const test = data.filter((arr:[string,any])=>arr[0]==colName)
-  mappedData[mapping.row][colName]=test[0][1]
+const GetDateTime =()=>{
+  let currentdate = new Date()
+  let datetime =
+    currentdate.getDate() +
+    '/' +
+    (currentdate.getMonth() + 1) +
+    '/' +
+    currentdate.getFullYear() +
+    ' ' +
+    currentdate.getHours() +
+    ':' +
+    currentdate.getMinutes()
+    return datetime
 }
+
+const approveMapping =async (approving:any): Promise<any>=>{
+mappedData[approving.row]['assignedReviewer']=approving.approvedBy
 const columns = []
   const dataFound: any = {}
   for (let key in mappedData[0]) {
@@ -47,8 +56,9 @@ const columns = []
 }
 
 const mappingData = async (mapping: any): Promise<any> => {
-  mappedData[mapping.row]['EQUIVALENCE'] = mapping.equivalence
-  mappedData[mapping.row]['Author'] = mapping.author
+  mappedData[mapping.row]['Equivalence'] = mapping.equivalence
+  mappedData[mapping.row]['createdBy'] = mapping.author
+  mappedData[mapping.row]['createdOn']= GetDateTime
   for (let col of mapping.columns) {
     const colName: string = col.column
     const data: [string, any][] = Array.from(mapping.data)
@@ -254,7 +264,7 @@ onmessage = async ({
     editData,
     mapping,
     getCSV,
-    approved
+    approving
   },
 }) => {
   let data: any = originalData
@@ -296,9 +306,9 @@ onmessage = async ({
       },
     })
     
-  }else if (approved == true && mapping !== undefined && mapping !== null ){
+  }else if (approving.approved == true && originalData !== undefined && originalData !== null ){
     //When approve button was clicked
-    const { originalData, cols } = await approveMapping(mapping)
+    const { originalData, cols } = await approveMapping(approving)
     let data = await orderData(originalData, sorts)
     data = await filterData(data, filters)
     await postMessage({
