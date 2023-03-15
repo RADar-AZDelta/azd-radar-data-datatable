@@ -12,6 +12,40 @@ let cols: IScheme[]
 let sorts: ISort[]
 let filters: IFilter[]
 
+const approveMapping =async (mapping:any): Promise<any>=>{
+mappedData[mapping.row]['assignedReviewer']=mapping.assignedReviewer
+for (let col of mapping.columns){
+  const colName: string = col.column
+  const data: [string,any][] = Array.from(mapping.data)
+  const test = data.filter((arr:[string,any])=>arr[0]==colName)
+  mappedData[mapping.row][colName]=test[0][1]
+}
+const columns = []
+  const dataFound: any = {}
+  for (let key in mappedData[0]) {
+    columns.push(key)
+    if (cols.filter((col: any) => col.column == key).length == 0) {
+      cols.push({
+        column: key,
+        type: key == 'id' ? 1 : 0,
+        editable: true,
+      })
+    }
+  }
+  for (let col of columns) {
+    const d = []
+    for (let obj of mappedData) {
+      d.push(obj[col])
+    }
+    dataFound[col] = d
+  }
+  originalData = table(dataFound)
+  return {
+    originalData,
+    cols,
+  }
+}
+
 const mappingData = async (mapping: any): Promise<any> => {
   mappedData[mapping.row]['EQUIVALENCE'] = mapping.equivalence
   mappedData[mapping.row]['Author'] = mapping.author
@@ -220,6 +254,7 @@ onmessage = async ({
     editData,
     mapping,
     getCSV,
+    approved
   },
 }) => {
   let data: any = originalData
@@ -260,7 +295,21 @@ onmessage = async ({
         data: file,
       },
     })
-  } else if (mapping != undefined || mapping != null) {
+    
+  }else if (approved == true && mapping !== undefined && mapping !== null ){
+    //When approve button was clicked
+    const { originalData, cols } = await approveMapping(mapping)
+    let data = await orderData(originalData, sorts)
+    data = await filterData(data, filters)
+    await postMessage({
+      processedData: {
+        data: data,
+        columns: cols,
+        update: true,
+      },
+    })
+
+  }else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
     const { originalData, cols } = await mappingData(mapping)
     let data = await orderData(originalData, sorts)
