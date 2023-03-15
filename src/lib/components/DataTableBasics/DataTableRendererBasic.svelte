@@ -22,7 +22,8 @@
     rowEvent: Function | null = null,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
-    updateData: Function | null = null
+    updateData: Function | null = null,
+    selectedRow: Writable<string>
 
   const data = writable<ITableData | null>(null)
 
@@ -245,9 +246,18 @@
             <tr
               id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
               on:click={function () {
-                if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
-                editClick = false
+                if ($selectedRow != String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))) {
+                  $selectedRow = String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
+                } else {
+                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
+                  editClick = false
+                }
               }}
+              class={`${
+                $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
+                  ? 'selected-row'
+                  : ''
+              }`}
             >
               {#each $data.data[i] as row, j}
                 <td class="cell"
@@ -273,9 +283,18 @@
             <tr
               id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
               on:click={function () {
-                if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
-                editClick = false
+                if ($selectedRow != String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))) {
+                  $selectedRow = String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
+                } else {
+                  if (rowEvent != null && updating == false && editClick == false) rowEvent(event, true)
+                  editClick = false
+                }
               }}
+              class={`${
+                $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
+                  ? 'selected-row'
+                  : ''
+              }`}
             >
               {#each $data.data[i] as row, j}
                 <td class="cell"
@@ -321,5 +340,9 @@
 
   .cell:hover .button-edit {
     display: block;
+  }
+
+  .selected-row {
+    background-color: #b2b2b2;
   }
 </style>

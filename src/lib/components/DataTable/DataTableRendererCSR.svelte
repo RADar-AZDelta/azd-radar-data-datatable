@@ -5,7 +5,7 @@
   import type ISort from '$lib/interfaces/ISort'
   import type ITableData from '$lib/interfaces/ITableData'
   import { onMount } from 'svelte'
-  import { writable } from 'svelte/store'
+  import { writable, type Writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
 
@@ -20,7 +20,8 @@
     ownEditorMethods: any = null,
     updateData: Function | null = null,
     mapping: any | null = null,
-    map: boolean = false
+    map: boolean = false,
+    selectedRow: Writable<string> = writable('')
 
   let worker: Worker | undefined = undefined
 
@@ -193,6 +194,7 @@
   bind:sorting
   bind:pagination
   bind:parentChange
+  bind:selectedRow
   {updateData}
   {ownEditorVisuals}
   {ownEditorMethods}
