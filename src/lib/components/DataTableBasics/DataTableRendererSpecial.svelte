@@ -1,27 +1,24 @@
 <script lang="ts">
   import '$lib/styles/table.scss'
   import Sorting from './Sorting.svelte'
-  import Filtering from './Filtering.svelte'
   import Pagination from './Pagination.svelte'
   import type ISort from '$lib/interfaces/ISort'
   import SortDirection from '../../classes/enums/SortDirection'
   import { writable, type Writable } from 'svelte/store'
-  import type IFilter from '$lib/interfaces/IFilter'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import Types from '../../classes/enums/Types'
   import Spinner from '../Extra/Spinner.svelte'
   import SkeletonTable from '../Extra/SkeletonTable.svelte'
-  import { onMount } from 'svelte'
   import type ITableData from '$lib/interfaces/ITableData'
   import FilteringGeneral from './FilteringGeneral.svelte'
 
   export let hasData: Function,
-    filter: Writable<string>,
+    filter: Writable<string | number | RegExp | Date | boolean>,
     sorting: Writable<ISort>,
     pagination: Writable<IPaginated>,
     pagesShown: number = 7,
     parentChange: Writable<boolean> = writable(false),
-    rowEvent: Function | null = null
+    rowEvent: Function | undefined = undefined
 
   const data = writable<ITableData | null>(null)
 
@@ -35,7 +32,7 @@
 
   let updated = writable<boolean>(false)
 
-  const updateSorting = async (col: string, direction: number) => {
+  const updateSorting = async (col: string, direction: number): Promise<void> => {
     /*
       Update the column sort
     */
@@ -74,7 +71,7 @@
     changePage(1)
   }
 
-  const changePage = async (page: number) => {
+  const changePage = async (page: number): Promise<void> => {
     /*
         Update the pagination
     */
@@ -89,42 +86,46 @@
     updated.set(false)
   }
 
-  async function updateRowsPerPage(event: any) {
+  async function updateRowsPerPage(event: Event): Promise<void> {
     /*
         Update the rows per page
     */
+    const element = event.target as HTMLInputElement
     $pagination = {
       currentPage: 1,
       totalPages: $pagination.totalPages,
-      rowsPerPage: Number(event.target.value),
+      rowsPerPage: Number(element.value),
       totalRows: $pagination.totalRows,
     }
     updated.set(false)
   }
 
-  async function updateFiltering(event: any, type: any) {
+  async function updateFiltering(event: Event, type?: any): Promise<void> {
     changePage(1)
-    let filterValue = event.target.value
+    const element = event.target as HTMLInputElement
+    let filterValue: string | number | RegExp | Date | boolean = element.value
 
-    switch (filterValue && type) {
-      case filterValue != undefined && type == Types.number:
-        filterValue = Number(filterValue)
-        break
+    if (type) {
+      switch (filterValue && type) {
+        case filterValue != undefined && type == Types.number:
+          filterValue = Number(filterValue)
+          break
 
-      case filterValue != undefined && type == Types.regex:
-        filterValue = new RegExp(filterValue)
-        break
+        case filterValue != undefined && type == Types.regex:
+          filterValue = new RegExp(filterValue)
+          break
 
-      case filterValue != undefined && type == Types.date:
-        filterValue = new Date(filterValue)
-        break
+        case filterValue != undefined && type == Types.date:
+          filterValue = new Date(filterValue)
+          break
 
-      case filterValue != undefined && type == Types.boolean:
-        filterValue = filterValue == 'true' ? true : false
-        break
+        case filterValue != undefined && type == Types.boolean:
+          filterValue = filterValue == 'true' ? true : false
+          break
 
-      default:
-        break
+        default:
+          break
+      }
     }
 
     $filter = filterValue
@@ -132,7 +133,7 @@
     updated.set(false)
   }
 
-  const deleteFilter = async () => {
+  const deleteFilter = async (): Promise<void> => {
     // Remove the filter from the filters array
     $filter = ''
     filter.update(() => $filter)
@@ -141,9 +142,8 @@
 
   // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
   // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
-  // TODO: place long calculations in a computed property (make it understandable for others)
 
-  const callbackFunction = async () => {
+  const callbackFunction = async (): Promise<void> => {
     if ($updated == false || $parentChange == true) {
       $data = await hasData()
     }
@@ -194,7 +194,7 @@
           <tr
             id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
             on:click={function () {
-              if (rowEvent != null) rowEvent(event, true)
+              if (rowEvent != undefined) rowEvent(event, true)
             }}
           >
             {#each $data.data[i] as row, j}

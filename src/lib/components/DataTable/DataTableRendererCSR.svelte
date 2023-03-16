@@ -82,7 +82,7 @@
 
   // Create a custom updateData method when there was none given
   if (updateData == undefined) {
-    updateData = async (index: string, value: string) => {
+    updateData = async (index: string, value: string): Promise<void> => {
       worker?.postMessage({
         editData: {
           index: index,
@@ -123,7 +123,7 @@
     }
   }
 
-  const loadWorker = async () => {
+  const loadWorker = async (): Promise<void> => {
     const w = await import('../../workers/csr.worker?worker')
     worker = new w.default()
     // Check how the file has been given to the application (REST, Drag & Drop or local in the data folder)
@@ -162,7 +162,7 @@
     worker.onmessage = onWorkerMessage
   }
 
-  const terminateWorker = async () => {
+  const terminateWorker = async (): Promise<void> => {
     if (worker != undefined) {
       worker?.terminate()
     }

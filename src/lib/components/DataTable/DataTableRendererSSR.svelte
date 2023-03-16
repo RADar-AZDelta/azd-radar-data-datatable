@@ -13,7 +13,7 @@
     filters: IFilter[],
     sorting: ISort[],
     transpileData: Function | undefined = undefined,
-    rowEvent: Function | null = null,
+    rowEvent: Function | undefined = undefined,
     selectedRow: Writable<string> = writable('')
 
   let paginationStore = writable<IPaginated>(pagination)

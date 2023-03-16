@@ -11,10 +11,10 @@
   export let data: Writable<[string, any][][]>,
     columns: IScheme[],
     downloadable: boolean = false,
-    rowEvent: Function | null = null,
-    ownEditorVisuals: any = null,
-    ownEditorMethods: any = null,
-    updateData: Function | null = null,
+    rowEvent: Function | undefined = undefined,
+    ownEditorVisuals: any = undefined,
+    ownEditorMethods: any = undefined,
+    updateData: Function | undefined = undefined,
     pagination: Writable<IPaginated> = writable<IPaginated>({
       currentPage: 1,
       totalPages: 1,
@@ -29,7 +29,7 @@
   let sorting = writable<Array<ISort>>([])
   let dataChanged = writable<boolean>(false)
 
-  const setColumnFilters = async (filters: IFilter[]) => {
+  const setColumnFilters = async (filters: IFilter[]): Promise<void> => {
     let filteredData: [string, any][][] = []
     /*
       Filter column name out of data
@@ -107,7 +107,7 @@
     $dataStore = filteredData
   }
 
-  const setColumnSort = async (sorting: ISort[]) => {
+  const setColumnSort = async (sorting: ISort[]): Promise<void> => {
     let filteredData: [string, any][][] = $dataStore
 
     for (let sort of sorting) {
@@ -133,7 +133,7 @@
     dataStore.set(filteredData)
   }
 
-  const setTablePagination = async (tablePagination: IPaginated) => {
+  const setTablePagination = async (tablePagination: IPaginated): Promise<void> => {
     /*
 			Update pagination store
 		*/
@@ -171,15 +171,15 @@
     })
   }
 
-  const hasData = async () => {
+  const hasData = async (): Promise<ITableData> => {
     return new Promise(async (resolve, reject) => {
       resolve(await getData())
     })
   }
 
   // TODO: make it possible to update data with ex. only numbers
-  if (updateData == null) {
-    updateData = async (index: string, value: string) => {
+  if (updateData == undefined) {
+    updateData = async (index: string, value: string): Promise<void> => {
       const indexes = index.split('-')
       const row = Number(indexes[0])
       const col = Number(indexes[1])

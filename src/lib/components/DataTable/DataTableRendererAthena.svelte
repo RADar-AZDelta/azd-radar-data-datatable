@@ -10,7 +10,7 @@
 
   export let data: Writable<[string, any][][]>,
     columns: IScheme[],
-    rowEvent: Function | null = null,
+    rowEvent: Function | undefined = undefined,
     pagination: Writable<IPaginated>,
     filter: Writable<string>,
     sorting: Writable<ISort>
@@ -19,7 +19,7 @@
   const dataStore = writable<[string, any][][]>()
   let dataChanged = writable<boolean>(false)
 
-  const setColumnFilters = async (filter?: string) => {
+  const setColumnFilters = async (): Promise<void> => {
     let filteredData: [string, any][][] = []
     /*
         Filter column name out of data
@@ -38,31 +38,19 @@
     $dataStore = filteredData
   }
 
-  const setTablePagination = async (tablePagination: IPaginated) => {
-    /*
-        Update pagination store
-    */
-    pagination.set({
-      currentPage: tablePagination.currentPage,
-      totalPages: Math.ceil($dataStore.length / tablePagination.rowsPerPage),
-      rowsPerPage: tablePagination.rowsPerPage,
-      totalRows: $data.length,
-    })
-  }
-
   const getData = async (): Promise<ITableData> => {
     return new Promise(async (resolve, reject) => {
       /*
         First: Get column scheme
         Finally: Resolve the data and scheme
       */
-      await setColumnFilters($filter).finally(() => {
+      await setColumnFilters().finally(() => {
         resolve({ data: $dataStore, scheme: $columnsStore })
       })
     })
   }
 
-  const hasData = async () => {
+  const hasData = async (): Promise<ITableData> => {
     return new Promise(async (resolve, reject) => {
       resolve(await getData())
     })

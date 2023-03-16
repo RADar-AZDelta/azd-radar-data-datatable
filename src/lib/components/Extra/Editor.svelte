@@ -3,7 +3,7 @@
 
   export let col: number,
     row: number,
-    updateData: Function | null = null,
+    updateData: Function | undefined = undefined,
     updated: Writable<boolean>,
     editClick: Writable<boolean>,
     editorUpdating: Writable<boolean>,
@@ -45,7 +45,7 @@
       const tag = document.createElement('p')
       tag.appendChild(document.createTextNode(value))
       parent?.appendChild(tag)
-      if (updateData != null) {
+      if (updateData != undefined) {
         updated.set(true)
         updateData(event, value)
       }

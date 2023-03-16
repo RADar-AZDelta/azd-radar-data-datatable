@@ -21,10 +21,10 @@
     pagination: Writable<IPaginated>,
     pagesShown: number = 7,
     parentChange: Writable<boolean> = writable(false),
-    rowEvent: Function | null = null,
-    ownEditorVisuals: any = null,
-    ownEditorMethods: any = null,
-    updateData: Function | null = null,
+    rowEvent: Function | undefined = undefined,
+    ownEditorVisuals: any = undefined,
+    ownEditorMethods: any = undefined,
+    updateData: Function | undefined = undefined,
     selectedRow: Writable<string>
 
   const data = writable<ITableData | null>(null)
@@ -41,7 +41,7 @@
 
   let updated = writable<boolean>(false)
 
-  const updateSorting = async (col: string, direction: number) => {
+  const updateSorting = async (col: string, direction: number): Promise<void> => {
     /*
       Update the column sort
     */
@@ -73,7 +73,7 @@
     changePage(1)
   }
 
-  const changePage = async (page: number) => {
+  const changePage = async (page: number): Promise<void> => {
     /*
       Update the current page
     */
@@ -88,7 +88,7 @@
     updated.set(false)
   }
 
-  async function updateRowsPerPage(event: any) {
+  async function updateRowsPerPage(event: any): Promise<void> {
     /*
       Update the rows per page
     */
@@ -101,7 +101,7 @@
     updated.set(false)
   }
 
-  async function updateFiltering(event: any, type: any) {
+  async function updateFiltering(event: any, type: any): Promise<void> {
     changePage(1)
     let filterValue = event.target.value
     const filterColumn: string = event.target.id
@@ -145,7 +145,7 @@
     updated.set(false)
   }
 
-  const deleteFilter = async (column: string) => {
+  const deleteFilter = async (column: string): Promise<void> => {
     // Remove the filter from the filters array
     $filters.splice($filters.indexOf($filters.filter(obj => obj.column == column)[0]), 1)
     filters.update(() => $filters)
@@ -155,7 +155,7 @@
   // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
   // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
 
-  const callbackFunction = async () => {
+  const callbackFunction = async (): Promise<void> => {
     if ($data != null && ($updated == false || $parentChange == true)) {
       $data = await hasData()
       updated.set(true)
@@ -217,7 +217,7 @@
               if ($selectedRow != String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))) {
                 $selectedRow = String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
               } else {
-                if (rowEvent != null && $editorUpdating == false && $editClick == false) rowEvent(event, true)
+                if (rowEvent != undefined && $editorUpdating == false && $editClick == false) rowEvent(event, true)
                 editClick.set(false)
               }
             }}
