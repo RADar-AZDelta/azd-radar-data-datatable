@@ -9,17 +9,18 @@
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
 
-  export let url: string | null = null,
-    fetchOptions: object | null = null,
-    dataType: string,
+  export let dataType: string,
     delimiter: string = ',',
-    file: File | null = null,
-    fileName: string | null = null,
-    rowEvent: Function | null = null,
-    ownEditorVisuals: any = null,
-    ownEditorMethods: any = null,
-    updateData: Function | null = null,
-    mapping: any | null = null,
+    downloadable: boolean = false,
+    url: string | undefined = undefined,
+    fetchOptions: object | undefined = undefined,
+    file: File | undefined = undefined,
+    fileName: string | undefined = undefined,
+    rowEvent: Function | undefined = undefined,
+    ownEditorVisuals: any = undefined,
+    ownEditorMethods: any = undefined,
+    updateData: Function | undefined = undefined,
+    mapping: any | undefined = undefined,
     map: boolean = false,
     selectedRow: Writable<string> = writable('')
 
@@ -41,11 +42,11 @@
   const workerMess = writable<boolean>(false)
 
   /*
-        This is the Arquero component where we fetch all of the data (CSV or JSON) and manipulate it with Arquero.
-        With this version we need a webworker because we don't want to do the heavy lifting on our GUI thread (sorting, filtering, pagination).
-        The user needs to give some params to this component like URL to know where to fetch the data, fetchOptions to know how to fetch.
-        The last param is optional but recommended and this is a function the user creates to manipulate the data to the given format.
-    */
+    This is the Arquero component where we fetch all of the data (CSV or JSON) and manipulate it with Arquero.
+    With this version we need a webworker because we don't want to do the heavy lifting on our GUI thread (sorting, filtering, pagination).
+    The user needs to give some params to this component like URL to know where to fetch the data, fetchOptions to know how to fetch.
+    The last param is optional but recommended and this is a function the user creates to manipulate the data to the given format.
+  */
 
   const getData = async (): Promise<ITableData> => {
     return new Promise(async (resolve, reject) => {
@@ -79,7 +80,23 @@
     })
   }
 
+  // Create a custom updateData method when there was none given
+  if (updateData == undefined) {
+    updateData = async (index: string, value: string) => {
+      worker?.postMessage({
+        editData: {
+          index: index,
+          value: value,
+        },
+        filter: $filters,
+        order: $sorting,
+        pagination: $pagination,
+      })
+    }
+  }
+
   const onWorkerMessage = async (data: any): Promise<void> => {
+    // Check what has changed and update the stores if needed
     if (data.data.processedData.columns != $columns) $columns = data.data.processedData.columns
     if (data.data.processedData.data != $data) $data = data.data.processedData.data
     const pag = data.data.processedData.pagination
@@ -94,11 +111,12 @@
       }
     }
     workerMess.set(true)
-    if (rowEvent != null) {
+    if (rowEvent != undefined) {
       rowEvent(null, false)
       if (data.data.processedData.update == true) {
         parentChange.set(true)
         setTimeout(function () {
+          // Add a class to the row that has been updated
           document.getElementById(mapping.row)?.classList.add('mapped')
         }, 0)
       }
@@ -108,7 +126,8 @@
   const loadWorker = async () => {
     const w = await import('../../workers/csr.worker?worker')
     worker = new w.default()
-    if (url != null && url != undefined) {
+    // Check how the file has been given to the application (REST, Drag & Drop or local in the data folder)
+    if (url != undefined) {
       worker.postMessage({
         filePath: url,
         method: 'REST',
@@ -119,7 +138,7 @@
         order: $sorting,
         pagination: $pagination,
       })
-    } else if (file != null && file != undefined) {
+    } else if (file != undefined) {
       worker.postMessage({
         file: file,
         method: 'file',
@@ -129,7 +148,7 @@
         order: $sorting,
         pagination: $pagination,
       })
-    } else if (fileName != null && fileName != undefined) {
+    } else if (fileName != undefined) {
       worker.postMessage({
         filePath: `../data/${fileName}`,
         method: 'local',
@@ -150,43 +169,34 @@
   }
 
   $: {
-    if (file != null) {
+    // When a new file has been given
+    if (file != undefined) {
       terminateWorker()
       loadWorker()
     }
   }
 
-  onMount(loadWorker)
-
-  if (updateData == null) {
-    updateData = async (index: string, value: string) => {
-      worker?.postMessage({
-        editData: {
-          index: index,
-          value: value,
-        },
-        filter: $filters,
-        order: $sorting,
-        pagination: $pagination,
-      })
-    }
-  }
-
   $: {
-    if (mapping != null && map == true) {
+    // When mapping of a row has been done
+    if (mapping != undefined && map == true) {
       worker?.postMessage({
         mapping: mapping,
       })
       map = false
     }
   }
+
+  onMount(loadWorker)
 </script>
 
-<div data-component="download-container">
-  {#if worker != undefined}
-    <FileDownload bind:worker />
-  {/if}
-</div>
+{#if downloadable == true}
+  <div data-component="download-container">
+    {#if worker != undefined}
+      <FileDownload bind:worker />
+    {/if}
+  </div>
+{/if}
+
 <DataTableRendererBasic
   {hasData}
   {rowEvent}

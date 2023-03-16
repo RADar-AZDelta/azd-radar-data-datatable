@@ -10,30 +10,30 @@
 
   export let data: Writable<[string, any][][]>,
     columns: IScheme[],
+    downloadable: boolean = false,
     rowEvent: Function | null = null,
     ownEditorVisuals: any = null,
     ownEditorMethods: any = null,
     updateData: Function | null = null,
-    pag: Writable<IPaginated> | undefined = undefined
+    pagination: Writable<IPaginated> = writable<IPaginated>({
+      currentPage: 1,
+      totalPages: 1,
+      rowsPerPage: 20,
+      totalRows: 10,
+    }),
+    selectedRow: Writable<string> = writable('')
 
-  // const originalData = writable<[string, any][][]>($data)
   const columnsStore = writable<IScheme[]>(columns)
   const dataStore = writable<[string, any][][]>()
   let filters = writable<Array<IFilter>>([])
   let sorting = writable<Array<ISort>>([])
-  let pagination = writable<IPaginated>(pag == undefined? {
-    currentPage: 1,
-    totalPages: 1,
-    rowsPerPage: 20,
-    totalRows: $data.length,
-  } : $pag)
   let dataChanged = writable<boolean>(false)
 
   const setColumnFilters = async (filters: IFilter[]) => {
     let filteredData: [string, any][][] = []
     /*
-            Filter column name out of data
-        */
+      Filter column name out of data
+    */
     for (let person of $data) {
       let personInfo: [string, any][] = []
       for (let information of person) {
@@ -46,6 +46,7 @@
             Apply extra filters if given
         */
     if (filters.length > 0) {
+      // Remove eventual duplicates first
       const extraFilteredData: [string, any][][] = Array.from(new Set(filteredData)).filter(elem => elem != undefined)
       for (let filter of filters) {
         const colIndex = $columnsStore.findIndex(obj => obj.column == filters[filters.indexOf(filter)].column)
@@ -100,8 +101,7 @@
             break
         }
       }
-
-      // Filter undefinend data from array
+      // Remove eventual duplicates
       filteredData = Array.from(new Set(extraFilteredData)).filter(elem => elem != undefined)
     }
     $dataStore = filteredData
@@ -112,10 +112,9 @@
 
     for (let sort of sorting) {
       const colIndex = $columnsStore.findIndex(obj => obj.column == sort.column)
-      let data = filteredData
       switch (sort.direction) {
         case 1:
-          data = $dataStore.sort(function (a, b) {
+          filteredData = $dataStore.sort(function (a, b) {
             if (b[colIndex] > a[colIndex]) return -1
             if (b[colIndex] < a[colIndex]) return 1
             return 0
@@ -123,15 +122,15 @@
           break
 
         case 2:
-          data = $dataStore.sort(function (a, b) {
+          filteredData = $dataStore.sort(function (a, b) {
             if (b[colIndex] < a[colIndex]) return -1
             if (b[colIndex] > a[colIndex]) return 1
             return 0
           })
           break
       }
-      filteredData = data
     }
+    dataStore.set(filteredData)
   }
 
   const setTablePagination = async (tablePagination: IPaginated) => {
@@ -155,14 +154,14 @@
 				Finally: Resolve the data and scheme
 			*/
       await setColumnFilters($filters)
-        .then(() =>
-          {if(pag == undefined){ setTablePagination({
+        .then(() => {
+          setTablePagination({
             currentPage: $pagination.currentPage,
             totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
             rowsPerPage: $pagination.rowsPerPage,
             totalRows: $data.length,
-          })}}
-        )
+          })
+        })
         .then(() => {
           if ($sorting.length > 0) setColumnSort($sorting)
         })
@@ -192,21 +191,18 @@
   }
 
   $: {
-    $pagination
-    if(pag != undefined) pag.set($pagination)
-  }
-
-  $: {
     $data
     dataChanged.set(true)
   }
 </script>
 
-<!-- <div data-component="download-container">
-  {#if $originalData != undefined || $originalData != null}
-    <FileDownload data={$originalData} />
-  {/if}
-</div> -->
+{#if downloadable == true}
+  <div data-component="download-container">
+    {#if $data != undefined || $data != null}
+      <FileDownload data={$data} />
+    {/if}
+  </div>
+{/if}
 
 <DataTableRendererBasic
   {hasData}
@@ -215,6 +211,7 @@
   bind:sorting
   bind:pagination
   bind:parentChange={dataChanged}
+  bind:selectedRow
   {updateData}
   {ownEditorVisuals}
   {ownEditorMethods}

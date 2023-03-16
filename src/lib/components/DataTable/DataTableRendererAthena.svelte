@@ -11,9 +11,6 @@
   export let data: Writable<[string, any][][]>,
     columns: IScheme[],
     rowEvent: Function | null = null,
-    ownEditorVisuals: any = null,
-    ownEditorMethods: any = null,
-    updateData: Function | null = null,
     pagination: Writable<IPaginated>,
     filter: Writable<string>,
     sorting: Writable<ISort>
@@ -57,21 +54,11 @@
     return new Promise(async (resolve, reject) => {
       /*
         First: Get column scheme
-        Second: Update pagination
         Finally: Resolve the data and scheme
-    */
-      await setColumnFilters($filter)
-        .then(() => {
-          setTablePagination({
-            currentPage: $pagination.currentPage,
-            totalPages: Math.ceil($dataStore.length / $pagination.rowsPerPage),
-            rowsPerPage: $pagination.rowsPerPage,
-            totalRows: $data.length,
-          })
-        })
-        .finally(() => {
-          resolve({ data: $dataStore, scheme: $columnsStore })
-        })
+      */
+      await setColumnFilters($filter).finally(() => {
+        resolve({ data: $dataStore, scheme: $columnsStore })
+      })
     })
   }
 
@@ -83,31 +70,11 @@
 
   // TODO: make it possible to update data with ex. only numbers
 
-  // Custom method to update the data
-  if (updateData == null) {
-    updateData = async (index: string, value: string) => {
-      const indexes = index.split('-')
-      const row = Number(indexes[0])
-      const col = Number(indexes[1])
-      // TODO: resolve issue of edit not working correctly when data is sorted
-      data.update(data => {
-        data[row][col][1] = value
-        return data
-      })
-    }
-  }
-
   $: {
     $data
     dataChanged.set(true)
   }
 </script>
-
-<!-- <div data-component="download-container">
-    {#if $originalData != undefined || $originalData != null}
-      <FileDownload data={$originalData} />
-    {/if}
-  </div> -->
 
 <DataTableRendererSpecial
   {hasData}
@@ -115,8 +82,6 @@
   bind:filter
   bind:sorting
   bind:pagination
+  pagesShown={7}
   bind:parentChange={dataChanged}
-  {updateData}
-  {ownEditorVisuals}
-  {ownEditorMethods}
 />

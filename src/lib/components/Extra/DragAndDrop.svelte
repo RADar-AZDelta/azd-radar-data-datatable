@@ -31,6 +31,6 @@
 <div class={`${$file != null ? 'hidden' : null}`}>
   <div data-component="drop" on:drop={dropHandler} on:dragover={dragOverHandler}>
     <p>{text}</p>
-    <img src="drag.png" alt="" />
+    <img src="drag.png" alt="Drag icon" />
   </div>
 </div>

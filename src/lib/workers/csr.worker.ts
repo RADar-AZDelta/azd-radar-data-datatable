@@ -28,7 +28,7 @@ const mappingData = async (mapping: any): Promise<any> => {
     if (cols.filter((col: any) => col.column == key).length == 0) {
       cols.push({
         column: key,
-        type: key == 'id' ? 1 : 0,
+        type: key == 'id' ? Types.number : Types.string,
         editable: true,
       })
     }
@@ -249,6 +249,7 @@ onmessage = async ({
             data: data,
             columns: cols,
             pagination: pagination,
+            origin: 'initial',
           },
         })
       )
@@ -270,6 +271,7 @@ onmessage = async ({
         data: data,
         columns: cols,
         update: true,
+        origin: 'mapping',
       },
     })
   } else if (editData != undefined || editData != null) {
@@ -281,6 +283,7 @@ onmessage = async ({
       processedData: {
         data: data,
         columns: cols,
+        origin: 'edit',
       },
     })
   } else {
@@ -294,6 +297,7 @@ onmessage = async ({
         data: data,
         columns: cols,
         pagination: pagination,
+        origin: 'manipulation',
       },
     })
   }

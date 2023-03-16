@@ -1,11 +1,34 @@
 <script lang="ts">
-  import type ITableData from '$lib/interfaces/ITableData'
   import type IPaginated from '$lib/interfaces/IPaginated'
-  import type { Writable } from 'svelte/store'
+  import { writable, type Writable } from 'svelte/store'
 
-  export let updateRowsPerPage: Function, changePage: Function, data: ITableData, pagination: Writable<IPaginated>
+  export let updateRowsPerPage: Function, changePage: Function, pagination: Writable<IPaginated>, pagesShown: number
 
-  let pagesShown = 7
+  let paginationLength = writable<number>($pagination.totalPages > pagesShown ? pagesShown : $pagination.totalPages)
+  let firstRowOfPage = writable<number>($pagination.rowsPerPage * $pagination.currentPage + 1 - $pagination.rowsPerPage)
+  let restingRows = writable<number>($pagination.totalRows - $pagination.rowsPerPage * ($pagination.currentPage - 1))
+  let lastRowOfPage = writable<number>($pagination.rowsPerPage * $pagination.currentPage)
+  let allRowsOfPage = writable<number>($pagination.rowsPerPage * ($pagination.currentPage - 1))
+  let currentPageBiggerThanHalf = writable<boolean>($pagination.currentPage > Math.floor(pagesShown / 2) + 1)
+  let currentPageSmallerThanTotal = writable<boolean>(
+    $pagination.currentPage + Math.floor(pagesShown / 2) + 1 <= $pagination.totalPages
+  )
+  let currentPageBiggerThanTotal = writable<boolean>(
+    $pagination.currentPage + Math.floor(pagesShown / 2) >= $pagination.totalPages
+  )
+
+  // Update the values when the pagination changes
+  $: {
+    $pagination
+    paginationLength.set($pagination.totalPages > pagesShown ? pagesShown : $pagination.totalPages)
+    firstRowOfPage.set($pagination.rowsPerPage * $pagination.currentPage + 1 - $pagination.rowsPerPage)
+    restingRows.set($pagination.totalRows - $pagination.rowsPerPage * ($pagination.currentPage - 1))
+    lastRowOfPage.set($pagination.rowsPerPage * $pagination.currentPage)
+    allRowsOfPage.set($pagination.rowsPerPage * ($pagination.currentPage - 1))
+    currentPageBiggerThanHalf.set($pagination.currentPage > Math.floor(pagesShown / 2) + 1)
+    currentPageSmallerThanTotal.set($pagination.currentPage + Math.floor(pagesShown / 2) + 1 <= $pagination.totalPages)
+    currentPageBiggerThanTotal.set($pagination.currentPage + Math.floor(pagesShown / 2) >= $pagination.totalPages)
+  }
 </script>
 
 <section data-component="pagination">
@@ -17,15 +40,14 @@
       {/each}
     </select>
     <p>
-      {$pagination.rowsPerPage * $pagination.currentPage + 1 - $pagination.rowsPerPage}-
-      {$pagination.totalRows - $pagination.rowsPerPage * ($pagination.currentPage - 1) > 0
-        ? $pagination.rowsPerPage * $pagination.currentPage
-        : $pagination.rowsPerPage * ($pagination.currentPage - 1) > $pagination.totalRows
+      {$firstRowOfPage}-
+      {$restingRows > 0
+        ? $lastRowOfPage
+        : $allRowsOfPage > $pagination.totalRows
         ? $pagination.totalRows
-        : $pagination.rowsPerPage * $pagination.currentPage}
+        : $lastRowOfPage}
       of {$pagination.totalRows}
     </p>
-    <p>{$pagination.totalRows - $pagination.rowsPerPage * ($pagination.currentPage - 1)}</p>
   </div>
   <div data-component="pagination-pages">
     <button
@@ -33,23 +55,17 @@
       class={`${$pagination.currentPage == 1 ? 'arrow-button-disable' : null}`}
       ><img src="/arrow-left.svg" alt="Arrow left" /></button
     >
-    {#each Array($pagination.totalPages > 7 ? 7 : $pagination.totalPages) as _, i}
+    {#each Array($paginationLength) as _, i}
       <button
         on:click={() => {
-          if (
-            $pagination.currentPage > Math.floor(pagesShown / 2) + 1 &&
-            $pagination.currentPage + Math.floor(pagesShown / 2) + 1 <= $pagination.totalPages
-          )
+          if ($currentPageBiggerThanHalf && $currentPageSmallerThanTotal)
             changePage($pagination.currentPage + i - Math.floor(pagesShown / 2))
-          else if (
-            $pagination.currentPage > Math.floor(pagesShown / 2) + 1 &&
-            $pagination.currentPage + Math.floor(pagesShown / 2) >= $pagination.totalPages
-          )
+          else if ($currentPageBiggerThanHalf && $currentPageBiggerThanTotal)
             changePage($pagination.totalPages + i - (pagesShown - 1))
           else changePage(i + 1)
         }}
       >
-        {#if $pagination.currentPage > Math.floor(pagesShown / 2) + 1 && $pagination.currentPage + Math.floor(pagesShown / 2) + 1 <= $pagination.totalPages}
+        {#if $currentPageBiggerThanHalf && $currentPageSmallerThanTotal}
           <p
             class={`${
               $pagination.currentPage == $pagination.currentPage + i - Math.floor(pagesShown / 2)
@@ -59,7 +75,7 @@
           >
             {$pagination.currentPage + i - Math.floor(pagesShown / 2)}
           </p>
-        {:else if $pagination.currentPage > Math.floor(pagesShown / 2) + 1 && $pagination.currentPage + Math.floor(pagesShown / 2) >= $pagination.totalPages}
+        {:else if $currentPageBiggerThanHalf && $currentPageBiggerThanTotal}
           <p
             class={`${
               $pagination.currentPage == $pagination.totalPages + i - (pagesShown - 1)

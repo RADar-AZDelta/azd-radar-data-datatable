@@ -1,5 +1,6 @@
 <script lang="ts">
-    import DataTableRendererSsr from '$lib/components/DataTable/DataTableRendererSSR.svelte'
+  import Types from '$lib/classes/enums/Types'
+  import DataTableRendererSsr from '$lib/components/DataTable/DataTableRendererSSR.svelte'
   import type IFilter from '$lib/interfaces/IFilter'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type IScheme from '$lib/interfaces/IScheme'
@@ -25,7 +26,7 @@
   const filters: IFilter[] = [
     {
       column: 'title',
-      filter: 'aut',
+      filter: 'auth',
     },
   ]
   const sorting: ISort[] = [
@@ -65,27 +66,28 @@
     const dataFound: [string, any][][] = []
     for (let key in data[0]) {
       const type = typeof data[0][key]
-      let typeEnum = 0
+      let typeEnum = Types.string
       switch (type) {
         case 'string':
-          typeEnum = 0
+          typeEnum = Types.string
           break
 
         case 'number':
-          typeEnum = 1
+          typeEnum = Types.number
           break
 
         case 'boolean':
-          typeEnum = 2
+          typeEnum = Types.boolean
           break
 
         default:
-          typeEnum = 3
+          typeEnum = Types.regex
           break
       }
       scheme.push({
         column: key,
         type: typeEnum,
+        editable: false,
       })
     }
     for (let obj in data) {
