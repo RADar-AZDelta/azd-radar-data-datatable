@@ -1,6 +1,6 @@
 <script lang="ts">
+  import type Types from '$lib/classes/enums/Types'
   import type { Writable } from 'svelte/store'
-  import Types from '../../classes/enums/Types'
   import type IFilter from '../../interfaces/IFilter'
 
   export let col: string, type: Types, updateFiltering: Function, deleteFilter: Function, filters: Writable<IFilter[]>
@@ -13,15 +13,7 @@
       updateFiltering(event, type)
     }}
     name={col}
-    type={type == Types.string
-      ? 'text'
-      : type == Types.number
-      ? 'number'
-      : type == Types.boolean
-      ? 'checkbox'
-      : type == Types.date
-      ? 'date'
-      : 'text'}
+    {type}
     value={$filters.filter(obj => obj.column == col)[0] == undefined
       ? ''
       : $filters.filter(obj => obj.column == col)[0].filter}

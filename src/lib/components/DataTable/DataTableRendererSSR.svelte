@@ -3,21 +3,22 @@
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type ISort from '$lib/interfaces/ISort'
   import type ITableData from '$lib/interfaces/ITableData'
-  import { writable } from 'svelte/store'
+  import { writable, type Writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
 
   export let url: string,
     fetchOptions: object,
-    transpileData: Function | undefined = undefined,
     pagination: IPaginated,
     filters: IFilter[],
     sorting: ISort[],
-    rowEvent: Function | null = null
+    transpileData: Function | undefined = undefined,
+    rowEvent: Function | null = null,
+    selectedRow: Writable<string> = writable('')
 
-  const paginationStore = writable<IPaginated>(pagination)
-  const filtersStore = writable<IFilter[]>(filters)
-  const sortingStore = writable<ISort[]>(sorting)
+  let paginationStore = writable<IPaginated>(pagination)
+  let filtersStore = writable<IFilter[]>(filters)
+  let sortingStore = writable<ISort[]>(sorting)
   const originalData = writable<any>()
 
   /*
@@ -52,9 +53,10 @@
 
 <DataTableRendererBasic
   {hasData}
-  pagination={paginationStore}
-  filters={filtersStore}
-  sorting={sortingStore}
+  bind:pagination={paginationStore}
+  bind:filters={filtersStore}
+  bind:sorting={sortingStore}
+  bind:selectedRow
   {rowEvent}
 />
 

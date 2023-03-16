@@ -6,14 +6,30 @@
 <div data-component="sort">
   <button on:click={updateSorting(col, direction)}>
     <p data-component="column-name">{col}</p>
-    {#if direction == SortDirection.None}
-      <img src="/no-sort.svg" alt="No filter icon" />
-    {:else if direction == SortDirection.Ascending}
-      <img src="/ascending-sort.svg" alt="Ascending filter icon" />
-    {:else if direction == SortDirection.Descending}
-      <img src="/descending-sort.svg" alt="Descending filter icon" />
-    {:else}
-      <p>Error in sorting!</p>
-    {/if}
+    <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1em" height="1rem" version="1.1">
+      <g>
+        <path
+          fill="%23888888"
+          class={`${direction == SortDirection.None || direction == SortDirection.Ascending ? 'fill' : 'empty'}`}
+          d="M1.5 6.5l6 -6 5.962 6c-0.984,0 -4.962,0 -11.962,0z"
+        />
+        <path
+          fill="%23888888"
+          class={`${direction == SortDirection.None || direction == SortDirection.Descending ? 'fill' : 'empty'}`}
+          id="down"
+          d="M13.5 9.5l-6 6 -6 -6c0,0 12,0 12,0z"
+        />
+      </g>
+    </svg>
   </button>
 </div>
+
+<style>
+  .fill {
+    fill: #888888;
+  }
+
+  .empty {
+    fill: #ffffff;
+  }
+</style>

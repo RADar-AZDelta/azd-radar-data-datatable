@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Types from '$lib/classes/enums/Types'
   import DataTableRendererJs from '$lib/components/DataTable/DataTableRendererJS.svelte'
   import type IScheme from '$lib/interfaces/IScheme'
   import { writable, type Writable } from 'svelte/store'
@@ -14,27 +15,27 @@
   columns = [
     {
       column: 'name',
-      type: 0,
+      type: Types.string,
       editable: false,
     },
     {
       column: 'age',
-      type: 1,
+      type: Types.number,
       editable: false,
     },
     {
       column: 'country',
-      type: 0,
+      type: Types.string,
       editable: false,
     },
     {
       column: 'telephone',
-      type: 0,
+      type: Types.string,
       editable: false,
     },
     {
       column: 'address',
-      type: 0,
+      type: Types.string,
       editable: false,
     },
   ]

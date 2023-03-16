@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Types from '../../classes/enums/Types'
   import type IFilter from '$lib/interfaces/IFilter'
   import { writable } from 'svelte/store'
   import Filtering from '../DataTableBasics/Filtering.svelte'
@@ -14,7 +15,7 @@
       {#each Array(5) as _, i}
         <th>
           <Sorting col={'Loading'} direction={0} {updateSorting} />
-          <Filtering col={'Loading'} {deleteFilter} {updateFiltering} type={0} bind:filters />
+          <Filtering col={'Loading'} {deleteFilter} {updateFiltering} type={Types.string} bind:filters />
         </th>
       {/each}
     </tr>
