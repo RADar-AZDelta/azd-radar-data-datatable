@@ -1,5 +1,5 @@
 <script lang="ts">
-  import '$lib/styles/table.scss'
+  // import '$lib/styles/table.scss'
   import Sorting from './Sorting.svelte'
   import Filtering from './Filtering.svelte'
   import Pagination from './Pagination.svelte'
@@ -225,7 +225,7 @@
 <section>
   {#if $data != null}
     <div data-component="tablerenderer">
-      <table>
+      <table class="table">
         <tr>
           {#each $data.scheme as info}
             <th>
