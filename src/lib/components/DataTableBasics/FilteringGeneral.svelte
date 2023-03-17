@@ -1,8 +1,7 @@
 <script lang="ts">
-  import type IFilter from '$lib/interfaces/IFilter'
   import type { Writable } from 'svelte/store'
 
-  export let updateFiltering: Function, deleteFilter: Function, filter: Writable<string>
+  export let updateFiltering: Function, deleteFilter: Function, filter: Writable<string | number | RegExp | Date | boolean>
 </script>
 
 <div data-component="filter">

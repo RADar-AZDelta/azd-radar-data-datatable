@@ -26,6 +26,16 @@ div[data-component='tablerenderer'] {
     background-color: inherit;
   }
 
+  .selected-row {
+    background-color: #b2b2b2 !important;
+  }
+
+  td:hover {
+    button[data-component='editor'] {
+      display: block;
+    }
+  }
+
   div[data-component='filter'] {
     display: flex;
     align-items: center;
@@ -44,7 +54,6 @@ div[data-component='tablerenderer'] {
       position: relative;
       display: flex;
       align-items: center;
-      right: 2.5rem;
       top: -0.25rem;
       border: none;
       background-color: inherit;
@@ -191,5 +200,18 @@ div[data-component='drop'] {
   img {
     width: 150px;
     height: 150px;
+  }
+}
+
+div[data-component='cell-container'] {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none;
   }
 }
