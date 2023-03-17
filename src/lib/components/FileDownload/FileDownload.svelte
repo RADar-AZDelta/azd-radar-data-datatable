@@ -25,7 +25,7 @@
 
   const onWorkerMessage = async (data: any) => {
     csv = data.data.processedData.data
-    const file = new Blob([tableData], { type: 'text/csv' })
+    const file = new Blob([csv], { type: 'text/csv' })
     // https://stackoverflow.com/questions/71309058/property-showsavefilepicker-does-not-exist-on-type-window-typeof-globalthis
     // https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker
     downloadCsv(file)

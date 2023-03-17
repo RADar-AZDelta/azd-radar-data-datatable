@@ -7,19 +7,17 @@ import type ISort from '$lib/interfaces/ISort'
 import { desc, escape, fromCSV, fromJSON, loadCSV, table } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
-let originalData: any
-let mappedData: any
+let originalData: ColumnTable
+let mappedData: Array<Object>
 let cols: IScheme[]
-let sorts: ISort[]
-let filters: IFilter[]
 
-const transpilerToTable = async (dataObject: any): Promise<any> => {
+const transpilerToTable = async (dataObject: Array<Object>): Promise<ColumnTable> => {
   return new Promise((resolve, reject) => {
-    const columns = []
+    const columnsArray: string[] = []
     const dataFound: any = {}
     for (let key in dataObject[0]) {
-      columns.push(key)
-      if (cols.filter((col: any) => col.column == key).length == 0) {
+      columnsArray.push(key)
+      if (cols.filter((col: IScheme) => col.column == key).length == 0) {
         cols.push({
           column: key,
           type: key == 'id' ? Types.number : Types.string,
@@ -27,10 +25,10 @@ const transpilerToTable = async (dataObject: any): Promise<any> => {
         })
       }
     }
-    for (let col of columns) {
-      const d = []
+    for (let col of columnsArray) {
+      const d: Array<Object> = []
       for (let obj of dataObject) {
-        d.push(obj[col])
+        d.push(obj[col as keyof Object])
       }
       dataFound[col] = d
     }
@@ -39,14 +37,14 @@ const transpilerToTable = async (dataObject: any): Promise<any> => {
   })
 }
 
-const transpilerToObjects = async (table: any, cols: any, total: number): Promise<[string, any][][]> => {
+const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], total: number): Promise<object[]> => {
   return new Promise((resolve, reject) => {
-    let filteredData: [string, any][][] = Array.from(new Set(table.objects()))
+    let filteredData: object[] = Array.from(new Set(table.objects()))
     if (filteredData.length > 0) {
       for (let i = 0; i < filteredData.length; i++) {
         let data = []
         for (let col of cols) {
-          data.push(filteredData[i][col])
+          data.push(filteredData[i][col as keyof Object])
         }
         filteredData[i] = data
       }
@@ -63,25 +61,22 @@ const transpilerToObjects = async (table: any, cols: any, total: number): Promis
   })
 }
 
-const mappingData = async (mapping: any): Promise<any> => {
+const mappingData = async (mapping: any): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
-    mappedData[mapping.row]['EQUIVALENCE'] = mapping.equivalence
-    mappedData[mapping.row]['Author'] = mapping.author
+    mappedData[mapping.row]['EQUIVALENCE' as keyof Object] = mapping.equivalence
+    mappedData[mapping.row]['Author' as keyof Object] = mapping.author
     for (let col of mapping.columns) {
       const colName: string = col.column
       const data: [string, any][] = Array.from(mapping.data)
-      const test = data.filter((arr: [string, any]) => arr[0] == colName)
-      mappedData[mapping.row][colName] = test[0][1]
+      const filteredData = data.filter((arr: [string, any]) => arr[0] == colName)
+      mappedData[mapping.row][colName as keyof Object] = filteredData[0][1]
     }
-    originalData = await transpilerToTable(mappedData)
-    resolve({
-      originalData,
-      cols,
-    })
+    let table = await transpilerToTable(mappedData)
+    resolve(table)
   })
 }
 
-const filterData = async (table: any, filters: IFilter[]): Promise<[string, any][][]> => {
+const filterData = async (table: ColumnTable, filters: IFilter[], cols: IScheme[]): Promise<object[]> => {
   return new Promise(async (resolve, reject) => {
     // If there are filters
     if (filters != undefined && filters.length > 0) {
@@ -107,10 +102,9 @@ const filterData = async (table: any, filters: IFilter[]): Promise<[string, any]
   })
 }
 
-const orderData = async (table: any, sorts: ISort[]): Promise<any> => {
+const orderData = async (table: ColumnTable, sorts: ISort[]): Promise<ColumnTable> => {
   return new Promise((resolve, reject) => {
     let orderedTable = table
-    orderedTable._order = null
     for (let sort of sorts) {
       if (sort.direction == SortDirection.Ascending) {
         orderedTable = orderedTable.orderby(sort.column)
@@ -122,7 +116,7 @@ const orderData = async (table: any, sorts: ISort[]): Promise<any> => {
   })
 }
 
-const getDataNeeded = async (data: [string, any][][], pagination: IPaginated): Promise<any> => {
+const getDataNeeded = async (data: object[], pagination: IPaginated): Promise<object[]> => {
   return new Promise((resolve, reject) => {
     const result = data.slice(
       pagination.currentPage * pagination.rowsPerPage - pagination.rowsPerPage,
@@ -133,7 +127,7 @@ const getDataNeeded = async (data: [string, any][][], pagination: IPaginated): P
   })
 }
 
-const updatePagination = async (data: [string, any][][], pagination: IPaginated): Promise<Object> => {
+const updatePagination = async (data: object[], pagination: IPaginated): Promise<IPaginated> => {
   return new Promise((resolve, reject) => {
     let updatedPag: IPaginated = {
       currentPage: pagination.currentPage,
@@ -170,14 +164,14 @@ const extractDataREST = async (
   fileType: string,
   fetchOptions: Object,
   delimiter: string
-): Promise<any> => {
+): Promise<ColumnTable> => {
   if (filePath && fileType.toLowerCase() == 'csv') {
     const response = await fetch(filePath, fetchOptions)
     const data = await response.text()
     originalData = await fromCSV(data, { delimiter: delimiter })
   } else if (filePath && fileType.toLowerCase() == 'json') {
     const response = await fetch(filePath, fetchOptions)
-    let data
+    let data: string | Object
     if (response.url.includes('data:application/json')) {
       data = atob(response.url.substring(29))
     } else {
@@ -188,7 +182,7 @@ const extractDataREST = async (
   return originalData
 }
 
-const extractDataFile = async (fileType: string, file: File, delimiter: string): Promise<any> => {
+const extractDataFile = async (fileType: string, file: File, delimiter: string): Promise<ColumnTable> => {
   if (fileType.toLowerCase() == 'csv') {
     const text = await file.text()
     originalData = await fromCSV(text, { delimiter: delimiter })
@@ -206,25 +200,27 @@ const getData = async (
   method: string,
   fileType: string,
   fetchOptions: Object
-): Promise<any> => {
+): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
-    let extractedData
+    let extractedData: ColumnTable
     if (method == 'REST') {
       extractedData = await extractDataREST(filePath, fileType, fetchOptions, delimiter)
+      mappedData = extractedData.objects()
     } else if (method == 'file') {
       extractedData = await extractDataFile(fileType, file, delimiter)
+      mappedData = extractedData.objects()
     } else if (method == 'local') {
       extractedData = await loadCSV(filePath, { delimiter: delimiter })
+      mappedData = extractedData.objects()
     }
-    mappedData = extractedData.objects()
     resolve(originalData)
   })
 }
 
 const updateTableData = async (index: string, value: string): Promise<void> => {
   const indexes = index.split('-')
-  const row = indexes[0]
-  const col = indexes[1]
+  const row = Number(indexes[0])
+  const col = Number(indexes[1])
   const colName = originalData._names[col]
   originalData._data[colName].data[row] = value
 }
@@ -245,28 +241,34 @@ onmessage = async ({
     getCSV,
   },
 }) => {
-  let data: any = originalData
-  filter != undefined ? (filters = filter) : []
-  order != undefined ? (sorts = order) : []
+  let sorts: ISort[]
+  let filters: IFilter[]
+  filter != undefined ? (filters = filter) : (filters = [])
+  order != undefined ? (sorts = order) : (sorts = [])
+  let orderedData: ColumnTable,
+    filteredData: object[] = [],
+    paginatedData: Object = {},
+    data: object[] = [],
+    table: ColumnTable
   if ((getCSV == undefined && originalData == undefined) || originalData == null) {
     // First time loading data
-    data = await getData(filePath, file, delimiter, method, fileType, fetchOptions)
+    table = await getData(filePath, file, delimiter, method, fileType, fetchOptions)
     cols = await getColumns()
     if (order) {
-      data = await orderData(originalData, order)
-      data = await filterData(data, filters)
+      orderedData = await orderData(table, order)
+      filteredData = await filterData(orderedData, filters, cols)
     } else {
-      data = await filterData(originalData, filters)
+      filteredData = await filterData(originalData, filters, cols)
     }
     if (pagination) {
-      pagination = await updatePagination(data, pagination)
-      data = await getDataNeeded(data, pagination)
+      paginatedData = await updatePagination(filteredData, pagination)
+      data = await getDataNeeded(filteredData, pagination)
     }
     await postMessage({
       processedData: {
         data: data,
         columns: cols,
-        pagination: pagination,
+        pagination: paginatedData,
         origin: 'initial',
       },
     })
@@ -280,9 +282,9 @@ onmessage = async ({
     })
   } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
-    const { originalData, cols } = await mappingData(mapping)
-    let data = await orderData(originalData, sorts)
-    data = await filterData(data, filters)
+    table = await mappingData(mapping)
+    table = await orderData(table, sorts)
+    data = await filterData(table, filters, cols)
     await postMessage({
       processedData: {
         data: data,
@@ -294,8 +296,8 @@ onmessage = async ({
   } else if (editData != undefined || editData != null) {
     // When a cell has been edited
     await updateTableData(editData.index, editData.value)
-    data = await filterData(data, filters)
-    data = await getDataNeeded(data, pagination)
+    filteredData = await filterData(originalData, filters, cols)
+    data = await getDataNeeded(filteredData, pagination)
     await postMessage({
       processedData: {
         data: data,
@@ -305,10 +307,10 @@ onmessage = async ({
     })
   } else {
     // When manipulation (filtering, sorting and pagination) has been done
-    data = await orderData(originalData, order)
-    data = await filterData(data, filter)
-    pagination = await updatePagination(data, pagination)
-    data = await getDataNeeded(data, pagination)
+    orderedData = await orderData(originalData, order)
+    filteredData = await filterData(orderedData, filter, cols)
+    paginatedData = await updatePagination(filteredData, pagination)
+    data = await getDataNeeded(filteredData, pagination)
     await postMessage({
       processedData: {
         data: data,
