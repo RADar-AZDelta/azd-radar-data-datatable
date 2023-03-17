@@ -65,11 +65,11 @@ const mappingData = async (mapping: any): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
     mappedData[mapping.row]['EQUIVALENCE' as keyof Object] = mapping.equivalence
     mappedData[mapping.row]['Author' as keyof Object] = mapping.author
-    for (let col of mapping.columns) {
-      const colName: string = col.column
-      const data: [string, any][] = Array.from(mapping.data)
-      const filteredData = data.filter((arr: [string, any]) => arr[0] == colName)
-      mappedData[mapping.row][colName as keyof Object] = filteredData[0][1]
+    for (let col in mapping.columns) {
+      const colName: string = mapping.columns[col].column
+      const data: any = Array.from(mapping.data)
+      const filteredData: any = data[col]
+      mappedData[mapping.row][colName as keyof Object] = filteredData
     }
     let table = await transpilerToTable(mappedData)
     resolve(table)

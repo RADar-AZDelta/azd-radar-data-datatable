@@ -4,6 +4,7 @@
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
   import type ITableData from '$lib/interfaces/ITableData'
+  import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import DataTableRendererSpecial from '../DataTableBasics/DataTableRendererSpecial.svelte'
@@ -22,6 +23,7 @@
     singleFilter: Writable<string> = writable<string>(''),
     sorting: Writable<ISort[]> = writable<ISort[]>([]),
     singleSorting: Writable<ISort> = writable<ISort>(undefined),
+    columns: Writable<IScheme[]>,
     transpileData: Function | undefined = undefined,
     rowEvent: Function | undefined = undefined,
     selectedRow: Writable<string> = writable('')
@@ -52,15 +54,15 @@
     const response = await fetch($url, fetchOptions)
     const data = await response.json()
     let currentPageData, totalPagesData, rowsPerPageData, totalRowsData, content
-    currentPagePath == undefined ? $pagination.currentPage : (currentPageData = await getPath(data, currentPagePath))
+    currentPagePath == undefined ? ($pagination.currentPage == 0? 1 : $pagination.currentPage) : (currentPageData = await getPath(data, currentPagePath))
     totalPagesPath == undefined ? $pagination.totalPages : (totalPagesData = await getPath(data, totalPagesPath))
     rowsPerPagePath == undefined ? $pagination.rowsPerPage : (rowsPerPageData = await getPath(data, rowsPerPagePath))
     totalRowsPath == undefined ? $pagination.totalRows : (totalRowsData = await getPath(data, totalRowsPath))
     dataPath == undefined ? (content = data) : (content = await getPath(data, dataPath))
 
-    if ($pagination == undefined) {
+    if ($pagination.currentPage == 0) {
       $pagination = {
-        currentPage: Number(currentPagePath),
+        currentPage: Number(currentPageData),
         totalPages: Number(totalPagesData),
         rowsPerPage: Number(rowsPerPageData),
         totalRows: Number(totalRowsData),
@@ -70,6 +72,7 @@
     if (transpileData != undefined) {
       // if the scheme is not like the default one, we need to transpile the data to the default one (column store)
       const transpiledData = await transpileData(content)
+      columns.set(transpiledData.scheme)
       return transpiledData
     } else {
       return data
@@ -89,10 +92,19 @@
     dataChanged.set(true)
   }
 
+  $: {
+    $url
+    dataChanged.set(true)
+  }
+
+  onMount(() => {
+    fetchData()
+  })
+
   // Not editable because you get the data from REST and you would need to make a POST request (maybe in the future)
 </script>
 
-{#if special == true}
+{#if special == true && $pagination.currentPage != 0}
   <DataTableRendererSpecial
     {hasData}
     {rowEvent}

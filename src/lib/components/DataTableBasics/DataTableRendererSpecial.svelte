@@ -13,7 +13,7 @@
   import FilteringGeneral from './FilteringGeneral.svelte'
 
   export let hasData: Function,
-    filter: Writable<string | number | RegExp | Date | boolean>,
+    filter: Writable<string | number | RegExp | Date | boolean> = writable(''),
     sorting: Writable<ISort>,
     pagination: Writable<IPaginated>,
     pagesShown: number = 7,
