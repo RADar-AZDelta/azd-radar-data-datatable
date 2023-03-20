@@ -26,3 +26,12 @@
     <button class="button is-small" on:click={deleteFilter(col)}><img src="/x.svg" alt="Cross icon" /></button>
   </div>
 </div>
+
+<style>
+  .button {
+    width: 40px;
+  }
+  /* .input {
+    width: 100px;
+  } */
+</style>
