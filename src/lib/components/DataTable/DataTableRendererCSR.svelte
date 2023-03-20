@@ -9,7 +9,9 @@
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
 
-  export let dataType: string,
+  export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
+    data: Writable<any> = writable<any>(),
+    dataType: string,
     delimiter: string = ',',
     downloadable: boolean = false,
     url: string | undefined = undefined,
@@ -35,9 +37,6 @@
     totalRows: 10,
   })
   let parentChange = writable<boolean>(false)
-
-  const columns = writable<Array<IScheme>>([])
-  const data = writable<any>([])
 
   const workerMess = writable<boolean>(false)
 
