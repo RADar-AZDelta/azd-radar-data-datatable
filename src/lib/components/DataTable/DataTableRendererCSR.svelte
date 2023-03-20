@@ -213,25 +213,37 @@
   onMount(loadWorker)
 </script>
 
-{#if downloadable == true}
-  <div data-component="download-container">
-    {#if worker != undefined}
-      <FileDownload bind:worker />
+<body>
+  <div id="download">
+    {#if downloadable == true}
+      <div data-component="download-container">
+        {#if worker != undefined}
+          <FileDownload bind:worker />
+        {/if}
+      </div>
     {/if}
   </div>
-{/if}
+  <div class="container is-fluid" id="checkbox">
+    <ShowColumns bind:columns bind:parentChange />
+  </div>
+  <div id="data">
+    <DataTableRendererBasic
+      {hasData}
+      {rowEvent}
+      bind:filters
+      bind:sorting
+      bind:pagination
+      bind:parentChange
+      bind:selectedRow
+      {updateData}
+      {ownEditorVisuals}
+      {ownEditorMethods}
+    />
+  </div>
+</body>
 
-<ShowColumns bind:columns bind:parentChange />
-
-<DataTableRendererBasic
-  {hasData}
-  {rowEvent}
-  bind:filters
-  bind:sorting
-  bind:pagination
-  bind:parentChange
-  bind:selectedRow
-  {updateData}
-  {ownEditorVisuals}
-  {ownEditorMethods}
-/>
+<style>
+  body {
+    font-size: 10px;
+  }
+</style>

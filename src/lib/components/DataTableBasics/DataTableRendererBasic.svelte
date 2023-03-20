@@ -1,5 +1,5 @@
 <script lang="ts">
-  // import '$lib/styles/table.scss'
+  //import '$lib/styles/table.scss'
   import Sorting from './Sorting.svelte'
   import Filtering from './Filtering.svelte'
   import Pagination from './Pagination.svelte'
@@ -192,68 +192,85 @@
 </script>
 
 <!-- Create a table with readonly cells -->
-<section>
+<section class="container is-fluid">
   {#if $data != null}
     <div data-component="tablerenderer">
-      <table class="table">
-        <tr>
-          {#each $data.scheme as info}
-            {#if info.visible == true}
-              <th>
-                <Sorting
-                  col={info.column}
-                  direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
-                    ? $sorting.filter(obj => obj.column == info.column)[0].direction
-                    : 0}
-                  {updateSorting}
-                />
-                <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
-              </th>
-            {/if}
-          {/each}
-        </tr>
-        {#each Array($dataSmallerThanRows ? $data.data.length : $moreRowsThanOnPage ? $pagination.rowsPerPage : $restingRows) as _, i}
-          <tr
-            id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
-            on:click={function () {
-              if ($selectedRow != String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))) {
-                $selectedRow = String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
-              } else {
-                if (rowEvent != undefined && $editorUpdating == false && $editClick == false) rowEvent(event, true)
-                editClick.set(false)
-              }
-            }}
-            class={`${
-              $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1)) ? 'selected-row' : ''
-            }`}
-          >
-            {#each $data.data[i] as row, j}
-              {#if $data.scheme[j].visible == true}
-                <td class="cell"
-                  ><div class="cell-container" data-component="cell-container">
-                    <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
-                    {#if $data.scheme[j].editable == true}
-                      <Editor
-                        col={j}
-                        row={i}
-                        bind:updateData
-                        bind:updated
-                        bind:editClick
-                        bind:editorUpdating
-                        {ownEditorMethods}
-                        {ownEditorVisuals}
+      <div class="table-container">
+        <table class="table is-narrow">
+          <tr>
+            {#each $data.scheme as info}
+              {#if info.visible == true}
+                <th>
+                  <div>
+                    <div class="control">
+                      <Sorting
+                        col={info.column}
+                        direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
+                          ? $sorting.filter(obj => obj.column == info.column)[0].direction
+                          : 0}
+                        {updateSorting}
                       />
-                    {/if}
-                  </div></td
-                >
+                    </div>
+                    <div class="control">
+                      <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
+                    </div>
+                  </div>
+                </th>
               {/if}
             {/each}
           </tr>
-        {/each}
-      </table>
+          {#each Array($dataSmallerThanRows ? $data.data.length : $moreRowsThanOnPage ? $pagination.rowsPerPage : $restingRows) as _, i}
+            <tr
+              id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
+              on:click={function () {
+                if ($selectedRow != String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))) {
+                  $selectedRow = String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
+                } else {
+                  if (rowEvent != undefined && $editorUpdating == false && $editClick == false) rowEvent(event, true)
+                  editClick.set(false)
+                }
+              }}
+              class={`${
+                $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
+                  ? 'selected-row'
+                  : ''
+              }`}
+            >
+              {#each $data.data[i] as row, j}
+                {#if $data.scheme[j].visible == true}
+                  <td class="cell"
+                    ><div class="cell-container" data-component="cell-container">
+                      <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
+                      {#if $data.scheme[j].editable == true}
+                        <Editor
+                          col={j}
+                          row={i}
+                          bind:updateData
+                          bind:updated
+                          bind:editClick
+                          bind:editorUpdating
+                          {ownEditorMethods}
+                          {ownEditorVisuals}
+                        />
+                      {/if}
+                    </div></td
+                  >
+                {/if}
+              {/each}
+            </tr>
+          {/each}
+        </table>
+      </div>
       <Pagination {updateRowsPerPage} {changePage} bind:pagination {pagesShown} />
     </div>
   {:else}
     <Spinner />
   {/if}
 </section>
+
+<style>
+  .container {
+    margin-left: 0%;
+    margin-right: 0%;
+  }
+</style>

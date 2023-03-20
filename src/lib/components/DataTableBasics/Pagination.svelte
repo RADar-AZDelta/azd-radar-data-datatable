@@ -34,11 +34,13 @@
 <section data-component="pagination">
   <div data-component="pagination-rows">
     <p>Rows:</p>
-    <select bind:value={$pagination.rowsPerPage} id="rows" on:change={() => updateRowsPerPage(event)}>
-      {#each Array(5) as _, i}
-        <option value={(i + 1) * 10}>{(i + 1) * 10}</option>
-      {/each}
-    </select>
+    <div class="select is-small">
+      <select bind:value={$pagination.rowsPerPage} id="rows" on:change={() => updateRowsPerPage(event)}>
+        {#each Array(5) as _, i}
+          <option value={(i + 1) * 10}>{(i + 1) * 10}</option>
+        {/each}
+      </select>
+    </div>
     <p>
       {$firstRowOfPage}-
       {$restingRows > 0
@@ -50,13 +52,12 @@
     </p>
   </div>
   <div data-component="pagination-pages">
-    <button
-      on:click={() => changePage($pagination.currentPage - 1)}
-      class={`${$pagination.currentPage == 1 ? 'arrow-button-disable' : null}`}
+    <button class="button is-small" on:click={() => changePage($pagination.currentPage - 1)}
       ><img src="/arrow-left.svg" alt="Arrow left" /></button
     >
     {#each Array($paginationLength) as _, i}
       <button
+        class="button is-small"
         on:click={() => {
           if ($currentPageBiggerThanHalf && $currentPageSmallerThanTotal)
             changePage($pagination.currentPage + i - Math.floor(pagesShown / 2))
@@ -68,33 +69,25 @@
         {#if $currentPageBiggerThanHalf && $currentPageSmallerThanTotal}
           <p
             class={`${
-              $pagination.currentPage == $pagination.currentPage + i - Math.floor(pagesShown / 2)
-                ? 'pagination-page-selected'
-                : null
+              $pagination.currentPage == $pagination.currentPage + i - Math.floor(pagesShown / 2) ? 'tag is-dark' : null
             }`}
           >
             {$pagination.currentPage + i - Math.floor(pagesShown / 2)}
           </p>
         {:else if $currentPageBiggerThanHalf && $currentPageBiggerThanTotal}
           <p
-            class={`${
-              $pagination.currentPage == $pagination.totalPages + i - (pagesShown - 1)
-                ? 'pagination-page-selected'
-                : null
-            }`}
+            class={`${$pagination.currentPage == $pagination.totalPages + i - (pagesShown - 1) ? 'tag is-dark' : null}`}
           >
             {$pagination.totalPages + i - (pagesShown - 1)}
           </p>
         {:else}
-          <p class={`${$pagination.currentPage == i + 1 ? 'pagination-page-selected' : null}`}>
+          <p class={`${$pagination.currentPage == i + 1 ? 'tag is-dark' : null}`}>
             {i + 1}
           </p>
         {/if}
       </button>
     {/each}
-    <button
-      on:click={() => changePage($pagination.currentPage + 1)}
-      class={`${$pagination.currentPage == $pagination.totalPages ? 'arrow-button-disable' : null}`}
+    <button on:click={() => changePage($pagination.currentPage + 1)} class="button is-small"
       ><img src="/arrow-right.svg" alt="Arrow right" /></button
     >
   </div>
