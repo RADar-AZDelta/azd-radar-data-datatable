@@ -200,14 +200,20 @@
           {#each $data.scheme as info}
             {#if info.visible == true}
               <th>
-                <Sorting
-                  col={info.column}
-                  direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
-                    ? $sorting.filter(obj => obj.column == info.column)[0].direction
-                    : 0}
-                  {updateSorting}
-                />
-                <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
+                <div class="field has-addons">
+                  <div class="control">
+                    <Sorting
+                      col={info.column}
+                      direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
+                        ? $sorting.filter(obj => obj.column == info.column)[0].direction
+                        : 0}
+                      {updateSorting}
+                    />
+                  </div>
+                  <div class="control">
+                    <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
+                  </div>
+                </div>
               </th>
             {/if}
           {/each}
