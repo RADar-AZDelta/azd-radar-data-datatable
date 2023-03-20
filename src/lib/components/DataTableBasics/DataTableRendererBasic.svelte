@@ -1,5 +1,5 @@
 <script lang="ts">
-  // import '$lib/styles/table.scss'
+  //import '$lib/styles/table.scss'
   import Sorting from './Sorting.svelte'
   import Filtering from './Filtering.svelte'
   import Pagination from './Pagination.svelte'
@@ -192,10 +192,10 @@
 </script>
 
 <!-- Create a table with readonly cells -->
-<section>
+<section class="container is-max-desktop">
   {#if $data != null}
     <div data-component="tablerenderer">
-      <table class="table">
+      <table class="table is-narrow">
         <tr>
           {#each $data.scheme as info}
             <th>

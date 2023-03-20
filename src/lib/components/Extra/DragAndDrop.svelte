@@ -28,9 +28,20 @@
   }
 </script>
 
-<div class={`${$file != null ? 'hidden' : null}`}>
-  <div data-component="drop" on:drop={dropHandler} on:dragover={dragOverHandler}>
-    <p>{text}</p>
-    <img src="drag.png" alt="Drag icon" />
+<div class="container is-max-desktop">
+  <div class={`${$file != null ? 'is-hidden' : 'box'}`}>
+    <div class="img" data-component="drop" on:drop={dropHandler} on:dragover={dragOverHandler}>
+      <p class="title">{text}</p>
+      <img src="drag.png" alt="Drag icon" />
+    </div>
   </div>
 </div>
+
+<style>
+  .title {
+    text-align: center;
+  }
+  .img {
+    text-align: center;
+  }
+</style>
