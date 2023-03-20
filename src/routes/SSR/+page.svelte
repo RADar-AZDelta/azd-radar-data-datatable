@@ -5,8 +5,9 @@
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
+  import { writable } from 'svelte/store'
 
-  const url = 'https://jsonplaceholder.typicode.com/posts'
+  const url = writable<string>('https://jsonplaceholder.typicode.com/posts')
   const fetchOptions = {
     method: 'GET',
     header: {
@@ -17,24 +18,14 @@
   /*
 		These properties are examples and can be changed to your data
 	*/
-  const pagination: IPaginated = {
+  const pagination = writable<IPaginated>({
     currentPage: 1,
     totalPages: 3,
     rowsPerPage: 10,
     totalRows: 30,
-  }
-  const filters: IFilter[] = [
-    {
-      column: 'title',
-      filter: 'auth',
-    },
-  ]
-  const sorting: ISort[] = [
-    {
-      column: 'id',
-      direction: 1,
-    },
-  ]
+  })
+  const filters = writable<IFilter[]>([{ column: 'title', filter: 'auth' }])
+  const sorting = writable<ISort[]>([{ column: 'id', direction: 1 }])
 
   const transpileData = async (data: any) => {
     /*
@@ -88,6 +79,7 @@
         column: key,
         type: typeEnum,
         editable: false,
+        visible: true,
       })
     }
     for (let obj in data) {

@@ -6,5 +6,6 @@ import type Types from '$lib/classes/enums/Types'
 export default interface IScheme {
   column: string
   type: Types
-  editable: boolean
+  editable: boolean,
+  visible: boolean
 }

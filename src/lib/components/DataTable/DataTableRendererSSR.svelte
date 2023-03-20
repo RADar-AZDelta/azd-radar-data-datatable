@@ -23,7 +23,7 @@
     singleFilter: Writable<string> = writable<string>(''),
     sorting: Writable<ISort[]> = writable<ISort[]>([]),
     singleSorting: Writable<ISort> = writable<ISort>(undefined),
-    columns: Writable<IScheme[]>,
+    columns: Writable<IScheme[]> = writable<IScheme[]>([]),
     transpileData: Function | undefined = undefined,
     rowEvent: Function | undefined = undefined,
     selectedRow: Writable<string> = writable(''),
