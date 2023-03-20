@@ -1,5 +1,6 @@
 <script lang="ts">
   import type IFilter from '$lib/interfaces/IFilter'
+  import type IMapping from '$lib/interfaces/IMapping'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
@@ -25,7 +26,12 @@
     updateData: Function | undefined = undefined,
     mapping: any | undefined = undefined,
     map: boolean = false,
-    selectedRow: Writable<string> = writable('')
+    selectedRow: Writable<string> = writable(''),
+    autoMapping: boolean = true,
+    mappingURL: string = 'https://athena.ohdsi.org/api/v1/concepts?query=INSERT_QUERY',
+    mappingFetchOptions: object = {},
+    mappingFileType: string = 'json',
+    mappingDelimiter: string = ','
 
   let worker: Worker | undefined = undefined
 
@@ -128,6 +134,12 @@
   const loadWorker = async (): Promise<void> => {
     const w = await import('../../workers/csr.worker?worker')
     worker = new w.default()
+    const mapper: IMapping = {
+      mappingURL: mappingURL,
+      mappingFetchOptions: mappingFetchOptions,
+      mappingFileType: mappingFileType,
+      mappingDelimiter: mappingDelimiter,
+    }
     // Check how the file has been given to the application (REST, Drag & Drop or local in the data folder)
     if (url != undefined) {
       worker.postMessage({
@@ -140,6 +152,8 @@
         order: $sorting,
         pagination: $pagination,
         columns: $columns,
+        autoMapping: autoMapping,
+        mapper: mapper,
       })
     } else if (file != undefined) {
       worker.postMessage({
@@ -151,6 +165,8 @@
         order: $sorting,
         pagination: $pagination,
         columns: $columns,
+        autoMapping: autoMapping,
+        mapper: mapper,
       })
     } else if (fileName != undefined) {
       worker.postMessage({
@@ -162,6 +178,8 @@
         order: $sorting,
         pagination: $pagination,
         columns: $columns,
+        autoMapping: autoMapping,
+        mapper: mapper,
       })
     }
     worker.onmessage = onWorkerMessage
@@ -203,7 +221,7 @@
   </div>
 {/if}
 
-<ShowColumns bind:columns bind:parentChange/>
+<ShowColumns bind:columns bind:parentChange />
 
 <DataTableRendererBasic
   {hasData}

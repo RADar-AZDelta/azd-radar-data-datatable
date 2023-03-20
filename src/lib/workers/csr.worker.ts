@@ -6,10 +6,43 @@ import type IScheme from '$lib/interfaces/IScheme'
 import type ISort from '$lib/interfaces/ISort'
 import { desc, escape, fromCSV, fromJSON, loadCSV, table } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
+import type IMapping from '$lib/interfaces/IMapping'
 
 let originalData: ColumnTable
 let mappedData: Array<Object>
 let cols: IScheme[]
+
+// const autoMapper = async (tableData: any, mapping: IMapping): Promise<object[]> => {
+//   return new Promise(async (resolve, reject) => {
+//     let colIndex = 0
+//     for (let col of cols) {
+//       if (col.column == 'sourceName') {
+//         colIndex = cols.indexOf(col)
+//       }
+//     }
+//     let number = 10
+//     if (pagination == undefined) number = 10
+//     else number = pagination.rowsPerPage
+//     let extractedData = tableData.slice(0, number)
+//     for await (let data of extractedData) {
+//       const index = tableData.indexOf(data)
+//       const dataFound = await editData(index, extractedData, colIndex, mapping)
+//       for (let key of Object.keys(dataFound.content[0])) {
+//         data[key] = dataFound.content[0][key as keyof object]
+//       }
+//       console.log(data)
+//       extractedData[index] = data
+//       if (index == number - 1) {
+//         if (extractedData[0].id != undefined) {
+//           let test = [extractedData[0], extractedData[1]]
+//           resolve(extractedData)
+//         } else {
+//           console.log('DOES NOT WORK')
+//         }
+//       }
+//     }
+//   })
+// }
 
 const transpilerToTable = async (dataObject: Array<Object>, originalColumns: IScheme[]): Promise<ColumnTable> => {
   return new Promise((resolve, reject) => {
@@ -42,7 +75,7 @@ const transpilerToTable = async (dataObject: Array<Object>, originalColumns: ISc
 }
 
 const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], total: number): Promise<object[]> => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     let filteredData: object[] = Array.from(new Set(table.objects()))
     if (filteredData.length > 0) {
       for (let i = 0; i < filteredData.length; i++) {
@@ -63,6 +96,20 @@ const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], 
     }
     resolve(filteredData)
   })
+}
+
+const editData = async (num: number, tableData: object[], columnIndex: number, mapping: IMapping) => {
+  let data = tableData[num]
+  let sourceName = Object.values(data)[columnIndex]
+  mapping.mappingURL = mapping.mappingURL.replace('INSERT_QUERY', sourceName)
+  mapping.mappingURL += '&pageSize=1'
+  return await extractDataREST(
+    false,
+    mapping.mappingURL,
+    mapping.mappingFileType,
+    mapping.mappingFetchOptions,
+    mapping.mappingDelimiter
+  )
 }
 
 const mappingData = async (mapping: any, columns: IScheme[]): Promise<ColumnTable> => {
@@ -170,15 +217,20 @@ const getColumns = async (originalColumns: IScheme[]): Promise<IScheme[]> => {
 }
 
 const extractDataREST = async (
+  tableFormat: boolean,
   filePath: string,
   fileType: string,
   fetchOptions: Object,
   delimiter: string
-): Promise<ColumnTable> => {
+) => {
+  let dataReceived: ColumnTable | string | Object
   if (filePath && fileType.toLowerCase() == 'csv') {
     const response = await fetch(filePath, fetchOptions)
     const data = await response.text()
-    originalData = await fromCSV(data, { delimiter: delimiter })
+    dataReceived = await fromCSV(data, { delimiter: delimiter })
+    if (tableFormat == true) dataReceived = await fromCSV(data, { delimiter: delimiter })
+    else dataReceived = data
+    return dataReceived
   } else if (filePath && fileType.toLowerCase() == 'json') {
     const response = await fetch(filePath, fetchOptions)
     let data: string | Object
@@ -187,9 +239,13 @@ const extractDataREST = async (
     } else {
       data = await response.json()
     }
-    originalData = await fromJSON(data, { autoType: true })
+    if (tableFormat == true) dataReceived = await fromJSON(data, { autoType: true })
+    else dataReceived = data
+    return dataReceived
+  } else {
+    dataReceived = table({})
   }
-  return originalData
+  return dataReceived
 }
 
 const extractDataFile = async (fileType: string, file: File, delimiter: string): Promise<ColumnTable> => {
@@ -214,7 +270,9 @@ const getData = async (
   return new Promise(async (resolve, reject) => {
     let extractedData: ColumnTable
     if (method == 'REST') {
-      extractedData = await extractDataREST(filePath, fileType, fetchOptions, delimiter)
+      // @ts-ignore
+      extractedData = await extractDataREST(true, filePath, fileType, fetchOptions, delimiter)
+      originalData = extractedData
       mappedData = extractedData.objects()
     } else if (method == 'file') {
       extractedData = await extractDataFile(fileType, file, delimiter)
@@ -249,6 +307,8 @@ onmessage = async ({
     editData,
     mapping,
     getCSV,
+    autoMapping,
+    mapper,
     columns,
   },
 }) => {
@@ -275,6 +335,9 @@ onmessage = async ({
       paginatedData = await updatePagination(filteredData, pagination)
       data = await getDataNeeded(filteredData, pagination)
     }
+    // if(autoMapping == true){
+    //   await autoMapper(data, mapping)
+    // }
     await postMessage({
       processedData: {
         data: data,
