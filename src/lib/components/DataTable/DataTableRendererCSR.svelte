@@ -7,9 +7,12 @@
   import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
+  import ShowColumns from '../Extra/ShowColumns.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
 
-  export let dataType: string,
+  export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
+    data: Writable<any> = writable<any>(),
+    dataType: string,
     delimiter: string = ',',
     downloadable: boolean = false,
     url: string | undefined = undefined,
@@ -36,9 +39,6 @@
   })
   let parentChange = writable<boolean>(false)
 
-  const columns = writable<Array<IScheme>>([])
-  const data = writable<any>([])
-
   const workerMess = writable<boolean>(false)
 
   /*
@@ -64,6 +64,7 @@
         filter: $filters,
         order: $sorting,
         pagination: $pagination,
+        columns: $columns,
       })
       workerMess.set(false)
 
@@ -91,6 +92,7 @@
         filter: $filters,
         order: $sorting,
         pagination: $pagination,
+        columns: $columns,
       })
     }
   }
@@ -137,6 +139,7 @@
         filter: $filters,
         order: $sorting,
         pagination: $pagination,
+        columns: $columns,
       })
     } else if (file != undefined) {
       worker.postMessage({
@@ -147,6 +150,7 @@
         filter: $filters,
         order: $sorting,
         pagination: $pagination,
+        columns: $columns,
       })
     } else if (fileName != undefined) {
       worker.postMessage({
@@ -157,6 +161,7 @@
         filter: $filters,
         order: $sorting,
         pagination: $pagination,
+        columns: $columns,
       })
     }
     worker.onmessage = onWorkerMessage
@@ -181,6 +186,7 @@
     if (mapping != undefined && map == true) {
       worker?.postMessage({
         mapping: mapping,
+        columns: $columns,
       })
       map = false
     }
@@ -196,6 +202,8 @@
     {/if}
   </div>
 {/if}
+
+<ShowColumns bind:columns bind:parentChange/>
 
 <DataTableRendererBasic
   {hasData}

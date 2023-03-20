@@ -17,26 +17,31 @@
       column: 'name',
       type: Types.string,
       editable: false,
+      visible: true,
     },
     {
       column: 'age',
       type: Types.number,
       editable: false,
+      visible: true,
     },
     {
       column: 'country',
       type: Types.string,
       editable: false,
+      visible: true,
     },
     {
       column: 'telephone',
       type: Types.string,
       editable: false,
+      visible: true,
     },
     {
       column: 'address',
       type: Types.string,
       editable: false,
+      visible: true,
     },
   ]
 

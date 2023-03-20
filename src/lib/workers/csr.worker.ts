@@ -11,7 +11,7 @@ let originalData: ColumnTable
 let mappedData: Array<Object>
 let cols: IScheme[]
 
-const transpilerToTable = async (dataObject: Array<Object>): Promise<ColumnTable> => {
+const transpilerToTable = async (dataObject: Array<Object>, originalColumns: IScheme[]): Promise<ColumnTable> => {
   return new Promise((resolve, reject) => {
     const columnsArray: string[] = []
     const dataFound: any = {}
@@ -22,6 +22,10 @@ const transpilerToTable = async (dataObject: Array<Object>): Promise<ColumnTable
           column: key,
           type: key == 'id' ? Types.number : Types.string,
           editable: true,
+          visible:
+            originalColumns.filter(obj => (obj.column = key)).length == 0
+              ? true
+              : originalColumns.filter(obj => (obj.column = key))[0].visible,
         })
       }
     }
@@ -61,7 +65,7 @@ const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], 
   })
 }
 
-const mappingData = async (mapping: any): Promise<ColumnTable> => {
+const mappingData = async (mapping: any, columns: IScheme[]): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
     mappedData[mapping.row]['EQUIVALENCE' as keyof Object] = mapping.equivalence
     mappedData[mapping.row]['Author' as keyof Object] = mapping.author
@@ -71,7 +75,7 @@ const mappingData = async (mapping: any): Promise<ColumnTable> => {
       const filteredData: any = data[col]
       mappedData[mapping.row][colName as keyof Object] = filteredData
     }
-    let table = await transpilerToTable(mappedData)
+    let table = await transpilerToTable(mappedData, columns)
     resolve(table)
   })
 }
@@ -139,7 +143,7 @@ const updatePagination = async (data: object[], pagination: IPaginated): Promise
   })
 }
 
-const getColumns = async (): Promise<IScheme[]> => {
+const getColumns = async (originalColumns: IScheme[]): Promise<IScheme[]> => {
   return new Promise((resolve, reject) => {
     let cols: IScheme[] = []
     const columns = originalData._names
@@ -149,10 +153,16 @@ const getColumns = async (): Promise<IScheme[]> => {
       else if (originalData._data[col].data[0] == true || originalData._data[col].data[0] == false) type = Types.boolean
       else if (/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(?:\.\d+)?Z?/.test(originalData._data[col].data[0]) == true)
         type = Types.date
+
+      const originalColumn = originalColumns.filter(obj => obj.column.toLowerCase() == col.toLowerCase())
+      let visible = true
+      originalColumn[0] == undefined ? (visible = true) : (visible = originalColumn[0].visible)
+
       cols.push({
         column: col,
         type: type,
         editable: false,
+        visible: visible,
       })
     }
     resolve(cols)
@@ -239,6 +249,7 @@ onmessage = async ({
     editData,
     mapping,
     getCSV,
+    columns,
   },
 }) => {
   let sorts: ISort[]
@@ -253,7 +264,7 @@ onmessage = async ({
   if ((getCSV == undefined && originalData == undefined) || originalData == null) {
     // First time loading data
     table = await getData(filePath, file, delimiter, method, fileType, fetchOptions)
-    cols = await getColumns()
+    cols = await getColumns(columns)
     if (order) {
       orderedData = await orderData(table, order)
       filteredData = await filterData(orderedData, filters, cols)
@@ -282,7 +293,7 @@ onmessage = async ({
     })
   } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
-    table = await mappingData(mapping)
+    table = await mappingData(mapping, columns)
     table = await orderData(table, sorts)
     data = await filterData(table, filters, cols)
     await postMessage({
@@ -307,6 +318,7 @@ onmessage = async ({
     })
   } else {
     // When manipulation (filtering, sorting and pagination) has been done
+    cols = await getColumns(columns)
     orderedData = await orderData(originalData, order)
     filteredData = await filterData(orderedData, filter, cols)
     paginatedData = await updatePagination(filteredData, pagination)

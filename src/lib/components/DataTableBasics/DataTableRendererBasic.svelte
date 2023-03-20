@@ -198,16 +198,18 @@
       <table class="table is-narrow">
         <tr>
           {#each $data.scheme as info}
-            <th>
-              <Sorting
-                col={info.column}
-                direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
-                  ? $sorting.filter(obj => obj.column == info.column)[0].direction
-                  : 0}
-                {updateSorting}
-              />
-              <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
-            </th>
+            {#if info.visible == true}
+              <th>
+                <Sorting
+                  col={info.column}
+                  direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
+                    ? $sorting.filter(obj => obj.column == info.column)[0].direction
+                    : 0}
+                  {updateSorting}
+                />
+                <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
+              </th>
+            {/if}
           {/each}
         </tr>
         {#each Array($dataSmallerThanRows ? $data.data.length : $moreRowsThanOnPage ? $pagination.rowsPerPage : $restingRows) as _, i}
@@ -226,23 +228,25 @@
             }`}
           >
             {#each $data.data[i] as row, j}
-              <td class="cell"
-                ><div class="cell-container" data-component="cell-container">
-                  <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
-                  {#if $data.scheme[j].editable == true}
-                    <Editor
-                      col={j}
-                      row={i}
-                      bind:updateData
-                      bind:updated
-                      bind:editClick
-                      bind:editorUpdating
-                      {ownEditorMethods}
-                      {ownEditorVisuals}
-                    />
-                  {/if}
-                </div></td
-              >
+              {#if $data.scheme[j].visible == true}
+                <td class="cell"
+                  ><div class="cell-container" data-component="cell-container">
+                    <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
+                    {#if $data.scheme[j].editable == true}
+                      <Editor
+                        col={j}
+                        row={i}
+                        bind:updateData
+                        bind:updated
+                        bind:editClick
+                        bind:editorUpdating
+                        {ownEditorMethods}
+                        {ownEditorVisuals}
+                      />
+                    {/if}
+                  </div></td
+                >
+              {/if}
             {/each}
           </tr>
         {/each}

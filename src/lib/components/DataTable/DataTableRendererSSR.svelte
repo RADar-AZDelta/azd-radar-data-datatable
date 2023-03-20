@@ -23,10 +23,11 @@
     singleFilter: Writable<string> = writable<string>(''),
     sorting: Writable<ISort[]> = writable<ISort[]>([]),
     singleSorting: Writable<ISort> = writable<ISort>(undefined),
-    columns: Writable<IScheme[]>,
+    columns: Writable<IScheme[]> = writable<IScheme[]>([]),
     transpileData: Function | undefined = undefined,
     rowEvent: Function | undefined = undefined,
-    selectedRow: Writable<string> = writable('')
+    selectedRow: Writable<string> = writable(''),
+    downloadable: boolean = false
 
   const originalData = writable<any>()
   let dataChanged = writable<boolean>(false)
@@ -54,7 +55,11 @@
     const response = await fetch($url, fetchOptions)
     const data = await response.json()
     let currentPageData, totalPagesData, rowsPerPageData, totalRowsData, content
-    currentPagePath == undefined ? ($pagination.currentPage == 0? 1 : $pagination.currentPage) : (currentPageData = await getPath(data, currentPagePath))
+    currentPagePath == undefined
+      ? $pagination.currentPage == 0
+        ? 1
+        : $pagination.currentPage
+      : (currentPageData = await getPath(data, currentPagePath))
     totalPagesPath == undefined ? $pagination.totalPages : (totalPagesData = await getPath(data, totalPagesPath))
     rowsPerPagePath == undefined ? $pagination.rowsPerPage : (rowsPerPageData = await getPath(data, rowsPerPagePath))
     totalRowsPath == undefined ? $pagination.totalRows : (totalRowsData = await getPath(data, totalRowsPath))
@@ -104,6 +109,10 @@
   // Not editable because you get the data from REST and you would need to make a POST request (maybe in the future)
 </script>
 
+{#if downloadable == true}
+  <FileDownload data={$originalData} />
+{/if}
+
 {#if special == true && $pagination.currentPage != 0}
   <DataTableRendererSpecial
     {hasData}
@@ -117,5 +126,3 @@
 {:else if special == false}
   <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting bind:selectedRow {rowEvent} />
 {/if}
-
-<FileDownload data={$originalData} />
