@@ -28,7 +28,7 @@
     map: boolean = false,
     selectedRow: Writable<string> = writable(''),
     autoMapping: boolean = true,
-    mappingURL: string = 'https://athena.ohdsi.org/api/v1/concepts?query=INSERT_QUERY',
+    mappingURL: string = 'https://athena.ohdsi.org/api/v1/concepts?',
     mappingFetchOptions: object = {},
     mappingFileType: string = 'json',
     mappingDelimiter: string = ','

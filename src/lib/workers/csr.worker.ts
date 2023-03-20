@@ -12,37 +12,61 @@ let originalData: ColumnTable
 let mappedData: Array<Object>
 let cols: IScheme[]
 
-// const autoMapper = async (tableData: any, mapping: IMapping): Promise<object[]> => {
-//   return new Promise(async (resolve, reject) => {
-//     let colIndex = 0
-//     for (let col of cols) {
-//       if (col.column == 'sourceName') {
-//         colIndex = cols.indexOf(col)
-//       }
-//     }
-//     let number = 10
-//     if (pagination == undefined) number = 10
-//     else number = pagination.rowsPerPage
-//     let extractedData = tableData.slice(0, number)
-//     for await (let data of extractedData) {
-//       const index = tableData.indexOf(data)
-//       const dataFound = await editData(index, extractedData, colIndex, mapping)
-//       for (let key of Object.keys(dataFound.content[0])) {
-//         data[key] = dataFound.content[0][key as keyof object]
-//       }
-//       console.log(data)
-//       extractedData[index] = data
-//       if (index == number - 1) {
-//         if (extractedData[0].id != undefined) {
-//           let test = [extractedData[0], extractedData[1]]
-//           resolve(extractedData)
-//         } else {
-//           console.log('DOES NOT WORK')
-//         }
-//       }
-//     }
-//   })
-// }
+const autoMapper = async (tableData: any, mapping: IMapping, pagination: IPaginated): Promise<object[]> => {
+  return new Promise(async (resolve, reject) => {
+    let colIndex = 0
+    for (let col of cols) {
+      if (col.column == 'sourceName') {
+        colIndex = cols.indexOf(col)
+      }
+    }
+    const start = pagination.rowsPerPage * (pagination.currentPage - 1)
+    const end = start + pagination.rowsPerPage
+    const dataMapping = tableData.slice(start, end)
+    for (let row of dataMapping) {
+      const rowIndex = tableData.indexOf(row)
+      const extracted = await editData(row, colIndex, mapping)
+      // @ts-ignore
+      for (let key of Object.keys(extracted.content[0])) {
+        if (cols.filter(col => col.column == key).length == 0) {
+          cols.push({
+            column: key,
+            type: Types.string,
+            editable: true,
+            visible: true,
+          })
+        }
+      }
+      cols = Array.from(new Set(cols))
+      // @ts-ignore
+      for (let value of Object.values(extracted.content[0])) {
+        tableData[rowIndex].push(value)
+      }
+    }
+    const table = await transpilerToTableFromArray(tableData, cols)
+    mappedData = table.objects()
+    resolve(tableData)
+  })
+}
+
+const transpilerToTableFromArray = async (dataArray: Array<any>, columns: IScheme[]): Promise<ColumnTable> => {
+  return new Promise((resolve, reject) => {
+    const columnsArray: string[] = []
+    const dataFound: any = {}
+    for (let col of columns) {
+      columnsArray.push(col.column)
+    }
+    for (let i = 0; i < columnsArray.length; i++) {
+      const d: Array<Object> = []
+      for (let obj of dataArray) {
+        d.push(obj[i])
+      }
+      dataFound[columnsArray[i]] = d
+    }
+    originalData = table(dataFound)
+    resolve(originalData)
+  })
+}
 
 const transpilerToTable = async (dataObject: Array<Object>, originalColumns: IScheme[]): Promise<ColumnTable> => {
   return new Promise((resolve, reject) => {
@@ -98,14 +122,14 @@ const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], 
   })
 }
 
-const editData = async (num: number, tableData: object[], columnIndex: number, mapping: IMapping) => {
-  let data = tableData[num]
-  let sourceName = Object.values(data)[columnIndex]
-  mapping.mappingURL = mapping.mappingURL.replace('INSERT_QUERY', sourceName)
-  mapping.mappingURL += '&pageSize=1'
+const editData = async (data: object, columnIndex: number, mapping: IMapping) => {
+  let sourceName = data[columnIndex as keyof object]
+  let url = mapping.mappingURL
+  url += `query=${sourceName}&pageSize=1`
+  url = encodeURI(url)
   return await extractDataREST(
     false,
-    mapping.mappingURL,
+    url,
     mapping.mappingFileType,
     mapping.mappingFetchOptions,
     mapping.mappingDelimiter
@@ -333,11 +357,11 @@ onmessage = async ({
     }
     if (pagination) {
       paginatedData = await updatePagination(filteredData, pagination)
-      data = await getDataNeeded(filteredData, pagination)
     }
-    // if(autoMapping == true){
-    //   await autoMapper(data, mapping)
-    // }
+    if (autoMapping == true) {
+      data = await autoMapper(filteredData, mapper, pagination)
+    }
+    data = await getDataNeeded(data, pagination)
     await postMessage({
       processedData: {
         data: data,
@@ -381,11 +405,12 @@ onmessage = async ({
     })
   } else {
     // When manipulation (filtering, sorting and pagination) has been done
-    cols = await getColumns(columns)
+    cols = columns
     orderedData = await orderData(originalData, order)
     filteredData = await filterData(orderedData, filter, cols)
     paginatedData = await updatePagination(filteredData, pagination)
-    data = await getDataNeeded(filteredData, pagination)
+    // @ts-ignore
+    data = await getDataNeeded(filteredData, paginatedData)
     await postMessage({
       processedData: {
         data: data,
