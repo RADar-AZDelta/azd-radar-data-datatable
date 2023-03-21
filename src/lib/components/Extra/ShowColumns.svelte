@@ -2,9 +2,10 @@
   import type IScheme from '$lib/interfaces/IScheme'
   import { each } from 'svelte/internal'
   import { writable, type Writable } from 'svelte/store'
-  let count = 0
   export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     parentChange: Writable<boolean>
+
+  const hiddenColumns = ['sourceAutoAssignedConceptIds', 'ADD_INFO:additionalInfo', 'ADD_INFO:prescriptionID', 'ADD_INFO:ATC', 'matchScore', 'mappingStatus', 'statusSetOn', 'comment', 'createdBy', 'createdOn']
 </script>
 
 <section>

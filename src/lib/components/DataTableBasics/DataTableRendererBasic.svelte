@@ -176,7 +176,9 @@
 
   $: {
     $data, $pagination
-    dataSmallerThanRows.set($data != null ? $data!.data.length < $pagination.rowsPerPage : true)
+    dataSmallerThanRows.set(
+      $data != null ? ($data.data != undefined ? $data.data.length < $pagination.rowsPerPage : true) : true
+    )
     moreRowsThanOnPage.set($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0)
     restingRows.set(
       $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)
@@ -193,7 +195,7 @@
 
 <!-- Create a table with readonly cells -->
 <section class="container is-fluid">
-  {#if $data != null}
+  {#if $data != null && $data.data != undefined && $data.scheme != undefined}
     <div data-component="tablerenderer">
       <div class="table-container">
         <table class="table is-narrow">
@@ -237,24 +239,26 @@
               }`}
             >
               {#each $data.data[i] as row, j}
-                {#if $data.scheme[i].visible == true}
-                  <td class="cell"
-                    ><div class="cell-container" data-component="cell-container">
-                      <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
-                      {#if $data.scheme[j].editable == true}
-                        <Editor
-                          col={j}
-                          row={i}
-                          bind:updateData
-                          bind:updated
-                          bind:editClick
-                          bind:editorUpdating
-                          {ownEditorMethods}
-                          {ownEditorVisuals}
-                        />
-                      {/if}
-                    </div></td
-                  >
+                {#if $data.scheme[j] != undefined}
+                  {#if $data.scheme[j].visible == true}
+                    <td class="cell"
+                      ><div class="cell-container" data-component="cell-container">
+                        <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
+                        {#if $data.scheme[j].editable == true}
+                          <Editor
+                            col={j}
+                            row={i}
+                            bind:updateData
+                            bind:updated
+                            bind:editClick
+                            bind:editorUpdating
+                            {ownEditorMethods}
+                            {ownEditorVisuals}
+                          />
+                        {/if}
+                      </div></td
+                    >
+                  {/if}
                 {/if}
               {/each}
             </tr>

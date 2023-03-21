@@ -7,10 +7,47 @@ import type ISort from '$lib/interfaces/ISort'
 import { desc, escape, fromCSV, fromJSON, loadCSV, table } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 import type IMapping from '$lib/interfaces/IMapping'
+import type IColumn from '$lib/interfaces/IColumn'
+import { writable } from 'svelte/store'
 
 let originalData: ColumnTable
 let mappedData: Array<Object>
 let cols: IScheme[]
+
+let mappingCount = writable<number>(3)
+
+const addDataToRow = async (
+  obj: object | string,
+  data: [string | number | boolean][],
+  rowIndex: number,
+  startingIndex: number,
+  endingIndex: number,
+  expectedColumns?: IColumn[]
+) => {
+  for (let key of Object.keys(obj)) {
+    let name = key
+    if (expectedColumns == undefined ? true : expectedColumns.filter(col => col.name == key).length != 0) {
+      name = expectedColumns == undefined ? key : expectedColumns?.filter(col => col.name == key)[0].altName
+      if (cols.filter(col => col.column == name).length == 0) {
+        cols.push({
+          column: name,
+          type: Types.string,
+          editable: true,
+          visible: true,
+        })
+        data[rowIndex as keyof object].splice(startingIndex, 0, obj[key as keyof object])
+        data[rowIndex].splice(startingIndex + 1, endingIndex)
+        startingIndex += 1
+      } else {
+        const index = cols.indexOf(cols.filter(col => col.column == name)[0])
+        data[rowIndex as keyof object].splice(index, 1, obj[key as keyof object])
+        startingIndex += 1
+      }
+    }
+  }
+  mappingCount.set(startingIndex)
+  return data
+}
 
 const autoMapper = async (
   tableData: [string | number | boolean][],
@@ -24,13 +61,16 @@ const autoMapper = async (
         colIndex = cols.indexOf(col)
       }
     }
+    // Get the data that needs to be mapped
     const dataMapping = tableData.slice(
       pagination.rowsPerPage * (pagination.currentPage - 1),
       pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
     )
     for (let row of dataMapping) {
       const rowIndex = tableData.indexOf(row)
-      const extracted = await editData(row, colIndex, mapping)
+      // Get the data from the Athena API
+      const extracted = await createURL(row, colIndex, mapping)
+      // Get the content from the data from the Athena API
       let content: object | string = extracted
       if (typeof extracted == 'object') {
         for (let path of mapping.contentPath) {
@@ -40,25 +80,26 @@ const autoMapper = async (
           content = content[0 as keyof object]
         }
       }
+
+      let start = 3
+      let end = tableData[rowIndex].length
+      // Are there fields that need to be added to the table?
+      if (mapping.additionalFields != undefined) {
+        mappingCount.subscribe(value => {
+          start = value
+        })
+        tableData = await addDataToRow(mapping.additionalFields, tableData, rowIndex, start, end)
+      }
+      // Is there content found in the data from the Athena API?
       if (content != undefined) {
-        let count = 3
-        let end = tableData[rowIndex].length
-        for (let key of Object.keys(content)) {
-          if (cols.filter(col => col.column == key).length == 0) {
-            cols.push({
-              column: key,
-              type: Types.string,
-              editable: true,
-              visible: true,
-            })
-          }
-          tableData[rowIndex].splice(count, 0, content[key as keyof object])
-          tableData[rowIndex].splice(count + 1, end)
-          count += 1
-        }
+        mappingCount.subscribe(value => {
+          start = value
+        })
+        tableData = await addDataToRow(content, tableData, rowIndex, start, end, mapping.expectedColumns)
       }
     }
     cols = Array.from(new Set(cols))
+    // Transpile to table for later use
     const table = await transpilerToTableFromArray(tableData, cols)
     mappedData = table.objects()
     resolve(tableData)
@@ -138,7 +179,7 @@ const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], 
   })
 }
 
-const editData = async (data: object, columnIndex: number, mapping: IMapping) => {
+const createURL = async (data: object, columnIndex: number, mapping: IMapping) => {
   let sourceName: string = data[columnIndex as keyof object]
   let url = mapping.mappingURL
   url += `query=${sourceName.replaceAll('-', ' ')}&pageSize=1`
@@ -152,14 +193,14 @@ const editData = async (data: object, columnIndex: number, mapping: IMapping) =>
   )
 }
 
-const mappingData = async (mapping: any, columns: IScheme[]): Promise<ColumnTable> => {
+const mappingData = async (mapping: any, columns: IScheme[], expectedColumns: IColumn[]): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
-    mappedData[mapping.row]['EQUIVALENCE' as keyof Object] = mapping.equivalence
-    mappedData[mapping.row]['Author' as keyof Object] = mapping.author
-    for (let col in mapping.columns) {
-      const colName: string = mapping.columns[col].column
-      const data: any = Array.from(mapping.data)
-      const filteredData: any = data[col]
+    mappedData[mapping.row]['equivalence' as keyof Object] = mapping.equivalence
+    mappedData[mapping.row]['statusSetBy' as keyof Object] = mapping.author
+    for (let col of expectedColumns) {
+      const colName: string = col.altName
+      const index = columns.indexOf(columns.filter((c: IScheme) => c.column == col.name)[0])
+      const filteredData: any = mapping.data[col.name]
       mappedData[mapping.row][colName as keyof Object] = filteredData
     }
     let table = await transpilerToTable(mappedData, columns)
@@ -350,6 +391,7 @@ onmessage = async ({
     autoMapping,
     mapper,
     columns,
+    expectedColumns,
   },
 }) => {
   let sorts: ISort[]
@@ -409,7 +451,7 @@ onmessage = async ({
     })
   } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
-    table = await mappingData(mapping, columns)
+    table = await mappingData(mapping, columns, expectedColumns)
     table = await orderData(table, sorts)
     data = await filterData(table, filters, cols)
     await postMessage({

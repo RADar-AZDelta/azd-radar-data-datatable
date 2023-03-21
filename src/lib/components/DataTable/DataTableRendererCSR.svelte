@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type IColumn from '$lib/interfaces/IColumn'
   import type IFilter from '$lib/interfaces/IFilter'
   import type IMapping from '$lib/interfaces/IMapping'
   import type IPaginated from '$lib/interfaces/IPaginated'
@@ -27,11 +28,42 @@
     mapping: any | undefined = undefined,
     map: boolean = false,
     selectedRow: Writable<string> = writable(''),
+    selectedRowPage: Writable<number> = writable(0),
     autoMapping: boolean = true,
     mappingURL: string = 'https://athena.ohdsi.org/api/v1/concepts?',
     mappingFetchOptions: object = {},
     mappingFileType: string = 'json',
-    mappingDelimiter: string = ','
+    mappingDelimiter: string = ',',
+    expectedColumns: Array<IColumn> = [
+      {
+        name: 'id',
+        altName: 'conceptId',
+      },
+      {
+        name: 'name',
+        altName: 'conceptName',
+      },
+      {
+        name: 'domain',
+        altName: 'domainId',
+      },
+    ],
+    additionalFields: object = {
+      sourceAutoAssignedConceptIds: '',
+      'ADD_INFO:additionalInfo': '',
+      'ADD_INFO:prescriptionID': '',
+      'ADD_INFO:ATC': '',
+      matchScore: 1,
+      mappingStatus: '',
+      equivalence: 'EQUAL',
+      statusSetBy: 'USER',
+      statusSetOn: new Date().getTime(),
+      mappingType: 'MAPS_TO',
+      comment: 'AUTO MAPPED',
+      createdBy: 'ctl',
+      createdOn: new Date().getTime(),
+      assignedReviewer: '',
+    }
 
   let worker: Worker | undefined = undefined
 
@@ -50,6 +82,8 @@
     mappingFileType: mappingFileType,
     mappingDelimiter: mappingDelimiter,
     contentPath: ['content'],
+    expectedColumns: expectedColumns,
+    additionalFields: additionalFields,
   })
 
   const workerMess = writable<boolean>(false)
@@ -208,10 +242,16 @@
     if (mapping != undefined && map == true) {
       worker?.postMessage({
         mapping: mapping,
+        expectedColumns: expectedColumns,
         columns: $columns,
       })
       map = false
     }
+  }
+
+  $: {
+    $selectedRow
+    $selectedRowPage = Number($selectedRow) - (($pagination.currentPage - 1) * $pagination.rowsPerPage)
   }
 
   onMount(loadWorker)
