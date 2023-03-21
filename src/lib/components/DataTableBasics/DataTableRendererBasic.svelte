@@ -14,8 +14,10 @@
   import { onMount } from 'svelte'
   import type ITableData from '$lib/interfaces/ITableData'
   import Editor from '../Extra/Editor.svelte'
+  import type IStatus from '$lib/interfaces/IStatus'
 
   export let hasData: Function,
+    statusScheme: IStatus,
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
     pagination: Writable<IPaginated>,
@@ -38,6 +40,8 @@
   let restingRows = writable<number>(
     $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)
   )
+
+  let chosenColor = writable<Array<any>>([])
 
   let updated = writable<boolean>(false)
 
@@ -232,6 +236,24 @@
                   editClick.set(false)
                 }
               }}
+              style={`${
+                statusScheme.statuses.find(obj => {
+                  if (
+                    obj.status ==
+                    $data?.data[i][
+                      $data?.scheme.indexOf($data.scheme.filter(col => col.column == statusScheme.columnName)[0])
+                    ]
+                  ) {
+                    $chosenColor.push({
+                      row: i,
+                      color: obj.color,
+                    })
+                    return true
+                  }
+                }) != undefined
+                  ? `background-color: ${$chosenColor.find(obj => obj.row == i).color};`
+                  : ''
+              }`}
               class={`${
                 $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
                   ? 'selected-row'

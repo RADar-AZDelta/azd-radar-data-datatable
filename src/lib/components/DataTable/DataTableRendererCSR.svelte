@@ -5,6 +5,7 @@
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
+    import type IStatus from '$lib/interfaces/IStatus'
   import type ITableData from '$lib/interfaces/ITableData'
   import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
@@ -15,6 +16,7 @@
   export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     data: Writable<any> = writable<any>(),
     dataType: string,
+    statusScheme: IStatus,
     delimiter: string = ',',
     downloadable: boolean = false,
     url: string | undefined = undefined,
@@ -282,6 +284,7 @@
       {updateData}
       {ownEditorVisuals}
       {ownEditorMethods}
+      {statusScheme}
     />
   </div>
 </body>
