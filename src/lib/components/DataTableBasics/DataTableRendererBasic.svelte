@@ -237,7 +237,7 @@
               }`}
             >
               {#each $data.data[i] as row, j}
-                {#if $data.scheme[j].visible == true}
+                {#if $data.scheme[i].visible == true}
                   <td class="cell"
                     ><div class="cell-container" data-component="cell-container">
                       <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>

@@ -44,6 +44,13 @@
     totalRows: 10,
   })
   let parentChange = writable<boolean>(false)
+  let mapper = writable<IMapping>({
+    mappingURL: mappingURL,
+    mappingFetchOptions: mappingFetchOptions,
+    mappingFileType: mappingFileType,
+    mappingDelimiter: mappingDelimiter,
+    contentPath: ['content'],
+  })
 
   const workerMess = writable<boolean>(false)
 
@@ -71,6 +78,8 @@
         order: $sorting,
         pagination: $pagination,
         columns: $columns,
+        mapper: $mapper,
+        autoMapping: autoMapping,
       })
       workerMess.set(false)
 
@@ -99,6 +108,7 @@
         order: $sorting,
         pagination: $pagination,
         columns: $columns,
+        mapper: $mapper,
       })
     }
   }
@@ -134,12 +144,6 @@
   const loadWorker = async (): Promise<void> => {
     const w = await import('../../workers/csr.worker?worker')
     worker = new w.default()
-    const mapper: IMapping = {
-      mappingURL: mappingURL,
-      mappingFetchOptions: mappingFetchOptions,
-      mappingFileType: mappingFileType,
-      mappingDelimiter: mappingDelimiter,
-    }
     // Check how the file has been given to the application (REST, Drag & Drop or local in the data folder)
     if (url != undefined) {
       worker.postMessage({
@@ -153,7 +157,7 @@
         pagination: $pagination,
         columns: $columns,
         autoMapping: autoMapping,
-        mapper: mapper,
+        mapper: $mapper,
       })
     } else if (file != undefined) {
       worker.postMessage({
@@ -166,7 +170,7 @@
         pagination: $pagination,
         columns: $columns,
         autoMapping: autoMapping,
-        mapper: mapper,
+        mapper: $mapper,
       })
     } else if (fileName != undefined) {
       worker.postMessage({
@@ -179,7 +183,7 @@
         pagination: $pagination,
         columns: $columns,
         autoMapping: autoMapping,
-        mapper: mapper,
+        mapper: $mapper,
       })
     }
     worker.onmessage = onWorkerMessage

@@ -12,7 +12,11 @@ let originalData: ColumnTable
 let mappedData: Array<Object>
 let cols: IScheme[]
 
-const autoMapper = async (tableData: any, mapping: IMapping, pagination: IPaginated): Promise<object[]> => {
+const autoMapper = async (
+  tableData: [string | number | boolean][],
+  mapping: IMapping,
+  pagination: IPaginated
+): Promise<[string | number | boolean][]> => {
   return new Promise(async (resolve, reject) => {
     let colIndex = 0
     for (let col of cols) {
@@ -20,29 +24,41 @@ const autoMapper = async (tableData: any, mapping: IMapping, pagination: IPagina
         colIndex = cols.indexOf(col)
       }
     }
-    const start = pagination.rowsPerPage * (pagination.currentPage - 1)
-    const end = start + pagination.rowsPerPage
-    const dataMapping = tableData.slice(start, end)
+    const dataMapping = tableData.slice(
+      pagination.rowsPerPage * (pagination.currentPage - 1),
+      pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
+    )
     for (let row of dataMapping) {
       const rowIndex = tableData.indexOf(row)
       const extracted = await editData(row, colIndex, mapping)
-      // @ts-ignore
-      for (let key of Object.keys(extracted.content[0])) {
-        if (cols.filter(col => col.column == key).length == 0) {
-          cols.push({
-            column: key,
-            type: Types.string,
-            editable: true,
-            visible: true,
-          })
+      let content: object | string = extracted
+      if (typeof extracted == 'object') {
+        for (let path of mapping.contentPath) {
+          content = content[path as keyof object]
+        }
+        if (Array.isArray(content) == true) {
+          content = content[0 as keyof object]
         }
       }
-      cols = Array.from(new Set(cols))
-      // @ts-ignore
-      for (let value of Object.values(extracted.content[0])) {
-        tableData[rowIndex].push(value)
+      if (content != undefined) {
+        let count = 3
+        let end = tableData[rowIndex].length
+        for (let key of Object.keys(content)) {
+          if (cols.filter(col => col.column == key).length == 0) {
+            cols.push({
+              column: key,
+              type: Types.string,
+              editable: true,
+              visible: true,
+            })
+          }
+          tableData[rowIndex].splice(count, 0, content[key as keyof object])
+          tableData[rowIndex].splice(count + 1, end)
+          count += 1
+        }
       }
     }
+    cols = Array.from(new Set(cols))
     const table = await transpilerToTableFromArray(tableData, cols)
     mappedData = table.objects()
     resolve(tableData)
@@ -123,9 +139,9 @@ const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], 
 }
 
 const editData = async (data: object, columnIndex: number, mapping: IMapping) => {
-  let sourceName = data[columnIndex as keyof object]
+  let sourceName: string = data[columnIndex as keyof object]
   let url = mapping.mappingURL
-  url += `query=${sourceName}&pageSize=1`
+  url += `query=${sourceName.replaceAll('-', ' ')}&pageSize=1`
   url = encodeURI(url)
   return await extractDataREST(
     false,
@@ -341,8 +357,13 @@ onmessage = async ({
   filter != undefined ? (filters = filter) : (filters = [])
   order != undefined ? (sorts = order) : (sorts = [])
   let orderedData: ColumnTable,
-    filteredData: object[] = [],
-    paginatedData: Object = {},
+    filteredData: any = [],
+    paginatedData: IPaginated = {
+      currentPage: 1,
+      rowsPerPage: 10,
+      totalPages: 1,
+      totalRows: 10,
+    },
     data: object[] = [],
     table: ColumnTable
   if ((getCSV == undefined && originalData == undefined) || originalData == null) {
@@ -359,7 +380,15 @@ onmessage = async ({
       paginatedData = await updatePagination(filteredData, pagination)
     }
     if (autoMapping == true) {
-      data = await autoMapper(filteredData, mapper, pagination)
+      const dataMapping = filteredData.slice(
+        pagination.rowsPerPage * (pagination.currentPage - 1),
+        pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
+      )
+      if (dataMapping[0].length <= 3) {
+        data = await autoMapper(filteredData, mapper, pagination)
+      }
+    } else {
+      data = filteredData
     }
     data = await getDataNeeded(data, pagination)
     await postMessage({
@@ -409,8 +438,18 @@ onmessage = async ({
     orderedData = await orderData(originalData, order)
     filteredData = await filterData(orderedData, filter, cols)
     paginatedData = await updatePagination(filteredData, pagination)
-    // @ts-ignore
-    data = await getDataNeeded(filteredData, paginatedData)
+    const dataMapping = filteredData.slice(
+      pagination.rowsPerPage * (pagination.currentPage - 1),
+      pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
+    )
+    const lastItem = dataMapping.pop()
+    const undefinedCount = lastItem.filter((value: any) => value == undefined)
+    if (autoMapping == true && undefinedCount.length >= 3) {
+      data = await autoMapper(filteredData, mapper, pagination)
+    } else {
+      data = filteredData
+    }
+    data = await getDataNeeded(data, paginatedData)
     await postMessage({
       processedData: {
         data: data,

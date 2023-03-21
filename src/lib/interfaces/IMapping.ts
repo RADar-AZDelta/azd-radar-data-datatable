@@ -3,4 +3,5 @@ export default interface IMapping {
   mappingFetchOptions: object
   mappingFileType: string
   mappingDelimiter: string
+  contentPath: string[]
 }
