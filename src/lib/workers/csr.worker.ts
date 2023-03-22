@@ -6,10 +6,124 @@ import type IScheme from '$lib/interfaces/IScheme'
 import type ISort from '$lib/interfaces/ISort'
 import { desc, escape, fromCSV, fromJSON, loadCSV, table } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
+import type IMapping from '$lib/interfaces/IMapping'
+import type IColumn from '$lib/interfaces/IColumn'
+import { writable } from 'svelte/store'
 
 let originalData: ColumnTable
 let mappedData: Array<Object>
 let cols: IScheme[]
+
+let mappingCount = writable<number>(3)
+
+const addDataToRow = async (
+  obj: object | string,
+  data: [string | number | boolean][],
+  rowIndex: number,
+  startingIndex: number,
+  endingIndex: number,
+  expectedColumns?: IColumn[]
+) => {
+  for (let key of Object.keys(obj)) {
+    let name = key
+    if (expectedColumns == undefined ? true : expectedColumns.filter(col => col.name == key).length != 0) {
+      name = expectedColumns == undefined ? key : expectedColumns?.filter(col => col.name == key)[0].altName
+      if (cols.filter(col => col.column == name).length == 0) {
+        cols.push({
+          column: name,
+          type: Types.string,
+          editable: true,
+          visible: true,
+        })
+        data[rowIndex as keyof object].splice(startingIndex, 0, obj[key as keyof object])
+        data[rowIndex].splice(startingIndex + 1, endingIndex)
+        startingIndex += 1
+      } else {
+        const index = cols.indexOf(cols.filter(col => col.column == name)[0])
+        data[rowIndex as keyof object].splice(index, 1, obj[key as keyof object])
+        startingIndex += 1
+      }
+    }
+  }
+  mappingCount.set(startingIndex)
+  return data
+}
+
+const autoMapper = async (
+  tableData: [string | number | boolean][],
+  mapping: IMapping,
+  pagination: IPaginated
+): Promise<[string | number | boolean][]> => {
+  return new Promise(async (resolve, reject) => {
+    let colIndex = 0
+    for (let col of cols) {
+      if (col.column == 'sourceName') {
+        colIndex = cols.indexOf(col)
+      }
+    }
+    // Get the data that needs to be mapped
+    const dataMapping = tableData.slice(
+      pagination.rowsPerPage * (pagination.currentPage - 1),
+      pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
+    )
+    for (let row of dataMapping) {
+      const rowIndex = tableData.indexOf(row)
+      // Get the data from the Athena API
+      const extracted = await createURL(row, colIndex, mapping)
+      // Get the content from the data from the Athena API
+      let content: object | string = extracted
+      if (typeof extracted == 'object') {
+        for (let path of mapping.contentPath) {
+          content = content[path as keyof object]
+        }
+        if (Array.isArray(content) == true) {
+          content = content[0 as keyof object]
+        }
+      }
+
+      let start = 3
+      let end = tableData[rowIndex].length
+      // Are there fields that need to be added to the table?
+      if (mapping.additionalFields != undefined) {
+        mappingCount.subscribe(value => {
+          start = value
+        })
+        tableData = await addDataToRow(mapping.additionalFields, tableData, rowIndex, start, end)
+      }
+      // Is there content found in the data from the Athena API?
+      if (content != undefined) {
+        mappingCount.subscribe(value => {
+          start = value
+        })
+        tableData = await addDataToRow(content, tableData, rowIndex, start, end, mapping.expectedColumns)
+      }
+    }
+    cols = Array.from(new Set(cols))
+    // Transpile to table for later use
+    const table = await transpilerToTableFromArray(tableData, cols)
+    mappedData = table.objects()
+    resolve(tableData)
+  })
+}
+
+const transpilerToTableFromArray = async (dataArray: Array<any>, columns: IScheme[]): Promise<ColumnTable> => {
+  return new Promise((resolve, reject) => {
+    const columnsArray: string[] = []
+    const dataFound: any = {}
+    for (let col of columns) {
+      columnsArray.push(col.column)
+    }
+    for (let i = 0; i < columnsArray.length; i++) {
+      const d: Array<Object> = []
+      for (let obj of dataArray) {
+        d.push(obj[i])
+      }
+      dataFound[columnsArray[i]] = d
+    }
+    originalData = table(dataFound)
+    resolve(originalData)
+  })
+}
 
 const transpilerToTable = async (dataObject: Array<Object>, originalColumns: IScheme[]): Promise<ColumnTable> => {
   return new Promise((resolve, reject) => {
@@ -42,7 +156,7 @@ const transpilerToTable = async (dataObject: Array<Object>, originalColumns: ISc
 }
 
 const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], total: number): Promise<object[]> => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     let filteredData: object[] = Array.from(new Set(table.objects()))
     if (filteredData.length > 0) {
       for (let i = 0; i < filteredData.length; i++) {
@@ -65,14 +179,28 @@ const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], 
   })
 }
 
-const mappingData = async (mapping: any, columns: IScheme[]): Promise<ColumnTable> => {
+const createURL = async (data: object, columnIndex: number, mapping: IMapping) => {
+  let sourceName: string = data[columnIndex as keyof object]
+  let url = mapping.mappingURL
+  url += `query=${sourceName.replaceAll('-', ' ')}&pageSize=1`
+  url = encodeURI(url)
+  return await extractDataREST(
+    false,
+    url,
+    mapping.mappingFileType,
+    mapping.mappingFetchOptions,
+    mapping.mappingDelimiter
+  )
+}
+
+const mappingData = async (mapping: any, columns: IScheme[], expectedColumns: IColumn[]): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
-    mappedData[mapping.row]['EQUIVALENCE' as keyof Object] = mapping.equivalence
-    mappedData[mapping.row]['Author' as keyof Object] = mapping.author
-    for (let col in mapping.columns) {
-      const colName: string = mapping.columns[col].column
-      const data: any = Array.from(mapping.data)
-      const filteredData: any = data[col]
+    mappedData[mapping.row]['equivalence' as keyof Object] = mapping.equivalence
+    mappedData[mapping.row]['statusSetBy' as keyof Object] = mapping.author
+    for (let col of expectedColumns) {
+      const colName: string = col.altName
+      const index = columns.indexOf(columns.filter((c: IScheme) => c.column == col.name)[0])
+      const filteredData: any = mapping.data[col.name]
       mappedData[mapping.row][colName as keyof Object] = filteredData
     }
     let table = await transpilerToTable(mappedData, columns)
@@ -170,15 +298,20 @@ const getColumns = async (originalColumns: IScheme[]): Promise<IScheme[]> => {
 }
 
 const extractDataREST = async (
+  tableFormat: boolean,
   filePath: string,
   fileType: string,
   fetchOptions: Object,
   delimiter: string
-): Promise<ColumnTable> => {
+) => {
+  let dataReceived: ColumnTable | string | Object
   if (filePath && fileType.toLowerCase() == 'csv') {
     const response = await fetch(filePath, fetchOptions)
     const data = await response.text()
-    originalData = await fromCSV(data, { delimiter: delimiter })
+    dataReceived = await fromCSV(data, { delimiter: delimiter })
+    if (tableFormat == true) dataReceived = await fromCSV(data, { delimiter: delimiter })
+    else dataReceived = data
+    return dataReceived
   } else if (filePath && fileType.toLowerCase() == 'json') {
     const response = await fetch(filePath, fetchOptions)
     let data: string | Object
@@ -187,9 +320,13 @@ const extractDataREST = async (
     } else {
       data = await response.json()
     }
-    originalData = await fromJSON(data, { autoType: true })
+    if (tableFormat == true) dataReceived = await fromJSON(data, { autoType: true })
+    else dataReceived = data
+    return dataReceived
+  } else {
+    dataReceived = table({})
   }
-  return originalData
+  return dataReceived
 }
 
 const extractDataFile = async (fileType: string, file: File, delimiter: string): Promise<ColumnTable> => {
@@ -214,7 +351,9 @@ const getData = async (
   return new Promise(async (resolve, reject) => {
     let extractedData: ColumnTable
     if (method == 'REST') {
-      extractedData = await extractDataREST(filePath, fileType, fetchOptions, delimiter)
+      // @ts-ignore
+      extractedData = await extractDataREST(true, filePath, fileType, fetchOptions, delimiter)
+      originalData = extractedData
       mappedData = extractedData.objects()
     } else if (method == 'file') {
       extractedData = await extractDataFile(fileType, file, delimiter)
@@ -249,7 +388,10 @@ onmessage = async ({
     editData,
     mapping,
     getCSV,
+    autoMapping,
+    mapper,
     columns,
+    expectedColumns,
   },
 }) => {
   let sorts: ISort[]
@@ -257,8 +399,13 @@ onmessage = async ({
   filter != undefined ? (filters = filter) : (filters = [])
   order != undefined ? (sorts = order) : (sorts = [])
   let orderedData: ColumnTable,
-    filteredData: object[] = [],
-    paginatedData: Object = {},
+    filteredData: any = [],
+    paginatedData: IPaginated = {
+      currentPage: 1,
+      rowsPerPage: 10,
+      totalPages: 1,
+      totalRows: 10,
+    },
     data: object[] = [],
     table: ColumnTable
   if ((getCSV == undefined && originalData == undefined) || originalData == null) {
@@ -273,8 +420,19 @@ onmessage = async ({
     }
     if (pagination) {
       paginatedData = await updatePagination(filteredData, pagination)
-      data = await getDataNeeded(filteredData, pagination)
     }
+    if (autoMapping == true) {
+      const dataMapping = filteredData.slice(
+        pagination.rowsPerPage * (pagination.currentPage - 1),
+        pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
+      )
+      if (dataMapping[0].length <= 3) {
+        data = await autoMapper(filteredData, mapper, pagination)
+      }
+    } else {
+      data = filteredData
+    }
+    data = await getDataNeeded(data, pagination)
     await postMessage({
       processedData: {
         data: data,
@@ -293,7 +451,7 @@ onmessage = async ({
     })
   } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
-    table = await mappingData(mapping, columns)
+    table = await mappingData(mapping, columns, expectedColumns)
     table = await orderData(table, sorts)
     data = await filterData(table, filters, cols)
     await postMessage({
@@ -318,11 +476,22 @@ onmessage = async ({
     })
   } else {
     // When manipulation (filtering, sorting and pagination) has been done
-    cols = await getColumns(columns)
+    cols = columns
     orderedData = await orderData(originalData, order)
     filteredData = await filterData(orderedData, filter, cols)
     paginatedData = await updatePagination(filteredData, pagination)
-    data = await getDataNeeded(filteredData, pagination)
+    const dataMapping = filteredData.slice(
+      pagination.rowsPerPage * (pagination.currentPage - 1),
+      pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
+    )
+    const lastItem = dataMapping.pop()
+    const undefinedCount = lastItem.filter((value: any) => value == undefined)
+    if (autoMapping == true && undefinedCount.length >= 3) {
+      data = await autoMapper(filteredData, mapper, pagination)
+    } else {
+      data = filteredData
+    }
+    data = await getDataNeeded(data, paginatedData)
     await postMessage({
       processedData: {
         data: data,

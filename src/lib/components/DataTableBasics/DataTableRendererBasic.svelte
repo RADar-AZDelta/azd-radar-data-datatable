@@ -14,8 +14,10 @@
   import { onMount } from 'svelte'
   import type ITableData from '$lib/interfaces/ITableData'
   import Editor from '../Extra/Editor.svelte'
+  import type IStatus from '$lib/interfaces/IStatus'
 
   export let hasData: Function,
+    statusScheme: IStatus,
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
     pagination: Writable<IPaginated>,
@@ -38,6 +40,8 @@
   let restingRows = writable<number>(
     $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)
   )
+
+  let chosenColor = writable<Array<any>>([])
 
   let updated = writable<boolean>(false)
 
@@ -176,7 +180,9 @@
 
   $: {
     $data, $pagination
-    dataSmallerThanRows.set($data != null ? $data!.data.length < $pagination.rowsPerPage : true)
+    dataSmallerThanRows.set(
+      $data != null ? ($data.data != undefined ? $data.data.length < $pagination.rowsPerPage : true) : true
+    )
     moreRowsThanOnPage.set($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0)
     restingRows.set(
       $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)
@@ -193,7 +199,7 @@
 
 <!-- Create a table with readonly cells -->
 <section class="container is-fluid">
-  {#if $data != null}
+  {#if $data != null && $data.data != undefined && $data.scheme != undefined}
     <div data-component="tablerenderer">
       <div class="table-container">
         <table class="table is-narrow">
@@ -230,6 +236,24 @@
                   editClick.set(false)
                 }
               }}
+              style={`${
+                statusScheme.statuses.find(obj => {
+                  if (
+                    obj.status ==
+                    $data?.data[i][
+                      $data?.scheme.indexOf($data.scheme.filter(col => col.column == statusScheme.columnName)[0])
+                    ]
+                  ) {
+                    $chosenColor.push({
+                      row: i,
+                      color: obj.color,
+                    })
+                    return true
+                  }
+                }) != undefined
+                  ? `background-color: ${$chosenColor.find(obj => obj.row == i).color};`
+                  : ''
+              }`}
               class={`${
                 $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
                   ? 'selected-row'
@@ -237,24 +261,26 @@
               }`}
             >
               {#each $data.data[i] as row, j}
-                {#if $data.scheme[j].visible == true}
-                  <td class="cell"
-                    ><div class="cell-container" data-component="cell-container">
-                      <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
-                      {#if $data.scheme[j].editable == true}
-                        <Editor
-                          col={j}
-                          row={i}
-                          bind:updateData
-                          bind:updated
-                          bind:editClick
-                          bind:editorUpdating
-                          {ownEditorMethods}
-                          {ownEditorVisuals}
-                        />
-                      {/if}
-                    </div></td
-                  >
+                {#if $data.scheme[j] != undefined}
+                  {#if $data.scheme[j].visible == true}
+                    <td class="cell"
+                      ><div class="cell-container" data-component="cell-container">
+                        <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
+                        {#if $data.scheme[j].editable == true}
+                          <Editor
+                            col={j}
+                            row={i}
+                            bind:updateData
+                            bind:updated
+                            bind:editClick
+                            bind:editorUpdating
+                            {ownEditorMethods}
+                            {ownEditorVisuals}
+                          />
+                        {/if}
+                      </div></td
+                    >
+                  {/if}
                 {/if}
               {/each}
             </tr>
