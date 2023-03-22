@@ -80,7 +80,7 @@
   }
 </script>
 
-<button data-component="button-download" on:click={loadWorker}>
+<button class="button is-small" data-component="button-download" on:click={loadWorker}>
   <p>Download CSV</p>
   <img src="/download.svg" alt="Download icon" />
 </button>

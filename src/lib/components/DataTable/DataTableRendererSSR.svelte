@@ -109,20 +109,25 @@
   // Not editable because you get the data from REST and you would need to make a POST request (maybe in the future)
 </script>
 
-{#if downloadable == true}
-  <FileDownload data={$originalData} />
-{/if}
-
-{#if special == true && $pagination.currentPage != 0}
-  <DataTableRendererSpecial
-    {hasData}
-    {rowEvent}
-    bind:filter={singleFilter}
-    bind:sorting={singleSorting}
-    bind:pagination
-    pagesShown={7}
-    bind:parentChange={dataChanged}
-  />
-{:else if special == false}
-  <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting bind:selectedRow {rowEvent} />
-{/if}
+<body>
+  <div>
+    {#if downloadable == true}
+      <FileDownload data={$originalData} />
+    {/if}
+  </div>
+  <div class="container is-fluid">
+    {#if special == true && $pagination.currentPage != 0}
+      <DataTableRendererSpecial
+        {hasData}
+        {rowEvent}
+        bind:filter={singleFilter}
+        bind:sorting={singleSorting}
+        bind:pagination
+        pagesShown={7}
+        bind:parentChange={dataChanged}
+      />
+    {:else if special == false}
+      <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting bind:selectedRow {rowEvent} />
+    {/if}
+  </div>
+</body>
