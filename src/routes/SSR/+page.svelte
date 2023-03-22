@@ -15,15 +15,6 @@
       'Content-Type': 'application/json',
     },
   }
-  const statusScheme: IStatus = {
-    columnName: 'mappingStatus',
-    statuses: [
-      {
-        status: 'APPROVED',
-        color: 'green',
-      },
-    ],
-  }
 
   /*
 		These properties are examples and can be changed to your data
@@ -107,4 +98,4 @@
 
 <h1>RADar-DataTable Demo - REST data</h1>
 <p>This page demonstrates how the already manipulated data gets fetched from the API and rendered in the DataTable.</p>
-<DataTableRendererSsr {url} {statusScheme} {fetchOptions} {transpileData} {pagination} {filters} {sorting} />
+<DataTableRendererSsr {url} {fetchOptions} {transpileData} {pagination} {filters} {sorting} />
