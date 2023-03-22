@@ -1,4 +1,5 @@
 export default interface IColor {
-    status: string
-    color: string
+  row: number
+  color: string
+  priority: number
 }
