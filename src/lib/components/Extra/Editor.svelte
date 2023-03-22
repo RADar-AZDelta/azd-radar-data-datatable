@@ -13,6 +13,7 @@
   let eventListener: string
   let updatedParent: string[] = []
   let parent: any
+  let divField: any
   //   let editClick = writable<boolean>(false)
 
   const editor = async (event: string) => {
@@ -67,6 +68,14 @@
         editor(`${row}-${col}`)
       }
     }}
-    class="button-edit"><img src="/edit.svg" alt="Edit the cell" /></button
+    class="button is-small"><img class="image is-64x64" src="/edit.svg" alt="Edit the cell" /></button
   >
 {/if}
+
+<style>
+  .button {
+    width: 40px;
+    border: none;
+    background: none;
+  }
+</style>

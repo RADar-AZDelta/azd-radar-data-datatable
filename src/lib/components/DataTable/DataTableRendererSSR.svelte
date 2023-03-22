@@ -4,6 +4,7 @@
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
   import type ITableData from '$lib/interfaces/ITableData'
+  import type IStatus from '$lib/interfaces/IStatus'
   import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
@@ -27,7 +28,8 @@
     transpileData: Function | undefined = undefined,
     rowEvent: Function | undefined = undefined,
     selectedRow: Writable<string> = writable(''),
-    downloadable: boolean = false
+    downloadable: boolean = false,
+    statusScheme: IStatus
 
   const originalData = writable<any>()
   let dataChanged = writable<boolean>(false)
@@ -127,7 +129,15 @@
         bind:parentChange={dataChanged}
       />
     {:else if special == false}
-      <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting bind:selectedRow {rowEvent} />
+      <DataTableRendererBasic
+        {statusScheme}
+        {hasData}
+        bind:pagination
+        bind:filters
+        bind:sorting
+        bind:selectedRow
+        {rowEvent}
+      />
     {/if}
   </div>
 </body>

@@ -263,9 +263,11 @@
               {#each $data.data[i] as row, j}
                 {#if $data.scheme[j] != undefined}
                   {#if $data.scheme[j].visible == true}
-                    <td class="cell"
-                      ><div class="cell-container" data-component="cell-container">
-                        <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
+                    <td class="cell">
+                      <div class="field has-addons" data-component="cell-container">
+                        <p class="content" id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">
+                          {row}
+                        </p>
                         {#if $data.scheme[j].editable == true}
                           <Editor
                             col={j}
@@ -278,8 +280,8 @@
                             {ownEditorVisuals}
                           />
                         {/if}
-                      </div></td
-                    >
+                      </div>
+                    </td>
                   {/if}
                 {/if}
               {/each}
@@ -298,5 +300,8 @@
   .container {
     margin-left: 0%;
     margin-right: 0%;
+  }
+  .content {
+    padding-right: 5px;
   }
 </style>

@@ -5,6 +5,7 @@
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
+  import type IStatus from '$lib/interfaces/IStatus'
   import { writable } from 'svelte/store'
 
   const url = writable<string>('https://jsonplaceholder.typicode.com/posts')
@@ -13,6 +14,15 @@
     header: {
       'Content-Type': 'application/json',
     },
+  }
+  const statusScheme: IStatus = {
+    columnName: 'mappingStatus',
+    statuses: [
+      {
+        status: 'APPROVED',
+        color: 'green',
+      },
+    ],
   }
 
   /*
@@ -53,6 +63,7 @@
 
 			Here are the data and the scheme with the columns seperated
 		*/
+
     const scheme: IScheme[] = []
     const dataFound: [string, any][][] = []
     for (let key in data[0]) {
@@ -96,4 +107,4 @@
 
 <h1>RADar-DataTable Demo - REST data</h1>
 <p>This page demonstrates how the already manipulated data gets fetched from the API and rendered in the DataTable.</p>
-<DataTableRendererSsr {url} {fetchOptions} {transpileData} {pagination} {filters} {sorting} />
+<DataTableRendererSsr {url} {statusScheme} {fetchOptions} {transpileData} {pagination} {filters} {sorting} />
