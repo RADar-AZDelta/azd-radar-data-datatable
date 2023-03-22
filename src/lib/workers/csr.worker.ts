@@ -428,6 +428,8 @@ onmessage = async ({
       )
       if (dataMapping[0].length <= 3) {
         data = await autoMapper(filteredData, mapper, pagination)
+      } else {
+        data = filteredData
       }
     } else {
       data = filteredData

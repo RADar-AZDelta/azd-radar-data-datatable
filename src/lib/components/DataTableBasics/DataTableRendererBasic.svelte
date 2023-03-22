@@ -15,9 +15,10 @@
   import type ITableData from '$lib/interfaces/ITableData'
   import Editor from '../Extra/Editor.svelte'
   import type IStatus from '$lib/interfaces/IStatus'
+  import type IColor from '$lib/interfaces/IColor'
 
   export let hasData: Function,
-    statusScheme: IStatus,
+    statusScheme: IStatus[],
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
     pagination: Writable<IPaginated>,
@@ -41,7 +42,8 @@
     $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)
   )
 
-  let chosenColor = writable<Array<any>>([])
+  let chosenColor = writable<IColor[]>([])
+  let chosenColorArray = writable<Array<any>>([])
 
   let updated = writable<boolean>(false)
 
@@ -195,6 +197,49 @@
       updated.set(true)
     })
   })
+
+  $: {
+    statusScheme
+    let count = 0
+    for (let status of statusScheme) {
+      status.priority += count
+      // count += 1
+    }
+  }
+
+  function checkStatuses(row: number) {
+    const allStatuses = statusScheme.filter(obj => {
+      if (
+        obj.status.toLowerCase() ==
+        $data?.data[row][
+          $data?.scheme.indexOf($data.scheme.filter(col => col.column.toLowerCase() == obj.column.toLowerCase())[0])
+        ].toLowerCase()
+      ) {
+        return obj
+      }
+    })
+    if (allStatuses.length > 0) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  function getColorFromStatus(row: number) {
+    const allStatuses = statusScheme.filter(obj => {
+      if (
+        obj.status.toLowerCase() ==
+        $data?.data[row][
+          $data?.scheme.indexOf($data.scheme.filter(col => col.column.toLowerCase() == obj.column.toLowerCase())[0])
+        ].toLowerCase()
+      ) {
+        return obj
+      }
+    })
+    const priority = Math.max(...allStatuses.map(status => status.priority))
+    const status = allStatuses.filter(status => status.priority == priority)[0]
+    return status.color
+  }
 </script>
 
 <!-- Create a table with readonly cells -->
@@ -236,24 +281,7 @@
                   editClick.set(false)
                 }
               }}
-              style={`${
-                statusScheme.statuses.find(obj => {
-                  if (
-                    obj.status ==
-                    $data?.data[i][
-                      $data?.scheme.indexOf($data.scheme.filter(col => col.column == statusScheme.columnName)[0])
-                    ]
-                  ) {
-                    $chosenColor.push({
-                      row: i,
-                      color: obj.color,
-                    })
-                    return true
-                  }
-                }) != undefined
-                  ? `background-color: ${$chosenColor.find(obj => obj.row == i).color};`
-                  : ''
-              }`}
+              style={`${checkStatuses(i) ? `background-color: ${getColorFromStatus(i)};` : ''}`}
               class={`${
                 $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
                   ? 'selected-row'

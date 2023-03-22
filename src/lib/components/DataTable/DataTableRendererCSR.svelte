@@ -16,7 +16,7 @@
   export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     data: Writable<any> = writable<any>(),
     dataType: string,
-    statusScheme: IStatus,
+    statusScheme: IStatus[],
     delimiter: string = ',',
     downloadable: boolean = false,
     url: string | undefined = undefined,

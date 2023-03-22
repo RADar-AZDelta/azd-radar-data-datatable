@@ -1,6 +1,6 @@
-import type IColor from "./IColor"
-
 export default interface IStatus {
-    columnName: string
-    statuses: IColor[]
+  column: string
+  status: string
+  color: string
+  priority: number
 }
