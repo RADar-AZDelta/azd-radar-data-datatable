@@ -305,89 +305,96 @@
     >
       <th slot="customHeader">Actions</th>
       <td slot="customColumn" let:row>
-        <Action
-          name="&#10003"
-          bind:selectedRow
-          bind:worker
-          bind:parentChange
-          {row}
-          updateColumns={[
-            {
-              name: 'mappingStatus',
-              altName: 'mappingStatus',
-              data: 'APPROVED',
-            },
-            {
-              name: 'assignedReviewer',
-              altName: 'assignedReviewer',
-              data: getAuthor(),
-            },
-          ]}
-        />
-        <Action
-          name="&#127988"
-          bind:selectedRow
-          bind:worker
-          bind:parentChange
-          {row}
-          updateColumns={[
-            {
-              name: 'mappingStatus',
-              altName: 'mappingStatus',
-              data: 'FLAGGED',
-            },
-            {
-              name: 'assignedReviewer',
-              altName: 'assignedReviewer',
-              data: getAuthor(),
-            },
-          ]}
-        />
+        <div class="field has-addons">
+          <Action
+            name="&#10003"
+            bind:selectedRow
+            bind:worker
+            bind:parentChange
+            {row}
+            updateColumns={[
+              {
+                name: 'mappingStatus',
+                altName: 'mappingStatus',
+                data: 'APPROVED',
+              },
+              {
+                name: 'assignedReviewer',
+                altName: 'assignedReviewer',
+                data: getAuthor(),
+              },
+            ]}
+          />
+          <Action
+            name="&#127988"
+            bind:selectedRow
+            bind:worker
+            bind:parentChange
+            {row}
+            updateColumns={[
+              {
+                name: 'mappingStatus',
+                altName: 'mappingStatus',
+                data: 'FLAGGED',
+              },
+              {
+                name: 'assignedReviewer',
+                altName: 'assignedReviewer',
+                data: getAuthor(),
+              },
+            ]}
+          />
+        </div>
       </td></DataTableRendererBasic
     >
   </div>
-  <ActionPage
-    name="Approve page"
-    firstRow={($pagination.currentPage - 1) * $pagination.rowsPerPage}
-    lastRow={$pagination.currentPage * $pagination.rowsPerPage - 1}
-    updateColumns={[
-      {
-        name: 'mappingStatus',
-        altName: 'mappingStatus',
-        data: 'APPROVED',
-      },
-      {
-        name: 'assignedReviewer',
-        altName: 'assignedReviewer',
-        data: getAuthor(),
-      },
-    ]}
-    bind:worker
-    bind:parentChange
-  />
-  <ActionPage
-    name="Flag page"
-    firstRow={($pagination.currentPage - 1) * $pagination.rowsPerPage}
-    lastRow={$pagination.currentPage * $pagination.rowsPerPage - 1}
-    updateColumns={[
-      {
-        name: 'mappingStatus',
-        altName: 'mappingStatus',
-        data: 'FLAGGED',
-      },
-      {
-        name: 'assignedReviewer',
-        altName: 'assignedReviewer',
-        data: getAuthor(),
-      },
-    ]}
-    bind:worker
-    bind:parentChange
-  />
+  <div class="buttons is-right">
+    <ActionPage
+      name="Approve page"
+      firstRow={($pagination.currentPage - 1) * $pagination.rowsPerPage}
+      lastRow={$pagination.currentPage * $pagination.rowsPerPage - 1}
+      updateColumns={[
+        {
+          name: 'mappingStatus',
+          altName: 'mappingStatus',
+          data: 'APPROVED',
+        },
+        {
+          name: 'assignedReviewer',
+          altName: 'assignedReviewer',
+          data: getAuthor(),
+        },
+      ]}
+      bind:worker
+      bind:parentChange
+    />
+    <ActionPage
+      name="Flag page"
+      firstRow={($pagination.currentPage - 1) * $pagination.rowsPerPage}
+      lastRow={$pagination.currentPage * $pagination.rowsPerPage - 1}
+      updateColumns={[
+        {
+          name: 'mappingStatus',
+          altName: 'mappingStatus',
+          data: 'FLAGGED',
+        },
+        {
+          name: 'assignedReviewer',
+          altName: 'assignedReviewer',
+          data: getAuthor(),
+        },
+      ]}
+      bind:worker
+      bind:parentChange
+    />
+  </div>
 </section>
 
 <style>
   section {
-    font-size: 12px;
+    font-size: 11px;
+  }
+  .buttons {
+    margin-right: 15px;
   }
 </style>

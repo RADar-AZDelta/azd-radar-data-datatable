@@ -1,11 +1,31 @@
 <script lang="ts">
   import type IScheme from '$lib/interfaces/IScheme'
-  import { each } from 'svelte/internal'
+  import { each, onMount } from 'svelte/internal'
   import { writable, type Writable } from 'svelte/store'
   export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     parentChange: Writable<boolean>
 
-  const hiddenColumns = ['sourceAutoAssignedConceptIds', 'ADD_INFO:additionalInfo', 'ADD_INFO:prescriptionID', 'ADD_INFO:ATC', 'matchScore', 'mappingStatus', 'statusSetOn', 'comment', 'createdBy', 'createdOn']
+  const hiddenColumns = [
+    'sourceAutoAssignedConceptIds',
+    'matchScore',
+    'mappingStatus',
+    'statusSetBy',
+    'statusSetOn',
+    'comment',
+    'createdBy',
+    'createdOn',
+    'domainId',
+  ]
+  const checkColumns = (cols: IScheme[]) => {
+    for (let column of cols) {
+      column.visible = !hiddenColumns.includes(column.column)
+    }
+    $columns = cols
+  }
+
+  $: {
+    checkColumns($columns)
+  }
 </script>
 
 <section>

@@ -68,7 +68,7 @@
         editor(`${row}-${col}`)
       }
     }}
-    class="button is-small"><img class="image is-64x64" src="/edit.svg" alt="Edit the cell" /></button
+    class="button is-small"><img class="image is-16x16" src="/edit.svg" alt="Edit the cell" /></button
   >
 {/if}
 
@@ -77,5 +77,7 @@
     width: 40px;
     border: none;
     background: none;
+    padding-right: 5px;
+    padding-left: 5px;
   }
 </style>

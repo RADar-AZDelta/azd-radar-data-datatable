@@ -339,4 +339,11 @@
   .content {
     padding-right: 5px;
   }
+  .cell {
+    padding: 1px 1px 1px 1px;
+    vertical-align: middle;
+  }
+  tr {
+    line-height: 10px;
+  }
 </style>

@@ -31,8 +31,10 @@
 <button class="button is-small" on:click={loadWorker}>{name}</button>
 
 <style>
-    .button {
-        border: 0;
-        background-color: inherit;
-    }
+  .button {
+    border: 0;
+    background-color: inherit;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
 </style>

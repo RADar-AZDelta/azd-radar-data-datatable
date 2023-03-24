@@ -26,4 +26,7 @@
   }
 </script>
 
-<button data-component="button-approve" on:click={loadWorker}>{name}</button>
+<button class="button is-small" data-component="button-approve" on:click={loadWorker}>{name}</button>
+
+<style>
+</style>
