@@ -5,13 +5,15 @@
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
-    import type IStatus from '$lib/interfaces/IStatus'
+  import type IStatus from '$lib/interfaces/IStatus'
   import type ITableData from '$lib/interfaces/ITableData'
   import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
+  import Approve from '../Approve/Approve.svelte'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import ShowColumns from '../Extra/ShowColumns.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
+  import Flag from '../Flag/Flag.svelte'
 
   export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     data: Writable<any> = writable<any>(),
@@ -66,7 +68,6 @@
       createdOn: new Date().getTime(),
       assignedReviewer: '',
     }
-
   let worker: Worker | undefined = undefined
 
   let filters = writable<Array<IFilter>>([])
@@ -253,13 +254,13 @@
 
   $: {
     $selectedRow
-    $selectedRowPage = Number($selectedRow) - (($pagination.currentPage - 1) * $pagination.rowsPerPage)
+    $selectedRowPage = Number($selectedRow) - ($pagination.currentPage - 1) * $pagination.rowsPerPage
   }
 
   onMount(loadWorker)
 </script>
 
-<body>
+<section>
   <div id="download">
     {#if downloadable == true}
       <div data-component="download-container">
@@ -287,10 +288,12 @@
       {statusScheme}
     />
   </div>
-</body>
+  <Approve bind:selectedRow bind:worker bind:parentChange />
+  <Flag bind:selectedRow bind:worker bind:parentChange />
+</section>
 
 <style>
-  body {
-    font-size: 10px;
+  section {
+    font-size: 12px;
   }
 </style>
