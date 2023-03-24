@@ -1,5 +1,5 @@
 <script lang="ts">
-  import '$lib/styles/table.scss'
+  // import '$lib/styles/table.scss'
   import Sorting from './Sorting.svelte'
   import Pagination from './Pagination.svelte'
   import type ISort from '$lib/interfaces/ISort'

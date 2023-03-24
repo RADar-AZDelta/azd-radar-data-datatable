@@ -42,9 +42,6 @@
     $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)
   )
 
-  let chosenColor = writable<IColor[]>([])
-  let chosenColorArray = writable<Array<any>>([])
-
   let updated = writable<boolean>(false)
 
   const updateSorting = async (col: string, direction: number): Promise<void> => {
@@ -253,6 +250,9 @@
       <div class="table-container">
         <table class="table is-narrow">
           <tr>
+            {#if $$slots.customHeader}
+              <slot name="customHeader" />
+            {/if}
             {#each $data.scheme as info}
               {#if info.visible == true}
                 <th>
@@ -292,6 +292,9 @@
                   : ''
               }`}
             >
+              {#if $$slots.customColumn}
+                <slot row={i} name="customColumn" />
+              {/if}
               {#each $data.data[i] as row, j}
                 {#if $data.scheme[j] != undefined}
                   {#if $data.scheme[j].visible == true}

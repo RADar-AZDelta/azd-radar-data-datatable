@@ -1,4 +1,4 @@
-import type IColumn from './IColumn'
+import type IColumnName from './IColumnName'
 
 export default interface IMapping {
   mappingURL: string
@@ -6,6 +6,6 @@ export default interface IMapping {
   mappingFileType: string
   mappingDelimiter: string
   contentPath: string[]
-  expectedColumns: IColumn[]
+  expectedColumns: IColumnName[]
   additionalFields?: object
 }

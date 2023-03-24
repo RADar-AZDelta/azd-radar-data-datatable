@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type IColumn from '$lib/interfaces/IColumn'
+  import type IColumnName from '$lib/interfaces/IColumnName'
   import type IFilter from '$lib/interfaces/IFilter'
   import type IMapping from '$lib/interfaces/IMapping'
   import type IPaginated from '$lib/interfaces/IPaginated'
@@ -9,14 +9,16 @@
   import type ITableData from '$lib/interfaces/ITableData'
   import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
-  import Approve from '../Approve/Approve.svelte'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
+  import Action from '../Extra/Action.svelte'
   import ShowColumns from '../Extra/ShowColumns.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
-  import Flag from '../Flag/Flag.svelte'
+  import { browser } from '$app/environment'
+  import ActionPage from '../Extra/ActionPage.svelte'
 
   export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     data: Writable<any> = writable<any>(),
+    getAuthorEvent: Function | undefined = undefined,
     dataType: string,
     statusScheme: IStatus[],
     delimiter: string = ',',
@@ -38,7 +40,7 @@
     mappingFetchOptions: object = {},
     mappingFileType: string = 'json',
     mappingDelimiter: string = ',',
-    expectedColumns: Array<IColumn> = [
+    expectedColumns: Array<IColumnName> = [
       {
         name: 'id',
         altName: 'conceptId',
@@ -97,6 +99,20 @@
     The user needs to give some params to this component like URL to know where to fetch the data, fetchOptions to know how to fetch.
     The last param is optional but recommended and this is a function the user creates to manipulate the data to the given format.
   */
+
+  const getAuthor = () => {
+    let auth
+    if (browser == true) {
+      if (localStorage.getItem('author') !== null) {
+        auth = localStorage.getItem('author')
+      } else {
+        if (getAuthorEvent != null) getAuthorEvent()
+        else console.warn('No author found')
+      }
+    } else auth = 'SSR author'
+
+    return auth
+  }
 
   const getData = async (): Promise<ITableData> => {
     return new Promise(async (resolve, reject) => {
@@ -170,10 +186,10 @@
       rowEvent(null, false)
       if (data.data.processedData.update == true) {
         parentChange.set(true)
-        setTimeout(function () {
-          // Add a class to the row that has been updated
-          document.getElementById(mapping.row)?.classList.add('mapped')
-        }, 0)
+        // setTimeout(function () {
+        //   // Add a class to the row that has been updated
+        //   document.getElementById(mapping.row)?.classList.add('mapped')
+        // }, 0)
       }
     }
   }
@@ -286,10 +302,88 @@
       {ownEditorVisuals}
       {ownEditorMethods}
       {statusScheme}
-    />
+    >
+      <th slot="customHeader">Actions</th>
+      <td slot="customColumn" let:row>
+        <Action
+          name="&#10003"
+          bind:selectedRow
+          bind:worker
+          bind:parentChange
+          {row}
+          updateColumns={[
+            {
+              name: 'mappingStatus',
+              altName: 'mappingStatus',
+              data: 'APPROVED',
+            },
+            {
+              name: 'assignedReviewer',
+              altName: 'assignedReviewer',
+              data: getAuthor(),
+            },
+          ]}
+        />
+        <Action
+          name="&#127988"
+          bind:selectedRow
+          bind:worker
+          bind:parentChange
+          {row}
+          updateColumns={[
+            {
+              name: 'mappingStatus',
+              altName: 'mappingStatus',
+              data: 'FLAGGED',
+            },
+            {
+              name: 'assignedReviewer',
+              altName: 'assignedReviewer',
+              data: getAuthor(),
+            },
+          ]}
+        />
+      </td></DataTableRendererBasic
+    >
   </div>
-  <Approve bind:selectedRow bind:worker bind:parentChange />
-  <Flag bind:selectedRow bind:worker bind:parentChange />
+  <ActionPage
+    name="Approve page"
+    firstRow={($pagination.currentPage - 1) * $pagination.rowsPerPage}
+    lastRow={$pagination.currentPage * $pagination.rowsPerPage - 1}
+    updateColumns={[
+      {
+        name: 'mappingStatus',
+        altName: 'mappingStatus',
+        data: 'APPROVED',
+      },
+      {
+        name: 'assignedReviewer',
+        altName: 'assignedReviewer',
+        data: getAuthor(),
+      },
+    ]}
+    bind:worker
+    bind:parentChange
+  />
+  <ActionPage
+    name="Flag page"
+    firstRow={($pagination.currentPage - 1) * $pagination.rowsPerPage}
+    lastRow={$pagination.currentPage * $pagination.rowsPerPage - 1}
+    updateColumns={[
+      {
+        name: 'mappingStatus',
+        altName: 'mappingStatus',
+        data: 'FLAGGED',
+      },
+      {
+        name: 'assignedReviewer',
+        altName: 'assignedReviewer',
+        data: getAuthor(),
+      },
+    ]}
+    bind:worker
+    bind:parentChange
+  />
 </section>
 
 <style>

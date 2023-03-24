@@ -7,7 +7,7 @@ import type ISort from '$lib/interfaces/ISort'
 import { desc, escape, fromCSV, fromJSON, loadCSV, table } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 import type IMapping from '$lib/interfaces/IMapping'
-import type IColumn from '$lib/interfaces/IColumn'
+import type IColumnName from '$lib/interfaces/IColumnName'
 import { writable } from 'svelte/store'
 
 let originalData: ColumnTable
@@ -22,7 +22,7 @@ const addDataToRow = async (
   rowIndex: number,
   startingIndex: number,
   endingIndex: number,
-  expectedColumns?: IColumn[]
+  expectedColumns?: IColumnName[]
 ) => {
   for (let key of Object.keys(obj)) {
     let name = key
@@ -193,13 +193,38 @@ const createURL = async (data: object, columnIndex: number, mapping: IMapping) =
   )
 }
 
-const manipulateData = async (mapping: any, columns: IScheme[], expectedColumns: IColumn[]): Promise<ColumnTable> => {
+const manipulateData = async (
+  mapping: any,
+  columns: IScheme[],
+  expectedColumns: IColumnName[]
+): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
     for (let col of expectedColumns) {
-      console.log("COLUMN ", col, " DATA ", mapping.data[col.name])
       const colName: string = col.altName
       const filteredData: any = mapping.data[col.name]
       mappedData[mapping.row][colName as keyof Object] = filteredData
+    }
+    let table = await transpilerToTable(mappedData, columns)
+    resolve(table)
+  })
+}
+
+const manipulateDataUpdate = async (action: any, columns: IScheme[]): Promise<ColumnTable> => {
+  return new Promise(async (resolve, reject) => {
+    for (let column of action.expectedColumns) {
+      mappedData[action.row][column.altName as keyof Object] = column.data
+    }
+    let table = await transpilerToTable(mappedData, columns)
+    resolve(table)
+  })
+}
+
+const manipulateDataPage = async (action: any, columns: IScheme[]): Promise<ColumnTable> => {
+  return new Promise(async (resolve, reject) => {
+    for (let row = action.startRow; row <= action.endRow; row++) {
+      for (let column of action.expectedColumns) {
+        mappedData[row][column.altName as keyof Object] = column.data
+      }
     }
     let table = await transpilerToTable(mappedData, columns)
     resolve(table)
@@ -390,8 +415,8 @@ onmessage = async ({
     mapper,
     columns,
     expectedColumns,
-    approving,
-    flagging,
+    action,
+    actionPage,
   },
 }) => {
   let sorts: ISort[]
@@ -435,6 +460,7 @@ onmessage = async ({
       data = filteredData
     }
     data = await getDataNeeded(data, pagination)
+    console.log("POST MESSAGE")
     await postMessage({
       processedData: {
         data: data,
@@ -443,10 +469,9 @@ onmessage = async ({
         origin: 'initial',
       },
     })
-  } else if (approving && originalData !== undefined && originalData !== null) {
-    console.log("APPROVING")
-    table = await manipulateData(approving, cols, expectedColumns)
-    if(sorts){
+  } else if (action && originalData !== undefined && originalData !== null) {
+    table = await manipulateDataUpdate(action, cols)
+    if (sorts) {
       orderedData = await orderData(table, sorts)
       filteredData = await filterData(orderedData, filters, cols)
     } else {
@@ -457,23 +482,23 @@ onmessage = async ({
       processedData: {
         data: data,
         columns: cols,
+        update: true,
       },
     })
-  } else if (flagging && originalData !== undefined && originalData !== null) {
-    console.log("FLAGGED")
-    console.log(expectedColumns)
-    table = await manipulateData(flagging, cols, expectedColumns)
-    if(sorts){
+  } else if (actionPage && originalData !== undefined && originalData !== null) {
+    table = await manipulateDataPage(actionPage, cols)
+    if (sorts) {
       orderedData = await orderData(table, sorts)
       filteredData = await filterData(orderedData, filters, cols)
     } else {
-      filteredData = await filterData(table, filters, cols)
+      filteredData = await filteredData(table, filters, cols)
     }
     data = filteredData
     await postMessage({
       processedData: {
         data: data,
         columns: cols,
+        update: true,
       },
     })
   } else if (getCSV == true && originalData !== undefined && originalData !== null) {
