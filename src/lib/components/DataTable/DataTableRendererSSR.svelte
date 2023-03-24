@@ -29,7 +29,7 @@
     rowEvent: Function | undefined = undefined,
     selectedRow: Writable<string> = writable(''),
     downloadable: boolean = false,
-    statusScheme: IStatus
+    statusScheme: IStatus[]
 
   const originalData = writable<any>()
   let dataChanged = writable<boolean>(false)

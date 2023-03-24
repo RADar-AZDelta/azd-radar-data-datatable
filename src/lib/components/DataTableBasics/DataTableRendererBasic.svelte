@@ -210,12 +210,16 @@
   function checkStatuses(row: number) {
     const allStatuses = statusScheme.filter(obj => {
       if (
-        obj.status.toLowerCase() ==
-        $data?.data[row][
-          $data?.scheme.indexOf($data.scheme.filter(col => col.column.toLowerCase() == obj.column.toLowerCase())[0])
-        ].toLowerCase()
+        $data?.scheme.indexOf($data.scheme.filter(col => col.column.toLowerCase() == obj.column.toLowerCase())[0]) != -1
       ) {
-        return obj
+        if (
+          obj.status.toLowerCase() ==
+          $data?.data[row][
+            $data?.scheme.indexOf($data.scheme.filter(col => col.column.toLowerCase() == obj.column.toLowerCase())[0])
+          ].toLowerCase()
+        ) {
+          return obj
+        }
       }
     })
     if (allStatuses.length > 0) {
