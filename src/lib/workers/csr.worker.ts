@@ -193,13 +193,11 @@ const createURL = async (data: object, columnIndex: number, mapping: IMapping) =
   )
 }
 
-const mappingData = async (mapping: any, columns: IScheme[], expectedColumns: IColumn[]): Promise<ColumnTable> => {
+const manipulateData = async (mapping: any, columns: IScheme[], expectedColumns: IColumn[]): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
-    mappedData[mapping.row]['equivalence' as keyof Object] = mapping.equivalence
-    mappedData[mapping.row]['statusSetBy' as keyof Object] = mapping.author
     for (let col of expectedColumns) {
+      console.log("COLUMN ", col, " DATA ", mapping.data[col.name])
       const colName: string = col.altName
-      const index = columns.indexOf(columns.filter((c: IScheme) => c.column == col.name)[0])
       const filteredData: any = mapping.data[col.name]
       mappedData[mapping.row][colName as keyof Object] = filteredData
     }
@@ -392,6 +390,8 @@ onmessage = async ({
     mapper,
     columns,
     expectedColumns,
+    approving,
+    flagging,
   },
 }) => {
   let sorts: ISort[]
@@ -443,6 +443,39 @@ onmessage = async ({
         origin: 'initial',
       },
     })
+  } else if (approving && originalData !== undefined && originalData !== null) {
+    console.log("APPROVING")
+    table = await manipulateData(approving, cols, expectedColumns)
+    if(sorts){
+      orderedData = await orderData(table, sorts)
+      filteredData = await filterData(orderedData, filters, cols)
+    } else {
+      filteredData = await filterData(table, filters, cols)
+    }
+    data = filteredData
+    await postMessage({
+      processedData: {
+        data: data,
+        columns: cols,
+      },
+    })
+  } else if (flagging && originalData !== undefined && originalData !== null) {
+    console.log("FLAGGED")
+    console.log(expectedColumns)
+    table = await manipulateData(flagging, cols, expectedColumns)
+    if(sorts){
+      orderedData = await orderData(table, sorts)
+      filteredData = await filterData(orderedData, filters, cols)
+    } else {
+      filteredData = await filterData(table, filters, cols)
+    }
+    data = filteredData
+    await postMessage({
+      processedData: {
+        data: data,
+        columns: cols,
+      },
+    })
   } else if (getCSV == true && originalData !== undefined && originalData !== null) {
     // When download button was clicked
     const file = originalData.toCSV({ delimiter: ',' })
@@ -453,7 +486,7 @@ onmessage = async ({
     })
   } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
-    table = await mappingData(mapping, columns, expectedColumns)
+    table = await manipulateData(mapping, columns, expectedColumns)
     table = await orderData(table, sorts)
     data = await filterData(table, filters, cols)
     await postMessage({

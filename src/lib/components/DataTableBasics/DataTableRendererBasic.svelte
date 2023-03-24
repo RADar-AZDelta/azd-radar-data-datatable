@@ -292,7 +292,7 @@
                 {#if $data.scheme[j] != undefined}
                   {#if $data.scheme[j].visible == true}
                     <td class="cell"
-                      ><div class="cell-container" data-component="cell-container">
+                      ><div data-component="cell-container">
                         <p id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">{row}</p>
                         {#if $data.scheme[j].editable == true}
                           <Editor

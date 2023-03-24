@@ -7,9 +7,11 @@
   import type IPaginated from '$lib/interfaces/IPaginated'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
+  import type IStatus from '$lib/interfaces/IStatus'
 
   export let data: Writable<[string, any][][]>,
     columns: IScheme[],
+    statusScheme: IStatus[],
     downloadable: boolean = false,
     rowEvent: Function | undefined = undefined,
     ownEditorVisuals: any = undefined,
@@ -205,6 +207,7 @@
 {/if}
 
 <DataTableRendererBasic
+  {statusScheme}
   {hasData}
   {rowEvent}
   bind:filters
