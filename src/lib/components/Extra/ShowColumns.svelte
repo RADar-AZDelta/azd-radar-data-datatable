@@ -16,6 +16,7 @@
     'createdOn',
     'domainId',
   ]
+  //Change so it can be unchecked
   const checkColumns = (cols: IScheme[]) => {
     for (let column of cols) {
       column.visible = !hiddenColumns.includes(column.column)
