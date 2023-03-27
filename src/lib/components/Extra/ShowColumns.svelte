@@ -12,17 +12,25 @@
     'ADD_INFO:ATC',
     'matchScore',
     'mappingStatus',
+    'matchScore',
+    'mappingStatus',
+    'statusSetBy',
     'statusSetOn',
     'comment',
     'createdBy',
     'createdOn',
+    'domainId',
   ]
+  //Change so it can be unchecked
+  const checkColumns = (cols: IScheme[]) => {
+    for (let column of cols) {
+      column.visible = !hiddenColumns.includes(column.column)
+    }
+    $columns = cols
+  }
 
   $: {
-    $columns
-    for (let col of $columns) {
-      hiddenColumns.includes(col.column) && col.forceVisibility != true ? (col.visible = false) : (col.visible = true)
-    }
+    checkColumns($columns)
   }
 </script>
 
@@ -36,9 +44,9 @@
             type="checkbox"
             id={column.column}
             bind:checked={column.visible}
-            on:change={(event) => {
+            on:change={event => {
               // @ts-ignore
-              if(event.target.checked == false) column.forceVisibility = true
+              if (event.target.checked == false) column.forceVisibility = true
               else column.forceVisibility = false
               parentChange.set(true)
             }}

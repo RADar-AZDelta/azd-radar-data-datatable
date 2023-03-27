@@ -268,6 +268,13 @@
     margin-right: 0%;
   }
   .content {
-    padding-right: 5px;
+    padding-right: 1px;
+  }
+  .cell {
+    padding: 1px 1px 1px 1px;
+    vertical-align: middle;
+  }
+  tr {
+    line-height: 10px;
   }
 </style>
