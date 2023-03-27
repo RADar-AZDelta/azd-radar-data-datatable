@@ -1,38 +1,10 @@
 <script lang="ts">
   import DataTableRendererCsr from '$lib/components/DataTable/DataTableRendererCSR.svelte'
   import DragAndDrop from '$lib/components/Extra/DragAndDrop.svelte'
-  import type IStatus from '$lib/interfaces/IStatus'
   import { writable } from 'svelte/store'
   import type { PageData } from './$types'
 
   export let data: PageData
-
-  let statuses: IStatus[] = [
-    {
-      column: 'mappingStatus',
-      status: 'APPROVED',
-      color: 'hsl(120, 100%, 75%)',
-      priority: 1,
-    },
-    {
-      column: 'mappingStatus',
-      status: '',
-      color: 'hsl(0, 100%, 75%)',
-      priority: 1,
-    },
-    {
-      column: 'statusSetBy',
-      status: 'Dupulthys Stijn',
-      color: 'hsl(16, 100%, 75%)',
-      priority: 0,
-    },
-    {
-      column: 'statusSetBy',
-      status: 'Kim Denturck',
-      color: 'hsl(240, 100%, 75%)',
-      priority: 0,
-    },
-  ]
 
   const urlJSON = 'data:application/json;base64,' + btoa(JSON.stringify(data.data))
   const urlCSV =
@@ -65,5 +37,5 @@
 
 <DragAndDrop {file} fileExtension="csv" />
 {#if $file != null}
-  <DataTableRendererCsr statusScheme={statuses} file={$file} dataType="csv" {delimiter} />
+  <DataTableRendererCsr file={$file} dataType="csv" {delimiter} />
 {/if}

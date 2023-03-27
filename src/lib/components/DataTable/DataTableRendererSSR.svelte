@@ -19,17 +19,14 @@
     totalPagesPath: string[] | undefined = undefined,
     rowsPerPagePath: string[] | undefined = undefined,
     totalRowsPath: string[] | undefined = undefined,
-    pagination: Writable<IPaginated> = writable<IPaginated>(undefined),
+    pagination: Writable<IPaginated> = writable<IPaginated>(),
     filters: Writable<IFilter[]> = writable<IFilter[]>([]),
     singleFilter: Writable<string> = writable<string>(''),
     sorting: Writable<ISort[]> = writable<ISort[]>([]),
-    singleSorting: Writable<ISort> = writable<ISort>(undefined),
+    singleSorting: Writable<ISort> = writable<ISort>(),
     columns: Writable<IScheme[]> = writable<IScheme[]>([]),
     transpileData: Function | undefined = undefined,
-    rowEvent: Function | undefined = undefined,
-    selectedRow: Writable<string> = writable(''),
-    downloadable: boolean = false,
-    statusScheme: IStatus[]
+    downloadable: boolean = false
 
   const originalData = writable<any>()
   let dataChanged = writable<boolean>(false)
@@ -117,27 +114,50 @@
       <FileDownload data={$originalData} />
     {/if}
   </div>
-  <div class="container is-fluid">
+  <div class="container">
     {#if special == true && $pagination.currentPage != 0}
       <DataTableRendererSpecial
         {hasData}
-        {rowEvent}
         bind:filter={singleFilter}
         bind:sorting={singleSorting}
         bind:pagination
         pagesShown={7}
         bind:parentChange={dataChanged}
-      />
+      >
+        <slot
+          name="columns"
+          slot="columns"
+          let:columns
+          let:sorting
+          let:updateSorting
+          let:filter
+          {columns}
+          {sorting}
+          {updateSorting}
+          {filter}
+        />
+        <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
+      </DataTableRendererSpecial>
     {:else if special == false}
-      <DataTableRendererBasic
-        {statusScheme}
-        {hasData}
-        bind:pagination
-        bind:filters
-        bind:sorting
-        bind:selectedRow
-        {rowEvent}
-      />
+      <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting>
+        <slot
+          name="columns"
+          slot="columns"
+          let:columns
+          let:sorting
+          let:updateSorting
+          let:deleteFilter
+          let:updateFiltering
+          let:filters
+          {columns}
+          {sorting}
+          {updateSorting}
+          {deleteFilter}
+          {updateFiltering}
+          {filters}
+        />
+        <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
+      </DataTableRendererBasic>
     {/if}
   </div>
 </body>

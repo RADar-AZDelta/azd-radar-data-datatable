@@ -1,95 +1,42 @@
 <script lang="ts">
-  import type IColumnName from '$lib/interfaces/IColumnName'
   import type IFilter from '$lib/interfaces/IFilter'
-  import type IMapping from '$lib/interfaces/IMapping'
+  import type IMapper from '$lib/interfaces/IMapper'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
-  import type IStatus from '$lib/interfaces/IStatus'
   import type ITableData from '$lib/interfaces/ITableData'
   import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
-  import Action from '../Extra/Action.svelte'
-  import ShowColumns from '../Extra/ShowColumns.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
-  import { browser } from '$app/environment'
-  import ActionPage from '../Extra/ActionPage.svelte'
 
   export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     data: Writable<any> = writable<any>(),
-    getAuthorEvent: Function | undefined = undefined,
     dataType: string,
-    statusScheme: IStatus[],
     delimiter: string = ',',
     downloadable: boolean = false,
     url: string | undefined = undefined,
     fetchOptions: object | undefined = undefined,
     file: File | undefined = undefined,
     fileName: string | undefined = undefined,
-    rowEvent: Function | undefined = undefined,
-    ownEditorVisuals: any = undefined,
-    ownEditorMethods: any = undefined,
-    updateData: Function | undefined = undefined,
     mapping: any | undefined = undefined,
     map: boolean = false,
     selectedRow: Writable<string> = writable(''),
     selectedRowPage: Writable<number> = writable(0),
-    autoMapping: boolean = true,
-    mappingURL: string = 'https://athena.ohdsi.org/api/v1/concepts?',
-    mappingFetchOptions: object = {},
-    mappingFileType: string = 'json',
-    mappingDelimiter: string = ',',
-    expectedColumns: Array<IColumnName> = [
-      {
-        name: 'id',
-        altName: 'conceptId',
-      },
-      {
-        name: 'name',
-        altName: 'conceptName',
-      },
-      {
-        name: 'domain',
-        altName: 'domainId',
-      },
-    ],
-    additionalFields: object = {
-      sourceAutoAssignedConceptIds: '',
-      'ADD_INFO:additionalInfo': '',
-      'ADD_INFO:prescriptionID': '',
-      'ADD_INFO:ATC': '',
-      matchScore: 1,
-      mappingStatus: '',
-      equivalence: 'EQUAL',
-      statusSetBy: 'USER',
-      statusSetOn: new Date().getTime(),
-      mappingType: 'MAPS_TO',
-      comment: 'AUTO MAPPED',
-      createdBy: 'ctl',
-      createdOn: new Date().getTime(),
-      assignedReviewer: '',
-    }
-  let worker: Worker | undefined = undefined
+    autoMapping: boolean = true
+  export let worker: Worker | undefined = undefined
 
-  let filters = writable<Array<IFilter>>([])
-  let sorting = writable<Array<ISort>>([])
-  let pagination = writable<IPaginated>({
+  export let filters: Writable<Array<IFilter>> = writable([])
+  export let sorting = writable<Array<ISort>>([])
+  export let pagination = writable<IPaginated>({
     currentPage: 1,
     totalPages: 1,
     rowsPerPage: 10,
     totalRows: 10,
   })
-  let parentChange = writable<boolean>(false)
-  let mapper = writable<IMapping>({
-    mappingURL: mappingURL,
-    mappingFetchOptions: mappingFetchOptions,
-    mappingFileType: mappingFileType,
-    mappingDelimiter: mappingDelimiter,
-    contentPath: ['content'],
-    expectedColumns: expectedColumns,
-    additionalFields: additionalFields,
-  })
+  export let updated = writable<boolean>(false)
+  export let parentChange = writable<boolean>(false)
+  export let mapper: Writable<IMapper> = writable<IMapper>()
 
   const workerMess = writable<boolean>(false)
 
@@ -99,20 +46,6 @@
     The user needs to give some params to this component like URL to know where to fetch the data, fetchOptions to know how to fetch.
     The last param is optional but recommended and this is a function the user creates to manipulate the data to the given format.
   */
-
-  const getAuthor = () => {
-    let auth
-    if (browser == true) {
-      if (localStorage.getItem('author') !== null) {
-        auth = localStorage.getItem('author')
-      } else {
-        if (getAuthorEvent != null) getAuthorEvent()
-        else console.warn('No author found')
-      }
-    } else auth = 'SSR author'
-
-    return auth
-  }
 
   const getData = async (): Promise<ITableData> => {
     return new Promise(async (resolve, reject) => {
@@ -149,23 +82,6 @@
     })
   }
 
-  // Create a custom updateData method when there was none given
-  if (updateData == undefined) {
-    updateData = async (index: string, value: string): Promise<void> => {
-      worker?.postMessage({
-        editData: {
-          index: index,
-          value: value,
-        },
-        filter: $filters,
-        order: $sorting,
-        pagination: $pagination,
-        columns: $columns,
-        mapper: $mapper,
-      })
-    }
-  }
-
   const onWorkerMessage = async (data: any): Promise<void> => {
     // Check what has changed and update the stores if needed
     if (data.data.processedData.columns != $columns) $columns = data.data.processedData.columns
@@ -182,15 +98,8 @@
       }
     }
     workerMess.set(true)
-    if (rowEvent != undefined) {
-      rowEvent(null, false)
-      if (data.data.processedData.update == true) {
-        parentChange.set(true)
-        // setTimeout(function () {
-        //   // Add a class to the row that has been updated
-        //   document.getElementById(mapping.row)?.classList.add('mapped')
-        // }, 0)
-      }
+    if (data.data.processedData.update == true) {
+      parentChange.set(true)
     }
   }
 
@@ -261,7 +170,7 @@
     if (mapping != undefined && map == true) {
       worker?.postMessage({
         mapping: mapping,
-        expectedColumns: expectedColumns,
+        expectedColumns: $mapper.expectedColumns,
         columns: $columns,
       })
       map = false
@@ -277,7 +186,30 @@
 </script>
 
 <section>
-  <div id="download">
+  <div id="data">
+    <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange bind:updated>
+      <slot
+        name="columns"
+        slot="columns"
+        let:columns
+        let:sorting
+        let:updateSorting
+        let:deleteFilter
+        let:updateFiltering
+        let:filters
+        {columns}
+        {sorting}
+        {updateSorting}
+        {deleteFilter}
+        {updateFiltering}
+        {filters}
+        {worker}
+      />
+      <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} {worker} />
+    </DataTableRendererBasic>
+  </div>
+  <slot name="extra" {worker} />
+  <div id="download" class="download">
     {#if downloadable == true}
       <div data-component="download-container">
         {#if worker != undefined}
@@ -286,108 +218,14 @@
       </div>
     {/if}
   </div>
-  <div class="container is-fluid" id="checkbox">
-    <ShowColumns bind:columns bind:parentChange />
-  </div>
-  <div id="data">
-    <DataTableRendererBasic
-      {hasData}
-      {rowEvent}
-      bind:filters
-      bind:sorting
-      bind:pagination
-      bind:parentChange
-      bind:selectedRow
-      {updateData}
-      {ownEditorVisuals}
-      {ownEditorMethods}
-      {statusScheme}
-    >
-      <th slot="customHeader">Actions</th>
-      <td slot="customColumn" let:row>
-        <Action
-          name="&#10003"
-          bind:selectedRow
-          bind:worker
-          bind:parentChange
-          {row}
-          updateColumns={[
-            {
-              name: 'mappingStatus',
-              altName: 'mappingStatus',
-              data: 'APPROVED',
-            },
-            {
-              name: 'assignedReviewer',
-              altName: 'assignedReviewer',
-              data: getAuthor(),
-            },
-          ]}
-        />
-        <Action
-          name="&#127988"
-          bind:selectedRow
-          bind:worker
-          bind:parentChange
-          {row}
-          updateColumns={[
-            {
-              name: 'mappingStatus',
-              altName: 'mappingStatus',
-              data: 'FLAGGED',
-            },
-            {
-              name: 'assignedReviewer',
-              altName: 'assignedReviewer',
-              data: getAuthor(),
-            },
-          ]}
-        />
-      </td></DataTableRendererBasic
-    >
-  </div>
-  <ActionPage
-    name="Approve page"
-    firstRow={($pagination.currentPage - 1) * $pagination.rowsPerPage}
-    lastRow={$pagination.currentPage * $pagination.rowsPerPage - 1}
-    updateColumns={[
-      {
-        name: 'mappingStatus',
-        altName: 'mappingStatus',
-        data: 'APPROVED',
-      },
-      {
-        name: 'assignedReviewer',
-        altName: 'assignedReviewer',
-        data: getAuthor(),
-      },
-    ]}
-    bind:worker
-    bind:parentChange
-  />
-  <ActionPage
-    name="Flag page"
-    firstRow={($pagination.currentPage - 1) * $pagination.rowsPerPage}
-    lastRow={$pagination.currentPage * $pagination.rowsPerPage - 1}
-    updateColumns={[
-      {
-        name: 'mappingStatus',
-        altName: 'mappingStatus',
-        data: 'FLAGGED',
-      },
-      {
-        name: 'assignedReviewer',
-        altName: 'assignedReviewer',
-        data: getAuthor(),
-      },
-    ]}
-    bind:worker
-    bind:parentChange
-  />
 </section>
 
 <style>
   section {
     font-size: 12px;
+  }
+
+  .download {
+    margin-top: 2rem;
   }
 </style>

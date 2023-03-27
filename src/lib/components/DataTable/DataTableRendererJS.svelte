@@ -7,29 +7,23 @@
   import type IPaginated from '$lib/interfaces/IPaginated'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
   import FileDownload from '../FileDownload/FileDownload.svelte'
-  import type IStatus from '$lib/interfaces/IStatus'
 
   export let data: Writable<[string, any][][]>,
     columns: IScheme[],
-    statusScheme: IStatus[],
     downloadable: boolean = false,
-    rowEvent: Function | undefined = undefined,
-    ownEditorVisuals: any = undefined,
-    ownEditorMethods: any = undefined,
     updateData: Function | undefined = undefined,
     pagination: Writable<IPaginated> = writable<IPaginated>({
       currentPage: 1,
       totalPages: 1,
       rowsPerPage: 20,
       totalRows: 10,
-    }),
-    selectedRow: Writable<string> = writable('')
+    })
 
   const columnsStore = writable<IScheme[]>(columns)
   const dataStore = writable<[string, any][][]>()
-  let filters = writable<Array<IFilter>>([])
-  let sorting = writable<Array<ISort>>([])
-  let dataChanged = writable<boolean>(false)
+  export let filters = writable<Array<IFilter>>([])
+  export let sorting = writable<Array<ISort>>([])
+  export let dataChanged = writable<boolean>(false)
 
   const setColumnFilters = async (filters: IFilter[]): Promise<void> => {
     let filteredData: [string, any][][] = []
@@ -206,16 +200,22 @@
   </div>
 {/if}
 
-<DataTableRendererBasic
-  {statusScheme}
-  {hasData}
-  {rowEvent}
-  bind:filters
-  bind:sorting
-  bind:pagination
-  bind:parentChange={dataChanged}
-  bind:selectedRow
-  {updateData}
-  {ownEditorVisuals}
-  {ownEditorMethods}
-/>
+<DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange={dataChanged}>
+  <slot
+    name="columns"
+    slot="columns"
+    let:columns
+    let:sorting
+    let:updateSorting
+    let:deleteFilter
+    let:updateFiltering
+    let:filters
+    {columns}
+    {sorting}
+    {updateSorting}
+    {deleteFilter}
+    {updateFiltering}
+    {filters}
+  />
+  <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
+</DataTableRendererBasic>

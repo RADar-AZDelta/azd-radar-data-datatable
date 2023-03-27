@@ -8,4 +8,5 @@ export default interface IScheme {
   type: Types
   editable: boolean,
   visible: boolean
+  forceVisibility?: boolean
 }

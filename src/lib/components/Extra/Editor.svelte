@@ -8,19 +8,18 @@
     editClick: Writable<boolean>,
     editorUpdating: Writable<boolean>,
     ownEditorVisuals: any | undefined = undefined,
-    ownEditorMethods: Function | undefined = undefined
+    ownEditorMethods: Function | undefined = undefined,
+    worker: Worker | undefined = undefined
 
   let eventListener: string
   let updatedParent: string[] = []
   let parent: any
-  let divField: any
-  //   let editClick = writable<boolean>(false)
 
-  const editor = async (event: string) => {
-    parent = document.getElementById(event)
-    if (eventListener != event && $editorUpdating == false) {
+  const editor = async (id: string) => {
+    parent = document.getElementById(id)
+    if (eventListener != id && $editorUpdating == false) {
       // First press on edit button
-      eventListener = event
+      eventListener = id
       let value: string
       if (parent.firstChild.data == undefined) value = parent.firstChild.innerText
       else value = parent.firstChild.data
@@ -30,25 +29,25 @@
       input.value = value
       parent?.appendChild(input)
       editorUpdating.set(true)
-      if (updatedParent.filter(obj => obj == event).length == 0) {
-        updatedParent.push(event)
+      if (updatedParent.filter(obj => obj == id).length == 0) {
+        updatedParent.push(id)
         parent.addEventListener('keydown', (e: any) => {
           if (e.key === 'Enter') {
-            editor(event)
+            editor(id)
           }
         })
       }
-    } else if (eventListener == event && $editorUpdating == true) {
+    } else if (eventListener == id && $editorUpdating == true) {
       // When in editing state and "Enter" key is pressed or the edit button is pressed
       // @ts-ignore
-      const value = document.getElementById(event)?.firstChild?.value
+      const value = document.getElementById(id)?.firstChild?.value
       parent?.firstChild.remove()
       const tag = document.createElement('p')
       tag.appendChild(document.createTextNode(value))
       parent?.appendChild(tag)
       if (updateData != undefined) {
         updated.set(true)
-        updateData(event, value)
+        updateData(worker, id, value)
       }
 
       editorUpdating.set(false)
@@ -68,7 +67,7 @@
         editor(`${row}-${col}`)
       }
     }}
-    class="button is-small"><img class="image is-64x64" src="/edit.svg" alt="Edit the cell" /></button
+    class="button is-small"><img class="image" src="/edit.svg" alt="Edit the cell" /></button
   >
 {/if}
 

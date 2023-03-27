@@ -21,6 +21,7 @@
       worker.postMessage({
         action: action,
       })
+      selectedRow.set('55')
       parentChange.set(true)
     } else {
       console.warn('Provide a worker to use actions')
@@ -29,10 +30,3 @@
 </script>
 
 <button class="button is-small" on:click={loadWorker}>{name}</button>
-
-<style>
-    .button {
-        border: 0;
-        background-color: inherit;
-    }
-</style>

@@ -1,6 +1,6 @@
 import type IColumnName from './IColumnName'
 
-export default interface IMapping {
+export default interface IMapper {
   mappingURL: string
   mappingFetchOptions: object
   mappingFileType: string

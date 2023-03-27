@@ -2,7 +2,6 @@
   import Types from '$lib/classes/enums/Types'
   import DataTableRendererJs from '$lib/components/DataTable/DataTableRendererJS.svelte'
   import type IScheme from '$lib/interfaces/IScheme'
-  import type IStatus from '$lib/interfaces/IStatus'
   import { writable, type Writable } from 'svelte/store'
 
   // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
@@ -12,33 +11,6 @@
   /*
         Some test data
     */
-
-  let statuses: IStatus[] = [
-    {
-      column: 'mappingStatus',
-      status: 'APPROVED',
-      color: 'hsl(120, 100%, 75%)',
-      priority: 1,
-    },
-    {
-      column: 'mappingStatus',
-      status: '',
-      color: 'hsl(0, 100%, 75%)',
-      priority: 1,
-    },
-    {
-      column: 'statusSetBy',
-      status: 'Dupulthys Stijn',
-      color: 'hsl(16, 100%, 75%)',
-      priority: 0,
-    },
-    {
-      column: 'statusSetBy',
-      status: 'Kim Denturck',
-      color: 'hsl(240, 100%, 75%)',
-      priority: 0,
-    },
-  ]
 
   export var columns: IScheme[]
   columns = [
@@ -176,4 +148,4 @@
   This page demonstrates simple data, consisting of a matrix of key value pairs, also known as an array of
   `Object.entries(myObject)`.
 </p>
-<DataTableRendererJs statusScheme={statuses} {data} {columns} />
+<DataTableRendererJs {data} {columns} />

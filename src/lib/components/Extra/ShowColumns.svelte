@@ -1,11 +1,29 @@
 <script lang="ts">
   import type IScheme from '$lib/interfaces/IScheme'
-  import { each } from 'svelte/internal'
+  import { each, onMount } from 'svelte/internal'
   import { writable, type Writable } from 'svelte/store'
   export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     parentChange: Writable<boolean>
 
-  const hiddenColumns = ['sourceAutoAssignedConceptIds', 'ADD_INFO:additionalInfo', 'ADD_INFO:prescriptionID', 'ADD_INFO:ATC', 'matchScore', 'mappingStatus', 'statusSetOn', 'comment', 'createdBy', 'createdOn']
+  const hiddenColumns = [
+    'sourceAutoAssignedConceptIds',
+    'ADD_INFO:additionalInfo',
+    'ADD_INFO:prescriptionID',
+    'ADD_INFO:ATC',
+    'matchScore',
+    'mappingStatus',
+    'statusSetOn',
+    'comment',
+    'createdBy',
+    'createdOn',
+  ]
+
+  $: {
+    $columns
+    for (let col of $columns) {
+      hiddenColumns.includes(col.column) && col.forceVisibility != true ? (col.visible = false) : (col.visible = true)
+    }
+  }
 </script>
 
 <section>
@@ -18,7 +36,12 @@
             type="checkbox"
             id={column.column}
             bind:checked={column.visible}
-            on:change={() => parentChange.set(true)}
+            on:change={(event) => {
+              // @ts-ignore
+              if(event.target.checked == false) column.forceVisibility = true
+              else column.forceVisibility = false
+              parentChange.set(true)
+            }}
           /></label
         >
         <label for={column.column}>{column.column}</label>

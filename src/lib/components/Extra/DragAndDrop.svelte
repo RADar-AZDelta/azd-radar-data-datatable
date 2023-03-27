@@ -7,7 +7,6 @@
 
   function dropHandler(event: DragEvent) {
     event.preventDefault()
-    console.log(event.dataTransfer?.items)
     if (event.dataTransfer?.items) {
       if (event.dataTransfer.items.length > 1) {
         alert('Only drop one file')

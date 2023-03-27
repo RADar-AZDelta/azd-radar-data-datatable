@@ -6,7 +6,7 @@ import type IScheme from '$lib/interfaces/IScheme'
 import type ISort from '$lib/interfaces/ISort'
 import { desc, escape, fromCSV, fromJSON, loadCSV, table } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
-import type IMapping from '$lib/interfaces/IMapping'
+import type IMapper from '$lib/interfaces/IMapper'
 import type IColumnName from '$lib/interfaces/IColumnName'
 import { writable } from 'svelte/store'
 
@@ -51,7 +51,7 @@ const addDataToRow = async (
 
 const autoMapper = async (
   tableData: [string | number | boolean][],
-  mapping: IMapping,
+  mapping: IMapper,
   pagination: IPaginated
 ): Promise<[string | number | boolean][]> => {
   return new Promise(async (resolve, reject) => {
@@ -179,7 +179,7 @@ const transpilerToObjects = async (table: ColumnTable, cols: readonly string[], 
   })
 }
 
-const createURL = async (data: object, columnIndex: number, mapping: IMapping) => {
+const createURL = async (data: object, columnIndex: number, mapping: IMapper) => {
   let sourceName: string = data[columnIndex as keyof object]
   let url = mapping.mappingURL
   url += `query=${sourceName.replaceAll('-', ' ')}&pageSize=1`
@@ -391,8 +391,8 @@ const getData = async (
 
 const updateTableData = async (index: string, value: string): Promise<void> => {
   const indexes = index.split('-')
-  const row = Number(indexes[0])
-  const col = Number(indexes[1])
+  const row = Number(indexes[1])
+  const col = Number(indexes[0])
   const colName = originalData._names[col]
   originalData._data[colName].data[row] = value
 }
@@ -460,7 +460,6 @@ onmessage = async ({
       data = filteredData
     }
     data = await getDataNeeded(data, pagination)
-    console.log("POST MESSAGE")
     await postMessage({
       processedData: {
         data: data,

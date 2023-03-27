@@ -1,5 +1,4 @@
 <script lang="ts">
-  //import '$lib/styles/table.scss'
   import Sorting from './Sorting.svelte'
   import Filtering from './Filtering.svelte'
   import Pagination from './Pagination.svelte'
@@ -10,29 +9,17 @@
   import type IPaginated from '$lib/interfaces/IPaginated'
   import Types from '../../classes/enums/Types'
   import Spinner from '../Extra/Spinner.svelte'
-  import SkeletonTable from '../Extra/SkeletonTable.svelte'
   import { onMount } from 'svelte'
   import type ITableData from '$lib/interfaces/ITableData'
-  import Editor from '../Extra/Editor.svelte'
-  import type IStatus from '$lib/interfaces/IStatus'
-  import type IColor from '$lib/interfaces/IColor'
 
   export let hasData: Function,
-    statusScheme: IStatus[],
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
     pagination: Writable<IPaginated>,
     pagesShown: number = 7,
-    parentChange: Writable<boolean> = writable(false),
-    rowEvent: Function | undefined = undefined,
-    ownEditorVisuals: any = undefined,
-    ownEditorMethods: any = undefined,
-    updateData: Function | undefined = undefined,
-    selectedRow: Writable<string>
+    parentChange: Writable<boolean> = writable(false)
 
   const data = writable<ITableData | null>(null)
-  let editorUpdating = writable<boolean>(false)
-  let editClick = writable<boolean>(false)
 
   let dataSmallerThanRows = writable<boolean>($data != null ? $data.data.length < $pagination.rowsPerPage : true)
   let moreRowsThanOnPage = writable<boolean>(
@@ -42,7 +29,7 @@
     $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)
   )
 
-  let updated = writable<boolean>(false)
+  export let updated = writable<boolean>(false)
 
   const updateSorting = async (col: string, direction: number): Promise<void> => {
     /*
@@ -194,133 +181,74 @@
       updated.set(true)
     })
   })
-
-  $: {
-    statusScheme
-    let count = 0
-    for (let status of statusScheme) {
-      status.priority += count
-      // count += 1
-    }
-  }
-
-  function checkStatuses(row: number) {
-    const allStatuses = statusScheme.filter(obj => {
-      if (
-        $data?.scheme.indexOf($data.scheme.filter(col => col.column.toLowerCase() == obj.column.toLowerCase())[0]) != -1
-      ) {
-        if (
-          obj.status.toLowerCase() ==
-          $data?.data[row][
-            $data?.scheme.indexOf($data.scheme.filter(col => col.column.toLowerCase() == obj.column.toLowerCase())[0])
-          ].toLowerCase()
-        ) {
-          return obj
-        }
-      }
-    })
-    if (allStatuses.length > 0) {
-      return true
-    } else {
-      return false
-    }
-  }
-
-  function getColorFromStatus(row: number) {
-    const allStatuses = statusScheme.filter(obj => {
-      if (
-        obj.status.toLowerCase() ==
-        $data?.data[row][
-          $data?.scheme.indexOf($data.scheme.filter(col => col.column.toLowerCase() == obj.column.toLowerCase())[0])
-        ].toLowerCase()
-      ) {
-        return obj
-      }
-    })
-    const priority = Math.max(...allStatuses.map(status => status.priority))
-    const status = allStatuses.filter(status => status.priority == priority)[0]
-    return status.color
-  }
 </script>
 
 <!-- Create a table with readonly cells -->
-<section class="container is-fluid">
+<section class="container">
   {#if $data != null && $data.data != undefined && $data.scheme != undefined}
     <div data-component="tablerenderer">
       <div class="table-container">
         <table class="table is-narrow">
-          <tr>
-            {#if $$slots.customHeader}
-              <slot name="customHeader" />
-            {/if}
-            {#each $data.scheme as info}
-              {#if info.visible == true}
-                <th>
-                  <div>
-                    <div class="control">
-                      <Sorting
-                        col={info.column}
-                        direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
-                          ? $sorting.filter(obj => obj.column == info.column)[0].direction
-                          : 0}
-                        {updateSorting}
-                      />
-                    </div>
-                    <div class="control">
-                      <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
-                    </div>
-                  </div>
-                </th>
-              {/if}
-            {/each}
-          </tr>
-          {#each Array($dataSmallerThanRows ? $data.data.length : $moreRowsThanOnPage ? $pagination.rowsPerPage : $restingRows) as _, i}
-            <tr
-              id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
-              on:click={function () {
-                if ($selectedRow != String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))) {
-                  $selectedRow = String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
-                } else {
-                  if (rowEvent != undefined && $editorUpdating == false && $editClick == false) rowEvent(event, true)
-                  editClick.set(false)
-                }
-              }}
-              style={`${checkStatuses(i) ? `background-color: ${getColorFromStatus(i)};` : ''}`}
-              class={`${
-                $selectedRow == String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))
-                  ? 'selected-row'
-                  : ''
-              }`}
-            >
-              {#if $$slots.customColumn}
-                <slot row={i} name="customColumn" />
-              {/if}
-              {#each $data.data[i] as row, j}
-                {#if $data.scheme[j] != undefined}
-                  {#if $data.scheme[j].visible == true}
-                    <td class="cell">
-                      <div class="field has-addons" data-component="cell-container">
-                        <p class="content" id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">
-                          {row}
-                        </p>
-                        {#if $data.scheme[j].editable == true}
-                          <Editor
-                            col={j}
-                            row={i}
-                            bind:updateData
-                            bind:updated
-                            bind:editClick
-                            bind:editorUpdating
-                            {ownEditorMethods}
-                            {ownEditorVisuals}
-                          />
-                        {/if}
+          {#if $$slots.columns}
+            <slot
+              name="columns"
+              columns={$data.scheme}
+              sorting={$sorting}
+              {updateSorting}
+              {deleteFilter}
+              {updateFiltering}
+              {filters}
+            />
+          {:else}
+            <tr>
+              {#each $data.scheme as info}
+                {#if info.visible == true}
+                  <th>
+                    <div>
+                      <div class="control">
+                        <Sorting
+                          col={info.column}
+                          direction={$sorting.filter(obj => obj.column == info.column)[0] != undefined
+                            ? $sorting.filter(obj => obj.column == info.column)[0].direction
+                            : 0}
+                          {updateSorting}
+                        />
                       </div>
-                    </td>
-                  {/if}
+                      <div class="control">
+                        <Filtering col={info.column} type={info.type} {deleteFilter} {updateFiltering} bind:filters />
+                      </div>
+                    </div>
+                  </th>
                 {/if}
               {/each}
             </tr>
+          {/if}
+          {#each Array($dataSmallerThanRows ? $data.data.length : $moreRowsThanOnPage ? $pagination.rowsPerPage : $restingRows) as _, i}
+            {#if $$slots.row}
+              <slot
+                name="row"
+                row={$data.data[i]}
+                scheme={$data.scheme}
+                id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
+                number={i}
+              />
+            {:else}
+              <tr id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}>
+                {#each $data.data[i] as row, j}
+                  {#if $data.scheme[j] != undefined}
+                    {#if $data.scheme[j].visible == true}
+                      <td class="cell">
+                        <div class="cell-container">
+                          <p class="content" id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">
+                            {row}
+                          </p>
+                        </div>
+                      </td>
+                    {/if}
+                  {/if}
+                {/each}
+              </tr>
+            {/if}
           {/each}
         </table>
       </div>
@@ -328,6 +256,9 @@
     </div>
   {:else}
     <Spinner />
+    <button on:click={() => {
+      console.log($data)
+    }}>Test</button>
   {/if}
 </section>
 

@@ -32,7 +32,6 @@
   }
 
   const transpileData = async (data: any) => {
-    console.log(data)
     const tableData: any = {}
     let colCount = 0
     if (data.scheme) {
