@@ -148,4 +148,4 @@
   This page demonstrates simple data, consisting of a matrix of key value pairs, also known as an array of
   `Object.entries(myObject)`.
 </p>
-<DataTableRendererJs {data} {columns} />
+<DataTableRendererJs {data} {columns} customCode={false} />

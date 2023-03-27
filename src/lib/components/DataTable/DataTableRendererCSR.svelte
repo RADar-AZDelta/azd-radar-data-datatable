@@ -23,7 +23,8 @@
     map: boolean = false,
     selectedRow: Writable<string> = writable(''),
     selectedRowPage: Writable<number> = writable(0),
-    autoMapping: boolean = true
+    autoMapping: boolean = false,
+    customCode: boolean = true
   export let worker: Worker | undefined = undefined
 
   export let filters: Writable<Array<IFilter>> = writable([])
@@ -187,6 +188,7 @@
 
 <section>
   <div id="data">
+    {#if customCode == true}
     <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange bind:updated>
       <slot
         name="columns"
@@ -207,6 +209,9 @@
       />
       <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} {worker} />
     </DataTableRendererBasic>
+    {:else}
+    <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange bind:updated />
+    {/if}
   </div>
   <slot name="extra" {worker} />
   <div id="download" class="download">

@@ -97,4 +97,4 @@
 
 <h1>RADar-DataTable Demo - REST data</h1>
 <p>This page demonstrates how the already manipulated data gets fetched from the API and rendered in the DataTable.</p>
-<DataTableRendererSsr {url} {fetchOptions} {transpileData} {pagination} {filters} {sorting} />
+<DataTableRendererSsr {url} {fetchOptions} {transpileData} {pagination} {filters} {sorting} customCode={false} />

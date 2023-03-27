@@ -1,6 +1,5 @@
 <script lang="ts">
   import type IScheme from '$lib/interfaces/IScheme'
-  import { each, onMount } from 'svelte/internal'
   import { writable, type Writable } from 'svelte/store'
   export let columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     parentChange: Writable<boolean>

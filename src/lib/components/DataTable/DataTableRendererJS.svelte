@@ -17,7 +17,8 @@
       totalPages: 1,
       rowsPerPage: 20,
       totalRows: 10,
-    })
+    }),
+    customCode: boolean = true
 
   const columnsStore = writable<IScheme[]>(columns)
   const dataStore = writable<[string, any][][]>()
@@ -200,22 +201,26 @@
   </div>
 {/if}
 
-<DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange={dataChanged}>
-  <slot
-    name="columns"
-    slot="columns"
-    let:columns
-    let:sorting
-    let:updateSorting
-    let:deleteFilter
-    let:updateFiltering
-    let:filters
-    {columns}
-    {sorting}
-    {updateSorting}
-    {deleteFilter}
-    {updateFiltering}
-    {filters}
-  />
-  <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
-</DataTableRendererBasic>
+{#if customCode == true}
+  <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange={dataChanged}>
+    <slot
+      name="columns"
+      slot="columns"
+      let:columns
+      let:sorting
+      let:updateSorting
+      let:deleteFilter
+      let:updateFiltering
+      let:filters
+      {columns}
+      {sorting}
+      {updateSorting}
+      {deleteFilter}
+      {updateFiltering}
+      {filters}
+    />
+    <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
+  </DataTableRendererBasic>
+{:else}
+  <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange={dataChanged} />
+{/if}

@@ -26,7 +26,8 @@
     singleSorting: Writable<ISort> = writable<ISort>(),
     columns: Writable<IScheme[]> = writable<IScheme[]>([]),
     transpileData: Function | undefined = undefined,
-    downloadable: boolean = false
+    downloadable: boolean = false,
+    customCode: boolean = true
 
   const originalData = writable<any>()
   let dataChanged = writable<boolean>(false)
@@ -116,48 +117,63 @@
   </div>
   <div class="container">
     {#if special == true && $pagination.currentPage != 0}
-      <DataTableRendererSpecial
-        {hasData}
-        bind:filter={singleFilter}
-        bind:sorting={singleSorting}
-        bind:pagination
-        pagesShown={7}
-        bind:parentChange={dataChanged}
-      >
-        <slot
-          name="columns"
-          slot="columns"
-          let:columns
-          let:sorting
-          let:updateSorting
-          let:filter
-          {columns}
-          {sorting}
-          {updateSorting}
-          {filter}
+      {#if customCode == true}
+        <DataTableRendererSpecial
+          {hasData}
+          bind:filter={singleFilter}
+          bind:sorting={singleSorting}
+          bind:pagination
+          pagesShown={7}
+          bind:parentChange={dataChanged}
+        >
+          <slot
+            name="columns"
+            slot="columns"
+            let:columns
+            let:sorting
+            let:updateSorting
+            let:filter
+            {columns}
+            {sorting}
+            {updateSorting}
+            {filter}
+          />
+          <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
+        </DataTableRendererSpecial>
+      {:else}
+        <DataTableRendererSpecial
+          {hasData}
+          bind:filter={singleFilter}
+          bind:sorting={singleSorting}
+          bind:pagination
+          pagesShown={7}
+          bind:parentChange={dataChanged}
         />
-        <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
-      </DataTableRendererSpecial>
+      {/if}
     {:else if special == false}
-      <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting>
-        <slot
-          name="columns"
-          slot="columns"
-          let:columns
-          let:sorting
-          let:updateSorting
-          let:deleteFilter
-          let:updateFiltering
-          let:filters
-          {columns}
-          {sorting}
-          {updateSorting}
-          {deleteFilter}
-          {updateFiltering}
-          {filters}
-        />
-        <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
-      </DataTableRendererBasic>
+      {#if customCode == true}
+        <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting>
+          <slot
+            name="columns"
+            slot="columns"
+            let:columns
+            let:sorting
+            let:updateSorting
+            let:deleteFilter
+            let:updateFiltering
+            let:filters
+            {columns}
+            {sorting}
+            {updateSorting}
+            {deleteFilter}
+            {updateFiltering}
+            {filters}
+          />
+          <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
+        </DataTableRendererBasic>
+      {:else}
+        <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting />
+      {/if}
     {/if}
   </div>
 </body>

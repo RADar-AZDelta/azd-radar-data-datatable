@@ -37,5 +37,5 @@
 
 <DragAndDrop {file} fileExtension="csv" />
 {#if $file != null}
-  <DataTableRendererCsr file={$file} dataType="csv" {delimiter} />
+  <DataTableRendererCsr file={$file} dataType="csv" {delimiter} customCode={false} />
 {/if}
