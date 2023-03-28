@@ -1,9 +1,14 @@
 <script lang="ts">
   import type Types from '$lib/classes/enums/Types'
-  import type { Writable } from 'svelte/store'
   import type IFilter from '../../interfaces/IFilter'
+  import { debounce } from 'lodash'
+  import type { Writable } from 'svelte/store'
 
   export let col: string, type: Types, updateFiltering: Function, deleteFilter: Function, filters: Writable<IFilter[]>
+
+  const handleInput = debounce(e => {
+    updateFiltering(e, type)
+  }, 500)
 </script>
 
 <div class="field has-addons">
@@ -11,9 +16,7 @@
     <input
       class="input is-small"
       id={col}
-      on:change={() => {
-        updateFiltering(event, type)
-      }}
+      on:input={handleInput}
       name={col}
       {type}
       value={$filters.filter(obj => obj.column == col)[0] == undefined

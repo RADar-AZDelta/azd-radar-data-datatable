@@ -20,7 +20,7 @@
     file: File | undefined = undefined,
     fileName: string | undefined = undefined,
     mapping: any | undefined = undefined,
-    map: boolean = false,
+    map: Writable<boolean> = writable<boolean>(false),
     selectedRow: Writable<string> = writable(''),
     selectedRowPage: Writable<number> = writable(0),
     autoMapping: boolean = false,
@@ -168,13 +168,13 @@
 
   $: {
     // When mapping of a row has been done
-    if (mapping != undefined && map == true) {
+    if (mapping != undefined && $map == true) {
       worker?.postMessage({
         mapping: mapping,
         expectedColumns: $mapper.expectedColumns,
         columns: $columns,
       })
-      map = false
+      $map = false
     }
   }
 

@@ -193,19 +193,91 @@ const createURL = async (data: object, columnIndex: number, mapping: IMapper) =>
   )
 }
 
+
+const updateData = async (
+  data: any,
+  map: any,
+  expectedColumns: IColumnName[],
+  originalRow: number,
+  replace: boolean,
+  count: number
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    let c = 0
+    let copy = data[originalRow + count]
+    console.log('COPY FOR ROW ', map.row, ' --> ', data[originalRow])
+    console.log('IT CAN ALSO BE THIS ', data[originalRow + count])
+    console.log('REPLACE ', replace)
+    for (let col of expectedColumns) {
+      const colName: string = col.altName
+      const filteredData = map.data[col.name]
+      copy[colName as keyof Object] = filteredData
+      console.log(data[map.row])
+      console.log(
+        `FROM data `,
+        data[map.row],
+        ' WITH ROW ',
+        map.row,
+        ' COMES ',
+        data[map.row][colName as keyof Object],
+        ' AND FILTERED DATA ',
+        filteredData
+      )
+      c++
+    }
+    if (c == expectedColumns.length) {
+      if (replace == true) {
+        data.splice(map.row + 1, 0, copy)
+        delete data[map.row]
+        console.log(data)
+      } else {
+        data.splice(map.row + 1, 0, copy)
+      }
+
+      mappedData = data
+      resolve(data)
+    }
+  })
+}
+
 const manipulateData = async (
+  data: any,
   mapping: any,
   columns: IScheme[],
   expectedColumns: IColumnName[]
 ): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
-    for (let col of expectedColumns) {
-      const colName: string = col.altName
-      const filteredData: any = mapping.data[col.name]
-      mappedData[mapping.row][colName as keyof Object] = filteredData
+    // console.log(data)
+    let count = 0
+    if(mapping[0] != undefined){
+      for (let map of mapping) {
+        const updatedValues = await updateData(
+          data,
+          map,
+          expectedColumns,
+          mapping[0].row,
+          count == 0 ? true : false,
+          count
+        )
+        data = updatedValues
+        count++
+      }
+      if (count == mapping.length) {
+        data.splice(mapping[0].row, 1)
+        console.log(data)
+        let table = await transpilerToTable(data, columns)
+        resolve(table)
+      }
+    } else {
+      for(let col of expectedColumns){
+        const colName: string = col.altName
+        const filteredData: any = mapping.data[col.name]
+        data[mapping.row][colName as keyof Object] = filteredData
+      }
+      mappedData = data
+      let table = await transpilerToTable(data, columns)
+      resolve(table)
     }
-    let table = await transpilerToTable(mappedData, columns)
-    resolve(table)
   })
 }
 
@@ -251,6 +323,7 @@ const filterData = async (table: ColumnTable, filters: IFilter[], cols: IScheme[
         )
       }
     }
+    console.log('TABLE ', table)
     const transpiledData = await transpilerToObjects(table, table._names, table._total)
 
     resolve(transpiledData)
@@ -259,6 +332,7 @@ const filterData = async (table: ColumnTable, filters: IFilter[], cols: IScheme[
 
 const orderData = async (table: ColumnTable, sorts: ISort[]): Promise<ColumnTable> => {
   return new Promise((resolve, reject) => {
+    console.log('TABLE HERE ', table)
     let orderedTable = table
     for (let sort of sorts) {
       if (sort.direction == SortDirection.Ascending) {
@@ -389,10 +463,13 @@ const getData = async (
   })
 }
 
-const updateTableData = async (index: string, value: string): Promise<void> => {
+const updateTableData = async (index: string, value: string, extraChanges: Array<any>): Promise<void> => {
   const indexes = index.split('-')
   const row = Number(indexes[1])
   const col = Number(indexes[0])
+  for (let change of extraChanges) {
+    originalData._data[change.column].data[row] = change.value
+  }
   const colName = originalData._names[col]
   originalData._data[colName].data[row] = value
 }
@@ -417,6 +494,7 @@ onmessage = async ({
     expectedColumns,
     action,
     actionPage,
+    extraChanges,
   },
 }) => {
   let sorts: ISort[]
@@ -465,7 +543,6 @@ onmessage = async ({
         data: data,
         columns: cols,
         pagination: paginatedData,
-        origin: 'initial',
       },
     })
   } else if (action && originalData !== undefined && originalData !== null) {
@@ -510,27 +587,29 @@ onmessage = async ({
     })
   } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
-    table = await manipulateData(mapping, columns, expectedColumns)
-    table = await orderData(table, sorts)
-    data = await filterData(table, filters, cols)
-    await postMessage({
-      processedData: {
-        data: data,
-        columns: cols,
-        update: true,
-        origin: 'mapping',
-      },
-    })
+    // TODO: fix bug where data is not being updated correctly when mapping multiple
+    await manipulateData(mappedData, mapping, columns, expectedColumns)
+      .then(async table => await orderData(table, sorts))
+      .then(async table => await filterData(table, filters, cols))
+      .finally(async () => {
+        await postMessage({
+          processedData: {
+            data: data,
+            columns: cols,
+            update: true,
+          },
+        })
+      })
   } else if (editData != undefined || editData != null) {
     // When a cell has been edited
-    await updateTableData(editData.index, editData.value)
+    await updateTableData(editData.index, editData.value, extraChanges)
     filteredData = await filterData(originalData, filters, cols)
     data = await getDataNeeded(filteredData, pagination)
     await postMessage({
       processedData: {
         data: data,
         columns: cols,
-        origin: 'edit',
+        update: true,
       },
     })
   } else {
@@ -556,7 +635,6 @@ onmessage = async ({
         data: data,
         columns: cols,
         pagination: pagination,
-        origin: 'manipulation',
       },
     })
   }
