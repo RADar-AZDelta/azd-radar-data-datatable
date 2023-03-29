@@ -193,51 +193,13 @@ const createURL = async (data: object, columnIndex: number, mapping: IMapper) =>
   )
 }
 
-
-const updateData = async (
-  data: any,
-  map: any,
-  expectedColumns: IColumnName[],
-  originalRow: number,
-  replace: boolean,
-  count: number
-): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    let c = 0
-    let copy = data[originalRow + count]
-    console.log('COPY FOR ROW ', map.row, ' --> ', data[originalRow])
-    console.log('IT CAN ALSO BE THIS ', data[originalRow + count])
-    console.log('REPLACE ', replace)
-    for (let col of expectedColumns) {
-      const colName: string = col.altName
-      const filteredData = map.data[col.name]
-      copy[colName as keyof Object] = filteredData
-      console.log(data[map.row])
-      console.log(
-        `FROM data `,
-        data[map.row],
-        ' WITH ROW ',
-        map.row,
-        ' COMES ',
-        data[map.row][colName as keyof Object],
-        ' AND FILTERED DATA ',
-        filteredData
-      )
-      c++
-    }
-    if (c == expectedColumns.length) {
-      if (replace == true) {
-        data.splice(map.row + 1, 0, copy)
-        delete data[map.row]
-        console.log(data)
-      } else {
-        data.splice(map.row + 1, 0, copy)
-      }
-
-      mappedData = data
-      resolve(data)
-    }
-  })
+const assembleData = async (copy: any, expectedColumns: IColumnName[], map: any) => {
+  for (let col of expectedColumns) {
+    const colName: string = col.altName
+    const filteredData: any = map.data[col.name]
+    copy[colName as keyof Object] = filteredData
+  }
+  return copy
 }
 
 const manipulateData = async (
@@ -247,37 +209,28 @@ const manipulateData = async (
   expectedColumns: IColumnName[]
 ): Promise<ColumnTable> => {
   return new Promise(async (resolve, reject) => {
-    // console.log(data)
-    let count = 0
-    if(mapping[0] != undefined){
+    if (mapping[0] != undefined) {
+      const sourceName = data[mapping[0].row].sourceName
+      const duplicates = data.filter((obj: any) => obj.sourceName == sourceName)
       for (let map of mapping) {
-        const updatedValues = await updateData(
-          data,
-          map,
-          expectedColumns,
-          mapping[0].row,
-          count == 0 ? true : false,
-          count
-        )
-        data = updatedValues
-        count++
+        const copy = JSON.parse(JSON.stringify(data[mapping[0].row]))
+        const dataMap = await assembleData(copy, expectedColumns, map)
+        data.splice(mapping[0].row, 0, dataMap)
       }
-      if (count == mapping.length) {
-        data.splice(mapping[0].row, 1)
-        console.log(data)
-        let table = await transpilerToTable(data, columns)
-        resolve(table)
+      for (let dupe of duplicates) {
+        const index = data.indexOf(dupe)
+        data.splice(index, 1)
       }
     } else {
-      for(let col of expectedColumns){
+      for (let col of expectedColumns) {
         const colName: string = col.altName
         const filteredData: any = mapping.data[col.name]
         data[mapping.row][colName as keyof Object] = filteredData
       }
-      mappedData = data
-      let table = await transpilerToTable(data, columns)
-      resolve(table)
     }
+    mappedData = data
+    let table = await transpilerToTable(data, columns)
+    resolve(table)
   })
 }
 
@@ -323,7 +276,6 @@ const filterData = async (table: ColumnTable, filters: IFilter[], cols: IScheme[
         )
       }
     }
-    console.log('TABLE ', table)
     const transpiledData = await transpilerToObjects(table, table._names, table._total)
 
     resolve(transpiledData)
@@ -332,7 +284,6 @@ const filterData = async (table: ColumnTable, filters: IFilter[], cols: IScheme[
 
 const orderData = async (table: ColumnTable, sorts: ISort[]): Promise<ColumnTable> => {
   return new Promise((resolve, reject) => {
-    console.log('TABLE HERE ', table)
     let orderedTable = table
     for (let sort of sorts) {
       if (sort.direction == SortDirection.Ascending) {
