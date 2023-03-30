@@ -107,8 +107,7 @@ const transpilerToTableFromArray = async (dataArray: Array<any>, columns: ISchem
       }
       dataFound[columnsArray[i]] = d
     }
-    originalData = table(dataFound)
-    resolve(originalData)
+    resolve(table(dataFound))
   })
 }
 
@@ -475,6 +474,7 @@ onmessage = async ({
         }
       }
       const table = await transpilerToTableFromArray(filteredData, cols)
+      originalData = table
       mappedData = table.objects()
     }
     data = await getDataNeeded(filteredData, pagination)
