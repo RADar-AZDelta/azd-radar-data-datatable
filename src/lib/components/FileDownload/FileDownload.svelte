@@ -1,12 +1,13 @@
 <script lang="ts">
+  import type IWorkerMessage from '$lib/interfaces/IWorkerMessage'
   import { table } from 'arquero'
 
   export let worker: Worker | null = null,
-    data: any | null = null
+    data: any | null = null,
+    workerMessage: any | undefined = undefined
 
   let csv: any
   let delimiter = ','
-  let tableData: any
 
   const loadWorker = async () => {
     if (worker != null) {
@@ -23,12 +24,15 @@
     }
   }
 
-  const onWorkerMessage = async (data: any) => {
-    csv = data.data.processedData.data
-    const file = new Blob([csv], { type: 'text/csv' })
-    // https://stackoverflow.com/questions/71309058/property-showsavefilepicker-does-not-exist-on-type-window-typeof-globalthis
-    // https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker
-    downloadCsv(file)
+  const onWorkerMessage = async (data: IWorkerMessage) => {
+    csv = data.data.file
+    if (data.data.download == true) {
+      const file = new Blob([csv], { type: 'text/csv' })
+      // https://stackoverflow.com/questions/71309058/property-showsavefilepicker-does-not-exist-on-type-window-typeof-globalthis
+      // https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker
+      await downloadCsv(file)
+      if(workerMessage != undefined) worker!.onmessage = workerMessage
+    }
   }
 
   const transpileData = async (data: any) => {

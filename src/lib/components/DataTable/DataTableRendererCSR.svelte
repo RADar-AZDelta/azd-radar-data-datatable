@@ -5,6 +5,7 @@
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
   import type ITableData from '$lib/interfaces/ITableData'
+  import type IWorkerMessage from '$lib/interfaces/IWorkerMessage'
   import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
@@ -25,18 +26,12 @@
     selectedRowPage: Writable<number> = writable(0),
     autoMapping: boolean = false,
     customCode: boolean = true
+
   export let worker: Worker | undefined = undefined
 
-  export let filters: Writable<Array<IFilter>> = writable([])
-  export let sorting = writable<Array<ISort>>([])
-  export let pagination = writable<IPaginated>({
-    currentPage: 1,
-    totalPages: 1,
-    rowsPerPage: 10,
-    totalRows: 10,
-  })
-  export let updated = writable<boolean>(false)
-  export let parentChange = writable<boolean>(false)
+  export let filters: Writable<Array<IFilter>>
+  export let sorting: Writable<Array<ISort>>
+  export let pagination: Writable<IPaginated>
   export let mapper: Writable<IMapper> = writable<IMapper>()
 
   const workerMess = writable<boolean>(false)
@@ -83,11 +78,13 @@
     })
   }
 
-  const onWorkerMessage = async (data: any): Promise<void> => {
+  const onWorkerMessage = async (data: IWorkerMessage): Promise<void> => {
     // Check what has changed and update the stores if needed
-    if (data.data.processedData.columns != $columns) $columns = data.data.processedData.columns
-    if (data.data.processedData.data != $data) $data = data.data.processedData.data
-    const pag = data.data.processedData.pagination
+    if (data.data.columns != $columns) {
+      $columns = data.data.columns
+    }
+    if (data.data.data != $data) $data = data.data.data
+    const pag = data.data.pagination
     if (pag != undefined) {
       if (
         pag.currentPage != $pagination.currentPage ||
@@ -95,12 +92,13 @@
         pag.totalPages != $pagination.totalPages ||
         pag.totalRows != $pagination.totalRows
       ) {
-        $pagination = data.data.processedData.pagination
+        // EDIT THIS
+        $pagination = data.data.pagination!
       }
     }
     workerMess.set(true)
-    if (data.data.processedData.update == true) {
-      parentChange.set(true)
+    if (data.data.update == true) {
+      pagination.set($pagination)
     }
   }
 
@@ -180,7 +178,8 @@
 
   $: {
     $selectedRow
-    $selectedRowPage = ($selectedRow == undefined ? 0 : $selectedRow) - ($pagination.currentPage - 1) * $pagination.rowsPerPage
+    $selectedRowPage =
+      ($selectedRow == undefined ? 0 : $selectedRow) - ($pagination.currentPage - 1) * $pagination.rowsPerPage
   }
 
   onMount(loadWorker)
@@ -189,28 +188,28 @@
 <section>
   <div id="data">
     {#if customCode == true}
-    <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange bind:updated>
-      <slot
-        name="columns"
-        slot="columns"
-        let:columns
-        let:sorting
-        let:updateSorting
-        let:deleteFilter
-        let:updateFiltering
-        let:filters
-        {columns}
-        {sorting}
-        {updateSorting}
-        {deleteFilter}
-        {updateFiltering}
-        {filters}
-        {worker}
-      />
-      <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} {worker} />
-    </DataTableRendererBasic>
+      <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:scheme={columns}>
+        <slot
+          name="columns"
+          slot="columns"
+          let:columns
+          let:sorting
+          let:updateSorting
+          let:deleteFilter
+          let:updateFiltering
+          let:filters
+          {columns}
+          {sorting}
+          {updateSorting}
+          {deleteFilter}
+          {updateFiltering}
+          {filters}
+          {worker}
+        />
+        <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} {worker} />
+      </DataTableRendererBasic>
     {:else}
-    <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange bind:updated />
+      <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:scheme={columns} />
     {/if}
   </div>
   <slot name="extra" {worker} />
@@ -218,7 +217,7 @@
     {#if downloadable == true}
       <div data-component="download-container">
         {#if worker != undefined}
-          <FileDownload bind:worker />
+          <FileDownload bind:worker workerMessage={onWorkerMessage}/>
         {/if}
       </div>
     {/if}

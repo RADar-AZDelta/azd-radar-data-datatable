@@ -11,25 +11,26 @@
   import Spinner from '../Extra/Spinner.svelte'
   import { onMount } from 'svelte'
   import type ITableData from '$lib/interfaces/ITableData'
+  import type IScheme from '$lib/interfaces/IScheme'
 
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
     sorting: Writable<Array<ISort>>,
     pagination: Writable<IPaginated>,
     pagesShown: number = 7,
-    parentChange: Writable<boolean> = writable(false)
+    scheme: Writable<IScheme[]> | undefined
 
   const data = writable<ITableData | null>(null)
 
-  let dataSmallerThanRows = writable<boolean>($data != null ? $data.data.length < $pagination.rowsPerPage : true)
+  let dataSmallerThanRows = writable<boolean>(
+    $data != null && $data != undefined ? $data.data.length < $pagination.rowsPerPage : true
+  )
   let moreRowsThanOnPage = writable<boolean>(
     $pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0
   )
   let restingRows = writable<number>(
     $pagination.rowsPerPage - ($pagination.rowsPerPage * $pagination.currentPage - $pagination.totalRows)
   )
-
-  export let updated = writable<boolean>(false)
 
   const updateSorting = async (col: string, direction: number): Promise<void> => {
     /*
@@ -59,7 +60,6 @@
     if (sortsFound.length > 0 && (sortsFound[0].direction > 2 || sortsFound[0].direction < 0))
       $sorting = Array.from(new Set($sorting.filter(obj => obj.column != col)))
     sorting.update(() => $sorting)
-    updated.set(false)
     changePage(1)
   }
 
@@ -69,32 +69,35 @@
     */
     if (page > $pagination.totalPages) page--
     else if (page < 1) page = 1
-    $pagination = {
-      currentPage: page,
-      totalPages: $pagination.totalPages,
-      rowsPerPage: $pagination.rowsPerPage,
-      totalRows: $pagination.totalRows,
+    if (page != $pagination.currentPage) {
+      $pagination = {
+        currentPage: page,
+        totalPages: $pagination.totalPages,
+        rowsPerPage: $pagination.rowsPerPage,
+        totalRows: $pagination.totalRows,
+      }
     }
-    updated.set(false)
   }
 
-  async function updateRowsPerPage(event: any): Promise<void> {
+  async function updateRowsPerPage(event: Event): Promise<void> {
     /*
       Update the rows per page
     */
-    $pagination = {
-      currentPage: 1,
-      totalPages: $pagination.totalPages,
-      rowsPerPage: Number(event.target.value),
-      totalRows: $pagination.totalRows,
+    const rowsSelected = event.target as HTMLInputElement
+    if (Number(rowsSelected.value) != $pagination.rowsPerPage) {
+      $pagination = {
+        currentPage: 1,
+        totalPages: $pagination.totalPages,
+        rowsPerPage: Number(rowsSelected.value),
+        totalRows: $pagination.totalRows,
+      }
     }
-    updated.set(false)
   }
 
-  async function updateFiltering(event: any, type: any): Promise<void> {
-    changePage(1)
-    let filterValue = event.target.value
-    const filterColumn: string = event.target.id
+  async function updateFiltering(event: Event, type?: any): Promise<void> {
+    const element = event.target as HTMLInputElement
+    let filterValue: string | number | RegExp | Date | boolean = element.value
+    const filterColumn: string = element.id
 
     switch (filterValue && type) {
       case filterValue != undefined && type == Types.number:
@@ -131,24 +134,22 @@
         filter: filterValue,
       })
     }
+    changePage(1)
     filters.update(() => $filters)
-    updated.set(false)
   }
 
   const deleteFilter = async (column: string): Promise<void> => {
     // Remove the filter from the filters array
     $filters.splice($filters.indexOf($filters.filter(obj => obj.column == column)[0]), 1)
     filters.update(() => $filters)
-    updated.set(false)
   }
 
   // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
   // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
 
   const callbackFunction = async (): Promise<void> => {
-    if ($data != null && ($updated == false || $parentChange == true)) {
-      $data = await hasData()
-      updated.set(true)
+    if ($data != null) {
+      data.set(await hasData())
     }
   }
 
@@ -158,16 +159,13 @@
   }
 
   $: {
-    if ($parentChange == true || $updated == false) {
-      callbackFunction()
-      $parentChange = false
-    }
-  }
-
-  $: {
     $data, $pagination
     dataSmallerThanRows.set(
-      $data != null ? ($data.data != undefined ? $data.data.length < $pagination.rowsPerPage : true) : true
+      $data != null && $data != undefined
+        ? $data.data != undefined
+          ? $data.data.length < $pagination.rowsPerPage
+          : true
+        : true
     )
     moreRowsThanOnPage.set($pagination.totalRows - $pagination.rowsPerPage * $pagination.currentPage > 0)
     restingRows.set(
@@ -178,21 +176,21 @@
   onMount(async () => {
     await hasData().then((results: any) => {
       data.set(results)
-      updated.set(true)
+      scheme != undefined ? scheme.set(results.scheme) : writable<IScheme[]>(results.scheme)
     })
   })
 </script>
 
 <!-- Create a table with readonly cells -->
 <section class="container">
-  {#if $data != null && $data.data != undefined && $data.scheme != undefined}
+  {#if $data != null && $data.data != undefined && ($data.scheme != undefined || $scheme != undefined)}
     <div data-component="tablerenderer">
       <div class="table-container">
         <table class="table is-narrow">
           {#if $$slots.columns}
             <slot
               name="columns"
-              columns={$data.scheme}
+              columns={$scheme != undefined ? $scheme : $data.scheme}
               sorting={$sorting}
               {updateSorting}
               {deleteFilter}
@@ -201,7 +199,7 @@
             />
           {:else}
             <tr>
-              {#each $data.scheme as info}
+              {#each $scheme != undefined ? $scheme : $data.scheme as info}
                 {#if info.visible == true}
                   <th>
                     <div>
@@ -228,15 +226,15 @@
               <slot
                 name="row"
                 row={$data.data[i]}
-                scheme={$data.scheme}
+                scheme={$scheme != undefined ? $scheme : $data.scheme}
                 id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}
                 number={i}
               />
             {:else}
               <tr id={String(i + $pagination.rowsPerPage * ($pagination.currentPage - 1))}>
                 {#each $data.data[i] as row, j}
-                  {#if $data.scheme[j] != undefined}
-                    {#if $data.scheme[j].visible == true}
+                  {#if $data.scheme[j] != undefined || $scheme != undefined}
+                    {#if $data.scheme[j].visible == true || ($scheme != undefined && $scheme[j] != undefined && $scheme[j].visible == true)}
                       <td class="cell">
                         <div class="cell-container">
                           <p class="content" id="{i + $pagination.rowsPerPage * ($pagination.currentPage - 1)}-{j}">
@@ -256,9 +254,11 @@
     </div>
   {:else}
     <Spinner />
-    <button on:click={() => {
-      console.log($data)
-    }}>Test</button>
+    <button
+      on:click={() => {
+        console.log($data)
+      }}>Test</button
+    >
   {/if}
 </section>
 

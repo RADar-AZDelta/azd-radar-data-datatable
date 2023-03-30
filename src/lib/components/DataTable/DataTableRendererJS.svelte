@@ -9,7 +9,7 @@
   import FileDownload from '../FileDownload/FileDownload.svelte'
 
   export let data: Writable<[string, any][][]>,
-    columns: IScheme[],
+    columns: Writable<Array<IScheme>> = writable<Array<IScheme>>([]),
     downloadable: boolean = false,
     updateData: Function | undefined = undefined,
     pagination: Writable<IPaginated> = writable<IPaginated>({
@@ -20,11 +20,10 @@
     }),
     customCode: boolean = true
 
-  const columnsStore = writable<IScheme[]>(columns)
+  const columnsStore = writable<IScheme[]>($columns)
   const dataStore = writable<[string, any][][]>()
   export let filters = writable<Array<IFilter>>([])
   export let sorting = writable<Array<ISort>>([])
-  export let dataChanged = writable<boolean>(false)
 
   const setColumnFilters = async (filters: IFilter[]): Promise<void> => {
     let filteredData: [string, any][][] = []
@@ -186,11 +185,6 @@
       })
     }
   }
-
-  $: {
-    $data
-    dataChanged.set(true)
-  }
 </script>
 
 {#if downloadable == true}
@@ -202,7 +196,7 @@
 {/if}
 
 {#if customCode == true}
-  <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange={dataChanged}>
+  <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:scheme={columns}>
     <slot
       name="columns"
       slot="columns"
@@ -222,5 +216,5 @@
     <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
   </DataTableRendererBasic>
 {:else}
-  <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:parentChange={dataChanged} />
+  <DataTableRendererBasic {hasData} bind:filters bind:sorting bind:pagination bind:scheme={columns} />
 {/if}

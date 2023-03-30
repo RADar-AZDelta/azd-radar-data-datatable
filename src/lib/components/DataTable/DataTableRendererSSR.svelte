@@ -4,7 +4,6 @@
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
   import type ITableData from '$lib/interfaces/ITableData'
-  import type IStatus from '$lib/interfaces/IStatus'
   import { onMount } from 'svelte'
   import { writable, type Writable } from 'svelte/store'
   import DataTableRendererBasic from '../DataTableBasics/DataTableRendererBasic.svelte'
@@ -30,8 +29,6 @@
     customCode: boolean = true
 
   const originalData = writable<any>()
-  let dataChanged = writable<boolean>(false)
-  const data = writable<[string, any][][]>()
 
   /*
         This is the REST component where we fetch only a portion of the data with the params we sent to the API
@@ -92,16 +89,6 @@
     })
   }
 
-  $: {
-    $data
-    dataChanged.set(true)
-  }
-
-  $: {
-    $url
-    dataChanged.set(true)
-  }
-
   onMount(() => {
     fetchData()
   })
@@ -124,7 +111,7 @@
           bind:sorting={singleSorting}
           bind:pagination
           pagesShown={7}
-          bind:parentChange={dataChanged}
+          bind:scheme={columns}
         >
           <slot
             name="columns"
@@ -138,7 +125,7 @@
             {updateSorting}
             {filter}
           />
-          <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
+          <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} number={Number(number)} {scheme} />
         </DataTableRendererSpecial>
       {:else}
         <DataTableRendererSpecial
@@ -147,12 +134,12 @@
           bind:sorting={singleSorting}
           bind:pagination
           pagesShown={7}
-          bind:parentChange={dataChanged}
+          bind:scheme={columns}
         />
       {/if}
     {:else if special == false}
       {#if customCode == true}
-        <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting>
+        <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting bind:scheme={columns}>
           <slot
             name="columns"
             slot="columns"
@@ -172,7 +159,7 @@
           <slot name="row" slot="row" let:row let:scheme let:id let:number {row} {id} {number} {scheme} />
         </DataTableRendererBasic>
       {:else}
-        <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting />
+        <DataTableRendererBasic {hasData} bind:pagination bind:filters bind:sorting bind:scheme={columns} />
       {/if}
     {/if}
   </div>

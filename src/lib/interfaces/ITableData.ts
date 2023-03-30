@@ -1,6 +1,6 @@
 import type IScheme from './IScheme'
 
 export default interface ITableData {
-  data: any[][]
+  data: Array<Array<any>>
   scheme: IScheme[]
 }

@@ -49,59 +49,46 @@ const addDataToRow = async (
   return data
 }
 
-const autoMapper = async (
+const autoMap = async (
   tableData: [string | number | boolean][],
-  mapping: IMapper,
-  pagination: IPaginated
-): Promise<[string | number | boolean][]> => {
+  data: [string | number | boolean],
+  mapping: IMapper
+) => {
   return new Promise(async (resolve, reject) => {
     let colIndex = 0
     for (let col of cols) {
-      if (col.column == 'sourceName') {
-        colIndex = cols.indexOf(col)
-      }
+      if (col.column == 'sourceName') colIndex = cols.indexOf(col)
     }
-    // Get the data that needs to be mapped
-    const dataMapping = tableData.slice(
-      pagination.rowsPerPage * (pagination.currentPage - 1),
-      pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
-    )
-    for (let row of dataMapping) {
-      const rowIndex = tableData.indexOf(row)
-      // Get the data from the Athena API
-      const extracted = await createURL(row, colIndex, mapping)
-      // Get the content from the data from the Athena API
-      let content: object | string = extracted
-      if (typeof extracted == 'object') {
-        for (let path of mapping.contentPath) {
-          content = content[path as keyof object]
-        }
-        if (Array.isArray(content) == true) {
-          content = content[0 as keyof object]
-        }
-      }
 
-      let start = 3
-      let end = tableData[rowIndex].length
-      // Are there fields that need to be added to the table?
-      if (mapping.additionalFields != undefined) {
-        mappingCount.subscribe(value => {
-          start = value
-        })
-        tableData = await addDataToRow(mapping.additionalFields, tableData, rowIndex, start, end)
+    const rowIndex = tableData.indexOf(data)
+    // Get the data from the Athena API
+    const extracted = await createURL(data, colIndex, mapping)
+    // Get the content from the data from the Athena API
+    let content: object | string = extracted
+    if (typeof extracted == 'object') {
+      for (let path of mapping.contentPath) {
+        content = content[path as keyof object]
       }
-      // Is there content found in the data from the Athena API?
-      if (content != undefined) {
-        mappingCount.subscribe(value => {
-          start = value
-        })
-        tableData = await addDataToRow(content, tableData, rowIndex, start, end, mapping.expectedColumns)
+      if (Array.isArray(content) == true) {
+        content = content[0 as keyof object]
       }
     }
-    cols = Array.from(new Set(cols))
-    // Transpile to table for later use
-    const table = await transpilerToTableFromArray(tableData, cols)
-    mappedData = table.objects()
+    let start = 3
+    let end = data.length
+    // Are there fields that need to be added to the table?
+    if (mapping.additionalFields != undefined) {
+      mappingCount.subscribe(value => {
+        start = value
+      })
+      tableData = await addDataToRow(mapping.additionalFields, tableData, rowIndex, start, end)
+    }
+    // Is there content found in the data from the Athena API?
+    if (content != undefined) {
+      mappingCount.subscribe(value => {
+        start = value
+      })
+      tableData = await addDataToRow(content, tableData, rowIndex, start, end, mapping.expectedColumns)
+    }
     resolve(tableData)
   })
 }
@@ -480,21 +467,21 @@ onmessage = async ({
         pagination.rowsPerPage * (pagination.currentPage - 1),
         pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
       )
-      if (dataMapping[0].length <= 3) {
-        data = await autoMapper(filteredData, mapper, pagination)
-      } else {
-        data = filteredData
+      for (let row of dataMapping) {
+        const conceptIdIndex = cols.findIndex((col: any) => col.column == 'conceptId')
+        const conceptId = row[conceptIdIndex]
+        if (conceptId == undefined) {
+          filteredData = await autoMap(filteredData, row, mapper)
+        }
       }
-    } else {
-      data = filteredData
+      const table = await transpilerToTableFromArray(filteredData, cols)
+      mappedData = table.objects()
     }
-    data = await getDataNeeded(data, pagination)
+    data = await getDataNeeded(filteredData, pagination)
     await postMessage({
-      processedData: {
-        data: data,
-        columns: cols,
-        pagination: paginatedData,
-      },
+      data: data,
+      columns: cols,
+      pagination: paginatedData,
     })
   } else if (action && originalData !== undefined && originalData !== null) {
     table = await manipulateDataUpdate(action, cols)
@@ -506,11 +493,9 @@ onmessage = async ({
     }
     data = filteredData
     await postMessage({
-      processedData: {
-        data: data,
-        columns: cols,
-        update: true,
-      },
+      data: data,
+      columns: cols,
+      update: true,
     })
   } else if (actionPage && originalData !== undefined && originalData !== null) {
     table = await manipulateDataPage(actionPage, cols)
@@ -522,19 +507,17 @@ onmessage = async ({
     }
     data = filteredData
     await postMessage({
-      processedData: {
-        data: data,
-        columns: cols,
-        update: true,
-      },
+      data: data,
+      columns: cols,
+      update: true,
     })
   } else if (getCSV == true && originalData !== undefined && originalData !== null) {
     // When download button was clicked
     const file = originalData.toCSV({ delimiter: ',' })
     postMessage({
-      processedData: {
-        data: file,
-      },
+      file: file,
+      download: true,
+      update: true,
     })
   } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
@@ -544,11 +527,9 @@ onmessage = async ({
       .then(async table => await filterData(table, filters, cols))
       .finally(async () => {
         await postMessage({
-          processedData: {
-            data: data,
-            columns: cols,
-            update: true,
-          },
+          data: data,
+          columns: cols,
+          update: true,
         })
       })
   } else if (editData != undefined || editData != null) {
@@ -557,11 +538,9 @@ onmessage = async ({
     filteredData = await filterData(originalData, filters, cols)
     data = await getDataNeeded(filteredData, pagination)
     await postMessage({
-      processedData: {
-        data: data,
-        columns: cols,
-        update: true,
-      },
+      data: data,
+      columns: cols,
+      update: true,
     })
   } else {
     // When manipulation (filtering, sorting and pagination) has been done
@@ -569,24 +548,26 @@ onmessage = async ({
     orderedData = await orderData(originalData, order)
     filteredData = await filterData(orderedData, filter, cols)
     paginatedData = await updatePagination(filteredData, pagination)
-    const dataMapping = filteredData.slice(
-      pagination.rowsPerPage * (pagination.currentPage - 1),
-      pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
-    )
-    const lastItem = dataMapping.pop()
-    const undefinedCount = lastItem.filter((value: any) => value == undefined)
-    if (autoMapping == true && undefinedCount.length >= 3) {
-      data = await autoMapper(filteredData, mapper, pagination)
-    } else {
-      data = filteredData
+    if (autoMapping == true) {
+      const dataMapping = filteredData.slice(
+        pagination.rowsPerPage * (pagination.currentPage - 1),
+        pagination.rowsPerPage * (pagination.currentPage - 1) + pagination.rowsPerPage
+      )
+      for (let row of dataMapping) {
+        const conceptIdIndex = cols.findIndex((col: any) => col.column == 'conceptId')
+        const conceptId = row[conceptIdIndex]
+        if (conceptId == undefined) {
+          filteredData = await autoMap(filteredData, row, mapper)
+        }
+      }
+      const table = await transpilerToTableFromArray(filteredData, cols)
+      mappedData = table.objects()
     }
-    data = await getDataNeeded(data, paginatedData)
+    data = await getDataNeeded(filteredData, paginatedData)
     await postMessage({
-      processedData: {
-        data: data,
-        columns: cols,
-        pagination: pagination,
-      },
+      data: data,
+      columns: cols,
+      pagination: pagination,
     })
   }
 }
