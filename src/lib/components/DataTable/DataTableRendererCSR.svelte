@@ -230,7 +230,7 @@
   }
 
   .download {
-    margin-top: -20px;
+    margin-top: -10px;
     margin-left: 5px;
   }
 </style>
