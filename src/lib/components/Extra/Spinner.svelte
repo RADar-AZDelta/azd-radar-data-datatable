@@ -1,24 +1,65 @@
-<div class="spinner-container">
-  <div class="circle" />
-</div>
-
+<div class="spinner"/>
 <style>
-  .circle {
-    height: 60px;
-    width: 60px;
-    border-color: gray transparent gray gray;
-    border-width: 5px;
-    border-style: solid;
-    border-image: initial;
-    border-radius: 50%;
-    animation: 1s linear 0s infinite normal none running rotate;
-  }
-  @keyframes rotate {
-    0% {
-      transform: rotate(0);
+    .spinner {
+	  --line-length: 8px;
+      --line-offset: 4px;
+      --line-width: 2px;
+      --color-ring1: #0093d5;
+      --color-ring2: #00a7a7;
+      --gradient-circle: circle at 80% 20%, var(--color-ring2) 50%, var(--color-ring1) 50%;
+      --gradient-lines: transparent calc(50% - var(--line-width) / 2),
+        var(--color-background) calc(50% - var(--line-width) / 2 + 1px) calc(50% + var(--line-width) / 2 - 1px),
+        transparent calc(50% + var(--line-width) / 2);
+      --gradient-circle-mask: farthest-side,
+        transparent calc(100% - var(--line-length)),
+        var(--color-background) calc(100% - var(--line-length));
+      --color-background: #fff;
+	}
+  
+    .spinner {
+      background: var(--color-background);
+      margin: calc(var(--line-length) + var(--line-offset) + 0px);
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      border-radius: 50%;
+      position: relative;
     }
-    100% {
-      transform: rotate(360deg);
+
+    .spinner::after {
+      content: "";
+      position: absolute;
+      top: calc(-1 * var(--line-length) - var(--line-offset));
+      bottom: calc(-1 * var(--line-length) - var(--line-offset));
+      left: calc(-1 * var(--line-length) - var(--line-offset));
+      right: calc(-1 * var(--line-length) - var(--line-offset));
+      border-radius: inherit;
+      background: linear-gradient(-90deg, var(--gradient-lines)),
+        linear-gradient(-75deg, var(--gradient-lines)),
+        linear-gradient(-60deg, var(--gradient-lines)),
+        linear-gradient(-45deg, var(--gradient-lines)),
+        linear-gradient(-30deg, var(--gradient-lines)),
+        linear-gradient(-15deg, var(--gradient-lines)),
+        linear-gradient(0deg, var(--gradient-lines)),
+        linear-gradient(15deg, var(--gradient-lines)),
+        linear-gradient(30deg, var(--gradient-lines)),
+        linear-gradient(45deg, var(--gradient-lines)),
+        linear-gradient(60deg, var(--gradient-lines)),
+        linear-gradient(75deg, var(--gradient-lines)),
+        linear-gradient(90deg, var(--gradient-lines)),
+        radial-gradient(var(--gradient-circle));
+      mask: radial-gradient(var(--gradient-circle-mask));
+      -webkit-mask: radial-gradient(var(--gradient-circle-mask));
+      animation: spin 4s infinite linear;
     }
-  }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(359deg);
+      }
+    }
 </style>

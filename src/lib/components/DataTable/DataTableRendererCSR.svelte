@@ -22,8 +22,6 @@
     fileName: string | undefined = undefined,
     mapping: any | undefined = undefined,
     map: Writable<boolean> = writable<boolean>(false),
-    selectedRow: Writable<number> = writable(),
-    selectedRowPage: Writable<number> = writable(0),
     autoMapping: boolean = false,
     customCode: boolean = true
 
@@ -174,12 +172,6 @@
       })
       $map = false
     }
-  }
-
-  $: {
-    $selectedRow
-    $selectedRowPage =
-      ($selectedRow == undefined ? 0 : $selectedRow) - ($pagination.currentPage - 1) * $pagination.rowsPerPage
   }
 
   onMount(loadWorker)
