@@ -93,6 +93,11 @@
     fetchData()
   })
 
+  $: {
+    $url
+    pagination.update(() => $pagination)
+  }
+
   // Not editable because you get the data from REST and you would need to make a POST request (maybe in the future)
 </script>
 
