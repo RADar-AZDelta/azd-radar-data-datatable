@@ -187,7 +187,7 @@
 </script>
 
 <!-- Create a table with readonly cells -->
-<section class="container">
+<section class="container is-fluid">
   {#if $data != null && $data.data != undefined && ($data.scheme != undefined || $scheme != undefined)}
     <div data-component="tablerenderer">
       <div class="table-container">
@@ -269,8 +269,9 @@
 
 <style>
   .container {
-    margin-left: 0%;
-    margin-right: 0%;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0px;
   }
   .content {
     padding-right: 1px;

@@ -32,7 +32,7 @@
 </script>
 
 <section data-component="pagination">
-  <div data-component="pagination-rows">
+  <div>
     <p>Rows:</p>
     <div class="select is-small">
       <select bind:value={$pagination.rowsPerPage} id="rows" on:change={() => updateRowsPerPage(event)}>

@@ -3,9 +3,9 @@
   export let col: string, direction: number, updateSorting: Function
 </script>
 
-<div data-component="sort">
+<div>
   <button class="button is-small is-fullwidth" on:click={updateSorting(col, direction)}>
-    <p data-component="column-name">{col}</p>
+    <p>{col}</p>
     <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1em" height="1rem" version="1.1">
       <g>
         <path

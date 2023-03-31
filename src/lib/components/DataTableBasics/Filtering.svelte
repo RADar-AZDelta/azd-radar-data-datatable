@@ -12,7 +12,7 @@
 </script>
 
 <div class="field has-addons">
-  <div class="control" data-component="filter">
+  <div class="control">
     <input
       class="input is-small"
       id={col}
