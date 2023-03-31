@@ -190,7 +190,7 @@
   {#if $data != null && $data.data != undefined && ($data.scheme != undefined || $scheme != undefined)}
     <div data-component="tablerenderer">
       <div class="table-container">
-        <table class="table is-narrow">
+        <table class="table">
           {#if $$slots.columns}
             <slot
               name="columns"
@@ -277,9 +277,12 @@
   }
   .cell {
     padding: 1px 1px 1px 1px;
-    vertical-align: middle;
+    vertical-align: bottom;
   }
   tr {
     line-height: 10px;
+  }
+  th {
+    padding: 0.25em 0.1em;
   }
 </style>
