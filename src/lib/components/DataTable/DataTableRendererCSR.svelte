@@ -217,7 +217,7 @@
     {#if downloadable == true}
       <div data-component="download-container">
         {#if worker != undefined}
-          <FileDownload bind:worker workerMessage={onWorkerMessage}/>
+          <FileDownload bind:worker workerMessage={onWorkerMessage} />
         {/if}
       </div>
     {/if}
@@ -230,6 +230,7 @@
   }
 
   .download {
-    margin-top: 2rem;
+    margin-top: -20px;
+    margin-left: 5px;
   }
 </style>
