@@ -1,6 +1,7 @@
 <script lang="ts">
   import type IPaginated from '$lib/interfaces/IPaginated'
   import { writable, type Writable } from 'svelte/store'
+  import { loading } from '../../store'
 
   export let updateRowsPerPage: Function, changePage: Function, pagination: Writable<IPaginated>, pagesShown: number
 
@@ -32,7 +33,7 @@
 </script>
 
 <section data-component="pagination">
-  <div>
+  <div data-component="pagination-rows">
     <p>Rows:</p>
     <div class="select is-small">
       <select bind:value={$pagination.rowsPerPage} id="rows" on:change={() => updateRowsPerPage(event)}>
@@ -52,7 +53,7 @@
     </p>
   </div>
   <div data-component="pagination-pages">
-    <button class="button is-small" on:click={() => changePage($pagination.currentPage - 1)}
+    <button class="button is-small" on:click={() => {if($loading != true) changePage($pagination.currentPage - 1)}}
       ><img src="/arrow-left.svg" alt="Arrow left" /></button
     >
     {#each Array($paginationLength) as _, i}
@@ -87,7 +88,7 @@
         {/if}
       </button>
     {/each}
-    <button on:click={() => changePage($pagination.currentPage + 1)} class="button is-small"
+    <button on:click={() => {if($loading != true) changePage($pagination.currentPage + 1)}} class="button is-small"
       ><img src="/arrow-right.svg" alt="Arrow right" /></button
     >
   </div>

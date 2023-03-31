@@ -154,7 +154,6 @@
       const results = await hasData()
       data.set(results)
       loading.set(false)
-      // data.set(await hasData())
     }
   }
 
