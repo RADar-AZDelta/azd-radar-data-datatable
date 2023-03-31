@@ -12,6 +12,7 @@
   import { onMount } from 'svelte'
   import type ITableData from '$lib/interfaces/ITableData'
   import type IScheme from '$lib/interfaces/IScheme'
+  import { loading } from '../../store'
 
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
@@ -149,7 +150,11 @@
 
   const callbackFunction = async (): Promise<void> => {
     if ($data != null) {
-      data.set(await hasData())
+      loading.set(true)
+      const results = await hasData()
+      data.set(results)
+      loading.set(false)
+      // data.set(await hasData())
     }
   }
 

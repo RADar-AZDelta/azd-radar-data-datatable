@@ -521,7 +521,6 @@ onmessage = async ({
     })
   } else if (mapping != undefined || mapping != null) {
     // When a row has been mapped
-    // TODO: fix bug where data is not being updated correctly when mapping multiple
     await manipulateData(mappedData, mapping, columns, expectedColumns)
       .then(async table => await orderData(table, sorts))
       .then(async table => await filterData(table, filters, cols))

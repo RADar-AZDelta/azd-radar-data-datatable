@@ -36,7 +36,7 @@
     <p>Rows:</p>
     <div class="select is-small">
       <select bind:value={$pagination.rowsPerPage} id="rows" on:change={() => updateRowsPerPage(event)}>
-        {#each Array(5) as _, i}
+        {#each Array(4) as _, i}
           <option value={(i + 1) * 10}>{(i + 1) * 10}</option>
         {/each}
       </select>
