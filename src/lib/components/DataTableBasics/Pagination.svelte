@@ -33,7 +33,7 @@
 </script>
 
 <section data-component="pagination">
-  <div data-component="pagination-rows">
+  <div>
     <p>Rows:</p>
     <div class="select is-small">
       <select bind:value={$pagination.rowsPerPage} id="rows" on:change={() => updateRowsPerPage(event)}>
@@ -53,8 +53,11 @@
     </p>
   </div>
   <div data-component="pagination-pages">
-    <button class="button is-small" on:click={() => {if($loading != true) changePage($pagination.currentPage - 1)}}
-      ><img src="/arrow-left.svg" alt="Arrow left" /></button
+    <button
+      class="button is-small"
+      on:click={() => {
+        if ($loading != true) changePage($pagination.currentPage - 1)
+      }}><img src="/arrow-left.svg" alt="Arrow left" /></button
     >
     {#each Array($paginationLength) as _, i}
       <button
@@ -88,8 +91,11 @@
         {/if}
       </button>
     {/each}
-    <button on:click={() => {if($loading != true) changePage($pagination.currentPage + 1)}} class="button is-small"
-      ><img src="/arrow-right.svg" alt="Arrow right" /></button
+    <button
+      on:click={() => {
+        if ($loading != true) changePage($pagination.currentPage + 1)
+      }}
+      class="button is-small"><img src="/arrow-right.svg" alt="Arrow right" /></button
     >
   </div>
 </section>
