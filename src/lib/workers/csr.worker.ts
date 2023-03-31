@@ -545,7 +545,7 @@ onmessage = async ({
     // When manipulation (filtering, sorting and pagination) has been done
     cols = columns
     orderedData = await orderData(originalData, order)
-    filteredData = await filterData(orderedData, filter, cols)
+    filteredData = await filterData(orderedData, filters, cols)
     paginatedData = await updatePagination(filteredData, pagination)
     if (autoMapping == true) {
       const dataMapping = filteredData.slice(
@@ -560,6 +560,7 @@ onmessage = async ({
         }
       }
       const table = await transpilerToTableFromArray(filteredData, cols)
+      if(filters.length == 0) originalData = table
       mappedData = table.objects()
     }
     data = await getDataNeeded(filteredData, paginatedData)
