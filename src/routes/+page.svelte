@@ -11,8 +11,8 @@
         Some test data
     */
 
-  export var columns: IScheme[]
-  columns = [
+  let columns =  writable<IScheme[]>()
+  $columns = [
     {
       column: 'name',
       type: Types.string,

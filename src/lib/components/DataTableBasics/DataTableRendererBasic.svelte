@@ -13,6 +13,7 @@
   import type ITableData from '$lib/interfaces/ITableData'
   import type IScheme from '$lib/interfaces/IScheme'
   import { loading } from '../../store'
+  import { objectComparison } from '../../utils'
 
   export let hasData: Function,
     filters: Writable<Array<IFilter>>,
@@ -22,6 +23,8 @@
     scheme: Writable<IScheme[]> | undefined
 
   const data = writable<ITableData | null>(null)
+
+  let oldPagination = writable<IPaginated | null>(null)
 
   let dataSmallerThanRows = writable<boolean>(
     $data != null && $data != undefined ? $data.data.length < $pagination.rowsPerPage : true
@@ -158,8 +161,26 @@
   }
 
   $: {
-    $filters, $sorting, $pagination
+    $filters, $sorting
     callbackFunction()
+  }
+
+  $: {
+    $pagination
+    if ($oldPagination != null) {
+      if (
+        $oldPagination.currentPage != $pagination.currentPage ||
+        $oldPagination.rowsPerPage != $pagination.rowsPerPage ||
+        $oldPagination.totalRows != $pagination.totalRows ||
+        $oldPagination.totalPages != $pagination.totalPages
+      ) {
+        $oldPagination = $pagination
+        callbackFunction()
+      }
+    } else {
+      $oldPagination = $pagination
+      callbackFunction()
+    }
   }
 
   $: {

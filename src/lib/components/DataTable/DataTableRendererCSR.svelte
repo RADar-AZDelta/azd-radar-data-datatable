@@ -1,6 +1,5 @@
 <script lang="ts">
   import type IFilter from '$lib/interfaces/IFilter'
-  import type IMapper from '$lib/interfaces/IMapper'
   import type IPaginated from '$lib/interfaces/IPaginated'
   import type IScheme from '$lib/interfaces/IScheme'
   import type ISort from '$lib/interfaces/ISort'
@@ -20,17 +19,20 @@
     fetchOptions: object | undefined = undefined,
     file: File | undefined = undefined,
     fileName: string | undefined = undefined,
-    mapping: any | undefined = undefined,
-    map: Writable<boolean> = writable<boolean>(false),
-    autoMapping: boolean = false,
+    extraMessage: object | undefined = undefined,
     customCode: boolean = true
 
   export let worker: Worker | undefined = undefined
+  export let workerPath: string | undefined = undefined
 
-  export let filters: Writable<Array<IFilter>>
-  export let sorting: Writable<Array<ISort>>
-  export let pagination: Writable<IPaginated>
-  export let mapper: Writable<IMapper> = writable<IMapper>()
+  export let filters: Writable<Array<IFilter>> = writable<Array<IFilter>>([])
+  export let sorting: Writable<Array<ISort>> = writable<Array<ISort>>([])
+  export let pagination: Writable<IPaginated> = writable<IPaginated>({
+    currentPage: 1,
+    totalPages: 1,
+    rowsPerPage: 20,
+    totalRows: 10,
+  })
 
   const workerMess = writable<boolean>(false)
 
@@ -58,8 +60,7 @@
         order: $sorting,
         pagination: $pagination,
         columns: $columns,
-        mapper: $mapper,
-        autoMapping: autoMapping,
+        extra: extraMessage,
       })
       workerMess.set(false)
 
@@ -96,56 +97,60 @@
     }
     workerMess.set(true)
     if (data.data.update == true) {
-      pagination.set($pagination)
+      filters.set($filters)
     }
   }
 
   const loadWorker = async (): Promise<void> => {
-    const w = await import('../../workers/csr.worker?worker')
-    worker = new w.default()
-    // Check how the file has been given to the application (REST, Drag & Drop or local in the data folder)
-    if (url != undefined) {
-      worker.postMessage({
-        filePath: url,
-        method: 'REST',
-        fileType: dataType,
-        delimiter: delimiter,
-        fetchOptions: fetchOptions,
-        filter: $filters,
-        order: $sorting,
-        pagination: $pagination,
-        columns: $columns,
-        autoMapping: autoMapping,
-        mapper: $mapper,
-      })
-    } else if (file != undefined) {
-      worker.postMessage({
-        file: file,
-        method: 'file',
-        fileType: dataType,
-        delimiter: delimiter,
-        filter: $filters,
-        order: $sorting,
-        pagination: $pagination,
-        columns: $columns,
-        autoMapping: autoMapping,
-        mapper: $mapper,
-      })
-    } else if (fileName != undefined) {
-      worker.postMessage({
-        filePath: `../data/${fileName}`,
-        method: 'local',
-        fileType: dataType,
-        delimiter: delimiter,
-        filter: $filters,
-        order: $sorting,
-        pagination: $pagination,
-        columns: $columns,
-        autoMapping: autoMapping,
-        mapper: $mapper,
-      })
+    if (workerPath != undefined) {
+      const w = await import(workerPath)
+      worker = new w.default()
+    } else {
+      const w = await import('../../workers/csr.worker?worker')
+      worker = new w.default()
     }
-    worker.onmessage = onWorkerMessage
+    if (worker != undefined) {
+      // Check how the file has been given to the application (REST, Drag & Drop or local in the data folder)
+      if (url != undefined) {
+        worker.postMessage({
+          filePath: url,
+          method: 'REST',
+          fileType: dataType,
+          delimiter: delimiter,
+          fetchOptions: fetchOptions,
+          filter: $filters,
+          order: $sorting,
+          pagination: $pagination,
+          columns: $columns,
+          extra: extraMessage,
+        })
+      } else if (file != undefined) {
+        worker.postMessage({
+          file: file,
+          method: 'file',
+          fileType: dataType,
+          delimiter: delimiter,
+          filter: $filters,
+          order: $sorting,
+          pagination: $pagination,
+          columns: $columns,
+          extra: extraMessage,
+        })
+      } else if (fileName != undefined) {
+        worker.postMessage({
+          filePath: `../data/${fileName}`,
+          method: 'local',
+          fileType: dataType,
+          delimiter: delimiter,
+          filter: $filters,
+          order: $sorting,
+          pagination: $pagination,
+          columns: $columns,
+          extra: extraMessage,
+        })
+      }
+      worker.onmessage = onWorkerMessage
+    }
   }
 
   const terminateWorker = async (): Promise<void> => {
@@ -159,18 +164,6 @@
     if (file != undefined) {
       terminateWorker()
       loadWorker()
-    }
-  }
-
-  $: {
-    // When mapping of a row has been done
-    if (mapping != undefined && $map == true) {
-      worker?.postMessage({
-        mapping: mapping,
-        expectedColumns: $mapper.expectedColumns,
-        columns: $columns,
-      })
-      $map = false
     }
   }
 
