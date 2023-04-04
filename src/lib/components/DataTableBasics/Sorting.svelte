@@ -1,35 +1,46 @@
 <script lang="ts">
+  import type { Nullable } from 'vitest'
   import SortDirection from '../../classes/enums/SortDirection'
+  import SvgIcon from './SvgIcon.svelte'
   export let col: string, direction: number, updateSorting: Function
+
+  type HEX = `#${string}`
+  let upColor: HEX, downColor: HEX
+  //let clazz: string
+
+  $: switch (direction) {
+    case SortDirection.Ascending:
+      upColor = '#888888'
+      downColor = '#ffffff'
+      //clazz = 'asc'
+      break
+    case SortDirection.Descending:
+      upColor = '#ffffff'
+      downColor = '#888888'
+      //clazz = 'desc'
+      break
+    default:
+      upColor = '#888888'
+      downColor = '#888888'
+      //clazz = ''
+      break
+  }
 </script>
 
-<div>
-  <button class="button is-small is-fullwidth" on:click={updateSorting(col, direction)}>
-    <p>{col}</p>
-    <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1em" height="1rem" version="1.1">
-      <g>
-        <path
-          fill="%23888888"
-          class={`${direction == SortDirection.None || direction == SortDirection.Ascending ? 'fill' : 'empty'}`}
-          d="M1.5 6.5l6 -6 5.962 6c-0.984,0 -4.962,0 -11.962,0z"
-        />
-        <path
-          fill="%23888888"
-          class={`${direction == SortDirection.None || direction == SortDirection.Descending ? 'fill' : 'empty'}`}
-          id="down"
-          d="M13.5 9.5l-6 6 -6 -6c0,0 12,0 12,0z"
-        />
-      </g>
-    </svg>
-  </button>
-</div>
+<button class="button is-small is-fullwidth" on:click={updateSorting(col, direction)}>
+  <p>{col}</p>
+  <SvgIcon href="icons.svg" id="updown" width="1rem" height="1rem" --up-color={upColor} --down-color={downColor} />
+  <!--SvgIcon href="icons.svg" id="updown" width="1rem" height="1rem" class="updown {clazz}" /-->
+</button>
 
 <style>
-  .fill {
-    fill: #888888;
+  /* :global(svg.updown.asc) {
+    --up-color: #888888;
+    --down-color: #ffffff;
   }
 
-  .empty {
-    fill: #ffffff;
-  }
+  :global(svg.updown.desc) {
+    --up-color: #ffffff;
+    --down-color: #888888;
+  } */
 </style>
