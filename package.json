@@ -14,37 +14,39 @@
     "format": "prettier --plugin-search-dir . --write ."
   },
   "devDependencies": {
-    "@playwright/test": "^1.28.1",
+    "@playwright/test": "^1.32.2",
     "@sveltejs/adapter-auto": "^2.0.0",
-    "@sveltejs/kit": "^1.5.0",
-    "@sveltejs/package": "^1.0.0",
+    "@sveltejs/kit": "^1.15.1",
+    "@sveltejs/package": "^1.0.2",
     "@types/lodash.debounce": "^4.0.7",
-    "@typescript-eslint/eslint-plugin": "^5.45.0",
-    "@typescript-eslint/parser": "^5.45.0",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
     "bulma": "^0.9.4",
-    "eslint": "^8.28.0",
-    "eslint-config-prettier": "^8.5.0",
+    "eslint": "^8.37.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-svelte3": "^4.0.0",
-    "prettier": "^2.8.0",
-    "prettier-plugin-svelte": "^2.8.1",
-    "sass": "^1.53.0",
-    "svelte": "^3.54.0",
-    "svelte-check": "^3.0.1",
+    "prettier": "^2.8.7",
+    "prettier-plugin-svelte": "^2.10.0",
+    "sass": "^1.60.0",
+    "svelte": "^3.58.0",
+    "svelte-check": "^3.2.0",
     "svelte-preprocess": "^4.10.7",
-    "tslib": "^2.4.1",
-    "typescript": "^4.9.3",
-    "vite": "^4.0.0",
-    "vitest": "^0.25.3"
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5",
+    "vite": "^4.2.1",
+    "vitest": "^0.25.8"
   },
   "type": "module",
   "dependencies": {
-    "@types/lodash": "^4.14.191",
+    "@types/lodash": "^4.14.192",
     "arquero": "^5.1.0",
-    "lodash": "^4.17.21"
+    "lodash.debounce": "^4.0.8"
   },
   "exports": {
-    ".": "./src/lib/components/DataTable/DataTableRendererCSR.svelte",
-    "./DataTableRendererSSR.svelte": "./src/lib/components/DataTable/DataTableRendererSSR.svelte",
-    "./DragAndDrop.svelte": "./src/lib/components/Extra/DragAndDrop.svelte"
+    ".": {
+      "types": "./index.d.ts",
+      "svelte": "./index.js"
+    },
+    "./styles/data-table.scss": "./styles/data-table.scss"
   }
 }

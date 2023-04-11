@@ -1,25 +1,10 @@
-export const objectComparison = (object1: object | null, object2: object | null) => {
-  if (isObject(object1) && isObject(object2)) {
-    const keys1 = Object.keys(object1!)
-    const keys2 = Object.keys(object2!)
-
-    if (keys1.length !== keys2.length) {
-      return false
-    }
-
-    for (const key of keys1) {
-      const val1 = object1![key as keyof object]
-      const val2 = object2![key as keyof object]
-      if (!objectComparison(val1, val2) || val1 !== val2) {
-        return false
-      }
-    }
-
-    return true
-  } else {
-  }
+export function jsonMapReplacer(key: string, value: any) {
+  if (value instanceof Map)
+    return [...value]
+  else
+    return value;
 }
 
-const isObject = (object: object | null) => {
-  return object != null && typeof object === 'object'
-}
+export const range = (start: number, stop: number, step: number) => Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
+
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

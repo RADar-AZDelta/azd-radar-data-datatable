@@ -3,14 +3,26 @@
     <symbol id="updown" viewbox="0 -10 100 110">
       <g>
         <path
-          style="fill: var(--up-color, #888888)"
+          style="fill-opacity: var(--up-opacity, 1); fill: var(--up-color, #888888);"
           d="M1.5 6.5l6 -6 5.962 6c-0.984,0 -4.962,0 -11.962,0z"
         />
         <path
-          style="fill: var(--down-color, #888888)"
+          style="fill-opacity: var(--down-opacity, 1); fill: var(--down-color, #888888);"
           d="M13.5 9.5l-6 6 -6 -6c0,0 12,0 12,0z"
         />
       </g>
+    </symbol>
+    <symbol id="x" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </symbol>
+    <symbol id="arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </symbol>
+    <symbol id="arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+      <polyline points="12 5 19 12 12 19"></polyline>
     </symbol>
   </defs>
 </svg>

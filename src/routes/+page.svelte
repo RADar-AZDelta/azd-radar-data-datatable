@@ -1,150 +1,210 @@
 <script lang="ts">
-  import Types from '$lib/classes/enums/Types'
-  import DataTableRendererJs from '$lib/components/DataTable/DataTableRendererJS.svelte'
-  import type IScheme from '$lib/interfaces/IScheme'
-  import { writable, type Writable } from 'svelte/store'
+  import DataTable from '$lib/components/DataTable.svelte'
+  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/components/types'
+  import '$lib/styles/data-table.scss'
+  import { sleep } from '$lib/utils'
 
-  // TODO: set interface on components https://medium.com/geekculture/type-safe-mutual-exclusivity-in-svelte-component-props-3cc1cb871904
-  // TODO: experiment with a State Machine https://github.com/kenkunz/svelte-fsm
-
-  /*
-        Some test data
-    */
-
-  let columns =  writable<IScheme[]>()
-  $columns = [
+  const data = [
     {
-      column: 'name',
-      type: Types.string,
-      editable: false,
-      visible: true,
-    },
-    {
-      column: 'age',
-      type: Types.number,
-      editable: false,
-      visible: true,
-    },
-    {
-      column: 'country',
-      type: Types.string,
-      editable: false,
-      visible: true,
-    },
-    {
-      column: 'telephone',
-      type: Types.string,
-      editable: false,
-      visible: true,
-    },
-    {
-      column: 'address',
-      type: Types.string,
-      editable: false,
-      visible: true,
-    },
-  ]
-
-  let data = writable<[string, any][][]>()
-
-  $data = [
-    Object.entries({
       name: 'Rory',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,',
+    },
+    {
       name: 'Amethyst',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Eikstraat 450,Belgrade,Namur,5001,',
+    },
+    {
       name: 'Bob',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Rue du Château 143,Lochristi,East Flanders,9080,',
+    },
+    {
       name: 'Cindy',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Rue Libert 93,Warsage,Liège,4608,',
+    },
+    {
       name: 'Derek',
       age: 35,
       country: 'USA',
       telephone: '0800-123-524-634',
       address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+    },
+    {
       name: 'Eve',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Rue du Pont Simon 204,Antwerpen,Antwerp,2040,',
+    },
+    {
       name: 'Frank',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Rue du Vert Galant 190,Poulseur,Liège,4171,',
+    },
+    {
       name: 'Gina',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Poolse Winglaan 288,Sint-Kwintens-Lennik,Flemish Brabant,1750,',
+    },
+    {
       name: 'Hannah',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Rue de la Poste 335,Ramsdonk,Flemish Brabant,1880,',
+    },
+    {
       name: 'Ivan',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Rue du Centre 259,Marquain,Hainaut,7522,',
+    },
+    {
       name: 'Jenny',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Rue des Campanules 311,Strombeek-Bever,Flemish Brabant,1853,',
+    },
+    {
       name: 'Karl',
       age: 35,
-      country: 'USA',
+      country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
-    Object.entries({
+      address: 'Rue Engeland 373,Neerrepen,Limburg,3700,',
+    },
+    {
       name: 'Rory2',
       age: 45,
       country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: '123 Main Street, New York, NY 10001',
-    }),
+      address: 'Machelsesteenweg 343,Montroeul-sur-Haine,Hainaut,7350,',
+    },
   ]
+
+  const matrix = data.map(obj => Object.values(obj))
+
+  const columns: IColumnMetaData[] = [
+    {
+      id: 'name',
+      label: 'NAAM',
+      sortDirection: 'asc',
+      sortOrder: 0,
+    },
+    {
+      id: 'age',
+      sortable: false,
+    },
+    {
+      id: 'country',
+      filter: 'b',
+    },
+    {
+      id: 'telephone',
+      position: 5,
+      filterable: false,
+    },
+    {
+      id: 'address',
+      position: 4,
+      sortDirection: 'desc',
+      sortOrder: 1,
+    },
+  ]
+
+  async function fetchData(
+    filteredColumns: Map<string, TFilter>,
+    sortedColumns: Map<string, SortDirection>,
+    pagination: IPagination
+  ) {
+    //lets simulate a remote fetch call
+
+    //FILTER
+    let fetchedData = data
+    for (const [column, filter] of [...filteredColumns].values()) {
+      fetchedData = fetchedData.filter(obj => obj[column]?.toString()?.toLowerCase().indexOf(filter) > -1)
+    }
+    const totalRows = fetchedData.length
+
+    //SORT
+    for (let [column, sortDirection] of [...sortedColumns].reverse()) {
+      switch (sortDirection) {
+        case 'asc':
+          fetchedData = fetchedData.sort((a, b) => (a[column] < b[column] ? -1 : a[column] > b[column] ? 1 : 0))
+          break
+        case 'desc':
+          fetchedData = fetchedData.sort((a, b) => (b[column] < a[column] ? -1 : b[column] > a[column] ? 1 : 0))
+          break
+      }
+    }
+
+    //PAGINATION
+    const start = (pagination.currentPage - 1) * pagination.rowsPerPage
+    const end = pagination.currentPage * pagination.rowsPerPage
+    fetchedData = fetchedData.slice(start, end)
+
+    await sleep(500)
+    return { totalRows, data: fetchedData }
+  }
+
+  let file: File
+
+  function onFileInputChange(e: Event) {
+    const allowedExtensions = ['csv', 'json']
+    const inputFiles = (e.target as HTMLInputElement).files
+    if (!inputFiles) return
+
+    for (const f of inputFiles) {
+      const extension = f.name.split('.').pop()
+      if (extension && allowedExtensions.includes(extension)) {
+        file = f
+        break
+      }
+    }
+  }
 </script>
 
-<h1>RADar-DataTable Demo - Simple Data</h1>
-<p>
-  This page demonstrates simple data, consisting of a matrix of key value pairs, also known as an array of
-  `Object.entries(myObject)`.
-</p>
-<DataTableRendererJs {data} {columns} customCode={false} />
+<h1>RADar-DataTable Demo</h1>
+
+<details>
+  <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
+  <DataTable {columns} data={matrix} />
+</details>
+
+<hr />
+
+<details>
+  <summary>Table with an array of objects as a data source</summary>
+  <DataTable {data} />
+</details>
+
+<hr />
+
+<details>
+  <summary>Table with a async function as a data source (ex: fetch data from web server)</summary>
+  <DataTable {columns} data={fetchData} />
+</details>
+
+<hr />
+
+<details open>
+  <summary>Table with a File as a data source (ex: CSV, JSON)</summary>
+  <input type="file" accept=".csv,.json" on:change={onFileInputChange} />
+  <DataTable data={file} />
+</details>
