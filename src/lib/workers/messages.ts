@@ -14,7 +14,8 @@ export interface MessageRequestLoadFile {
 export interface MessageRequestFetchData {
     filteredColumns: Map<string, TFilter>
     sortedColumns: Map<string, SortDirection>
-    pagination: IPagination
+    pagination: IPagination,
+    onlyPaginationChanged: boolean
 }
 
 export interface WorkerMessageRequests {

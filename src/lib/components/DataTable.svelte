@@ -71,7 +71,13 @@
     } else if (typeof data === 'function') dataType = DataType.Function
     else if (data instanceof File) {
       dataType = DataType.File
+      let start: number
+      if (dev) start = performance.now()
       const url = URL.createObjectURL(data as File)
+      if (dev) {
+        const end = performance.now()
+        console.log(`URL.createObjectURL took: ${Math.round(end - start!)} ms`)
+      }
       if (!worker) {
         worker = new DataTableWorker()
         await worker.init()
@@ -140,21 +146,27 @@
     await render()
   }
 
-  async function render() {
+  async function render(onlyPaginationChanged = false) {
     if (dev) console.log('render')
     renderedData = undefined
     if (dataType === DataType.Function) {
+      let start: number
+      if (dev) start = performance.now()
       const results = await (data as FetchDataFunc)(filteredColumns, sortedColumns, pagination)
+      if (dev) {
+        const end = performance.now()
+        console.log(`Data function took: ${Math.round(end - start!)} ms`)
+      }
       totalRows = results.totalRows
       renderedData = results.data
     } else if (dataType === DataType.Matrix || dataType === DataType.ArrayOfObjects) {
-      if (!filteredAndSortedData) {
+      if (!onlyPaginationChanged || !filteredAndSortedData) {
         filteredAndSortedData = applySort(applyFilter(data as any[][] | any[]))
         totalRows = filteredAndSortedData.length
       }
       renderedData = applyPagination(filteredAndSortedData)
     } else if (dataType === DataType.File) {
-      const results = await worker?.fetchData(filteredColumns, sortedColumns, pagination)
+      const results = await worker?.fetchData(filteredColumns, sortedColumns, pagination, onlyPaginationChanged)
       totalRows = results!.totalRows
       renderedData = results!.data
     }
@@ -243,7 +255,7 @@
 
     if (dev) console.log(`Pagination changed: ${JSON.stringify(event.detail)}`)
 
-    await render()
+    await render(true)
   }
 
   onMount(() => {
