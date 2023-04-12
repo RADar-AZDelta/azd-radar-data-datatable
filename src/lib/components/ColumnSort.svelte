@@ -54,8 +54,8 @@
   <SvgIcon
     href="icons.svg"
     id="updown"
-    width="1rem"
-    height="1rem"
+    width="16px"
+    height="16px"
     --up-color={upColor}
     --down-color={downColor}
     --up-opacity={upOpacity}

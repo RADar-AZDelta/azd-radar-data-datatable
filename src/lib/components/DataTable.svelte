@@ -84,6 +84,7 @@
       }
       const extension = (data as File).name.split('.').pop()
       await worker.loadFile(url, extension!)
+      URL.revokeObjectURL(url)
     } else return
 
     //COLUMNS

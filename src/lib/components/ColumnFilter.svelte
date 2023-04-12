@@ -23,5 +23,5 @@
 
 <input on:input={onInput} type={inputType} {value} placeholder="Filter" />
 <button on:click={onClick}>
-  <SvgIcon href="icons.svg" id="x" width="1rem" height="1rem" />
+  <SvgIcon href="icons.svg" id="x" width="16px" height="16px" />
 </button>

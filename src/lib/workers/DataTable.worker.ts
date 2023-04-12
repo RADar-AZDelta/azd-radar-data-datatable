@@ -1,5 +1,5 @@
 import type { MessageRequestFetchData, MessageRequestLoadFile, PostMessage, WorkerMessageRequests, WorkerMessageResponses } from "./messages"
-import { dev } from "$app/environment"
+// import { dev } from "$app/environment"
 import { desc, escape, loadJSON, loadCSV, op } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
