@@ -271,7 +271,7 @@
           <tr data-name="titles">
             {#each visibleOrderedColumns as column, i (column.id)}
               <th>
-                <div>
+                <ColumnResize resizable={column.resizable || (true && i < visibleOrderedColumns.length - 1)}>
                   <p>{column.label || column.id}</p>
                   {#if column.sortable !== false}
                     <ColumnSort
@@ -280,17 +280,14 @@
                       on:columnSortChanged={onColumnSortChanged}
                     />
                   {/if}
-                  {#if column.resizable !== false && i < visibleOrderedColumns.length - 1}
-                    <ColumnResize />
-                  {/if}
-                </div>
+                </ColumnResize>
               </th>
             {/each}
           </tr>
           <tr data-name="filters">
             {#each visibleOrderedColumns as column, i (column.id)}
               <th>
-                <div>
+                <ColumnResize resizable={column.resizable || (true && i < visibleOrderedColumns.length - 1)}>
                   {#if column.filterable !== false}
                     <ColumnFilter
                       column={column.id}
@@ -301,10 +298,7 @@
                   {:else}
                     <input class="hidden" />
                   {/if}
-                  {#if column.resizable !== false && i < visibleOrderedColumns.length - 1}
-                    <ColumnResize />
-                  {/if}
-                </div>
+                </ColumnResize>
               </th>
             {/each}
           </tr>

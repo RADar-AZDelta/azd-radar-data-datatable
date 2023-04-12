@@ -1,4 +1,10 @@
 <script lang="ts">
+  export let resizable: boolean | undefined
 </script>
 
-<div data-name="column-resize" />
+<div>
+  <slot />
+  {#if resizable}
+    <div data-name="column-resize" />
+  {/if}
+</div>
