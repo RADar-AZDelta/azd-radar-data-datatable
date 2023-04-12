@@ -24,7 +24,7 @@ export class DataTableWorker {
             this.worker!.onmessage = ({ data: { msg, data } }: MessageEvent<PostMessage<WorkerMessageResponses>>) => {
                 if (msg != 'loadFile')
                     reject(`Recieved unexpected message from web worker (expected 'loadFile', but recieved '${msg}')`)
-                resolve(undefined)
+                resolve(data as MessageResponseLoadFile)
             }
             this.postWorkerMessage('loadFile', { url, extension })
         })
