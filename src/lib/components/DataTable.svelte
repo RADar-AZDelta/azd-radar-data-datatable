@@ -18,7 +18,7 @@
   import Spinner from './Spinner.svelte'
   import { jsonMapReplacer } from '$lib/utils'
   import { dev } from '$app/environment'
-  import { onMount } from 'svelte'
+  import { onMount, onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
@@ -261,6 +261,10 @@
 
   onMount(() => {
     mounted = true
+  })
+
+  onDestroy(() => {
+    worker?.destroy()
   })
 </script>
 

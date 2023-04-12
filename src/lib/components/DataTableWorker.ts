@@ -12,6 +12,10 @@ export class DataTableWorker {
         this.worker = new DataTableWorker.default()
     }
 
+    destroy() {
+        this.worker?.terminate()
+    }
+
     private postWorkerMessage(msg: keyof WorkerMessageRequests, data?: WorkerMessageRequests[keyof WorkerMessageRequests]): void {
         this.worker!.postMessage({ msg, data })
     }
