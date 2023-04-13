@@ -59,7 +59,7 @@
   )
 
   async function init() {
-    if (dev) console.log('init')
+    if (dev) console.log('DataTable: init')
 
     //OPTIONS
     if (options) Object.assign(internalOptions, options)
@@ -72,13 +72,7 @@
     } else if (typeof data === 'function') dataType = DataType.Function
     else if (data instanceof File) {
       dataType = DataType.File
-      let start: number
-      if (dev) start = performance.now()
       const url = URL.createObjectURL(data as File)
-      if (dev) {
-        const end = performance.now()
-        console.log(`URL.createObjectURL took: ${Math.round(end - start!)} ms`)
-      }
       if (!worker) {
         worker = new DataTableWorker()
         await worker.init()
@@ -149,7 +143,7 @@
   }
 
   async function render(onlyPaginationChanged = false) {
-    if (dev) console.log('render')
+    if (dev) console.log('DataTable: render')
     renderedData = undefined
     if (dataType === DataType.Function) {
       let start: number
@@ -157,7 +151,7 @@
       const results = await (data as FetchDataFunc)(filteredColumns, sortedColumns, pagination)
       if (dev) {
         const end = performance.now()
-        console.log(`FetchData function took: ${Math.round(end - start!)} ms`)
+        console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
       }
       totalRows = results.totalRows
       renderedData = results.data
@@ -177,7 +171,7 @@
 
   function applyFilter(data: any[][] | any[]): any[][] | any[] {
     for (const [column, filter] of [...filteredColumns].values()) {
-      if (dev) console.log(`Applying filter '${filter}' on column '${column}'`)
+      if (dev) console.log(`DataTable: applying filter '${filter}' on column '${column}'`)
       if (dataType === DataType.Matrix) {
         const columnIndex = columnIds.indexOf(column)
         data = data.filter(row => row[columnIndex]?.toString()?.toLowerCase().indexOf(filter) > -1)
@@ -193,7 +187,7 @@
     let compareFn: ((a: any[] | any, b: any[] | any) => number) | undefined
     for (let [column, sortDirection] of [...sortedColumns].reverse()) {
       //Sort is applied in reverse order !!!
-      if (dev) console.log(`Applying sort order '${sortDirection}' on column '${column}'`)
+      if (dev) console.log(`DataTable: applying sort order '${sortDirection}' on column '${column}'`)
       if (dataType === DataType.Matrix) {
         const columnIndex = columnIds.indexOf(column)
         switch (sortDirection) {
@@ -222,7 +216,7 @@
   function applyPagination(data: any[][] | any[]): any[][] | any[] {
     const start = (pagination.currentPage - 1) * pagination.rowsPerPage
     const end = pagination.currentPage * pagination.rowsPerPage
-    if (dev) console.log(`Applying pagination row ${start} - ${end}`)
+    if (dev) console.log(`DataTable: applying pagination row ${start} - ${end}`)
     data = data.slice(start, end)
     return data
   }
@@ -233,7 +227,7 @@
     filteredColumns = filteredColumns
     filteredAndSortedData = undefined
 
-    if (dev) console.log(`filter changed: ${JSON.stringify(filteredColumns, jsonMapReplacer)}`)
+    if (dev) console.log(`DataTable: filter changed to ${JSON.stringify(filteredColumns, jsonMapReplacer)}`)
 
     pagination.currentPage = 1
     await render()
@@ -245,7 +239,7 @@
     sortedColumns = sortedColumns
     filteredAndSortedData = undefined
 
-    if (dev) console.log(`Sort changed: ${JSON.stringify(sortedColumns, jsonMapReplacer)}`)
+    if (dev) console.log(`DataTable: sort changed to ${JSON.stringify(sortedColumns, jsonMapReplacer)}`)
 
     pagination.currentPage = 1
     await render()
@@ -256,7 +250,7 @@
     pagination.currentPage = event.detail.currentPage
     pagination = pagination
 
-    if (dev) console.log(`Pagination changed: ${JSON.stringify(event.detail)}`)
+    if (dev) console.log(`DataTable: pagination changed to ${JSON.stringify(event.detail)}`)
 
     await render(true)
   }
@@ -275,11 +269,11 @@
     await worker.saveToFile(fileHandle)
   }
 
-  export async function updateRows(rowsToUpdateByLocalIndex: Map<number, Record<string, any>>) {
+  export async function updateRows(rowsToUpdateByIndex: Map<number, Record<string, any>>) {
     if (!worker) throw new Error('No data loaded!')
 
     //translate local index (on GUI) to worker row index
-    const rowsToUpdateByWorkerIndex = [...rowsToUpdateByLocalIndex].reduce<Map<number, Record<string, any>>>(
+    const rowsToUpdateByWorkerIndex = [...rowsToUpdateByIndex].reduce<Map<number, Record<string, any>>>(
       (acc, [index, row]) => {
         acc.set(indices[index], row) //swap the local index with the worker index
         return acc
@@ -288,6 +282,24 @@
     )
 
     await worker.updateRows(rowsToUpdateByWorkerIndex)
+    await render(true)
+  }
+
+  export async function insertRows(rows: Record<string, any>[]) {
+    if (!worker) throw new Error('No data loaded!')
+
+    await worker.insertRows(rows)
+    await render(false)
+  }
+
+  export async function deleteRows(indices: number[]) {
+    if (!worker) throw new Error('No data loaded!')
+
+    //translate local index (on GUI) to worker row index
+    const workerIndices = indices.map(index => indices[index])
+
+    await worker.deleteRows(workerIndices)
+    await render(false)
   }
 
   export function getColumns() {

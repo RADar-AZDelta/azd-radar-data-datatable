@@ -28,3 +28,11 @@ export interface MessageRequestSaveToFile {
 export interface MessageRequestUpdateRows {
     rowsByIndex: Map<number, Record<string, any>>
 }
+
+export interface MessageRequestInsertRows {
+    rows: Record<string, any>[]
+}
+
+export interface MessageRequestDeleteRows {
+    indices: number[]
+}

@@ -180,15 +180,17 @@
   }
 
   let dataTable: DataTable
+
   async function onClickSaveButton(e: Event) {
     await dataTable.saveToFile()
   }
+
   async function onClickUpdateRows(e: Event) {
     const dummyRow = dataTable
       .getColumns()
       ?.map(col => col.id)
       .reduce((acc, cur) => {
-        acc[cur] = 'test'
+        acc[cur] = 'update'
         return acc
       }, {})
 
@@ -198,7 +200,22 @@
         [1, dummyRow!],
       ])
     )
-    alert('You need to change the page and go back to see the changes')
+  }
+
+  async function onClickDeleteRows(e: Event) {
+    await dataTable.deleteRows([0, 1])
+  }
+
+  async function onClickInsertRows(e: Event) {
+    const dummyRow = dataTable
+      .getColumns()
+      ?.map(col => col.id)
+      .reduce((acc, cur) => {
+        acc[cur] = ' insert'
+        return acc
+      }, {})
+
+    await dataTable.insertRows([dummyRow!, dummyRow!])
   }
 </script>
 
@@ -231,5 +248,10 @@
   <DataTable data={file} bind:this={dataTable} />
 
   <button disabled={!file} on:click={onClickSaveButton}>Save table</button>
+  <br />
   <button disabled={!file} on:click={onClickUpdateRows}>Update first 2 rows</button>
+  <br />
+  <button disabled={!file} on:click={onClickDeleteRows}>Delete first 2 rows</button>
+  <br />
+  <button disabled={!file} on:click={onClickInsertRows}>Insert 2 rows</button>
 </details>

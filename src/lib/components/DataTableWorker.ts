@@ -1,5 +1,5 @@
 import { dev } from "$app/environment"
-import type { PostMessage, MessageResponseFetchData, MessageRequestLoadFile, MessageRequestFetchData, MessageRequestSaveToFile, MessageRequestUpdateRows } from "$lib/workers/messages"
+import type { PostMessage, MessageResponseFetchData, MessageRequestLoadFile, MessageRequestFetchData, MessageRequestSaveToFile, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows } from "$lib/workers/messages"
 import type { IPagination, SortDirection, TFilter } from "./DataTable"
 
 export class DataTableWorker {
@@ -30,7 +30,7 @@ export class DataTableWorker {
         })
         if (dev) {
             const end = performance.now()
-            console.log(`${requestMsg} took: ${Math.round(end - start!)} ms`)
+            console.log(`DataTable: worker message '${requestMsg}' took ${Math.round(end - start!)} ms`)
         }
         return result
     }
@@ -56,5 +56,13 @@ export class DataTableWorker {
 
     async updateRows(rowsByIndex: Map<number, Record<string, any>>): Promise<void> {
         return await this.executeWorkerMethod<MessageRequestUpdateRows, void>("updateRows", { rowsByIndex })
+    }
+
+    async insertRows(rows: Record<string, any>[]): Promise<void> {
+        return await this.executeWorkerMethod<MessageRequestInsertRows, void>("insertRows", { rows })
+    }
+
+    async deleteRows(indices: number[]): Promise<void> {
+        return await this.executeWorkerMethod<MessageRequestDeleteRows, void>("deleteRows", { indices })
     }
 }

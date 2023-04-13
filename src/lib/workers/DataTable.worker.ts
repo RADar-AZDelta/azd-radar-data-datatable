@@ -1,5 +1,6 @@
-import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage, MessageRequestUpdateRows } from "./messages"
-import { desc, escape, loadJSON, loadCSV, op } from 'arquero'
+import { dev } from "$app/environment"
+import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows } from "./messages"
+import { desc, escape, loadJSON, loadCSV, op, from } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
 let dt: ColumnTable
@@ -21,6 +22,12 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case "updateRows":
       await updateRows(data as MessageRequestUpdateRows)
+      break
+    case "insertRows":
+      await insertRows(data as MessageRequestInsertRows)
+      break
+    case "deleteRows":
+      await deleteRows(data as MessageRequestDeleteRows)
       break
   }
 }
@@ -125,7 +132,8 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   for (let rowIndex = 0; rowIndex < dt.totalRows(); rowIndex++) {
     if (rowIndex % bufferRowSize == 0) {
       await writable.write(buffer.join(''))
-      console.log(`Saved ${rowIndex} rows to file`)
+      if (dev)
+        console.log(`DataTable: saved ${rowIndex} rows to file`)
       buffer = []
     }
     const cells = names.map(col => formatValue(dt.get(col, rowIndex)))
@@ -142,7 +150,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 }
 
 function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
-  tempDt = undefined
+  //tempDt = undefined
   for (let [index, row] of rowsByIndex) {
     for (const [column, value] of Object.entries(row)) {
       dt._data[column].data[index] = value
@@ -151,6 +159,36 @@ function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
 
   const message: PostMessage<unknown> = {
     msg: 'updateRows',
+    data: undefined
+  }
+  postMessage(message)
+}
+
+function insertRows({ rows }: MessageRequestInsertRows) {
+  tempDt = undefined
+
+  dt = dt.concat(from(rows))
+
+  const message: PostMessage<unknown> = {
+    msg: 'insertRows',
+    data: undefined
+  }
+  postMessage(message)
+}
+
+function deleteRows({ indices }: MessageRequestDeleteRows) {
+  tempDt = undefined
+
+  const rowObjects = indices.reduce((acc, cur) => {
+    acc.push(dt.object(cur!))
+    return acc
+  }, [] as Record<string, any>[])
+
+
+  dt = dt.antijoin(from(rowObjects))
+
+  const message: PostMessage<unknown> = {
+    msg: 'deleteRows',
     data: undefined
   }
   postMessage(message)
