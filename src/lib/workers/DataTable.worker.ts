@@ -110,7 +110,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   const formatValue = (value: any) => value == null ? ''
     : value instanceof Date ? (value as Date).toISOString()
       : reFormat.test(value += '') ? '"' + value.replace(/"/g, '""') + '"'
-        : value;
+        : value
 
   //write the header
   const cells = names.map(formatValue);
@@ -121,16 +121,13 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   for (let rowIndex = 0; rowIndex < dt.totalRows(); rowIndex++) {
     if (rowIndex % bufferRowSize == 0) {
       console.log(`row ${rowIndex}`)
-      await writable.write(buffer.join())
+      await writable.write(buffer.join(''))
       buffer = []
     }
-    const cells = names.map(col => {
-      const cell = dt.get(col, rowIndex)
-      return formatValue(cell)
-    })
+    const cells = names.map(col => formatValue(dt.get(col, rowIndex)))
     buffer.push(cells.join(delim) + '\n')
   }
-  await writable.write(buffer.join())
+  await writable.write(buffer.join(''))
   await writable.close()
 
   const message: PostMessage<URL> = {
