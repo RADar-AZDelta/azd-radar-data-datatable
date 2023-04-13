@@ -344,11 +344,10 @@
         await worker!.deleteRows(workerIndices)
         break
       case DataType.Matrix:
-        for (const index of indices.sort((a, b) => b - a)) {
-          ;(data as any[][]).splice(originalIndices[index], 1)
-        }
-        break
       case DataType.ArrayOfObjects:
+        for (const index of indices.sort((a, b) => b - a)) {
+          ;(data as any[]).splice(originalIndices[index], 1)
+        }
         break
       default:
         throw new Error('Not yet supported')
