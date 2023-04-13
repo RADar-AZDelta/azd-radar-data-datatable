@@ -1,4 +1,4 @@
-import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage } from "./messages"
+import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage, MessageRequestUpdateRows } from "./messages"
 import { desc, escape, loadJSON, loadCSV, op } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
@@ -18,6 +18,9 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case "saveToFile":
       await saveToFile(data as MessageRequestSaveToFile)
+      break
+    case "updateRows":
+      await updateRows(data as MessageRequestUpdateRows)
       break
   }
 }
@@ -133,6 +136,21 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 
   const message: PostMessage<URL> = {
     msg: 'saveToFile',
+    data: undefined
+  }
+  postMessage(message)
+}
+
+function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
+  tempDt = undefined
+  for (let [index, row] of rowsByIndex) {
+    for (const [column, value] of Object.entries(row)) {
+      dt._data[column].data[index] = value
+    }
+  }
+
+  const message: PostMessage<unknown> = {
+    msg: 'updateRows',
     data: undefined
   }
   postMessage(message)

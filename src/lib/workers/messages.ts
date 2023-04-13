@@ -14,12 +14,17 @@ export interface MessageRequestFetchData {
     pagination: IPagination,
     onlyPaginationChanged: boolean
 }
-export interface MessageRequestSaveToFile {
-    fileHandle: FileSystemFileHandle
-    options?: any
-}
+
 export interface MessageResponseFetchData {
     totalRows: number
     data: any[][]
     indices: Uint32Array
+}
+export interface MessageRequestSaveToFile {
+    fileHandle: FileSystemFileHandle
+    options?: any
+}
+
+export interface MessageRequestUpdateRows {
+    rowsByIndex: Map<number, Record<string, any>>
 }

@@ -1,5 +1,5 @@
 import { dev } from "$app/environment"
-import type { PostMessage, MessageResponseFetchData, MessageRequestLoadFile, MessageRequestFetchData, MessageRequestSaveToFile } from "$lib/workers/messages"
+import type { PostMessage, MessageResponseFetchData, MessageRequestLoadFile, MessageRequestFetchData, MessageRequestSaveToFile, MessageRequestUpdateRows } from "$lib/workers/messages"
 import type { IPagination, SortDirection, TFilter } from "./DataTable"
 
 export class DataTableWorker {
@@ -52,5 +52,9 @@ export class DataTableWorker {
 
     async saveToFile(fileHandle: FileSystemFileHandle, options?: any): Promise<void> {
         return await this.executeWorkerMethod<MessageRequestSaveToFile, void>("saveToFile", { fileHandle, options })
+    }
+
+    async updateRows(rowsByIndex: Map<number, Record<string, any>>): Promise<void> {
+        return await this.executeWorkerMethod<MessageRequestUpdateRows, void>("updateRows", { rowsByIndex })
     }
 }

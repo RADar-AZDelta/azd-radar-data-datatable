@@ -275,6 +275,25 @@
     await worker.saveToFile(fileHandle)
   }
 
+  export async function updateRows(rowsToUpdateByLocalIndex: Map<number, Record<string, any>>) {
+    if (!worker) throw new Error('No data loaded!')
+
+    //translate local index (on GUI) to worker row index
+    const rowsToUpdateByWorkerIndex = [...rowsToUpdateByLocalIndex].reduce<Map<number, Record<string, any>>>(
+      (acc, [index, row]) => {
+        acc.set(indices[index], row) //swap the local index with the worker index
+        return acc
+      },
+      new Map<number, Record<string, any>>()
+    )
+
+    await worker.updateRows(rowsToUpdateByWorkerIndex)
+  }
+
+  export function getColumns() {
+    return internalColumns
+  }
+
   onMount(() => {
     mounted = true
   })

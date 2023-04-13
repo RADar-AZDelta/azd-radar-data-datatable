@@ -183,6 +183,23 @@
   async function onClickSaveButton(e: Event) {
     await dataTable.saveToFile()
   }
+  async function onClickUpdateRows(e: Event) {
+    const dummyRow = dataTable
+      .getColumns()
+      ?.map(col => col.id)
+      .reduce((acc, cur) => {
+        acc[cur] = 'test'
+        return acc
+      }, {})
+
+    await dataTable.updateRows(
+      new Map([
+        [0, dummyRow!],
+        [1, dummyRow!],
+      ])
+    )
+    alert('You need to change the page and go back to see the changes')
+  }
 </script>
 
 <h1>RADar-DataTable Demo</h1>
@@ -214,4 +231,5 @@
   <DataTable data={file} bind:this={dataTable} />
 
   <button disabled={!file} on:click={onClickSaveButton}>Save table</button>
+  <button disabled={!file} on:click={onClickUpdateRows}>Update first 2 rows</button>
 </details>
