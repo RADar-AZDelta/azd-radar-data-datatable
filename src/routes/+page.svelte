@@ -128,6 +128,15 @@
     },
   ]
 
+  let dataTableMatrix: DataTable,
+    dataTableArrayOfObjects: DataTable,
+    dataTableFetchFunction: DataTable,
+    dataTableFile: DataTable
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  // FETCH FUNCTIONS
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+
   async function fetchData(
     filteredColumns: Map<string, TFilter>,
     sortedColumns: Map<string, SortDirection>,
@@ -163,6 +172,9 @@
     return { totalRows, data: fetchedData }
   }
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  // BUTTON EVENTS
+  ///////////////////////////////////////////////////////////////////////////////////////////////
   let file: File
 
   function onFileInputChange(e: Event) {
@@ -179,13 +191,11 @@
     }
   }
 
-  let dataTable: DataTable
-
-  async function onClickSaveButton(e: Event) {
+  async function onClickSaveButton(dataTable: DataTable) {
     await dataTable.saveToFile()
   }
 
-  async function onClickUpdateRows(e: Event) {
+  async function onClickUpdateRows(dataTable: DataTable) {
     const dummyRow = dataTable
       .getColumns()
       ?.map(col => col.id)
@@ -202,11 +212,11 @@
     )
   }
 
-  async function onClickDeleteRows(e: Event) {
+  async function onClickDeleteRows(dataTable: DataTable) {
     await dataTable.deleteRows([0, 1])
   }
 
-  async function onClickInsertRows(e: Event) {
+  async function onClickInsertRows(dataTable: DataTable) {
     const dummyRow = dataTable
       .getColumns()
       ?.map(col => col.id)
@@ -221,23 +231,45 @@
 
 <h1>RADar-DataTable Demo</h1>
 
-<details>
+<details open>
   <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
-  <DataTable {columns} data={matrix} />
+  <DataTable {columns} data={matrix} bind:this={dataTableMatrix} />
+
+  <br />
+  <button on:click={() => onClickSaveButton(dataTableMatrix)}>Save table</button>
+  <br />
+  <button on:click={() => onClickUpdateRows(dataTableMatrix)}
+    >Update first 2 rows (remove country filter to view updated records)</button
+  >
+  <br />
+  <button on:click={() => onClickDeleteRows(dataTableMatrix)}>Delete first 2 rows</button>
+  <br />
+  <button on:click={() => onClickInsertRows(dataTableMatrix)}
+    >Insert 2 rows (remove country filter to view updated records)</button
+  >
 </details>
 
 <hr />
 
 <details>
   <summary>Table with an array of objects as a data source</summary>
-  <DataTable {data} />
+  <DataTable {data} bind:this={dataTableArrayOfObjects} />
+
+  <br />
+  <button on:click={() => onClickSaveButton(dataTableArrayOfObjects)}>Save table</button>
+  <br />
+  <button on:click={() => onClickUpdateRows(dataTableArrayOfObjects)}>Update first 2 rows</button>
+  <br />
+  <button on:click={() => onClickDeleteRows(dataTableArrayOfObjects)}>Delete first 2 rows</button>
+  <br />
+  <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert 2 rows</button>
 </details>
 
 <hr />
 
 <details>
   <summary>Table with a async function as a data source (ex: fetch data from web server)</summary>
-  <DataTable {columns} data={fetchData} />
+  <DataTable {columns} data={fetchData} bind:this={dataTableFetchFunction} />
 </details>
 
 <hr />
@@ -245,13 +277,14 @@
 <details open>
   <summary>Table with a File as a data source (ex: CSV, JSON)</summary>
   <input type="file" accept=".csv,.json" on:change={onFileInputChange} />
-  <DataTable data={file} bind:this={dataTable} />
+  <DataTable data={file} bind:this={dataTableFile} />
 
-  <button disabled={!file} on:click={onClickSaveButton}>Save table</button>
   <br />
-  <button disabled={!file} on:click={onClickUpdateRows}>Update first 2 rows</button>
+  <button disabled={!file} on:click={() => onClickSaveButton(dataTableFile)}>Save table</button>
   <br />
-  <button disabled={!file} on:click={onClickDeleteRows}>Delete first 2 rows</button>
+  <button disabled={!file} on:click={() => onClickUpdateRows(dataTableFile)}>Update first 2 rows</button>
   <br />
-  <button disabled={!file} on:click={onClickInsertRows}>Insert 2 rows</button>
+  <button disabled={!file} on:click={() => onClickDeleteRows(dataTableFile)}>Delete first 2 rows</button>
+  <br />
+  <button disabled={!file} on:click={() => onClickInsertRows(dataTableFile)}>Insert 2 rows</button>
 </details>

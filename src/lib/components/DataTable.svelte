@@ -45,7 +45,7 @@
   let dataType: DataType | undefined = undefined
 
   let worker: DataTableWorker | undefined
-  let indices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
+  let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
 
   $: {
     options, columns, data
@@ -161,11 +161,15 @@
         totalRows = filteredAndSortedData.length
       }
       renderedData = applyPagination(filteredAndSortedData)
+      originalIndices = (renderedData as any[]).reduce((acc, cur) => {
+        acc.push((data as any[]).indexOf(cur))
+        return acc
+      }, [])
     } else if (dataType === DataType.File) {
       const results = await worker?.fetchData(filteredColumns, sortedColumns, pagination, onlyPaginationChanged)
       totalRows = results!.totalRows
       renderedData = results!.data
-      indices = results!.indices
+      originalIndices = results!.indices
     }
   }
 
@@ -256,7 +260,6 @@
   }
 
   export async function saveToFile() {
-    if (!worker) throw new Error('No data loaded!')
     const opts = {
       types: [
         {
@@ -266,44 +269,99 @@
       ],
     }
     const fileHandle = await (<any>window).showSaveFilePicker(opts)
-    await worker.saveToFile(fileHandle)
+    switch (dataType) {
+      case DataType.File:
+        await worker!.saveToFile(fileHandle)
+        break
+      // case DataType.Matrix:
+      //   break
+      // case DataType.ArrayOfObjects:
+      //   break
+      default:
+        throw new Error('Not yet supported')
+    }
   }
 
   export async function updateRows(rowsToUpdateByIndex: Map<number, Record<string, any>>) {
-    if (!worker) throw new Error('No data loaded!')
-
-    //translate local index (on GUI) to worker row index
-    const rowsToUpdateByWorkerIndex = [...rowsToUpdateByIndex].reduce<Map<number, Record<string, any>>>(
-      (acc, [index, row]) => {
-        acc.set(indices[index], row) //swap the local index with the worker index
-        return acc
-      },
-      new Map<number, Record<string, any>>()
-    )
-
-    await worker.updateRows(rowsToUpdateByWorkerIndex)
+    switch (dataType) {
+      case DataType.File:
+        const rowsToUpdateByWorkerIndex = [...rowsToUpdateByIndex].reduce<Map<number, Record<string, any>>>(
+          (acc, [index, row]) => {
+            acc.set(originalIndices[index], row) //swap the local index with the worker index
+            return acc
+          },
+          new Map<number, Record<string, any>>()
+        )
+        await worker!.updateRows(rowsToUpdateByWorkerIndex)
+        break
+      case DataType.Matrix:
+        for (const [index, row] of rowsToUpdateByIndex) {
+          const originalIndex = originalIndices[index]
+          for (const [column, value] of Object.entries(row)) {
+            ;(data as any[][])[originalIndex][columnIds.indexOf(column)] = value
+          }
+        }
+        break
+      case DataType.ArrayOfObjects:
+        for (const [index, row] of rowsToUpdateByIndex) {
+          Object.assign((data as any[])[originalIndices[index]], row)
+        }
+        break
+      default:
+        throw new Error('Not yet supported')
+    }
     await render(true)
   }
 
   export async function insertRows(rows: Record<string, any>[]) {
-    if (!worker) throw new Error('No data loaded!')
-
-    await worker.insertRows(rows)
+    switch (dataType) {
+      case DataType.File:
+        await worker!.insertRows(rows)
+        break
+      case DataType.Matrix:
+        for (const row of rows) {
+          ;(data as any[][]).push(
+            columnIds.reduce((acc, column) => {
+              acc.push(row[column])
+              return acc
+            }, [] as any[])
+          )
+        }
+        break
+      case DataType.ArrayOfObjects:
+        ;(data as any[]).push(...rows)
+        break
+      default:
+        throw new Error('Not yet supported')
+    }
     await render(false)
   }
 
   export async function deleteRows(indices: number[]) {
-    if (!worker) throw new Error('No data loaded!')
-
-    //translate local index (on GUI) to worker row index
-    const workerIndices = indices.map(index => indices[index])
-
-    await worker.deleteRows(workerIndices)
+    switch (dataType) {
+      case DataType.File:
+        const workerIndices = indices.map(index => indices[index]) //translate local index (on GUI) to worker row index
+        await worker!.deleteRows(workerIndices)
+        break
+      case DataType.Matrix:
+        for (const index of indices.sort((a, b) => b - a)) {
+          ;(data as any[][]).splice(originalIndices[index], 1)
+        }
+        break
+      case DataType.ArrayOfObjects:
+        break
+      default:
+        throw new Error('Not yet supported')
+    }
     await render(false)
   }
 
   export function getColumns() {
     return internalColumns
+  }
+
+  export function hasData() {
+    return !!data
   }
 
   onMount(() => {
