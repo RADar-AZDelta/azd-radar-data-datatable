@@ -112,12 +112,13 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
       : reFormat.test(value += '') ? '"' + value.replace(/"/g, '""') + '"'
         : value
 
+  let buffer = []
+
   //write the header
   const cells = names.map(formatValue);
-  await writable.write(cells.join(delim) + '\n')
+  buffer.push(cells.join(delim) + '\n')
 
   //write the rows
-  let buffer = []
   for (let rowIndex = 0; rowIndex < dt.totalRows(); rowIndex++) {
     if (rowIndex % bufferRowSize == 0) {
       console.log(`row ${rowIndex}`)
