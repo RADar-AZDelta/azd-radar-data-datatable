@@ -1,5 +1,4 @@
 import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage } from "./messages"
-// import { dev } from "$app/environment"
 import { desc, escape, loadJSON, loadCSV, op } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
@@ -78,11 +77,12 @@ async function fetchData(data: MessageRequestFetchData) {
   //pagination
   const totalRows = tempDt.numRows()
   const objects = tempDt.objects({ limit: data.pagination.rowsPerPage, offset: (data.pagination.currentPage - 1) * data.pagination.rowsPerPage })
+  const indices = tempDt.indices().slice((data.pagination.currentPage - 1) * data.pagination.rowsPerPage, data.pagination.currentPage * data.pagination.rowsPerPage)
   const matrix = objects.map(obj => Object.values(obj))
 
   const message: PostMessage<MessageResponseFetchData> = {
     msg: 'fetchData',
-    data: { totalRows, data: matrix }
+    data: { totalRows, data: matrix, indices: indices }
   }
   postMessage(message)
 }
@@ -102,7 +102,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   const writable = await fileHandle.createWritable()
 
   const names: string[] = options?.columns || dt.columnNames()
-  const format = options?.format || {};
+  //const format = options?.format || {};
   const delim = options?.delimiter || ',';
   const reFormat = new RegExp(`["${delim}\n\r]`);
   const bufferRowSize = options?.bufferRowSize || 5000

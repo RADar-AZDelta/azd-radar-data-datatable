@@ -21,4 +21,5 @@ export interface MessageRequestSaveToFile {
 export interface MessageResponseFetchData {
     totalRows: number
     data: any[][]
+    indices: Uint32Array
 }

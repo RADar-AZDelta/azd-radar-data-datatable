@@ -45,6 +45,7 @@
   let dataType: DataType | undefined = undefined
 
   let worker: DataTableWorker | undefined
+  let indices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
 
   $: {
     options, columns, data
@@ -170,6 +171,7 @@
       const results = await worker?.fetchData(filteredColumns, sortedColumns, pagination, onlyPaginationChanged)
       totalRows = results!.totalRows
       renderedData = results!.data
+      indices = results!.indices
     }
   }
 

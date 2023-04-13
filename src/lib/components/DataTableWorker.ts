@@ -46,7 +46,7 @@ export class DataTableWorker {
     async fetchData(filteredColumns: Map<string, TFilter>,
         sortedColumns: Map<string, SortDirection>,
         pagination: IPagination,
-        onlyPaginationChanged: boolean): Promise<{ totalRows: number, data: any[][] }> {
+        onlyPaginationChanged: boolean): Promise<{ totalRows: number, data: any[][], indices: Uint32Array }> {
         return await this.executeWorkerMethod<MessageRequestFetchData, MessageResponseFetchData>("fetchData", { filteredColumns, sortedColumns, pagination, onlyPaginationChanged })
     }
 
