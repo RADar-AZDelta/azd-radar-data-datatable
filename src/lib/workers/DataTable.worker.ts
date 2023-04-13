@@ -121,8 +121,8 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   //write the rows
   for (let rowIndex = 0; rowIndex < dt.totalRows(); rowIndex++) {
     if (rowIndex % bufferRowSize == 0) {
-      console.log(`row ${rowIndex}`)
       await writable.write(buffer.join(''))
+      console.log(`Saved ${rowIndex} rows to file`)
       buffer = []
     }
     const cells = names.map(col => formatValue(dt.get(col, rowIndex)))

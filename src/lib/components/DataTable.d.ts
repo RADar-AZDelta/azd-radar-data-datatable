@@ -56,9 +56,7 @@ export interface ColumnFilterChangedEventDetail {
   filter: TFilter
 }
 
-export interface PaginationChangedEventDetail {
-  rowsPerPage: number
-  currentPage: number
+export interface PaginationChangedEventDetail extends IPagination {
 }
 
 export enum DataType {
