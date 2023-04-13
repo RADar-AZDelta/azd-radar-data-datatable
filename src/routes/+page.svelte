@@ -178,6 +178,11 @@
       }
     }
   }
+
+  let dataTable: DataTable
+  async function onClickSaveButton(e: Event) {
+    await dataTable.saveToFile()
+  }
 </script>
 
 <h1>RADar-DataTable Demo</h1>
@@ -206,5 +211,7 @@
 <details open>
   <summary>Table with a File as a data source (ex: CSV, JSON)</summary>
   <input type="file" accept=".csv,.json" on:change={onFileInputChange} />
-  <DataTable data={file} />
+  <DataTable data={file} bind:this={dataTable} />
+
+  <button disabled={!file} on:click={onClickSaveButton}>Save table</button>
 </details>

@@ -1,4 +1,4 @@
-import type { MessageRequestFetchData, MessageRequestLoadFile, PostMessage, WorkerMessageRequests, WorkerMessageResponses } from "./messages"
+import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage } from "./messages"
 // import { dev } from "$app/environment"
 import { desc, escape, loadJSON, loadCSV, op } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
@@ -6,47 +6,50 @@ import type ColumnTable from 'arquero/dist/types/table/column-table'
 let dt: ColumnTable
 let tempDt: ColumnTable | undefined
 
-onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<WorkerMessageRequests>>) => {
+onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) => {
   switch (msg) {
     case 'loadFile':
       await loadFile(data as MessageRequestLoadFile)
-      break;
+      break
     case 'getColumnNames':
       getColumnNames()
-      break;
+      break
     case "fetchData":
       await fetchData(data as MessageRequestFetchData)
-      break;
+      break
+    case "saveToFile":
+      await saveToFile(data as MessageRequestSaveToFile)
+      break
   }
-};
+}
 
 async function loadFile(data: MessageRequestLoadFile) {
   tempDt = undefined
   switch (data.extension) {
     case 'csv':
       dt = await loadCSV(data.url, {})
-      break;
+      break
     case 'json':
       dt = await loadJSON(data.url, {})
-      break;
+      break
     default:
-      throw new Error(`Unknown extension '${data.extension}'`);
+      throw new Error(`Unknown extension '${data.extension}'`)
   }
 
-  const message: PostMessage<WorkerMessageResponses> = {
+  const message: PostMessage<unknown> = {
     msg: 'loadFile',
-    data
-  };
-  postMessage(message);
+    data: undefined
+  }
+  postMessage(message)
 }
 
 function getColumnNames() {
   const columnNames = dt.columnNames()
-  const message: PostMessage<WorkerMessageResponses> = {
+  const message: PostMessage<string[]> = {
     msg: 'getColumnNames',
-    data: { columnNames }
-  };
-  postMessage(message);
+    data: columnNames
+  }
+  postMessage(message)
 }
 
 async function fetchData(data: MessageRequestFetchData) {
@@ -77,11 +80,64 @@ async function fetchData(data: MessageRequestFetchData) {
   const objects = tempDt.objects({ limit: data.pagination.rowsPerPage, offset: (data.pagination.currentPage - 1) * data.pagination.rowsPerPage })
   const matrix = objects.map(obj => Object.values(obj))
 
-  const message: PostMessage<WorkerMessageResponses> = {
+  const message: PostMessage<MessageResponseFetchData> = {
     msg: 'fetchData',
     data: { totalRows, data: matrix }
-  };
-  postMessage(message);
+  }
+  postMessage(message)
 }
 
-export default {};
+async function saveToFile({ fileHandle, options }: MessageRequestSaveToFile) {
+  const extension = fileHandle.name.split('.').pop()
+  switch (extension) {
+    case "csv":
+      await exportCSV({ fileHandle, options })
+      break;
+    default:
+      throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`);
+  }
+}
+
+async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
+  const writable = await fileHandle.createWritable()
+
+  const names: string[] = options?.columns || dt.columnNames()
+  const format = options?.format || {};
+  const delim = options?.delimiter || ',';
+  const reFormat = new RegExp(`["${delim}\n\r]`);
+  const bufferRowSize = options?.bufferRowSize || 5000
+
+  const formatValue = (value: any) => value == null ? ''
+    : value instanceof Date ? (value as Date).toISOString()
+      : reFormat.test(value += '') ? '"' + value.replace(/"/g, '""') + '"'
+        : value;
+
+  //write the header
+  const cells = names.map(formatValue);
+  await writable.write(cells.join(delim) + '\n')
+
+  //write the rows
+  let buffer = []
+  for (let rowIndex = 0; rowIndex < dt.totalRows(); rowIndex++) {
+    if (rowIndex % bufferRowSize == 0) {
+      console.log(`row ${rowIndex}`)
+      await writable.write(buffer.join())
+      buffer = []
+    }
+    const cells = names.map(col => {
+      const cell = dt.get(col, rowIndex)
+      return formatValue(cell)
+    })
+    buffer.push(cells.join(delim) + '\n')
+  }
+  await writable.write(buffer.join())
+  await writable.close()
+
+  const message: PostMessage<URL> = {
+    msg: 'saveToFile',
+    data: undefined
+  }
+  postMessage(message)
+}
+
+export default {}

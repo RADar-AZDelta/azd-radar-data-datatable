@@ -156,7 +156,7 @@
       const results = await (data as FetchDataFunc)(filteredColumns, sortedColumns, pagination)
       if (dev) {
         const end = performance.now()
-        console.log(`Data function took: ${Math.round(end - start!)} ms`)
+        console.log(`FetchData function took: ${Math.round(end - start!)} ms`)
       }
       totalRows = results.totalRows
       renderedData = results.data
@@ -257,6 +257,20 @@
     if (dev) console.log(`Pagination changed: ${JSON.stringify(event.detail)}`)
 
     await render(true)
+  }
+
+  export async function saveToFile() {
+    if (!worker) throw new Error('No data loaded!')
+    const opts = {
+      types: [
+        {
+          description: 'CSV file',
+          accept: { 'text/csv': ['.csv'] },
+        },
+      ],
+    }
+    const fileHandle = await (<any>window).showSaveFilePicker(opts)
+    await worker.saveToFile(fileHandle)
   }
 
   onMount(() => {
