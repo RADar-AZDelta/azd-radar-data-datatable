@@ -1,5 +1,5 @@
 import { dev } from "$app/environment"
-import type { PostMessage, MessageResponseFetchData, MessageRequestLoadFile, MessageRequestFetchData, MessageRequestSaveToFile, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows } from "$lib/workers/messages"
+import type { PostMessage, MessageResponseFetchData, MessageRequestLoadFile, MessageRequestFetchData, MessageRequestSaveToFile, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows, MessageRequestGetRow, MessageResponseGetRow } from "$lib/workers/messages"
 import type { IPagination, SortDirection, TFilter } from "./DataTable"
 
 export class DataTableWorker {
@@ -64,5 +64,9 @@ export class DataTableWorker {
 
     async deleteRows(indices: number[]): Promise<void> {
         return await this.executeWorkerMethod<MessageRequestDeleteRows, void>("deleteRows", { indices })
+    }
+
+    async getRow(index: number): Promise<MessageResponseGetRow> {
+        return await this.executeWorkerMethod<MessageRequestGetRow, MessageResponseGetRow>("getRow", { index })
     }
 }

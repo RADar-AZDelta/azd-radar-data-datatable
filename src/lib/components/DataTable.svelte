@@ -18,18 +18,18 @@
   import Spinner from './Spinner.svelte'
   import { jsonMapReplacer } from '$lib/utils'
   import { dev } from '$app/environment'
-  import { onMount, onDestroy } from 'svelte'
+  import { onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
     options: ITableOptions | undefined = undefined
 
-  let mounted = false
   let renderedData: any[][] | any[] | undefined,
     filteredAndSortedData: any[][] | any[] | undefined,
     internalOptions: ITableOptions = {
       rowsPerPageOptions: [5, 10, 20, 50, 100],
+      rowsPerPage: 20,
     },
     internalColumns: IColumnMetaData[] | undefined
 
@@ -136,7 +136,7 @@
     //PAGINATION
     pagination = {
       currentPage: 1,
-      rowsPerPage: 20,
+      rowsPerPage: internalOptions.rowsPerPage || 20,
     }
 
     await render()
@@ -295,12 +295,6 @@
         await worker!.updateRows(rowsToUpdateByWorkerIndex)
         break
       case DataType.Matrix:
-        for (const [index, row] of rowsToUpdateByIndex) {
-          const originalIndex = originalIndices[index]
-          for (const [column, value] of Object.entries(row)) {
-            ;(data as any[][])[originalIndex][columnIds.indexOf(column)] = value
-          }
-        }
         break
       case DataType.ArrayOfObjects:
         for (const [index, row] of rowsToUpdateByIndex) {
@@ -310,7 +304,14 @@
       default:
         throw new Error('Not yet supported')
     }
-    await render(true)
+
+    for (const [index, row] of rowsToUpdateByIndex) {
+      const renderedRow = (renderedData as any[])[index]
+      for (const [column, value] of Object.entries(row)) {
+        renderedRow[columnIds.indexOf(column)] = value
+      }
+    }
+    renderedData = renderedData
   }
 
   export async function insertRows(rows: Record<string, any>[]) {
@@ -359,13 +360,21 @@
     return internalColumns
   }
 
-  export function hasData() {
-    return !!data
+  export async function getFullRow(index: number): Promise<Record<string, any>> {
+    switch (dataType) {
+      case DataType.File:
+        return await worker!.getRow(index)
+      case DataType.Matrix:
+        return columnIds.reduce((acc, column) => {
+          acc[column] = (data as any[][])[index][columnIds.indexOf(column)]
+          return acc
+        }, {} as Record<string, any>)
+      case DataType.ArrayOfObjects:
+        return (data as any[])[index]
+      default:
+        throw new Error('Not yet supported')
+    }
   }
-
-  onMount(() => {
-    mounted = true
-  })
 
   onDestroy(() => {
     worker?.destroy()
@@ -404,8 +413,6 @@
                       filter={filteredColumns.get(column.id)}
                       on:columnFilterChanged={onColumnFilterChanged}
                     />
-                  {:else}
-                    <input class="hidden" />
                   {/if}
                 </ColumnResize>
               </th>
@@ -418,15 +425,13 @@
           <tr data-name="pagination">
             <th colspan={visibleOrderedColumns.length}>
               <div>
-                {#if mounted}
-                  <Pagination
-                    rowsPerPage={pagination.rowsPerPage}
-                    currentPage={pagination.currentPage}
-                    rowsPerPageOptions={internalOptions.rowsPerPageOptions}
-                    {totalRows}
-                    on:paginationChanged={onPaginationChanged}
-                  />
-                {/if}
+                <Pagination
+                  rowsPerPage={pagination.rowsPerPage}
+                  currentPage={pagination.currentPage}
+                  rowsPerPageOptions={internalOptions.rowsPerPageOptions}
+                  {totalRows}
+                  on:paginationChanged={onPaginationChanged}
+                />
               </div>
             </th>
           </tr>
@@ -434,11 +439,13 @@
       </tfoot>
       <tbody>
         {#if renderedData && visibleOrderedColumnsOriginalColumnPosition}
-          {#each renderedData as row}
+          {#each renderedData as row, i}
             {#if $$slots.row}
+              <!-- TODO: pass the original row -->
               <slot
                 name="row"
-                row={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
+                renderedRow={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
+                index={i}
                 columns={visibleOrderedColumns}
               />
             {:else}
@@ -465,9 +472,3 @@
     </table>
   </div>
 </div>
-
-<style>
-  .hidden {
-    visibility: hidden;
-  }
-</style>

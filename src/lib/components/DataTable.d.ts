@@ -10,7 +10,8 @@ export interface IPagination {
 }
 
 export interface ITableOptions {
-  rowsPerPageOptions: number[]
+  rowsPerPage?: number
+  rowsPerPageOptions?: number[]
 }
 
 export type FetchDataFunc = (

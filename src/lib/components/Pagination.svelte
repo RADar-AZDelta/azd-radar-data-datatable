@@ -25,7 +25,7 @@
     if (totalPages < 7) {
       return range(1, totalPages, 1)
     } else {
-      if (currentPage < 6) return [1, 2, 3, 4, 5, null, totalPages]
+      if (currentPage < 5) return [1, 2, 3, 4, 5, null, totalPages]
       else if (currentPage > totalPages - 5) return [1, null, ...range(totalPages - 4, totalPages, 1)]
       else return [1, null, currentPage - 1, currentPage, currentPage + 1, null, totalPages]
     }

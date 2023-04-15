@@ -1,5 +1,5 @@
 import { dev } from "$app/environment"
-import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows } from "./messages"
+import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows, MessageResponseGetRow, MessageRequestGetRow } from "./messages"
 import { desc, escape, loadJSON, loadCSV, op, from } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
@@ -28,6 +28,9 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case "deleteRows":
       await deleteRows(data as MessageRequestDeleteRows)
+      break
+    case "getRow":
+      await getRow(data as MessageRequestGetRow)
       break
   }
 }
@@ -67,12 +70,10 @@ async function fetchData(data: MessageRequestFetchData) {
     //filter
     for (const [column, filter] of [...data.filteredColumns].values()) {
       const lowerCaseFilter = filter?.toString().toLowerCase()
-      tempDt = tempDt.filter(escape((d: any) => {
-        return op.lower(d[column]).includes(lowerCaseFilter)
-      }))
+      tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
     }
     //sort
-    for (let [column, sortDirection] of [...data.sortedColumns].reverse()) {
+    for (const [column, sortDirection] of [...data.sortedColumns].reverse()) {
       //Sort is applied in reverse order !!!
       switch (sortDirection) {
         case 'asc':
@@ -150,7 +151,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 }
 
 function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
-  //tempDt = undefined
+  debugger
   for (let [index, row] of rowsByIndex) {
     for (const [column, value] of Object.entries(row)) {
       dt._data[column].data[index] = value
@@ -184,12 +185,21 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
     return acc
   }, [] as Record<string, any>[])
 
-
   dt = dt.antijoin(from(rowObjects))
 
   const message: PostMessage<unknown> = {
     msg: 'deleteRows',
     data: undefined
+  }
+  postMessage(message)
+}
+
+function getRow({ index }: MessageRequestGetRow) {
+  const row = Object.values(dt.object(index))
+
+  const message: PostMessage<MessageResponseGetRow> = {
+    msg: 'deleteRows',
+    data: { row }
   }
   postMessage(message)
 }

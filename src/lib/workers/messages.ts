@@ -36,3 +36,11 @@ export interface MessageRequestInsertRows {
 export interface MessageRequestDeleteRows {
     indices: number[]
 }
+
+export interface MessageRequestGetRow {
+    index: number
+}
+
+export interface MessageResponseGetRow {
+    row: Record<string, any>
+}

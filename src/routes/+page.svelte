@@ -1,8 +1,9 @@
 <script lang="ts">
   import DataTable from '$lib/components/DataTable.svelte'
-  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/components/types'
+  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/components/DataTables.d'
   import '$lib/styles/data-table.scss'
   import { sleep } from '$lib/utils'
+  import EditableCell from '$lib/components/EditableCell.svelte'
 
   const data = [
     {
@@ -106,23 +107,26 @@
       label: 'NAAM',
       sortDirection: 'asc',
       sortOrder: 0,
+      position: 1,
     },
     {
       id: 'age',
       sortable: false,
+      position: 2,
     },
     {
       id: 'country',
       filter: 'b',
+      position: 0,
     },
     {
       id: 'telephone',
-      position: 5,
+      position: 4,
       filterable: false,
     },
     {
       id: 'address',
-      position: 4,
+      position: 3,
       sortDirection: 'desc',
       sortOrder: 1,
     },
@@ -233,7 +237,24 @@
 
 <details open>
   <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
-  <DataTable {columns} data={matrix} bind:this={dataTableMatrix} />
+  <DataTable
+    {columns}
+    data={matrix}
+    bind:this={dataTableMatrix}
+    options={{ rowsPerPage: 7, rowsPerPageOptions: [7, 15] }}
+  >
+    <tr slot="row" let:renderedRow let:index let:columns>
+      {#each columns as column, i}
+        <td>
+          <EditableCell
+            value={renderedRow[i]}
+            on:valueChanged={async event =>
+              await dataTableMatrix.updateRows(new Map([[index, Object.fromEntries([[column.id, event.detail]])]]))}
+          />
+        </td>
+      {/each}
+    </tr>
+  </DataTable>
 
   <br />
   <button on:click={() => onClickSaveButton(dataTableMatrix)}>Save table</button>
