@@ -295,6 +295,12 @@
         await worker!.updateRows(rowsToUpdateByWorkerIndex)
         break
       case DataType.Matrix:
+        for (const [index, row] of rowsToUpdateByIndex) {
+          const originalRow = (data as any[][])[originalIndices[index]]
+          for (const [column, value] of Object.entries(row)) {
+            originalRow[columnIds.indexOf(column)] = value
+          }
+        }
         break
       case DataType.ArrayOfObjects:
         for (const [index, row] of rowsToUpdateByIndex) {
