@@ -12,6 +12,7 @@ export interface IPagination {
 export interface ITableOptions {
   rowsPerPage?: number
   rowsPerPageOptions?: number[]
+  actionColumn?: boolean
 }
 
 export type FetchDataFunc = (

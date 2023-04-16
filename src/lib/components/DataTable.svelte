@@ -393,6 +393,9 @@
       <thead>
         {#if visibleOrderedColumns}
           <tr data-name="titles">
+            {#if internalOptions.actionColumn}
+              <th />
+            {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
               <th>
                 <ColumnResize resizable={column.resizable || (true && i < visibleOrderedColumns.length - 1)}>
@@ -409,6 +412,12 @@
             {/each}
           </tr>
           <tr data-name="filters">
+            {#if internalOptions.actionColumn}
+              <th />
+            {/if}
+            {#if internalOptions.actionColumn}
+              <th />
+            {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
               <th>
                 <ColumnResize resizable={column.resizable || (true && i < visibleOrderedColumns.length - 1)}>
@@ -447,15 +456,24 @@
         {#if renderedData && visibleOrderedColumnsOriginalColumnPosition}
           {#each renderedData as row, i}
             {#if $$slots.row}
-              <!-- TODO: pass the original row -->
               <slot
                 name="row"
                 renderedRow={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
                 index={i}
                 columns={visibleOrderedColumns}
+                options={internalOptions}
               />
             {:else}
               <tr>
+                {#if internalOptions.actionColumn}
+                  <slot
+                    name="actionCell"
+                    renderedRow={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
+                    index={i}
+                    columns={visibleOrderedColumns}
+                    options={internalOptions}
+                  />
+                {/if}
                 {#each visibleOrderedColumnsOriginalColumnPosition as index}
                   <td>{row[index]}</td>
                 {/each}

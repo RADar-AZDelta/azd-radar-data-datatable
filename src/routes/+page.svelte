@@ -241,10 +241,13 @@
     {columns}
     data={matrix}
     bind:this={dataTableMatrix}
-    options={{ rowsPerPage: 7, rowsPerPageOptions: [7, 15] }}
+    options={{ rowsPerPage: 7, rowsPerPageOptions: [7, 15], actionColumn: true }}
   >
     <tr slot="row" let:renderedRow let:index let:columns>
-      {#each columns as column, i}
+      <td>
+        <button on:click={async () => await dataTableMatrix.deleteRows([index])}>Delete row</button>
+      </td>
+      {#each columns || [] as column, i}
         <td>
           <EditableCell
             value={renderedRow[i]}
