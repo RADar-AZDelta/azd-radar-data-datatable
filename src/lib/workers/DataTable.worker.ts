@@ -1,6 +1,6 @@
 import { dev } from "$app/environment"
 import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows, MessageResponseGetRow, MessageRequestGetRow } from "./messages"
-import { desc, escape, loadJSON, loadCSV, op, from } from 'arquero'
+import { desc, escape, loadJSON, loadCSV, op, from, addFunction } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
 let dt: ColumnTable
@@ -71,6 +71,8 @@ async function fetchData(data: MessageRequestFetchData) {
     for (const [column, filter] of [...data.filteredColumns].values()) {
       const lowerCaseFilter = filter?.toString().toLowerCase()
       tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
+      //TODO: test if we can run without escape (better performance)
+      //tempDt = tempDt.params({ column, lowerCaseFilter: new RegExp(lowerCaseFilter!) }).filter(d => op.lower(d[column]).match(lowerCaseFilter))
     }
     //sort
     for (const [column, sortDirection] of [...data.sortedColumns].reverse()) {
@@ -151,7 +153,6 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 }
 
 function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
-  debugger
   for (let [index, row] of rowsByIndex) {
     for (const [column, value] of Object.entries(row)) {
       dt._data[column].data[index] = value
@@ -185,8 +186,21 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
     return acc
   }, [] as Record<string, any>[])
 
+  //TODO: test if we can run without escape (better performance)
+  //TODO: use op.equal to handle null values because join semantics do not consider null or undefined values to be equal (that is, null !== null)
+  //      or delete based on the index
   dt = dt.antijoin(from(rowObjects))
-
+  // dt = dt.antijoin(from(rowObjects), escape((a: any, b: any) => {
+  //   const operations = a.keys().reduce((acc: any, cur) => {
+  //     if (acc)
+  //       acc = acc && op.equal(a[cur], b[cur])
+  //     else
+  //       acc = op.equal(a[cur], b[cur])
+  //     return acc
+  //   }, undefined)
+  //   return operations
+  //   //return op.equal(a["concept_name"], b["concept_name"])
+  // }))
   const message: PostMessage<unknown> = {
     msg: 'deleteRows',
     data: undefined

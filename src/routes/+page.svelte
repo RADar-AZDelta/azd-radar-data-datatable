@@ -90,13 +90,6 @@
       telephone: '0800-123-524-634',
       address: 'Rue Engeland 373,Neerrepen,Limburg,3700,',
     },
-    {
-      name: 'Rory2',
-      age: 45,
-      country: 'Belgium',
-      telephone: '0800-123-524-634',
-      address: 'Machelsesteenweg 343,Montroeul-sur-Haine,Hainaut,7350,',
-    },
   ]
 
   const matrix = data.map(obj => Object.values(obj))
@@ -199,28 +192,18 @@
     await dataTable.saveToFile()
   }
 
-  async function onClickUpdateRows(dataTable: DataTable) {
-    const dummyRow = dataTable
-      .getColumns()
-      ?.map(col => col.id)
-      .reduce((acc, cur) => {
-        acc[cur] = 'update'
-        return acc
-      }, {})
-
-    await dataTable.updateRows(
-      new Map([
-        [0, dummyRow!],
-        [1, dummyRow!],
-      ])
-    )
-  }
-
-  async function onClickDeleteRows(dataTable: DataTable) {
-    await dataTable.deleteRows([0, 1])
-  }
-
   async function onClickInsertRows(dataTable: DataTable) {
+    const newRow = {
+      name: 'Rudy',
+      age: 45,
+      country: 'Belgium',
+      telephone: '0800-123-524-634',
+      address: 'Machelsesteenweg 343,Montroeul-sur-Haine,Hainaut,7350,',
+    }
+    await dataTable.insertRows([newRow])
+  }
+
+  async function onClickInsertRowsCSV(dataTable: DataTable) {
     const dummyRow = dataTable
       .getColumns()
       ?.map(col => col.id)
@@ -229,7 +212,7 @@
         return acc
       }, {})
 
-    await dataTable.insertRows([dummyRow!, dummyRow!])
+    await dataTable.insertRows([dummyRow!])
   }
 </script>
 
@@ -262,14 +245,8 @@
   <br />
   <button on:click={() => onClickSaveButton(dataTableMatrix)}>Save table</button>
   <br />
-  <button on:click={() => onClickUpdateRows(dataTableMatrix)}
-    >Update first 2 rows (remove country filter to view updated records)</button
-  >
-  <br />
-  <button on:click={() => onClickDeleteRows(dataTableMatrix)}>Delete first 2 rows</button>
-  <br />
   <button on:click={() => onClickInsertRows(dataTableMatrix)}
-    >Insert 2 rows (remove country filter to view updated records)</button
+    >Insert row (remove country filter to view updated records)</button
   >
 </details>
 
@@ -282,11 +259,8 @@
   <br />
   <button on:click={() => onClickSaveButton(dataTableArrayOfObjects)}>Save table</button>
   <br />
-  <button on:click={() => onClickUpdateRows(dataTableArrayOfObjects)}>Update first 2 rows</button>
   <br />
-  <button on:click={() => onClickDeleteRows(dataTableArrayOfObjects)}>Delete first 2 rows</button>
-  <br />
-  <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert 2 rows</button>
+  <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert row</button>
 </details>
 
 <hr />
@@ -301,14 +275,14 @@
 <details open>
   <summary>Table with a File as a data source (ex: CSV, JSON)</summary>
   <input type="file" accept=".csv,.json" on:change={onFileInputChange} />
-  <DataTable data={file} bind:this={dataTableFile} />
+  <DataTable data={file} bind:this={dataTableFile} options={{ actionColumn: true }}>
+    <td slot="actionCell" let:index>
+      <button on:click={async () => await dataTableFile.deleteRows([index])}>Delete row</button>
+    </td>
+  </DataTable>
 
   <br />
   <button disabled={!file} on:click={() => onClickSaveButton(dataTableFile)}>Save table</button>
   <br />
-  <button disabled={!file} on:click={() => onClickUpdateRows(dataTableFile)}>Update first 2 rows</button>
-  <br />
-  <button disabled={!file} on:click={() => onClickDeleteRows(dataTableFile)}>Delete first 2 rows</button>
-  <br />
-  <button disabled={!file} on:click={() => onClickInsertRows(dataTableFile)}>Insert 2 rows</button>
+  <button disabled={!file} on:click={() => onClickInsertRowsCSV(dataTableFile)}>Insert row</button>
 </details>

@@ -413,10 +413,11 @@
           </tr>
           <tr data-name="filters">
             {#if internalOptions.actionColumn}
-              <th />
-            {/if}
-            {#if internalOptions.actionColumn}
-              <th />
+              {#if $$slots.actionHeader}
+                <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
+              {:else}
+                <th />
+              {/if}
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
               <th>
