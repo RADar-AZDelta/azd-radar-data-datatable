@@ -401,7 +401,7 @@
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
               <th
-                data-direction={column?.SortDirection}
+                data-direction={column?.sortDirection}
                 data-resizable={column?.resizable}
                 data-key={column?.id}
                 data-sortable={column?.sortable}
@@ -429,7 +429,7 @@
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
               <th
-                data-direction={column?.SortDirection}
+                data-direction={column?.sortDirection}
                 data-resizable={column?.resizable}
                 data-key={column?.id}
                 data-filterable={column?.filterable}
