@@ -1,0 +1,83 @@
+div[data-component=RADar-DataTable] {
+
+    div[data-name=table-container] {
+
+        table {
+            thead {
+                tr[data-name=titles] {
+                    th {
+                        div {
+                            display: flex;
+
+                            :first-child {
+                                flex: 1 1 auto;
+                            }
+
+                            button {
+                                cursor: pointer;
+                            }
+                        }
+                    }
+                }
+
+                tr[data-name=filters] {
+                    th {
+                        div {
+                            display: flex;
+
+                            :first-child {
+                                flex: 1 1 auto;
+                            }
+
+                            button {
+                                cursor: pointer;
+                            }
+                        }
+                    }
+                }
+
+                tr {
+                    th {
+                        div[data-name=column-resize] {
+                            width: 3px;
+                            flex: 0 0 auto;
+                            background-color: aqua;
+                            cursor: col-resize;
+                        }
+                    }
+                }
+            }
+
+            tfoot {
+                tr[data-name=pagination] {
+                    th {
+                        div {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                    }
+                }
+            }
+
+            tbody {
+                tr {
+                    td {}
+                }
+            }
+        }
+    }
+
+    div[data-name=pagination-container] {
+        button {
+            &:not([data-active=true]):hover:enabled {}
+
+            &[data-active=true] {
+                color: #333;
+                background: linear-gradient(to bottom, white 0%, #dcdcdc 100%);
+                border: 1px solid #979797;
+            }
+
+            &:disabled {}
+        }
+    }
+}

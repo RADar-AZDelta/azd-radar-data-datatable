@@ -10,7 +10,6 @@ const config = {
     vitePreprocess(),
     preprocess({
       scss: {
-        prependData: '@use "src/variables.scss" as *;',
       },
     }),
   ],
