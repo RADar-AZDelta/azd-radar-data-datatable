@@ -243,8 +243,6 @@
   </DataTable>
 
   <br />
-  <button on:click={() => onClickSaveButton(dataTableMatrix)}>Save table</button>
-  <br />
   <button on:click={() => onClickInsertRows(dataTableMatrix)}
     >Insert row (remove country filter to view updated records)</button
   >
@@ -254,11 +252,8 @@
 
 <details>
   <summary>Table with an array of objects as a data source</summary>
-  <DataTable {data} bind:this={dataTableArrayOfObjects} />
+  <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ actionColumn: true }} />
 
-  <br />
-  <button on:click={() => onClickSaveButton(dataTableArrayOfObjects)}>Save table</button>
-  <br />
   <br />
   <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert row</button>
 </details>

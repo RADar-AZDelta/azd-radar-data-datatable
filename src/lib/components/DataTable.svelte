@@ -480,13 +480,17 @@
             {:else}
               <tr data-index={i}>
                 {#if internalOptions.actionColumn}
-                  <slot
-                    name="actionCell"
-                    renderedRow={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
-                    index={i}
-                    columns={visibleOrderedColumns}
-                    options={internalOptions}
-                  />
+                  {#if $$slots.actionCell}
+                    <slot
+                      name="actionCell"
+                      renderedRow={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
+                      index={i}
+                      columns={visibleOrderedColumns}
+                      options={internalOptions}
+                    />
+                  {:else}
+                    <td />
+                  {/if}
                 {/if}
                 {#each visibleOrderedColumnsOriginalColumnPosition as index}
                   <td>{row[index]}</td>

@@ -1,4 +1,5 @@
 import { dev } from "$app/environment"
+import type Column from "arquero/dist/types/table/column"
 import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows, MessageResponseGetRow, MessageRequestGetRow } from "./messages"
 import { desc, escape, loadJSON, loadCSV, op, from, addFunction } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
@@ -189,18 +190,15 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
   //TODO: test if we can run without escape (better performance)
   //TODO: use op.equal to handle null values because join semantics do not consider null or undefined values to be equal (that is, null !== null)
   //      or delete based on the index
-  dt = dt.antijoin(from(rowObjects))
-  // dt = dt.antijoin(from(rowObjects), escape((a: any, b: any) => {
-  //   const operations = a.keys().reduce((acc: any, cur) => {
-  //     if (acc)
-  //       acc = acc && op.equal(a[cur], b[cur])
-  //     else
-  //       acc = op.equal(a[cur], b[cur])
-  //     return acc
-  //   }, undefined)
-  //   return operations
-  //   //return op.equal(a["concept_name"], b["concept_name"])
-  // }))
+  //dt = dt.antijoin(from(rowObjects))
+  for (const index of indices) {
+    for (const column of Object.keys(dt._data)) {
+      (dt._data[column] as Column).data.splice(index, 1);
+    }
+    dt._total -= 1
+    dt._nrows -= 1
+  }
+
   const message: PostMessage<unknown> = {
     msg: 'deleteRows',
     data: undefined
