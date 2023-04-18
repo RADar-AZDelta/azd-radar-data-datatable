@@ -42,6 +42,7 @@
       rowsPerPage: 20,
     }
 
+  let renderStatus: string | null = null
   let dataType: DataType | undefined = undefined
 
   let worker: DataTableWorker | undefined
@@ -59,6 +60,7 @@
   )
 
   async function init() {
+    renderStatus = 'rendering'
     if (dev) console.log('DataTable: init')
 
     //OPTIONS
@@ -140,6 +142,7 @@
     }
 
     await render()
+    renderStatus = 'completed'
   }
 
   async function render(onlyPaginationChanged = false) {
@@ -387,7 +390,7 @@
   })
 </script>
 
-<div data-component="RADar-DataTable">
+<div data-component="RADar-DataTable" data-status={renderStatus}>
   <div data-name="table-container">
     <table>
       <thead>
@@ -397,7 +400,12 @@
               <th />
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
-              <th>
+              <th
+                data-direction={column?.SortDirection}
+                data-resizable={column?.resizable}
+                data-key={column?.id}
+                data-sortable={column?.sortable}
+              >
                 <ColumnResize resizable={column.resizable || (true && i < visibleOrderedColumns.length - 1)}>
                   <p>{column.label || column.id}</p>
                   {#if column.sortable !== false}
@@ -420,7 +428,12 @@
               {/if}
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
-              <th>
+              <th
+                data-direction={column?.SortDirection}
+                data-resizable={column?.resizable}
+                data-key={column?.id}
+                data-filterable={column?.filterable}
+              >
                 <ColumnResize resizable={column.resizable || (true && i < visibleOrderedColumns.length - 1)}>
                   {#if column.filterable !== false}
                     <ColumnFilter
@@ -465,7 +478,7 @@
                 options={internalOptions}
               />
             {:else}
-              <tr>
+              <tr data-index={i}>
                 {#if internalOptions.actionColumn}
                   {#if $$slots.actionCell}
                     <slot
