@@ -1,3 +1,4 @@
+<!-- Copyright 2023 RADar-AZDelta -->
 <div class="spinner" />
 
 <style>

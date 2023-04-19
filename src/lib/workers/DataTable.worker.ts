@@ -1,6 +1,18 @@
-import { dev } from "$app/environment"
-import type Column from "arquero/dist/types/table/column"
-import type { MessageRequestSaveToFile, MessageRequestFetchData, MessageRequestLoadFile, MessageResponseFetchData, PostMessage, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows, MessageResponseGetRow, MessageRequestGetRow } from "./messages"
+//Copyright 2023 RADar-AZDelta
+import { dev } from '$app/environment'
+import type Column from 'arquero/dist/types/table/column'
+import type {
+  MessageRequestSaveToFile,
+  MessageRequestFetchData,
+  MessageRequestLoadFile,
+  MessageResponseFetchData,
+  PostMessage,
+  MessageRequestUpdateRows,
+  MessageRequestInsertRows,
+  MessageRequestDeleteRows,
+  MessageResponseGetRow,
+  MessageRequestGetRow,
+} from './messages'
 import { desc, escape, loadJSON, loadCSV, op, from, addFunction } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
@@ -15,22 +27,22 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
     case 'getColumnNames':
       getColumnNames()
       break
-    case "fetchData":
+    case 'fetchData':
       await fetchData(data as MessageRequestFetchData)
       break
-    case "saveToFile":
+    case 'saveToFile':
       await saveToFile(data as MessageRequestSaveToFile)
       break
-    case "updateRows":
+    case 'updateRows':
       await updateRows(data as MessageRequestUpdateRows)
       break
-    case "insertRows":
+    case 'insertRows':
       await insertRows(data as MessageRequestInsertRows)
       break
-    case "deleteRows":
+    case 'deleteRows':
       await deleteRows(data as MessageRequestDeleteRows)
       break
-    case "getRow":
+    case 'getRow':
       await getRow(data as MessageRequestGetRow)
       break
   }
@@ -51,7 +63,7 @@ async function loadFile(data: MessageRequestLoadFile) {
 
   const message: PostMessage<unknown> = {
     msg: 'loadFile',
-    data: undefined
+    data: undefined,
   }
   postMessage(message)
 }
@@ -60,7 +72,7 @@ function getColumnNames() {
   const columnNames = dt.columnNames()
   const message: PostMessage<string[]> = {
     msg: 'getColumnNames',
-    data: columnNames
+    data: columnNames,
   }
   postMessage(message)
 }
@@ -90,13 +102,21 @@ async function fetchData(data: MessageRequestFetchData) {
   }
   //pagination
   const totalRows = tempDt.numRows()
-  const objects = tempDt.objects({ limit: data.pagination.rowsPerPage, offset: (data.pagination.currentPage - 1) * data.pagination.rowsPerPage })
-  const indices = tempDt.indices().slice((data.pagination.currentPage - 1) * data.pagination.rowsPerPage, data.pagination.currentPage * data.pagination.rowsPerPage)
+  const objects = tempDt.objects({
+    limit: data.pagination.rowsPerPage,
+    offset: (data.pagination.currentPage - 1) * data.pagination.rowsPerPage,
+  })
+  const indices = tempDt
+    .indices()
+    .slice(
+      (data.pagination.currentPage - 1) * data.pagination.rowsPerPage,
+      data.pagination.currentPage * data.pagination.rowsPerPage
+    )
   const matrix = objects.map(obj => Object.values(obj))
 
   const message: PostMessage<MessageResponseFetchData> = {
     msg: 'fetchData',
-    data: { totalRows, data: matrix, indices: indices }
+    data: { totalRows, data: matrix, indices: indices },
   }
   postMessage(message)
 }
@@ -104,11 +124,11 @@ async function fetchData(data: MessageRequestFetchData) {
 async function saveToFile({ fileHandle, options }: MessageRequestSaveToFile) {
   const extension = fileHandle.name.split('.').pop()
   switch (extension) {
-    case "csv":
+    case 'csv':
       await exportCSV({ fileHandle, options })
-      break;
+      break
     default:
-      throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`);
+      throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
   }
 }
 
@@ -117,27 +137,30 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 
   const names: string[] = options?.columns || dt.columnNames()
   //const format = options?.format || {};
-  const delim = options?.delimiter || ',';
-  const reFormat = new RegExp(`["${delim}\n\r]`);
+  const delim = options?.delimiter || ','
+  const reFormat = new RegExp(`["${delim}\n\r]`)
   const bufferRowSize = options?.bufferRowSize || 5000
 
-  const formatValue = (value: any) => value == null ? ''
-    : value instanceof Date ? (value as Date).toISOString()
-      : reFormat.test(value += '') ? '"' + value.replace(/"/g, '""') + '"'
-        : value
+  const formatValue = (value: any) =>
+    value == null
+      ? ''
+      : value instanceof Date
+      ? (value as Date).toISOString()
+      : reFormat.test((value += ''))
+      ? '"' + value.replace(/"/g, '""') + '"'
+      : value
 
   let buffer = []
 
   //write the header
-  const cells = names.map(formatValue);
+  const cells = names.map(formatValue)
   buffer.push(cells.join(delim) + '\n')
 
   //write the rows
   for (let rowIndex = 0; rowIndex < dt.totalRows(); rowIndex++) {
     if (rowIndex % bufferRowSize == 0) {
       await writable.write(buffer.join(''))
-      if (dev)
-        console.log(`DataTable: saved ${rowIndex} rows to file`)
+      if (dev) console.log(`DataTable: saved ${rowIndex} rows to file`)
       buffer = []
     }
     const cells = names.map(col => formatValue(dt.get(col, rowIndex)))
@@ -148,7 +171,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 
   const message: PostMessage<URL> = {
     msg: 'saveToFile',
-    data: undefined
+    data: undefined,
   }
   postMessage(message)
 }
@@ -162,7 +185,7 @@ function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
 
   const message: PostMessage<unknown> = {
     msg: 'updateRows',
-    data: undefined
+    data: undefined,
   }
   postMessage(message)
 }
@@ -174,7 +197,7 @@ function insertRows({ rows }: MessageRequestInsertRows) {
 
   const message: PostMessage<unknown> = {
     msg: 'insertRows',
-    data: undefined
+    data: undefined,
   }
   postMessage(message)
 }
@@ -193,7 +216,7 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
   //dt = dt.antijoin(from(rowObjects))
   for (const index of indices) {
     for (const column of Object.keys(dt._data)) {
-      (dt._data[column] as Column).data.splice(index, 1);
+      ;(dt._data[column] as Column).data.splice(index, 1)
     }
     dt._total -= 1
     dt._nrows -= 1
@@ -201,7 +224,7 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
 
   const message: PostMessage<unknown> = {
     msg: 'deleteRows',
-    data: undefined
+    data: undefined,
   }
   postMessage(message)
 }
@@ -211,7 +234,7 @@ function getRow({ index }: MessageRequestGetRow) {
 
   const message: PostMessage<MessageResponseGetRow> = {
     msg: 'deleteRows',
-    data: { row }
+    data: { row },
   }
   postMessage(message)
 }

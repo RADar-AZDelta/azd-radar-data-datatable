@@ -1,3 +1,4 @@
+<!-- Copyright 2023 RADar-AZDelta -->
 <script lang="ts">
   export let href: string
   export let id: string
