@@ -1,3 +1,4 @@
+<!-- Copyright 2023 RADar-AZDelta -->
 <script lang="ts">
   import type { Hex, SortDirection, CustomTableEvents } from './DataTable.d.js'
   import SvgIcon from './SvgIcon.svelte'

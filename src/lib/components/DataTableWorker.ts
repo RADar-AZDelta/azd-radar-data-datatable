@@ -1,72 +1,92 @@
-import { dev } from "$app/environment"
-import type { PostMessage, MessageResponseFetchData, MessageRequestLoadFile, MessageRequestFetchData, MessageRequestSaveToFile, MessageRequestUpdateRows, MessageRequestInsertRows, MessageRequestDeleteRows, MessageRequestGetRow, MessageResponseGetRow } from "$lib/workers/messages"
-import type { IPagination, SortDirection, TFilter } from "./DataTable"
+//Copyright 2023 RADar-AZDelta
+import { dev } from '$app/environment'
+import type {
+  PostMessage,
+  MessageResponseFetchData,
+  MessageRequestLoadFile,
+  MessageRequestFetchData,
+  MessageRequestSaveToFile,
+  MessageRequestUpdateRows,
+  MessageRequestInsertRows,
+  MessageRequestDeleteRows,
+  MessageRequestGetRow,
+  MessageResponseGetRow,
+} from '$lib/workers/messages'
+import type { IPagination, SortDirection, TFilter } from './DataTable'
 
 export class DataTableWorker {
-    private worker: Worker | undefined
+  private worker: Worker | undefined
 
-    constructor() { }
+  constructor() {}
 
-    async init() {
-        const DataTableWorker = await import('$lib/workers/DataTable.worker?worker')
-        this.worker = new DataTableWorker.default()
+  async init() {
+    const DataTableWorker = await import('$lib/workers/DataTable.worker?worker')
+    this.worker = new DataTableWorker.default()
+  }
+
+  destroy() {
+    this.worker?.terminate()
+  }
+
+  private async executeWorkerMethod<TData, TResult>(requestMsg: string, data?: TData): Promise<TResult> {
+    let start: number
+    if (dev) start = performance.now()
+    const result = await new Promise<TResult>((resolve, reject) => {
+      this.worker!.onmessage = ({ data: { msg: responseMsg, data } }: MessageEvent<PostMessage<TResult>>) => {
+        if (responseMsg != requestMsg)
+          reject(
+            `Recieved unexpected message from web worker (expected '${requestMsg}', but recieved '${responseMsg}')`
+          )
+        resolve(data as TResult)
+      }
+      this.worker!.postMessage({ msg: requestMsg, data })
+    })
+    if (dev) {
+      const end = performance.now()
+      console.log(`DataTable: worker message '${requestMsg}' took ${Math.round(end - start!)} ms`)
     }
+    return result
+  }
 
-    destroy() {
-        this.worker?.terminate()
-    }
+  async loadFile(url: string, extension: string): Promise<void> {
+    await this.executeWorkerMethod<MessageRequestLoadFile, undefined>('loadFile', { url, extension })
+  }
 
-    private async executeWorkerMethod<TData, TResult>(requestMsg: string, data?: TData): Promise<TResult> {
-        let start: number
-        if (dev)
-            start = performance.now()
-        const result = await new Promise<TResult>((resolve, reject) => {
-            this.worker!.onmessage = ({ data: { msg: responseMsg, data } }: MessageEvent<PostMessage<TResult>>) => {
-                if (responseMsg != requestMsg)
-                    reject(`Recieved unexpected message from web worker (expected '${requestMsg}', but recieved '${responseMsg}')`)
-                resolve(data as TResult)
-            }
-            this.worker!.postMessage({ msg: requestMsg, data })
-        })
-        if (dev) {
-            const end = performance.now()
-            console.log(`DataTable: worker message '${requestMsg}' took ${Math.round(end - start!)} ms`)
-        }
-        return result
-    }
+  async getColumnNames(): Promise<string[]> {
+    return await this.executeWorkerMethod<unknown, string[]>('getColumnNames')
+  }
 
-    async loadFile(url: string, extension: string): Promise<void> {
-        await this.executeWorkerMethod<MessageRequestLoadFile, undefined>("loadFile", { url, extension })
-    }
+  async fetchData(
+    filteredColumns: Map<string, TFilter>,
+    sortedColumns: Map<string, SortDirection>,
+    pagination: IPagination,
+    onlyPaginationChanged: boolean
+  ): Promise<{ totalRows: number; data: any[][]; indices: Uint32Array }> {
+    return await this.executeWorkerMethod<MessageRequestFetchData, MessageResponseFetchData>('fetchData', {
+      filteredColumns,
+      sortedColumns,
+      pagination,
+      onlyPaginationChanged,
+    })
+  }
 
-    async getColumnNames(): Promise<string[]> {
-        return await this.executeWorkerMethod<unknown, string[]>("getColumnNames")
-    }
+  async saveToFile(fileHandle: FileSystemFileHandle, options?: any): Promise<void> {
+    return await this.executeWorkerMethod<MessageRequestSaveToFile, void>('saveToFile', { fileHandle, options })
+  }
 
-    async fetchData(filteredColumns: Map<string, TFilter>,
-        sortedColumns: Map<string, SortDirection>,
-        pagination: IPagination,
-        onlyPaginationChanged: boolean): Promise<{ totalRows: number, data: any[][], indices: Uint32Array }> {
-        return await this.executeWorkerMethod<MessageRequestFetchData, MessageResponseFetchData>("fetchData", { filteredColumns, sortedColumns, pagination, onlyPaginationChanged })
-    }
+  async updateRows(rowsByIndex: Map<number, Record<string, any>>): Promise<void> {
+    return await this.executeWorkerMethod<MessageRequestUpdateRows, void>('updateRows', { rowsByIndex })
+  }
 
-    async saveToFile(fileHandle: FileSystemFileHandle, options?: any): Promise<void> {
-        return await this.executeWorkerMethod<MessageRequestSaveToFile, void>("saveToFile", { fileHandle, options })
-    }
+  async insertRows(rows: Record<string, any>[]): Promise<void> {
+    return await this.executeWorkerMethod<MessageRequestInsertRows, void>('insertRows', { rows })
+  }
 
-    async updateRows(rowsByIndex: Map<number, Record<string, any>>): Promise<void> {
-        return await this.executeWorkerMethod<MessageRequestUpdateRows, void>("updateRows", { rowsByIndex })
-    }
+  async deleteRows(indices: number[]): Promise<void> {
+    return await this.executeWorkerMethod<MessageRequestDeleteRows, void>('deleteRows', { indices })
+  }
 
-    async insertRows(rows: Record<string, any>[]): Promise<void> {
-        return await this.executeWorkerMethod<MessageRequestInsertRows, void>("insertRows", { rows })
-    }
-
-    async deleteRows(indices: number[]): Promise<void> {
-        return await this.executeWorkerMethod<MessageRequestDeleteRows, void>("deleteRows", { indices })
-    }
-
-    async getRow(index: number): Promise<MessageResponseGetRow> {
-        return await this.executeWorkerMethod<MessageRequestGetRow, MessageResponseGetRow>("getRow", { index })
-    }
+  async getRow(index: number): Promise<MessageResponseGetRow> {
+    return await this.executeWorkerMethod<MessageRequestGetRow, MessageResponseGetRow>('getRow', { index })
+  }
 }
