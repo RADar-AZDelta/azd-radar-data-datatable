@@ -1,8 +1,31 @@
+//Copyright 2023 RADar-AZDelta
 export type Hex = `#${string}`
-export type SortDirection = "asc" | "desc" | undefined | null
+export type SortDirection = 'asc' | 'desc' | undefined | null
 
 // see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types
-export type HTMLInputTypeAttribute = "button" | "checkbox" | "color" | "date" | "datetime-local" | "email" | "file" | "hidden" | "image" | "month" | "number" | "password" | "radio" | "range" | "reset" | "search" | "submit" | "tel" | "text" | "time" | "url" | "week"
+export type HTMLInputTypeAttribute =
+  | 'button'
+  | 'checkbox'
+  | 'color'
+  | 'date'
+  | 'datetime-local'
+  | 'email'
+  | 'file'
+  | 'hidden'
+  | 'image'
+  | 'month'
+  | 'number'
+  | 'password'
+  | 'radio'
+  | 'range'
+  | 'reset'
+  | 'search'
+  | 'submit'
+  | 'tel'
+  | 'text'
+  | 'time'
+  | 'url'
+  | 'week'
 
 export interface IPagination {
   currentPage: number
@@ -19,7 +42,7 @@ export type FetchDataFunc = (
   filteredColumns: Map<string, TFilter>,
   sortedColumns: Map<string, SortDirection>,
   pagination: IPagination
-) => Promise<{ totalRows: number, data: any[][] | any[] }>
+) => Promise<{ totalRows: number; data: any[][] | any[] }>
 
 export interface IColumnMetaData {
   id: string
@@ -58,12 +81,11 @@ export interface ColumnFilterChangedEventDetail {
   filter: TFilter
 }
 
-export interface PaginationChangedEventDetail extends IPagination {
-}
+export interface PaginationChangedEventDetail extends IPagination {}
 
 export enum DataType {
   Matrix,
   ArrayOfObjects,
   Function,
-  File
+  File,
 }
