@@ -1,4 +1,5 @@
 <!-- Copyright 2023 RADar-AZDelta -->
+<!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import type { CustomTableEvents, TFilter } from './DataTable.d.js'
   import SvgIcon from './SvgIcon.svelte'

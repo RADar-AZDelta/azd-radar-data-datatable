@@ -1,4 +1,5 @@
 //Copyright 2023 RADar-AZDelta
+//SPDX-License-Identifier: gpl3+
 import type { IPagination, SortDirection, TFilter } from '$lib/components/DataTable'
 
 export interface PostMessage<TData> {

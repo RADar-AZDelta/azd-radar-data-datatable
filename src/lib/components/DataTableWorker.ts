@@ -1,4 +1,5 @@
 //Copyright 2023 RADar-AZDelta
+//SPDX-License-Identifier: gpl3+
 import { dev } from '$app/environment'
 import type {
   PostMessage,
