@@ -1,4 +1,5 @@
 //Copyright 2023 RADar-AZDelta
+//SPDX-License-Identifier: gpl3+
 export function jsonMapReplacer(key: string, value: any) {
   if (value instanceof Map) return [...value]
   else return value

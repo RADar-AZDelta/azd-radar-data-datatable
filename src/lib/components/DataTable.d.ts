@@ -1,4 +1,5 @@
 //Copyright 2023 RADar-AZDelta
+//SPDX-License-Identifier: gpl3+
 export type Hex = `#${string}`
 export type SortDirection = 'asc' | 'desc' | undefined | null
 

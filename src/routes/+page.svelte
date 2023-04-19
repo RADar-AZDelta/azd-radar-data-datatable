@@ -1,4 +1,5 @@
 <!-- Copyright 2023 RADar-AZDelta -->
+<!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import DataTable from '$lib/components/DataTable.svelte'
   import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/components/DataTables.d'
