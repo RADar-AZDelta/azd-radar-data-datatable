@@ -1,4 +1,5 @@
 <!-- Copyright 2023 RADar-AZDelta -->
+<!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import type { CustomTableEvents, TFilter } from './DataTable.d.js'
   import SvgIcon from './SvgIcon.svelte'
@@ -22,7 +23,6 @@
   }
 </script>
 
-# Copyright 2022 RADar-AZDelta
 <input on:input={onInput} type={inputType} {value} placeholder="Filter" />
 <button on:click={onClick}>
   <SvgIcon href="icons.svg" id="x" width="16px" height="16px" />
