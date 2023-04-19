@@ -159,4 +159,12 @@ input{
         justify-content: flex-start;
         height: 25px;
     }
+    body{
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;   
+    }
+    footer{
+        margin-top: auto;
+    }
 
