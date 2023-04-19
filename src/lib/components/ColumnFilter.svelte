@@ -22,7 +22,6 @@
   }
 </script>
 
-# Copyright 2022 RADar-AZDelta
 <input on:input={onInput} type={inputType} {value} placeholder="Filter" />
 <button on:click={onClick}>
   <SvgIcon href="icons.svg" id="x" width="16px" height="16px" />
