@@ -403,7 +403,7 @@
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
               <th
-                data-direction={column?.SortDirection}
+                data-direction={column?.sortDirection}
                 data-resizable={column?.resizable}
                 data-key={column?.id}
                 data-sortable={column?.sortable}
@@ -431,7 +431,7 @@
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
               <th
-                data-direction={column?.SortDirection}
+                data-direction={column?.sortDirection}
                 data-resizable={column?.resizable}
                 data-key={column?.id}
                 data-filterable={column?.filterable}
@@ -454,17 +454,31 @@
       <tfoot>
         {#if visibleOrderedColumns}
           <tr data-name="pagination">
-            <th colspan={visibleOrderedColumns.length}>
-              <div>
-                <Pagination
-                  rowsPerPage={pagination.rowsPerPage}
-                  currentPage={pagination.currentPage}
-                  rowsPerPageOptions={internalOptions.rowsPerPageOptions}
-                  {totalRows}
-                  on:paginationChanged={onPaginationChanged}
-                />
-              </div>
-            </th>
+            {#if internalOptions.actionColumn == true}
+              <th colspan={visibleOrderedColumns.length + 1}>
+                <div>
+                  <Pagination
+                    rowsPerPage={pagination.rowsPerPage}
+                    currentPage={pagination.currentPage}
+                    rowsPerPageOptions={internalOptions.rowsPerPageOptions}
+                    {totalRows}
+                    on:paginationChanged={onPaginationChanged}
+                  />
+                </div>
+              </th>
+            {:else}
+              <th colspan={visibleOrderedColumns.length}>
+                <div>
+                  <Pagination
+                    rowsPerPage={pagination.rowsPerPage}
+                    currentPage={pagination.currentPage}
+                    rowsPerPageOptions={internalOptions.rowsPerPageOptions}
+                    {totalRows}
+                    on:paginationChanged={onPaginationChanged}
+                  />
+                </div>
+              </th>
+            {/if}
           </tr>
         {/if}
       </tfoot>

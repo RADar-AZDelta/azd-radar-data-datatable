@@ -53,7 +53,7 @@
     {fromRow}-{toRow} of {totalRows}
   </p>
 </div>
-<div data-name="pagination-container">
+<div data-name="pagination-container-pages">
   <button disabled={!totalRows || currentPage === 1} on:click={() => onChangePage(currentPage - 1)}>
     <SvgIcon href="icons.svg" id="arrow-left" width="16px" height="16px" />
   </button>
