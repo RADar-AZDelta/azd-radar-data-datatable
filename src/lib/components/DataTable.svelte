@@ -1,4 +1,3 @@
-<!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import {
@@ -18,9 +17,9 @@
   import ColumnFilter from './ColumnFilter.svelte'
   import Pagination from './Pagination.svelte'
   import Spinner from './Spinner.svelte'
-  import { jsonMapReplacer } from '$lib/utils'
+  import { jsonMapReplacer } from '../utils'
   import { dev } from '$app/environment'
-  import { onDestroy } from 'svelte'
+  import { createEventDispatcher, onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
 
@@ -51,12 +50,14 @@
   let worker: DataTableWorker | undefined
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
 
+  const dispatch = createEventDispatcher()
+
   $: {
     options, columns, data
     init()
   }
   $: visibleOrderedColumns = internalColumns
-    ?.filter(col => visibleColumns?.includes(col.id) || true)
+    ?.filter(col => visibleColumns?.includes(col.id))
     .sort((a, b) => (columnPositions?.indexOf(a.id) || 0) - (columnPositions?.indexOf(b.id) || 0))
   $: visibleOrderedColumnsOriginalColumnPosition = visibleOrderedColumns?.map(col =>
     dataType === DataType.Matrix || dataType === DataType.File ? columnIds.indexOf(col.id) : col.id
@@ -146,6 +147,7 @@
 
     await render()
     renderStatus = 'completed'
+    dispatch('rendering', { renderStatus })
   }
 
   async function render(onlyPaginationChanged = false) {
@@ -388,10 +390,10 @@
     }
   }
 
-  export async function utilizeQuery(query: Query | object): Promise<any> {
+  export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
     switch (dataType) {
       case DataType.File:
-        return await worker!.utilizeQuery(query)!
+        return await worker!.executeQueryAndReturnResults(query)!
       default:
         throw new Error('Not yet supported')
     }
@@ -401,6 +403,9 @@
     worker?.destroy()
   })
 </script>
+
+<!-- Copyright 2023 RADar-AZDelta -->
+
 
 <div data-component="RADar-DataTable" data-status={renderStatus}>
   <div data-name="table-container">

@@ -48,11 +48,10 @@ export interface MessageResponseGetRow {
   row: Record<string, any>
 }
 
-export interface MessageRequestUtilizeQuery {
+export interface MessageRequestExecuteQueryAndReturnResults {
   usedQuery: Query | object
 }
 
-
-export interface MessageResponseUtilizeQuery {
+export interface MessageResponseExecuteQueryAndReturnResults {
   queriedData: any
 }

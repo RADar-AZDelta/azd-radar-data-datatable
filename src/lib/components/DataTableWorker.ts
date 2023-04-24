@@ -12,8 +12,8 @@ import type {
   MessageRequestDeleteRows,
   MessageRequestGetRow,
   MessageResponseGetRow,
-  MessageRequestUtilizeQuery,
-  MessageResponseUtilizeQuery,
+  MessageResponseExecuteQueryAndReturnResults,
+  MessageRequestExecuteQueryAndReturnResults,
 } from '$lib/workers/messages'
 import type Query from 'arquero/dist/types/query/query'
 import type { IPagination, SortDirection, TFilter } from './DataTable'
@@ -94,8 +94,11 @@ export class DataTableWorker {
     return await this.executeWorkerMethod<MessageRequestGetRow, MessageResponseGetRow>('getRow', { index })
   }
 
-  async utilizeQuery(usedQuery: Query | object): Promise<MessageResponseUtilizeQuery> {
-    return await this.executeWorkerMethod<MessageRequestUtilizeQuery, MessageResponseUtilizeQuery>('utilizeQuery', {
+  async executeQueryAndReturnResults(usedQuery: Query | object): Promise<MessageResponseExecuteQueryAndReturnResults> {
+    return await this.executeWorkerMethod<
+      MessageRequestExecuteQueryAndReturnResults,
+      MessageResponseExecuteQueryAndReturnResults
+    >('executeQueryAndReturnResults', {
       usedQuery: usedQuery,
     })
   }

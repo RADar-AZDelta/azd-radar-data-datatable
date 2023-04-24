@@ -218,11 +218,11 @@
     await dataTable.insertRows([dummyRow!])
   }
 
-  async function utilizeQuery() {
+  async function executeQueryAndReturnResults() {
     const q = query()
       .filter(d => d!.sourceCode == 'AD')
       .toObject()
-    const res = await dataTableFile.utilizeQuery(q)
+    const res = await dataTableFile.executeQueryAndReturnResults(q)
     console.log('DataTable: queried data ', res)
   }
 </script>

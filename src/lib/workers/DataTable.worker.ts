@@ -13,8 +13,8 @@ import type {
   MessageRequestDeleteRows,
   MessageResponseGetRow,
   MessageRequestGetRow,
-  MessageRequestUtilizeQuery,
-  MessageResponseUtilizeQuery,
+  MessageRequestExecuteQueryAndReturnResults,
+  MessageResponseExecuteQueryAndReturnResults,
 } from './messages'
 import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, addFunction } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
@@ -48,8 +48,8 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
     case 'getRow':
       await getRow(data as MessageRequestGetRow)
       break
-    case 'utilizeQuery':
-      await utilizeQuery(data as MessageRequestUtilizeQuery)
+    case 'executeQueryAndReturnResults':
+      await executeQueryAndReturnResults(data as MessageRequestExecuteQueryAndReturnResults)
       break
   }
 }
@@ -239,18 +239,18 @@ function getRow({ index }: MessageRequestGetRow) {
   const row = Object.values(dt.object(index))
 
   const message: PostMessage<MessageResponseGetRow> = {
-    msg: 'deleteRows',
+    msg: 'getRow',
     data: { row },
   }
   postMessage(message)
 }
 
-function utilizeQuery({ usedQuery }: MessageRequestUtilizeQuery) {
+function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
   const query = queryFrom(usedQuery)
   const queriedData = query.evaluate(dt, () => {}).objects()
-  const message: PostMessage<MessageResponseUtilizeQuery> = {
-    msg: 'utilizeQuery',
-    data: { queriedData }
+  const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
+    msg: 'executeQueryAndReturnResults',
+    data: { queriedData },
   }
   postMessage(message)
 }
