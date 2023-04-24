@@ -22,6 +22,7 @@
   import { dev } from '$app/environment'
   import { onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
+  import type Query from 'arquero/dist/types/query/query'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -382,6 +383,15 @@
         }, {} as Record<string, any>)
       case DataType.ArrayOfObjects:
         return (data as any[])[index]
+      default:
+        throw new Error('Not yet supported')
+    }
+  }
+
+  export async function utilizeQuery(query: Query | object): Promise<any> {
+    switch (dataType) {
+      case DataType.File:
+        return await worker!.utilizeQuery(query)!
       default:
         throw new Error('Not yet supported')
     }

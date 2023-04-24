@@ -6,6 +6,7 @@
   import '$lib/styles/data-table.scss'
   import { sleep } from '$lib/utils'
   import EditableCell from '$lib/components/EditableCell.svelte'
+  import { query } from 'arquero'
 
   const data = [
     {
@@ -215,6 +216,14 @@
       }, {})
 
     await dataTable.insertRows([dummyRow!])
+  }
+
+  async function utilizeQuery() {
+    const q = query()
+      .filter(d => d!.sourceCode == 'AD')
+      .toObject()
+    const res = await dataTableFile.utilizeQuery(q)
+    console.log('DataTable: queried data ', res)
   }
 </script>
 
