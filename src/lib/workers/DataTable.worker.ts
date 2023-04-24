@@ -13,8 +13,9 @@ import type {
   MessageRequestDeleteRows,
   MessageResponseGetRow,
   MessageRequestGetRow,
+  MessageRequestInsertColumn,
 } from './messages'
-import { desc, escape, loadJSON, loadCSV, op, from, addFunction } from 'arquero'
+import { desc, escape, loadJSON, loadCSV, op, from, addFunction, fromJSON } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
 let dt: ColumnTable
@@ -45,6 +46,9 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case 'getRow':
       await getRow(data as MessageRequestGetRow)
+      break
+    case 'insertColumn':
+      await insertColumn(data as MessageRequestInsertColumn)
       break
   }
 }
@@ -236,6 +240,21 @@ function getRow({ index }: MessageRequestGetRow) {
   const message: PostMessage<MessageResponseGetRow> = {
     msg: 'deleteRows',
     data: { row },
+  }
+  postMessage(message)
+}
+
+function insertColumn({ column }: MessageRequestInsertColumn) {
+  const obj: {[key: string]: any[]} = {}
+  // Add a new column name with an empty array as values
+  obj[column.id] = [""]
+  // Add a column that is already in the original table
+  obj[dt._names[0]] = [dt._data[dt._names[0]].data[0]]
+  // Left join the new table into the original table
+  dt = dt.join_left(fromJSON(obj))
+  const message: PostMessage<unknown> = {
+    msg: 'insertColumn',
+    data: undefined
   }
   postMessage(message)
 }
