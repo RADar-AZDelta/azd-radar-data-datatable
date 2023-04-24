@@ -13,7 +13,6 @@ import type {
   MessageRequestGetRow,
   MessageResponseGetRow,
   MessageRequestInsertColumn,
-  MessageResponseInsertColumn,
 } from '$lib/workers/messages'
 import type { IColumnMetaData, IPagination, SortDirection, TFilter } from './DataTable'
 
