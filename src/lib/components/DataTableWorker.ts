@@ -12,7 +12,10 @@ import type {
   MessageRequestDeleteRows,
   MessageRequestGetRow,
   MessageResponseGetRow,
+  MessageResponseExecuteQueryAndReturnResults,
+  MessageRequestExecuteQueryAndReturnResults,
 } from '$lib/workers/messages'
+import type Query from 'arquero/dist/types/query/query'
 import type { IPagination, SortDirection, TFilter } from './DataTable'
 
 export class DataTableWorker {
@@ -89,5 +92,14 @@ export class DataTableWorker {
 
   async getRow(index: number): Promise<MessageResponseGetRow> {
     return await this.executeWorkerMethod<MessageRequestGetRow, MessageResponseGetRow>('getRow', { index })
+  }
+
+  async executeQueryAndReturnResults(usedQuery: Query | object): Promise<MessageResponseExecuteQueryAndReturnResults> {
+    return await this.executeWorkerMethod<
+      MessageRequestExecuteQueryAndReturnResults,
+      MessageResponseExecuteQueryAndReturnResults
+    >('executeQueryAndReturnResults', {
+      usedQuery: usedQuery,
+    })
   }
 }

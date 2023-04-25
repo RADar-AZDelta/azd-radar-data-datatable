@@ -1,6 +1,7 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
 import type { IPagination, SortDirection, TFilter } from '$lib/components/DataTable'
+import type Query from 'arquero/dist/types/query/query'
 
 export interface PostMessage<TData> {
   msg: string
@@ -45,4 +46,12 @@ export interface MessageRequestGetRow {
 
 export interface MessageResponseGetRow {
   row: Record<string, any>
+}
+
+export interface MessageRequestExecuteQueryAndReturnResults {
+  usedQuery: Query | object
+}
+
+export interface MessageResponseExecuteQueryAndReturnResults {
+  queriedData: any
 }
