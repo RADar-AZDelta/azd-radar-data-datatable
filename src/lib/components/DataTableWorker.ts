@@ -12,7 +12,7 @@ import type {
   MessageRequestDeleteRows,
   MessageRequestGetRow,
   MessageResponseGetRow,
-  MessageRequestInsertColumn,
+  MessageRequestInsertColumns,
 } from '$lib/workers/messages'
 import type { IColumnMetaData, IPagination, SortDirection, TFilter } from './DataTable'
 
@@ -92,7 +92,7 @@ export class DataTableWorker {
     return await this.executeWorkerMethod<MessageRequestGetRow, MessageResponseGetRow>('getRow', { index })
   }
 
-  async insertColumn(column: IColumnMetaData): Promise<void> {
-    return await this.executeWorkerMethod<MessageRequestInsertColumn, void>('insertColumn', { column })
+  async insertColumns(columns: IColumnMetaData[]): Promise<void> {
+    return await this.executeWorkerMethod<MessageRequestInsertColumns, void>('insertColumns', { columns })
   }
 }

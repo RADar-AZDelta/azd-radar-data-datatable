@@ -47,6 +47,6 @@ export interface MessageResponseGetRow {
   row: Record<string, any>
 }
 
-export interface MessageRequestInsertColumn {
-  column: IColumnMetaData
+export interface MessageRequestInsertColumns {
+  columns: IColumnMetaData[]
 }

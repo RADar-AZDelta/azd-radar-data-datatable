@@ -387,23 +387,27 @@
     }
   }
 
-  export async function insertColumn(column: IColumnMetaData) {
-    switch (dataType) {
-      case DataType.File:
-      case DataType.Matrix:
-      case DataType.ArrayOfObjects:
-        if (internalColumns!.find(c => c.id === column.id))
-          throw new Error(`Column with id ${column.id} already exists`)
-        break
-      default:
-        throw new Error('Not yet supported')
+  export async function insertColumns(columns: IColumnMetaData[]) {
+    let uniqueColumns = []
+    for (let col of columns) {
+      switch (dataType) {
+        case DataType.File:
+        case DataType.Matrix:
+        case DataType.ArrayOfObjects:
+          if (internalColumns!.find(c => c.id === col.id)) throw new Error(`Column with id ${col.id} already exists`)
+          else uniqueColumns.push(col)
+          break
+        default:
+          throw new Error('Not yet supported')
+      }
     }
     switch (dataType) {
       case DataType.File:
-        await worker!.insertColumn(column)
+        await worker!.insertColumns(uniqueColumns)
         break
     }
-    internalColumns?.push(column)
+    // Get possible duplicate rows out of the array
+    internalColumns = Array.from(new Set(internalColumns!.concat(uniqueColumns)))
     internalColumns = internalColumns
     await render(false)
   }
