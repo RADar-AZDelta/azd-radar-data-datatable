@@ -390,28 +390,24 @@
   export async function insertColumn(column: IColumnMetaData) {
     switch (dataType) {
       case DataType.File:
+      case DataType.Matrix:
+      case DataType.ArrayOfObjects:
         if (internalColumns!.find(c => c.id === column.id))
           throw new Error(`Column with id ${column.id} already exists`)
-        else {
-          await worker!.insertColumn(column)
-          internalColumns?.push(column)
-          internalColumns = internalColumns
-        }
-        break
-      case DataType.Matrix:
-        internalColumns?.push(column)
-        internalColumns = internalColumns
-        break
-      case DataType.ArrayOfObjects:
-        internalColumns?.push(column)
-        internalColumns = internalColumns
         break
       default:
         throw new Error('Not yet supported')
     }
+    switch (dataType) {
+      case DataType.File:
+        await worker!.insertColumn(column)
+        break
+    }
+    internalColumns?.push(column)
+    internalColumns = internalColumns
     await render(false)
   }
-  
+
   onDestroy(() => {
     worker?.destroy()
   })

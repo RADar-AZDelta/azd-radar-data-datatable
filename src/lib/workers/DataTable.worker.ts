@@ -247,7 +247,7 @@ function getRow({ index }: MessageRequestGetRow) {
 function insertColumn({ column }: MessageRequestInsertColumn) {
   const obj: {[key: string]: any[]} = {}
   // Add a new column name with an empty array as values
-  obj[column.id] = [""]
+  obj[column.id] = [undefined]
   // Add a column that is already in the original table
   obj[dt._names[0]] = [dt._data[dt._names[0]].data[0]]
   // Left join the new table into the original table
