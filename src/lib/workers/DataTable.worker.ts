@@ -14,8 +14,10 @@ import type {
   MessageResponseGetRow,
   MessageRequestGetRow,
   MessageRequestInsertColumns,
+  MessageRequestExecuteQueryAndReturnResults,
+  MessageResponseExecuteQueryAndReturnResults,
 } from './messages'
-import { desc, escape, loadJSON, loadCSV, op, from, addFunction, fromJSON } from 'arquero'
+import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, addFunction, fromJSON } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
 let dt: ColumnTable
@@ -49,6 +51,9 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case 'insertColumns':
       await insertColumns(data as MessageRequestInsertColumns)
+      break
+    case 'executeQueryAndReturnResults':
+      await executeQueryAndReturnResults(data as MessageRequestExecuteQueryAndReturnResults)
       break
   }
 }
@@ -238,7 +243,7 @@ function getRow({ index }: MessageRequestGetRow) {
   const row = Object.values(dt.object(index))
 
   const message: PostMessage<MessageResponseGetRow> = {
-    msg: 'deleteRows',
+    msg: 'getRow',
     data: { row },
   }
   postMessage(message)
@@ -257,6 +262,16 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
   const message: PostMessage<unknown> = {
     msg: 'insertColumns',
     data: undefined
+   }
+  postMessage(message)
+}
+
+function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
+  const query = queryFrom(usedQuery)
+  const queriedData = query.evaluate(dt, () => {}).objects()
+  const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
+    msg: 'executeQueryAndReturnResults',
+    data: { queriedData },
   }
   postMessage(message)
 }
