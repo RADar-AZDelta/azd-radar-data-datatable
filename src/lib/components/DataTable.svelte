@@ -102,6 +102,9 @@
         }))
       } else throw new Error('Columns property is not provided')
     } else {
+      if(dataType === DataType.File) {
+        await worker?.insertColumns(columns)
+      }
       internalColumns = []
       Object.assign(internalColumns, columns)
     }
