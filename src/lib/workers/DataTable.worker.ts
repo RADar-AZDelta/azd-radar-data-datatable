@@ -189,7 +189,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
   for (let [index, row] of rowsByIndex) {
     for (const [column, value] of Object.entries(row)) {
-      dt._data[column].data[index] = value
+      if(dt._data[column] != undefined) dt._data[column].data[index] = value
     }
   }
 

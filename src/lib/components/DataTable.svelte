@@ -101,7 +101,9 @@
       } else throw new Error('Columns property is not provided')
     } else {
       if(dataType === DataType.File) {
-        await worker?.insertColumns(columns)
+        if(columns.length != internalColumns?.length){
+          await worker?.insertColumns(columns)
+        }
       }
       internalColumns = []
       Object.assign(internalColumns, columns)
@@ -434,8 +436,6 @@
     }
     Object.assign(internalColumns!, columns)
     applyColumnOptions()
-
-    await render(false)
 }
 
   export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
