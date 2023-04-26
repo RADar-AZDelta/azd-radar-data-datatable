@@ -103,39 +103,8 @@
       internalColumns = []
       Object.assign(internalColumns, columns)
     }
-    columnIds = internalColumns!.map(col => col.id)
 
-    //VISABILITY
-    visibleColumns = []
-    internalColumns!
-      .reduce<IColumnMetaData[]>((acc, cur, i) => {
-        if (cur && cur.visible !== false) acc.push(cur)
-        return acc
-      }, [])
-      .forEach(col => visibleColumns.push(col.id))
-
-    //POSITION
-    columnPositions = []
-    internalColumns!.sort((a, b) => (a.position || 0) - (b.position || 0)).forEach(col => columnPositions.push(col.id))
-
-    //SORT
-    sortedColumns.clear()
-    internalColumns!
-      .reduce<IColumnMetaData[]>((acc, cur, i) => {
-        if (cur && cur.sortDirection) acc.push(cur)
-        return acc
-      }, [])
-      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-      .forEach(col => sortedColumns.set(col.id, col.sortDirection))
-
-    //FILTER
-    filteredColumns.clear()
-    internalColumns!
-      .reduce<IColumnMetaData[]>((acc, cur, i) => {
-        if (cur && cur.filter) acc.push(cur)
-        return acc
-      }, [])
-      .forEach(col => filteredColumns.set(col.id, col.filter))
+    applyColumnOptions()
 
     //PAGINATION
     pagination = {
@@ -228,6 +197,42 @@
     if (dev) console.log(`DataTable: applying pagination row ${start} - ${end}`)
     data = data.slice(start, end)
     return data
+  }
+
+  function applyColumnOptions() {
+    columnIds = internalColumns!.map(col => col.id)
+
+    //VISABILITY
+    visibleColumns = []
+    internalColumns!
+      .reduce<IColumnMetaData[]>((acc, cur, i) => {
+        if (cur && cur.visible !== false) acc.push(cur)
+        return acc
+      }, [])
+      .forEach(col => visibleColumns.push(col.id))
+
+    //POSITION
+    columnPositions = []
+    internalColumns!.sort((a, b) => (a.position || 0) - (b.position || 0)).forEach(col => columnPositions.push(col.id))
+
+    //SORT
+    sortedColumns.clear()
+    internalColumns!
+      .reduce<IColumnMetaData[]>((acc, cur, i) => {
+        if (cur && cur.sortDirection) acc.push(cur)
+        return acc
+      }, [])
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+      .forEach(col => sortedColumns.set(col.id, col.sortDirection))
+
+    //FILTER
+    filteredColumns.clear()
+    internalColumns!
+      .reduce<IColumnMetaData[]>((acc, cur, i) => {
+        if (cur && cur.filter) acc.push(cur)
+        return acc
+      }, [])
+      .forEach(col => filteredColumns.set(col.id, col.filter))
   }
 
   async function onColumnFilterChanged(event: CustomEvent<ColumnFilterChangedEventDetail>) {
@@ -387,14 +392,14 @@
     }
   }
 
-  export async function insertColumns(columns: IColumnMetaData[]) {
-    let uniqueColumns = []
-    for (let col of columns) {
+  export async function insertColumns(cols: IColumnMetaData[]) {
+    let uniqueColumns: IColumnMetaData[] = []
+    for (let col of cols) {
       switch (dataType) {
         case DataType.File:
         case DataType.Matrix:
         case DataType.ArrayOfObjects:
-          if (internalColumns!.find(c => c.id === col.id)) throw new Error(`Column with id ${col.id} already exists`)
+          if (internalColumns!.find(c => c.id === col.id)) console.error(`Column with id ${col.id} already exists`)
           else uniqueColumns.push(col)
           break
         default:
@@ -406,9 +411,27 @@
         await worker!.insertColumns(uniqueColumns)
         break
     }
-    // Get possible duplicate rows out of the array
-    internalColumns = Array.from(new Set(internalColumns!.concat(uniqueColumns)))
-    internalColumns = internalColumns
+    columns = columns!.concat(uniqueColumns)
+    applyColumnOptions()
+    await render(false)
+  }
+
+  export async function updateColumns(cols: IColumnMetaData[]) {
+    for (let col of cols) {
+      if (internalColumns!.find(column => column.id == col.id) == undefined)
+        throw new Error(`Column with id ${col.id} doesn't exist`)
+      else {
+        const index = columns!.findIndex(column => column.id == col.id)
+        // Only update the given properties and not the whole object
+        for (let key of Object.keys(col)) {
+          // @ts-ignore
+          columns![index][key as keyof Object] = col[key as keyof Object]
+        }
+      }
+    }
+    Object.assign(internalColumns!, columns)
+    applyColumnOptions()
+
     await render(false)
   }
 
