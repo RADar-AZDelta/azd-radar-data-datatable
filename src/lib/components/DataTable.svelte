@@ -19,7 +19,7 @@
   import Spinner from './Spinner.svelte'
   import { jsonMapReplacer } from '../utils'
   import { dev } from '$app/environment'
-  import { createEventDispatcher, onDestroy } from 'svelte'
+  import { onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
 
@@ -49,8 +49,6 @@
 
   let worker: DataTableWorker | undefined
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
-
-  const dispatch = createEventDispatcher()
 
   $: {
     options, columns, data
@@ -116,7 +114,6 @@
 
     await render()
     renderStatus = 'completed'
-    dispatch('rendering', { renderStatus })
   }
 
   async function render(onlyPaginationChanged = false) {
