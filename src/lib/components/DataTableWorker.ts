@@ -13,8 +13,11 @@ import type {
   MessageRequestGetRow,
   MessageResponseGetRow,
   MessageRequestInsertColumns,
+  MessageResponseExecuteQueryAndReturnResults,
+  MessageRequestExecuteQueryAndReturnResults,
 } from '$lib/workers/messages'
 import type { IColumnMetaData, IPagination, SortDirection, TFilter } from './DataTable'
+import type Query from 'arquero/dist/types/query/query'
 
 export class DataTableWorker {
   private worker: Worker | undefined
@@ -92,7 +95,15 @@ export class DataTableWorker {
     return await this.executeWorkerMethod<MessageRequestGetRow, MessageResponseGetRow>('getRow', { index })
   }
 
-  async insertColumns(columns: IColumnMetaData[]): Promise<void> {
+async insertColumns(columns: IColumnMetaData[]): Promise<void> {
     return await this.executeWorkerMethod<MessageRequestInsertColumns, void>('insertColumns', { columns })
+  }
+  async executeQueryAndReturnResults(usedQuery: Query | object): Promise<MessageResponseExecuteQueryAndReturnResults> {
+    return await this.executeWorkerMethod<
+      MessageRequestExecuteQueryAndReturnResults,
+      MessageResponseExecuteQueryAndReturnResults
+    >('executeQueryAndReturnResults', {
+      usedQuery: usedQuery,
+    })
   }
 }
