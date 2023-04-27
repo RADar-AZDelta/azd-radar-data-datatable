@@ -226,7 +226,7 @@
   }
 </script>
 
-<h1>RADar-DataTable Demo</h1>
+<h1>svelte-radar-datatable demo</h1>
 
 <details open>
   <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
@@ -284,7 +284,7 @@
       >medicatie_usagi.csv</a
     >)</summary
   >
-  <input type="file" accept=".csv,.json" on:change={onFileInputChange} />
+  <input type="file" accept=".csv" on:change={onFileInputChange} />
   <DataTable data={file} bind:this={dataTableFile} options={{ actionColumn: true }}>
     <td slot="actionCell" let:index>
       <button on:click={async () => await dataTableFile.deleteRows([index])}>Delete row</button>
