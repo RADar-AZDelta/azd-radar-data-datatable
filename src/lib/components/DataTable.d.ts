@@ -1,5 +1,10 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
+
+declare module '*.svelte' {
+  export { SvelteComponentDev as default } from 'svelte/internal';
+}
+
 export type Hex = `#${string}`
 export type SortDirection = 'asc' | 'desc' | undefined | null
 
@@ -82,7 +87,7 @@ export interface ColumnFilterChangedEventDetail {
   filter: TFilter
 }
 
-export interface PaginationChangedEventDetail extends IPagination {}
+export interface PaginationChangedEventDetail extends IPagination { }
 
 export enum DataType {
   Matrix,
