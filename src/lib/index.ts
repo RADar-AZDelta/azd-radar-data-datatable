@@ -14,12 +14,17 @@ import {
     default as DataTable,
 } from './components/DataTable.svelte'
 
+import {
+    default as EditableCell,
+} from './components/EditableCell.svelte'
+
 export {
-    DataTable,
+    DataTable as default,
     ITableOptions,
     IColumnMetaData,
     IPagination,
     FetchDataFunc,
     SortDirection,
-    TFilter
+    TFilter,
+    EditableCell
 };
