@@ -168,6 +168,12 @@ async function fetchData(
 - File (CSV)
 
 ```typescript
+const response = await fetch('https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv');
+const blob = await response.blob();
+const metadata = {
+  type: 'text/csv'
+};
+const data = new File([data], "medicatie_usagi.csv", metadata);
 ```
 
 ### Setup for development
