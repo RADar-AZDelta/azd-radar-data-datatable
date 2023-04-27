@@ -1,6 +1,6 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
-import type { IPagination, SortDirection, TFilter } from '$lib/components/DataTable'
+import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/components/DataTable'
 import type Query from 'arquero/dist/types/query/query'
 
 export interface PostMessage<TData> {
@@ -46,6 +46,10 @@ export interface MessageRequestGetRow {
 
 export interface MessageResponseGetRow {
   row: Record<string, any>
+}
+
+export interface MessageRequestInsertColumns {
+  columns: IColumnMetaData[]
 }
 
 export interface MessageRequestExecuteQueryAndReturnResults {

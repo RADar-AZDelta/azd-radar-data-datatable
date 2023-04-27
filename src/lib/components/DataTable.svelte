@@ -19,7 +19,7 @@
   import Spinner from './Spinner.svelte'
   import { jsonMapReplacer } from '../utils'
   import { dev } from '$app/environment'
-  import { createEventDispatcher, onDestroy } from 'svelte'
+  import { onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
 
@@ -49,8 +49,6 @@
 
   let worker: DataTableWorker | undefined
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
-
-  const dispatch = createEventDispatcher()
 
   $: {
     options, columns, data
@@ -102,42 +100,16 @@
         }))
       } else throw new Error('Columns property is not provided')
     } else {
+      if(dataType === DataType.File) {
+        if(columns.length != internalColumns?.length){
+          await worker?.insertColumns(columns)
+        }
+      }
       internalColumns = []
       Object.assign(internalColumns, columns)
     }
-    columnIds = internalColumns!.map(col => col.id)
 
-    //VISABILITY
-    visibleColumns = []
-    internalColumns!
-      .reduce<IColumnMetaData[]>((acc, cur, i) => {
-        if (cur && cur.visible !== false) acc.push(cur)
-        return acc
-      }, [])
-      .forEach(col => visibleColumns.push(col.id))
-
-    //POSITION
-    columnPositions = []
-    internalColumns!.sort((a, b) => (a.position || 0) - (b.position || 0)).forEach(col => columnPositions.push(col.id))
-
-    //SORT
-    sortedColumns.clear()
-    internalColumns!
-      .reduce<IColumnMetaData[]>((acc, cur, i) => {
-        if (cur && cur.sortDirection) acc.push(cur)
-        return acc
-      }, [])
-      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-      .forEach(col => sortedColumns.set(col.id, col.sortDirection))
-
-    //FILTER
-    filteredColumns.clear()
-    internalColumns!
-      .reduce<IColumnMetaData[]>((acc, cur, i) => {
-        if (cur && cur.filter) acc.push(cur)
-        return acc
-      }, [])
-      .forEach(col => filteredColumns.set(col.id, col.filter))
+    applyColumnOptions()
 
     //PAGINATION
     pagination = {
@@ -147,7 +119,6 @@
 
     await render()
     renderStatus = 'completed'
-    dispatch('rendering', { renderStatus })
   }
 
   async function render(onlyPaginationChanged = false) {
@@ -231,6 +202,42 @@
     if (dev) console.log(`DataTable: applying pagination row ${start} - ${end}`)
     data = data.slice(start, end)
     return data
+  }
+
+  function applyColumnOptions() {
+    columnIds = internalColumns!.map(col => col.id)
+
+    //VISABILITY
+    visibleColumns = []
+    internalColumns!
+      .reduce<IColumnMetaData[]>((acc, cur, i) => {
+        if (cur && cur.visible !== false) acc.push(cur)
+        return acc
+      }, [])
+      .forEach(col => visibleColumns.push(col.id))
+
+    //POSITION
+    columnPositions = []
+    internalColumns!.sort((a, b) => (a.position || 0) - (b.position || 0)).forEach(col => columnPositions.push(col.id))
+
+    //SORT
+    sortedColumns.clear()
+    internalColumns!
+      .reduce<IColumnMetaData[]>((acc, cur, i) => {
+        if (cur && cur.sortDirection) acc.push(cur)
+        return acc
+      }, [])
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+      .forEach(col => sortedColumns.set(col.id, col.sortDirection))
+
+    //FILTER
+    filteredColumns.clear()
+    internalColumns!
+      .reduce<IColumnMetaData[]>((acc, cur, i) => {
+        if (cur && cur.filter) acc.push(cur)
+        return acc
+      }, [])
+      .forEach(col => filteredColumns.set(col.id, col.filter))
   }
 
   async function onColumnFilterChanged(event: CustomEvent<ColumnFilterChangedEventDetail>) {
@@ -389,6 +396,47 @@
         throw new Error('Not yet supported')
     }
   }
+
+  export async function insertColumns(cols: IColumnMetaData[]) {
+    let uniqueColumns: IColumnMetaData[] = []
+    for (let col of cols) {
+      switch (dataType) {
+        case DataType.File:
+        case DataType.Matrix:
+        case DataType.ArrayOfObjects:
+          if (internalColumns!.find(c => c.id === col.id)) console.error(`Column with id ${col.id} already exists`)
+          else uniqueColumns.push(col)
+          break
+        default:
+          throw new Error('Not yet supported')
+      }
+    }
+    switch (dataType) {
+      case DataType.File:
+        await worker!.insertColumns(uniqueColumns)
+        break
+    }
+    columns = columns!.concat(uniqueColumns)
+    applyColumnOptions()
+    await render(false)
+  }
+
+  export async function updateColumns(cols: IColumnMetaData[]) {
+    for (let col of cols) {
+      if (internalColumns!.find(column => column.id == col.id) == undefined)
+        throw new Error(`Column with id ${col.id} doesn't exist`)
+      else {
+        const index = columns!.findIndex(column => column.id == col.id)
+        // Only update the given properties and not the whole object
+        for (let key of Object.keys(col)) {
+          // @ts-ignore
+          columns![index][key as keyof Object] = col[key as keyof Object]
+        }
+      }
+    }
+    Object.assign(internalColumns!, columns)
+    applyColumnOptions()
+}
 
   export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
     switch (dataType) {
