@@ -363,7 +363,7 @@
     switch (dataType) {
       case DataType.File:
         const workerIndices = indices.map(index => indices[index]) //translate local index (on GUI) to worker row index
-        await worker!.deleteRows(workerIndices)
+        await worker!.deleteRows(workerIndices.length == 1 && workerIndices[0] == undefined ? indices : workerIndices)
         break
       case DataType.Matrix:
       case DataType.ArrayOfObjects:
