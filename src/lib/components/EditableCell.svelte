@@ -27,6 +27,7 @@
 
 <div on:mouseleave={onClickCancel}>
   {#if !editMode}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div on:click={() => (editMode = true)}>{value}</div>
   {:else}
     <input bind:value={editValue} />
