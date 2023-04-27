@@ -63,6 +63,20 @@ The `DataTable` component accepts 3 properties: `options`, `columns`, and `data`
 
 #### Options property
 
+```typescript
+interface ITableOptions {
+  rowsPerPage?: number
+  rowsPerPageOptions?: number[]
+  actionColumn?: boolean
+}
+```
+
+| value | Description | Default |
+| ----- | ----------- |---------|
+| **rowsPerPage** | number of rows visible in a page | 20 |
+| **rowsPerPageOptions** | number of rows visible in a page | [5, 10, 20, 50, 100] |
+| **actionColumn** | Adds an action column as first column. This can be used to add aditional functionality, for example 'selecting multiple columns', or 'add custom action buttoms', etc... | undefined |
+
 #### Columns property
 
 #### Data property
