@@ -32,14 +32,14 @@ add the component to a svelte page
       age: 35,
       country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,',
+      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,'
     },
     {
       name: 'Amethyst',
       age: 35,
       country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: 'Eikstraat 450,Belgrade,Namur,5001,',
+      address: 'Eikstraat 450,Belgrade,Namur,5001,'
     }
   ]
 </script>
@@ -116,6 +116,51 @@ interface IColumnMetaData {
 | **width** | FUTURE FUNCTIONALITY: the width of the column | no | 'auto' |
 
 #### Data property
+
+- Array of Objects
+```typescript
+ const data = [
+    {
+      name: 'Rory',
+      age: 35,
+      country: 'Belgium',
+      telephone: '0800-123-524-634',
+      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,'
+    },
+    {
+      name: 'Amethyst',
+      age: 35,
+      country: 'Belgium',
+      telephone: '0800-123-524-634',
+      address: 'Eikstraat 450,Belgrade,Namur,5001,'
+    }
+  ]
+```
+
+- Matrix (requires the columns property)
+```typescript
+const data = [
+  ['Rory', 35, 'Belgium', '0800-123-524-634', 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,'],
+  ['Amethyst', 35, 'Belgium', '0800-123-524-634', 'Eikstraat 450,Belgrade,Namur,5001,']
+]
+```
+
+- Function (fetch from webservice)
+
+```typescript
+type FetchDataFunc = (
+  filteredColumns: Map<string, TFilter>,
+  sortedColumns: Map<string, SortDirection>,
+  pagination: IPagination
+) => Promise<{ totalRows: number; data: any[][] | any[] }>
+
+
+```
+
+- File (CSV)
+
+```typescript
+```
 
 ### Setup for development
 
