@@ -32,14 +32,14 @@ add the component to a svelte page
       age: 35,
       country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,',
+      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,'
     },
     {
       name: 'Amethyst',
       age: 35,
       country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: 'Eikstraat 450,Belgrade,Namur,5001,',
+      address: 'Eikstraat 450,Belgrade,Namur,5001,'
     }
   ]
 </script>
@@ -116,6 +116,65 @@ interface IColumnMetaData {
 | **width** | FUTURE FUNCTIONALITY: the width of the column | no | 'auto' |
 
 #### Data property
+
+- Array of Objects
+```typescript
+ const data = [
+    {
+      name: 'Rory',
+      age: 35,
+      country: 'Belgium',
+      telephone: '0800-123-524-634',
+      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,'
+    },
+    {
+      name: 'Amethyst',
+      age: 35,
+      country: 'Belgium',
+      telephone: '0800-123-524-634',
+      address: 'Eikstraat 450,Belgrade,Namur,5001,'
+    }
+  ]
+```
+
+- Matrix (requires the columns property)
+```typescript
+const data = [
+  ['Rory', 35, 'Belgium', '0800-123-524-634', 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,'],
+  ['Amethyst', 35, 'Belgium', '0800-123-524-634', 'Eikstraat 450,Belgrade,Namur,5001,']
+]
+```
+
+- Function (fetch from webservice)
+
+```typescript
+async function fetchData(
+  filteredColumns: Map<string, TFilter>,
+  sortedColumns: Map<string, SortDirection>,
+  pagination: IPagination
+): Promise<{ totalRows: number; data: any[][] | any[] }> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({filteredColumns: [...filteredColumns], sortedColumns: [...sortedColumns], pagination})
+  });
+  const result = response.json()
+  return { totalRows: result.totalRows, data: result.data }
+}
+```
+
+- File (CSV)
+
+```typescript
+const response = await fetch('https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv');
+const blob = await response.blob();
+const metadata = {
+  type: 'text/csv'
+};
+const data = new File([data], "medicatie_usagi.csv", metadata);
+```
 
 ### Setup for development
 
