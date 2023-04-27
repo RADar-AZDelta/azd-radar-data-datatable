@@ -1,7 +1,11 @@
 {
   "name": "svelte-radar-datatable",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RADar-AZDelta/svelte-radar-datatable.git"
+  },
   "scripts": {
     "dev": "vite dev --host=127.0.0.1",
     "build": "npx vite build",
