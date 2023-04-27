@@ -13,10 +13,11 @@ import type {
   MessageRequestDeleteRows,
   MessageResponseGetRow,
   MessageRequestGetRow,
+  MessageRequestInsertColumns,
   MessageRequestExecuteQueryAndReturnResults,
   MessageResponseExecuteQueryAndReturnResults,
 } from './messages'
-import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, addFunction } from 'arquero'
+import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, addFunction, fromJSON } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 
 let dt: ColumnTable
@@ -47,6 +48,9 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case 'getRow':
       await getRow(data as MessageRequestGetRow)
+      break
+    case 'insertColumns':
+      await insertColumns(data as MessageRequestInsertColumns)
       break
     case 'executeQueryAndReturnResults':
       await executeQueryAndReturnResults(data as MessageRequestExecuteQueryAndReturnResults)
@@ -185,7 +189,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
   for (let [index, row] of rowsByIndex) {
     for (const [column, value] of Object.entries(row)) {
-      dt._data[column].data[index] = value
+      if(dt._data[column] != undefined) dt._data[column].data[index] = value
     }
   }
 
@@ -242,6 +246,23 @@ function getRow({ index }: MessageRequestGetRow) {
     msg: 'getRow',
     data: { row },
   }
+  postMessage(message)
+}
+
+function insertColumns({ columns }: MessageRequestInsertColumns) {
+  const obj: {[key: string]: any[]} = {}
+  // Add a column that is already in the original table
+  obj[dt._names[0]] = [dt._data[dt._names[0]].data[0]]
+  for(let col of columns){
+    // Add a new column name with an empty array as values
+    obj[col.id] = [undefined]
+  }
+  // Left join the new table into the original table
+  dt = dt.join_left(fromJSON(obj))
+  const message: PostMessage<unknown> = {
+    msg: 'insertColumns',
+    data: undefined
+   }
   postMessage(message)
 }
 
