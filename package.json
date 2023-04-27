@@ -6,6 +6,7 @@
     "type": "git",
     "url": "https://github.com/RADar-AZDelta/svelte-radar-datatable.git"
   },
+  "homepage": "https://radar-azdelta.github.io/svelte-radar-datatable/",
   "scripts": {
     "dev": "vite dev --host=127.0.0.1",
     "build": "npx vite build",
