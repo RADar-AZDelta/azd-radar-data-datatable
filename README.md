@@ -12,7 +12,7 @@ We didn't find anything that suited our needs, so we developed our own.
 - Fast for very large CSV files (more than 100.000 rows)
 - Uses Arquero in a web worker for File (CSV) data source
 
-## Usage (publishing the package to NPM needs to be done)
+## Usage
 
 install the package
 
