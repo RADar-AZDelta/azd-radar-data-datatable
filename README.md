@@ -63,7 +63,7 @@ The `DataTable` component accepts 3 properties: `options`, `columns`, and `data`
 
 #### Options property
 
-
+globel options for the DataTable
 
 ```typescript
 interface ITableOptions {
@@ -80,6 +80,8 @@ interface ITableOptions {
 | **actionColumn** | Adds an action column as first column. This can be used to add aditional functionality, for example 'selecting multiple columns', or 'add custom action buttoms', etc... | false |
 
 #### Columns property
+
+The columns can be extracted from the data property (except when the data is a matrix). But you can also manually define the columns.
 
 ```typescript
 interface IColumnMetaData {
