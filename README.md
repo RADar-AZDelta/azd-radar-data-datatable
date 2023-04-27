@@ -15,4 +15,3 @@ pnpm install
 ```
 
 To run the example app, run `pnpm run dev --open` from the project root.
-
