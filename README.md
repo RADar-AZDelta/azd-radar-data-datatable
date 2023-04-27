@@ -148,13 +148,21 @@ const data = [
 - Function (fetch from webservice)
 
 ```typescript
-type FetchDataFunc = (
+async function fetchData(
   filteredColumns: Map<string, TFilter>,
   sortedColumns: Map<string, SortDirection>,
   pagination: IPagination
-) => Promise<{ totalRows: number; data: any[][] | any[] }>
-
-
+): Promise<{ totalRows: number; data: any[][] | any[] }> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({filteredColumns: [...filteredColumns], sortedColumns: [...sortedColumns], pagination})
+  });
+  const result = response.json()
+  return { totalRows: result.totalRows, data: result.data }
+}
 ```
 
 - File (CSV)
