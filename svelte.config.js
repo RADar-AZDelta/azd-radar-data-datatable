@@ -23,6 +23,9 @@ const config = {
       base: dev ? '' : process.env.BASE_PATH,
     }
   },
+  package: {
+
+  }
 }
 
 export default config

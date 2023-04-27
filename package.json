@@ -1,10 +1,12 @@
 {
-  "name": "radar-datatable",
-  "version": "0.0.1",
+  "name": "svelte-radar-datatable",
+  "version": "0.0.2",
+  "license": "GPL-3.0",
   "scripts": {
     "dev": "vite dev --host=127.0.0.1",
     "build": "npx vite build",
     "preview": "vite preview",
+    "package": "svelte-kit sync && svelte-package && publint",
     "prepublishOnly": "echo 'Did you mean to publish `./package/`, instead of `./`?' && exit 1",
     "test": "npx playwright test",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -22,7 +24,6 @@
     "@types/lodash.debounce": "^4.0.7",
     "@typescript-eslint/eslint-plugin": "^5.59.1",
     "@typescript-eslint/parser": "^5.59.1",
-    "adapter-static,": "link:@sveltejs/adapter-static,",
     "bulma": "^0.9.4",
     "eslint": "^8.39.0",
     "eslint-config-prettier": "^8.8.0",
@@ -38,17 +39,10 @@
     "vite": "^4.3.3",
     "vitest": "^0.25.8"
   },
-  "type": "module",
   "dependencies": {
     "@types/lodash": "^4.14.194",
     "arquero": "^5.2.0",
     "lodash.debounce": "^4.0.8"
   },
-  "exports": {
-    ".": {
-      "types": "./index.d.ts",
-      "svelte": "./index.js"
-    },
-    "./styles/data-table.scss": "./styles/data-table.scss"
-  }
+  "type": "module"
 }
