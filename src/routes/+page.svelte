@@ -3,7 +3,6 @@
 <script lang="ts">
   import DataTable from '$lib/components/DataTable.svelte'
   import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/components/DataTables.d'
-  import '$lib/styles/data-table.scss'
   import { sleep } from '$lib/utils'
   import EditableCell from '$lib/components/EditableCell.svelte'
   import { query } from 'arquero'
