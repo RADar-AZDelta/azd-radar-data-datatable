@@ -63,6 +63,8 @@ The `DataTable` component accepts 3 properties: `options`, `columns`, and `data`
 
 #### Options property
 
+
+
 ```typescript
 interface ITableOptions {
   rowsPerPage?: number
@@ -71,13 +73,45 @@ interface ITableOptions {
 }
 ```
 
-| value | Description | Default |
+| Value | Description | Default |
 | ----- | ----------- |---------|
 | **rowsPerPage** | number of rows visible in a page | 20 |
 | **rowsPerPageOptions** | number of rows visible in a page | [5, 10, 20, 50, 100] |
 | **actionColumn** | Adds an action column as first column. This can be used to add aditional functionality, for example 'selecting multiple columns', or 'add custom action buttoms', etc... | false |
 
 #### Columns property
+
+```typescript
+interface IColumnMetaData {
+  id: string
+  label?: string
+  visible?: boolean
+  sortable?: boolean
+  filterable?: boolean
+  resizable?: boolean
+  repositionable?: boolean
+  sortDirection?: SortDirection
+  sortOrder?: number
+  filter?: any
+  position?: number
+  width?: number | 'auto'
+}
+```
+
+| Value | Description | Required | Default |
+| ----- | ----------- |----------|---------|
+| **id** | id or name of the column | yes | |
+| **label** | id or name of the column | no | |
+| **visible** | is the column visible | no | yes |
+| **sortable** | is the column sortable | no | yes |
+| **filterable** | is the column filterable | no | yes |
+| **resizable** | FUTURE FUNCTIONALITY: can the column width be adjusted | no | yes |
+| **repositionable** | FUTURE FUNCTIONALITY: can the column be repositioned | no | yes |
+| **sortDirection** | do not sort (undefined), sort the column 'asc' or 'desc' | no | undefined |
+| **sortOrder** | if multiple columns are sorted, this prop defines the sequence of the order | no | undefined |
+| **filter** | filter the column values | no | undefined |
+| **position** | the visual position (sequence) of the column | no | undefined |
+| **width** | FUTURE FUNCTIONALITY: the width of the column | no | 'auto' |
 
 #### Data property
 
