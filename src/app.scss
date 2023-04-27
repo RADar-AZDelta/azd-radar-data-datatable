@@ -1,22 +1,14 @@
 // /* Write your global styles here, in SCSS syntax. Variables and mixins from the src/variables.scss file are available here without importing */ /* Import only what you need from Bulma */
 
 
-body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.copyright {
-    color: #858585;
-    text-align: center;
-    padding-top: 3%;
-
-}
-
+body {}
 
 footer {
-    margin-top: auto;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
     color: #858585;
 
     a:link,
@@ -29,18 +21,9 @@ footer {
         color: #858585;
     }
 
-    ul {
-        display: inline;
-        list-style: disc;
-        margin-block-start: 1em;
-        margin-left: 15%;
+    .copyright {
+        color: #858585;
+        text-align: center;
 
-        li {
-            list-style: none;
-            display: inline;
-            margin-right: 50px;
-        }
     }
-
-    ;
 }
