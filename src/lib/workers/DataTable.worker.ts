@@ -1,6 +1,6 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
-import { dev } from '$app/environment'
+//import { dev } from '$app/environment'
 import type Column from 'arquero/dist/types/table/column'
 import type {
   MessageRequestSaveToFile,
@@ -151,10 +151,10 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
     value == null
       ? ''
       : value instanceof Date
-      ? (value as Date).toISOString()
-      : reFormat.test((value += ''))
-      ? '"' + value.replace(/"/g, '""') + '"'
-      : value
+        ? (value as Date).toISOString()
+        : reFormat.test((value += ''))
+          ? '"' + value.replace(/"/g, '""') + '"'
+          : value
 
   let buffer = []
 
@@ -166,7 +166,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   for (let rowIndex = 0; rowIndex < dt.totalRows(); rowIndex++) {
     if (rowIndex % bufferRowSize == 0) {
       await writable.write(buffer.join(''))
-      if (dev) console.log(`DataTable: saved ${rowIndex} rows to file`)
+      //if (dev) console.log(`DataTable: saved ${rowIndex} rows to file`)
       buffer = []
     }
     const cells = names.map(col => formatValue(dt.get(col, rowIndex)))
@@ -222,7 +222,7 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
   //dt = dt.antijoin(from(rowObjects))
   for (const index of indices) {
     for (const column of Object.keys(dt._data)) {
-      ;(dt._data[column] as Column).data.splice(index, 1)
+      ; (dt._data[column] as Column).data.splice(index, 1)
     }
     dt._total -= 1
     dt._nrows -= 1
@@ -247,7 +247,7 @@ function getRow({ index }: MessageRequestGetRow) {
 
 function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
   const query = queryFrom(usedQuery)
-  const queriedData = query.evaluate(dt, () => {}).objects()
+  const queriedData = query.evaluate(dt, () => { }).objects()
   const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
     msg: 'executeQueryAndReturnResults',
     data: { queriedData },

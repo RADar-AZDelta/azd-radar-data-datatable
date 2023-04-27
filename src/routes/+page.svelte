@@ -279,7 +279,12 @@
 <hr />
 
 <details open>
-  <summary>Table with a File as a data source (ex: CSV, JSON)</summary>
+  <summary
+    >Table with a CSV file as a data source (ex: <a
+      href="https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv"
+      >medicatie_usagi.csv</a
+    >)</summary
+  >
   <input type="file" accept=".csv,.json" on:change={onFileInputChange} />
   <DataTable data={file} bind:this={dataTableFile} options={{ actionColumn: true }}>
     <td slot="actionCell" let:index>
