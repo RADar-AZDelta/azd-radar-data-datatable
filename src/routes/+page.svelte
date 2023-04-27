@@ -140,7 +140,7 @@
     filteredColumns: Map<string, TFilter>,
     sortedColumns: Map<string, SortDirection>,
     pagination: IPagination
-  ) {
+  ): Promise<{ totalRows: number; data: any[][] | any[] }> {
     //lets simulate a remote fetch call
 
     //FILTER
@@ -262,7 +262,7 @@
 
 <details>
   <summary>Table with an array of objects as a data source</summary>
-  <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ actionColumn: true }} />
+  <DataTable {data} bind:this={dataTableArrayOfObjects} />
 
   <br />
   <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert row</button>
