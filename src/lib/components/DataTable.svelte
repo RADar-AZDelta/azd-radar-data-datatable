@@ -11,6 +11,7 @@
     type FetchDataFunc,
     type IPagination,
     DataType,
+    type SettingsVisibilityChangedEventDetail,
   } from './DataTable.d'
   import ColumnSort from './ColumnSort.svelte'
   import ColumnResize from './ColumnResize.svelte'
@@ -22,6 +23,8 @@
   import { onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
+  import Options from './Options.svelte'
+  import Modal from './Modal.svelte'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -49,6 +52,8 @@
 
   let worker: DataTableWorker | undefined
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
+
+  let settingsVisibility: boolean = false
 
   $: {
     options, columns, data
@@ -100,8 +105,8 @@
         }))
       } else throw new Error('Columns property is not provided')
     } else {
-      if(dataType === DataType.File) {
-        if(columns.length != internalColumns?.length){
+      if (dataType === DataType.File) {
+        if (columns.length != internalColumns?.length) {
           await worker?.insertColumns(columns)
         }
       }
@@ -274,6 +279,19 @@
     await render(true)
   }
 
+  async function onSettingsVisibilityChanged(event: CustomEvent<SettingsVisibilityChangedEventDetail>) {
+    settingsVisibility = event.detail.visibility
+  }
+
+  async function onColumnVisibilityChanged(e: Event) {
+    const element = e.target as HTMLInputElement
+    const checked = element.checked
+    const id = element.id
+    internalColumns!.find(col => col.id == id)!.visible = checked
+    applyColumnOptions()
+    await render(true)
+  }
+
   export async function saveToFile() {
     const opts = {
       types: [
@@ -436,7 +454,7 @@
     }
     Object.assign(internalColumns!, columns)
     applyColumnOptions()
-}
+  }
 
   export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
     switch (dataType) {
@@ -454,6 +472,21 @@
 
 <!-- Copyright 2023 RADar-AZDelta -->
 
+<Modal on:settingsVisibilityChanged={onSettingsVisibilityChanged} show={settingsVisibility}>
+  {#if internalColumns}
+    {#each internalColumns as column}
+      <div>
+        <p>{column.id}</p>
+        <input
+          type="checkbox"
+          id={column.id}
+          checked={column.visible == undefined ? true : column.visible}
+          on:change={onColumnVisibilityChanged}
+        />
+      </div>
+    {/each}
+  {/if}
+</Modal>
 
 <div data-component="RADar-DataTable" data-status={renderStatus}>
   <div data-name="table-container">
@@ -544,6 +577,9 @@
             {/if}
           </tr>
         {/if}
+        <tr>
+          <th><Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} /></th>
+        </tr>
       </tfoot>
       <tbody>
         {#if renderedData && visibleOrderedColumnsOriginalColumnPosition}
