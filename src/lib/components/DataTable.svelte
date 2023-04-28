@@ -284,12 +284,13 @@
   }
 
   async function onColumnVisibilityChanged(e: Event) {
-    const element = e.target as HTMLInputElement
-    const checked = element.checked
-    const id = element.id
-    internalColumns!.find(col => col.id == id)!.visible = checked
+    const checked = (e.target as HTMLInputElement).checked
+    const id = (e.target as HTMLInputElement).id
+    columns == undefined
+      ? (internalColumns!.find(col => col.id == id)!.visible = checked)
+      : (columns!.find(col => col.id == id)!.visible = checked)
+    Object.assign(internalColumns!, columns)
     applyColumnOptions()
-    await render(true)
   }
 
   export async function saveToFile() {
