@@ -224,20 +224,9 @@
     const res = await dataTableFile.executeQueryAndReturnResults(q)
     console.log('DataTable: queried data ', res)
   }
-
-  async function execution() {
-    console.log("EXECUTION")
-    // const res = dataTableFile.getTablePagination()
-    // console.log("RESULTS ", res)
-    dataTableFile.changePagination({ currentPage: 2, rowsPerPage: 5 })
-  }
 </script>
 
 <h1>svelte-radar-datatable demo</h1>
-
-<button on:click={async() => {
-  await execution()
-}}>Testing</button>
  
 <details open>
   <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
