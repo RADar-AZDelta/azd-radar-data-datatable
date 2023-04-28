@@ -100,8 +100,8 @@
         }))
       } else throw new Error('Columns property is not provided')
     } else {
-      if(dataType === DataType.File) {
-        if(columns.length != internalColumns?.length){
+      if (dataType === DataType.File) {
+        if (columns.length != internalColumns?.length) {
           await worker?.insertColumns(columns)
         }
       }
@@ -436,7 +436,7 @@
     }
     Object.assign(internalColumns!, columns)
     applyColumnOptions()
-}
+  }
 
   export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
     switch (dataType) {
@@ -447,13 +447,27 @@
     }
   }
 
+  export function getTablePagination() {
+    return {
+      currentPage: pagination.currentPage,
+      rowsPerPage: pagination.rowsPerPage,
+      totalRows,
+    }
+  }
+
+  export function changePagination(pag: {currentPage?: number, rowsPerPage?: number}) {
+    pag.currentPage? pagination.currentPage = pag.currentPage : null
+    pag.rowsPerPage? pagination.rowsPerPage = pag.rowsPerPage : null
+    pagination = pagination
+    render(true)
+  }
+
   onDestroy(() => {
     worker?.destroy()
   })
 </script>
 
 <!-- Copyright 2023 RADar-AZDelta -->
-
 
 <div data-component="RADar-DataTable" data-status={renderStatus}>
   <div data-name="table-container">
