@@ -227,7 +227,7 @@
 </script>
 
 <h1>svelte-radar-datatable demo</h1>
-
+ 
 <details open>
   <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
   <DataTable

@@ -467,6 +467,21 @@
     }
   }
 
+  export function getTablePagination() {
+    return {
+      currentPage: pagination.currentPage,
+      rowsPerPage: pagination.rowsPerPage,
+      totalRows,
+    }
+  }
+
+  export function changePagination(pag: { currentPage?: number; rowsPerPage?: number }) {
+    if (pag.currentPage) pagination.currentPage = pag.currentPage
+    if (pag.rowsPerPage) pagination.rowsPerPage = pag.rowsPerPage
+    pagination = pagination
+    render(true)
+  }
+
   onDestroy(() => {
     worker?.destroy()
   })
