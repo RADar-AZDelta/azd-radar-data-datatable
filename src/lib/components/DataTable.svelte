@@ -1,3 +1,4 @@
+<!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import {
@@ -455,9 +456,9 @@
     }
   }
 
-  export function changePagination(pag: {currentPage?: number, rowsPerPage?: number}) {
-    pag.currentPage? pagination.currentPage = pag.currentPage : null
-    pag.rowsPerPage? pagination.rowsPerPage = pag.rowsPerPage : null
+  export function changePagination(pag: { currentPage?: number; rowsPerPage?: number }) {
+    if (pag.currentPage) pagination.currentPage = pag.currentPage
+    if (pag.rowsPerPage) pagination.rowsPerPage = pag.rowsPerPage
     pagination = pagination
     render(true)
   }
@@ -466,8 +467,6 @@
     worker?.destroy()
   })
 </script>
-
-<!-- Copyright 2023 RADar-AZDelta -->
 
 <div data-component="RADar-DataTable" data-status={renderStatus}>
   <div data-name="table-container">
