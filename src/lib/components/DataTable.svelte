@@ -1,3 +1,4 @@
+<!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import {
@@ -471,19 +472,18 @@
   })
 </script>
 
-<!-- Copyright 2023 RADar-AZDelta -->
-
 <Modal on:settingsVisibilityChanged={onSettingsVisibilityChanged} show={settingsVisibility}>
+  <h1>Change column visability:</h1>
   {#if internalColumns}
     {#each internalColumns as column}
       <div>
-        <p>{column.id}</p>
         <input
           type="checkbox"
           id={column.id}
           checked={column.visible == undefined ? true : column.visible}
           on:change={onColumnVisibilityChanged}
         />
+        <label for={column.id}>{column.label ?? column.id}</label><br />
       </div>
     {/each}
   {/if}
@@ -551,36 +551,20 @@
       <tfoot>
         {#if visibleOrderedColumns}
           <tr data-name="pagination">
-            {#if internalOptions.actionColumn == true}
-              <th colspan={visibleOrderedColumns.length + 1}>
-                <div>
-                  <Pagination
-                    rowsPerPage={pagination.rowsPerPage}
-                    currentPage={pagination.currentPage}
-                    rowsPerPageOptions={internalOptions.rowsPerPageOptions}
-                    {totalRows}
-                    on:paginationChanged={onPaginationChanged}
-                  />
-                </div>
-              </th>
-            {:else}
-              <th colspan={visibleOrderedColumns.length}>
-                <div>
-                  <Pagination
-                    rowsPerPage={pagination.rowsPerPage}
-                    currentPage={pagination.currentPage}
-                    rowsPerPageOptions={internalOptions.rowsPerPageOptions}
-                    {totalRows}
-                    on:paginationChanged={onPaginationChanged}
-                  />
-                </div>
-              </th>
-            {/if}
+            <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
+              <div>
+                <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
+                <Pagination
+                  rowsPerPage={pagination.rowsPerPage}
+                  currentPage={pagination.currentPage}
+                  rowsPerPageOptions={internalOptions.rowsPerPageOptions}
+                  {totalRows}
+                  on:paginationChanged={onPaginationChanged}
+                />
+              </div>
+            </th>
           </tr>
         {/if}
-        <tr>
-          <th><Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} /></th>
-        </tr>
       </tfoot>
       <tbody>
         {#if renderedData && visibleOrderedColumnsOriginalColumnPosition}

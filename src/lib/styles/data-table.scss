@@ -78,6 +78,33 @@ div[data-component=RADar-DataTable] {
                         }
                     }
                 }
+
+                input {
+                    border-radius: 2px;
+                    font-size: 0.75rem;
+                    box-shadow: inset 0 0.0625 0.125em rgba(10, 10, 10, .05);
+                    background-color: #fff;
+                    border-color: #dbdbdb;
+                    color: #363636;
+                    height: 2.5em;
+                    display: inline-flex;
+                    border: 1px solid;
+                    justify-content: flex-start;
+                    height: 25px;
+                }
+
+                button {
+                    cursor: pointer;
+                    background-color: #fff;
+                    border-radius: 2px;
+                    border-color: #dbdbdb;
+                    border-width: 1px;
+                    justify-content: center;
+                    padding-left: 1em;
+                    text-align: center;
+                    white-space: nowrap;
+                    font-size: 0.75em;
+                }
             }
 
             tfoot {
@@ -85,9 +112,30 @@ div[data-component=RADar-DataTable] {
                     th {
                         div {
                             display: flex;
-                            justify-content: space-between;
+
+                            div[data-name=pagination-container] {
+                                margin-left: 5px;
+                            }
+
+                            div[data-name=pagination-container-pages] {
+                                margin-left: auto;
+                            }
                         }
                     }
+                }
+
+                tr:last-child {
+                    border: none;
+                }
+
+                select {
+                    cursor: pointer;
+                    display: inline-block;
+                    font-size: 1em;
+                    max-width: 100%;
+                    outline: 0;
+                    height: 25px;
+                    align-self: center;
                 }
             }
 
@@ -97,6 +145,14 @@ div[data-component=RADar-DataTable] {
 
                 tr {
                     border-bottom: 1px solid black;
+                }
+
+                tr:nth-child(even) {
+                    background: #fff
+                }
+
+                tr:nth-child(odd) {
+                    background: #e2e8f3
                 }
             }
         }
@@ -132,55 +188,36 @@ div[data-component=RADar-DataTable] {
     }
 }
 
-tbody {
-    tr:nth-child(even) {
-        background: #fff
-    }
-
-    tr:nth-child(odd) {
-        background: #e2e8f3
-    }
-}
-
-tfoot {
-    tr:last-child {
-        border: none;
-    }
-}
-
-button {
-    cursor: pointer;
-    background-color: #fff;
-    border-radius: 2px;
-    border-color: #dbdbdb;
-    border-width: 1px;
+section[data-component='modal-container-medium'] {
+    width: 100%;
+    height: 100%;
+    display: flex;
     justify-content: center;
-    padding-left: 1em;
-    text-align: center;
-    white-space: nowrap;
-    font-size: 0.75em;
-}
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    filter: drop-shadow(12, 12, 10, rgba(0, 0, 0, 1));
 
-select {
-    cursor: pointer;
-    display: inline-block;
-    font-size: 1em;
-    max-width: 100%;
-    outline: 0;
-    height: 25px;
-    align-self: center;
-}
+    div[data-component='modal'] {
+        width: 60%;
+        height: 60%;
+        background-color: white;
+        border-radius: 10px;
 
-input {
-    border-radius: 2px;
-    font-size: 0.75rem;
-    box-shadow: inset 0 0.0625 0.125em rgba(10, 10, 10, .05);
-    background-color: #fff;
-    border-color: #dbdbdb;
-    color: #363636;
-    height: 2.5em;
-    display: inline-flex;
-    border: 1px solid;
-    justify-content: flex-start;
-    height: 25px;
+        button[data-component='close'] {
+            padding: 1rem 0 0 1rem;
+            border: none;
+            background-color: inherit;
+            cursor: pointer;
+            position: absolute;
+            right: 21vw;
+        }
+
+        div[data-component='modal-content'] {
+            padding: 5px;
+        }
+    }
 }
