@@ -74,6 +74,12 @@ export interface CustomTableEvents {
   columnFilterChanged: ColumnFilterChangedEventDetail
   paginationChanged: PaginationChangedEventDetail
   settingsVisibilityChanged: SettingsVisibilityChangedEventDetail
+  columnPositionChanged: ColumnPositionChangedEventDetail
+}
+
+export interface ColumnPositionChangedEventDetail {
+  column: string
+  position: number
 }
 
 export interface ColumnSortChangedEventDetail {
