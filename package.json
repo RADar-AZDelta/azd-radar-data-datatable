@@ -1,6 +1,6 @@
 {
   "name": "svelte-radar-datatable",
-  "version": "0.0.6",
+  "version": "0.0.11",
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
     "format": "prettier --plugin-search-dir . --write ."
   },
   "devDependencies": {
-    "@playwright/test": "^1.32.3",
+    "@playwright/test": "^1.33.0",
     "@sveltejs/adapter-auto": "^2.0.1",
     "@sveltejs/adapter-static": "^2.0.2",
     "@sveltejs/kit": "^1.15.9",

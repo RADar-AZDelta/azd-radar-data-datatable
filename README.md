@@ -47,6 +47,18 @@ add the component to a svelte page
 <DataTable {data} />
 ```
 
+Also add the folowing config to your vite.config.ts, otherwise svelte-radar-datatable worker can't be downloaded. 
+
+```js
+export default defineConfig({
+  ...
+  optimizeDeps: {
+    exclude: ['svelte-radar-datatable'],
+  }
+  ...
+})
+```
+
 ## Example
 
 see [demo](https://radar-azdelta.github.io/svelte-radar-datatable/) site
