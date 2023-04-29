@@ -12,6 +12,7 @@
     type FetchDataFunc,
     type IPagination,
     DataType,
+    type SettingsVisibilityChangedEventDetail,
   } from './DataTable.d'
   import ColumnSort from './ColumnSort.svelte'
   import ColumnResize from './ColumnResize.svelte'
@@ -23,6 +24,8 @@
   import { onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
+  import Options from './Options.svelte'
+  import Modal from './Modal.svelte'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -50,6 +53,8 @@
 
   let worker: DataTableWorker | undefined
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
+
+  let settingsVisibility: boolean = false
 
   $: {
     options, columns, data
@@ -275,6 +280,20 @@
     await render(true)
   }
 
+  async function onSettingsVisibilityChanged(event: CustomEvent<SettingsVisibilityChangedEventDetail>) {
+    settingsVisibility = event.detail.visibility
+  }
+
+  async function onColumnVisibilityChanged(e: Event) {
+    const checked = (e.target as HTMLInputElement).checked
+    const id = (e.target as HTMLInputElement).id
+    columns == undefined
+      ? (internalColumns!.find(col => col.id == id)!.visible = checked)
+      : (columns!.find(col => col.id == id)!.visible = checked)
+    Object.assign(internalColumns!, columns)
+    applyColumnOptions()
+  }
+
   export async function saveToFile() {
     const opts = {
       types: [
@@ -468,6 +487,23 @@
   })
 </script>
 
+<Modal on:settingsVisibilityChanged={onSettingsVisibilityChanged} show={settingsVisibility}>
+  <h1>Change column visability:</h1>
+  {#if internalColumns}
+    {#each internalColumns as column}
+      <div>
+        <input
+          type="checkbox"
+          id={column.id}
+          checked={column.visible == undefined ? true : column.visible}
+          on:change={onColumnVisibilityChanged}
+        />
+        <label for={column.id}>{column.label ?? column.id}</label><br />
+      </div>
+    {/each}
+  {/if}
+</Modal>
+
 <div data-component="RADar-DataTable" data-status={renderStatus}>
   <div data-name="table-container">
     <table>
@@ -530,31 +566,18 @@
       <tfoot>
         {#if visibleOrderedColumns}
           <tr data-name="pagination">
-            {#if internalOptions.actionColumn == true}
-              <th colspan={visibleOrderedColumns.length + 1}>
-                <div>
-                  <Pagination
-                    rowsPerPage={pagination.rowsPerPage}
-                    currentPage={pagination.currentPage}
-                    rowsPerPageOptions={internalOptions.rowsPerPageOptions}
-                    {totalRows}
-                    on:paginationChanged={onPaginationChanged}
-                  />
-                </div>
-              </th>
-            {:else}
-              <th colspan={visibleOrderedColumns.length}>
-                <div>
-                  <Pagination
-                    rowsPerPage={pagination.rowsPerPage}
-                    currentPage={pagination.currentPage}
-                    rowsPerPageOptions={internalOptions.rowsPerPageOptions}
-                    {totalRows}
-                    on:paginationChanged={onPaginationChanged}
-                  />
-                </div>
-              </th>
-            {/if}
+            <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
+              <div>
+                <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
+                <Pagination
+                  rowsPerPage={pagination.rowsPerPage}
+                  currentPage={pagination.currentPage}
+                  rowsPerPageOptions={internalOptions.rowsPerPageOptions}
+                  {totalRows}
+                  on:paginationChanged={onPaginationChanged}
+                />
+              </div>
+            </th>
           </tr>
         {/if}
       </tfoot>

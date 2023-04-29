@@ -10,7 +10,7 @@ We didn't find anything that suited our needs, so we developed our own.
 - Sorting (multi column)
 - Filtering (multi column)
 - Fast for very large CSV files (more than 100.000 rows)
-- Uses Arquero in a web worker for File (CSV) data source
+- Uses [Arquero](https://uwdata.github.io/arquero/) in a web worker for File (CSV) data source
 
 ## Usage
 
@@ -47,6 +47,18 @@ add the component to a svelte page
 <DataTable {data} />
 ```
 
+Also add the folowing config to your vite.config.ts, otherwise svelte-radar-datatable worker can't be downloaded. 
+
+```js
+export default defineConfig({
+  ...
+  optimizeDeps: {
+    exclude: ['svelte-radar-datatable'],
+  }
+  ...
+})
+```
+
 ## Example
 
 see [demo](https://radar-azdelta.github.io/svelte-radar-datatable/) site
@@ -63,7 +75,7 @@ The `DataTable` component accepts 3 properties: `options`, `columns`, and `data`
 
 #### Options property
 
-globel options for the DataTable
+global options for the DataTable
 
 ```typescript
 interface ITableOptions {
