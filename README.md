@@ -10,7 +10,7 @@ We didn't find anything that suited our needs, so we developed our own.
 - Sorting (multi column)
 - Filtering (multi column)
 - Fast for very large CSV files (more than 100.000 rows)
-- Uses Arquero in a web worker for File (CSV) data source
+- Uses [Arquero](https://uwdata.github.io/arquero/) in a web worker for File (CSV) data source
 
 ## Usage
 
@@ -75,7 +75,7 @@ The `DataTable` component accepts 3 properties: `options`, `columns`, and `data`
 
 #### Options property
 
-globel options for the DataTable
+global options for the DataTable
 
 ```typescript
 interface ITableOptions {
