@@ -10,7 +10,6 @@
     type IColumnMetaData,
     type PaginationChangedEventDetail,
     type FetchDataFunc,
-    type IPagination,
     DataType,
     type SettingsVisibilityChangedEventDetail,
     type ColumnPositionChangedEventDetail,
@@ -20,7 +19,6 @@
   import ColumnFilter from './ColumnFilter.svelte'
   import Pagination from './Pagination.svelte'
   import Spinner from './Spinner.svelte'
-  import { jsonMapReplacer } from '../utils'
   import { dev } from '$app/environment'
   import { onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
@@ -36,26 +34,18 @@
   let renderedData: any[][] | any[] | undefined,
     filteredAndSortedData: any[][] | any[] | undefined,
     internalOptions: ITableOptions = {
-      rowsPerPageOptions: [5, 10, 20, 50, 100],
-      rowsPerPage: 20,
-    },
-    internalColumns: IColumnMetaData[] | undefined
-
-  let columnIds: string[], visibleColumns: string[], columnPositions: string[]
-  let totalRows: number
-  let sortedColumns = new Map<string, SortDirection>(),
-    filteredColumns = new Map<string, TFilter>(),
-    pagination: IPagination = {
       currentPage: 1,
       rowsPerPage: 20,
-    }
+      rowsPerPageOptions: [5, 10, 20, 50, 100],
+      actionColumn: false,
+    },
+    internalColumns: IColumnMetaData[] | undefined
 
   let renderStatus: string | null = null
   let dataType: DataType | undefined = undefined
 
   let worker: DataTableWorker | undefined
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
-  let originalColumnPositions: string[] = []
 
   let settingsVisibility: boolean = false
 
@@ -64,10 +54,12 @@
     init()
   }
   $: visibleOrderedColumns = internalColumns
-    ?.filter(col => visibleColumns?.includes(col.id))
-    .sort((a, b) => columnPositions?.indexOf(a.id) - columnPositions?.indexOf(b.id))
+    ?.filter(col => col.visible !== false)
+    .sort((a, b) => a.position! - b.position!)
   $: visibleOrderedColumnsOriginalColumnPosition = visibleOrderedColumns?.map(col =>
-    dataType === DataType.Matrix || dataType === DataType.File ? originalColumnPositions.indexOf(col.id) : col.id
+    dataType === DataType.Matrix || dataType === DataType.File
+      ? internalColumns?.findIndex(c => c.id === col.id)!
+      : col.id
   )
 
   async function init() {
@@ -119,18 +111,6 @@
       internalColumns = columns
     }
 
-    originalColumnPositions = []
-    internalColumns!.forEach(col => originalColumnPositions.push(col.id))
-    if (dev) console.log(`DataTable: originalColumnPositions are ${originalColumnPositions}`)
-
-    applyColumnOptions()
-
-    //PAGINATION
-    pagination = {
-      currentPage: 1,
-      rowsPerPage: internalOptions.rowsPerPage || 20,
-    }
-
     await render()
     renderStatus = 'completed'
   }
@@ -140,18 +120,26 @@
     renderedData = undefined
     if (dataType === DataType.Function) {
       let start: number
+      const filteredColumns = internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
+        if (cur && cur.filter) acc.set(cur.id, cur.filter)
+        return acc
+      }, new Map<string, TFilter>())
+      const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
+        if (cur && cur.filter) acc.set(cur.id, cur.sortDirection)
+        return acc
+      }, new Map<string, SortDirection>())
       if (dev) start = performance.now()
-      const results = await (data as FetchDataFunc)(filteredColumns, sortedColumns, pagination)
+      const results = await (data as FetchDataFunc)(filteredColumns, sortedColumns, internalOptions)
       if (dev) {
         const end = performance.now()
         console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
       }
-      totalRows = results.totalRows
+      internalOptions.totalRows = results.totalRows
       renderedData = results.data
     } else if (dataType === DataType.Matrix || dataType === DataType.ArrayOfObjects) {
       if (!onlyPaginationChanged || !filteredAndSortedData) {
         filteredAndSortedData = applySort(applyFilter(data as any[][] | any[]))
-        totalRows = filteredAndSortedData.length
+        internalOptions.totalRows = filteredAndSortedData.length
       }
       renderedData = applyPagination(filteredAndSortedData)
       originalIndices = (renderedData as any[]).reduce((acc, cur) => {
@@ -159,111 +147,86 @@
         return acc
       }, [])
     } else if (dataType === DataType.File) {
-      const results = await worker?.fetchData(filteredColumns, sortedColumns, pagination, onlyPaginationChanged)
-      totalRows = results!.totalRows
+      const filteredColumns = internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
+        if (cur && cur.filter) acc.set(cur.id, cur.filter)
+        return acc
+      }, new Map<string, TFilter>())
+      const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
+        if (cur && cur.filter) acc.set(cur.id, cur.sortDirection)
+        return acc
+      }, new Map<string, SortDirection>())
+      const results = await worker?.fetchData(filteredColumns, sortedColumns, internalOptions, onlyPaginationChanged)
+      internalOptions.totalRows = results!.totalRows
       renderedData = results!.data
       originalIndices = results!.indices
     }
   }
 
   function applyFilter(data: any[][] | any[]): any[][] | any[] {
-    for (const [column, filter] of [...filteredColumns].values()) {
-      if (dev) console.log(`DataTable: applying filter '${filter}' on column '${column}'`)
-      if (dataType === DataType.Matrix) {
-        const columnIndex = columnIds.indexOf(column)
-        data = data.filter(row => row[columnIndex]?.toString()?.toLowerCase().indexOf(filter) > -1)
-      } else if (dataType === DataType.ArrayOfObjects) {
-        data = data.filter(obj => obj[column]?.toString()?.toLowerCase().indexOf(filter) > -1)
-      }
-    }
+    internalColumns
+      ?.filter(col => col.filter)
+      .forEach(col => {
+        if (dev) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
+        if (dataType === DataType.Matrix) {
+          const index = internalColumns?.findIndex(c => c.id === col.id)
+          data = data.filter(row => row[index!]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
+        } else if (dataType === DataType.ArrayOfObjects) {
+          data = data.filter(obj => obj[col.id]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
+        }
+      })
     return data
   }
 
   function applySort(data: any[][] | any[]): any[][] | any[] {
     //TODO: ignore case, use localCompare for strings, convert Dates to milliseconds using .getTime()
     let compareFn: ((a: any[] | any, b: any[] | any) => number) | undefined
-    for (let [column, sortDirection] of [...sortedColumns].reverse()) {
-      //Sort is applied in reverse order !!!
-      if (dev) console.log(`DataTable: applying sort order '${sortDirection}' on column '${column}'`)
-      if (dataType === DataType.Matrix) {
-        const columnIndex = columnIds.indexOf(column)
-        switch (sortDirection) {
-          case 'asc':
-            compareFn = (a, b) => (a[columnIndex] < b[columnIndex] ? -1 : a[columnIndex] > b[columnIndex] ? 1 : 0)
-            break
-          case 'desc':
-            compareFn = (a, b) => (b[columnIndex] < a[columnIndex] ? -1 : b[columnIndex] > a[columnIndex] ? 1 : 0)
-            break
+    internalColumns
+      ?.filter(col => col.sortDirection)
+      .slice()
+      .reverse() //Sort is applied in reverse order !!!
+      .forEach((col, index) => {
+        if (dev) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
+        if (dataType === DataType.Matrix) {
+          switch (col.sortDirection) {
+            case 'asc':
+              compareFn = (a, b) => (a[index] < b[index] ? -1 : a[index] > b[index] ? 1 : 0)
+              break
+            case 'desc':
+              compareFn = (a, b) => (b[index] < a[index] ? -1 : b[index] > a[index] ? 1 : 0)
+              break
+          }
+        } else if (dataType === DataType.ArrayOfObjects) {
+          switch (col.sortDirection) {
+            case 'asc':
+              compareFn = (a, b) => (a[col.id] < b[col.id] ? -1 : a[col.id] > b[col.id] ? 1 : 0)
+              break
+            case 'desc':
+              compareFn = (a, b) => (b[col.id] < a[col.id] ? -1 : b[col.id] > a[col.id] ? 1 : 0)
+              break
+          }
         }
-      } else if (dataType === DataType.ArrayOfObjects) {
-        switch (sortDirection) {
-          case 'asc':
-            compareFn = (a, b) => (a[column] < b[column] ? -1 : a[column] > b[column] ? 1 : 0)
-            break
-          case 'desc':
-            compareFn = (a, b) => (b[column] < a[column] ? -1 : b[column] > a[column] ? 1 : 0)
-            break
-        }
-      }
-      data = data.sort(compareFn)
-    }
+        data = data.sort(compareFn)
+      })
     return data
   }
 
   function applyPagination(data: any[][] | any[]): any[][] | any[] {
-    const start = (pagination.currentPage - 1) * pagination.rowsPerPage
-    const end = pagination.currentPage * pagination.rowsPerPage
+    const start = (internalOptions.currentPage! - 1) * internalOptions.rowsPerPage!
+    const end = internalOptions.currentPage! * internalOptions.rowsPerPage!
     if (dev) console.log(`DataTable: applying pagination row ${start} - ${end}`)
     data = data.slice(start, end)
     return data
   }
 
-  function applyColumnOptions() {
-    columnIds = internalColumns!.map(col => col.id)
-
-    //VISABILITY
-    visibleColumns = []
-    internalColumns!
-      .reduce<IColumnMetaData[]>((acc, cur, i) => {
-        if (cur && cur.visible !== false) acc.push(cur)
-        return acc
-      }, [])
-      .forEach(col => visibleColumns.push(col.id))
-
-    //POSITION
-    columnPositions = []
-    internalColumns!.sort((a, b) => a.position! - b.position!).forEach(col => columnPositions.push(col.id))
-    if (dev) console.log(`DataTable: columnPositions are ${columnPositions}`)
-
-    //SORT
-    sortedColumns.clear()
-    internalColumns!
-      .reduce<IColumnMetaData[]>((acc, cur, i) => {
-        if (cur && cur.sortDirection) acc.push(cur)
-        return acc
-      }, [])
-      .sort((a, b) => a.sortOrder! - b.sortOrder!)
-      .forEach(col => sortedColumns.set(col.id, col.sortDirection))
-
-    //FILTER
-    filteredColumns.clear()
-    internalColumns!
-      .reduce<IColumnMetaData[]>((acc, cur, i) => {
-        if (cur && cur.filter) acc.push(cur)
-        return acc
-      }, [])
-      .forEach(col => filteredColumns.set(col.id, col.filter))
-  }
-
   async function onColumnFilterChanged(event: CustomEvent<ColumnFilterChangedEventDetail>) {
-    if (!event.detail.filter) filteredColumns.delete(event.detail.column)
-    else filteredColumns.set(event.detail.column, event.detail.filter)
-    filteredColumns = filteredColumns
+    const column = internalColumns?.find(col => col.id === event.detail.column)
+    column!.filter = event.detail.filter
+    internalColumns = internalColumns
     filteredAndSortedData = undefined
 
-    if (dev) console.log(`DataTable: filter changed to ${JSON.stringify(filteredColumns, jsonMapReplacer)}`)
+    if (dev) console.log(`DataTable: column '${event.detail.column}' filter changed to '${event.detail.filter}'`)
 
-    pagination.currentPage = 1
+    internalOptions.currentPage = 1
     await render()
   }
 
@@ -276,29 +239,29 @@
       else if (sourcePosition! < column.position! && column.position! <= destinationPosition) column.position! -= 1
       else if (destinationPosition <= column.position! && column.position! < sourcePosition!) column.position! += 1
     })
+    internalColumns = internalColumns
     if (dev)
       console.log(
         `DataTable: column '${sourceColumn!.id}' position changed from '${sourcePosition}' to '${destinationPosition}'`
       )
-    applyColumnOptions()
   }
 
   async function onColumnSortChanged(event: CustomEvent<ColumnSortChangedEventDetail>) {
-    if (!event.detail.sortDirection) sortedColumns.delete(event.detail.column)
-    else sortedColumns.set(event.detail.column, event.detail.sortDirection)
-    sortedColumns = sortedColumns
+    const column = internalColumns?.find(col => col.id === event.detail.column)
+    column!.sortDirection = event.detail.sortDirection
+    internalColumns = internalColumns
     filteredAndSortedData = undefined
 
-    if (dev) console.log(`DataTable: sort changed to ${JSON.stringify(sortedColumns, jsonMapReplacer)}`)
+    if (dev) console.log(`DataTable: column '${event.detail.column}' sort changed to '${event.detail.sortDirection}'`)
 
-    pagination.currentPage = 1
+    internalOptions.currentPage = 1
     await render()
   }
 
   async function onPaginationChanged(event: CustomEvent<PaginationChangedEventDetail>) {
-    pagination.rowsPerPage = event.detail.rowsPerPage
-    pagination.currentPage = event.detail.currentPage
-    pagination = pagination
+    internalOptions.rowsPerPage = event.detail.rowsPerPage
+    internalOptions.currentPage = event.detail.currentPage
+    internalOptions = internalOptions
 
     if (dev) console.log(`DataTable: pagination changed to ${JSON.stringify(event.detail)}`)
 
@@ -313,7 +276,6 @@
     const inputEl = e.target as HTMLInputElement
     internalColumns!.find(col => col.id == inputEl.id)!.visible = inputEl.checked
     internalColumns = internalColumns
-    applyColumnOptions()
   }
 
   export async function saveToFile() {
@@ -330,10 +292,6 @@
       case DataType.File:
         await worker!.saveToFile(fileHandle)
         break
-      // case DataType.Matrix:
-      //   break
-      // case DataType.ArrayOfObjects:
-      //   break
       default:
         throw new Error('Not yet supported')
     }
@@ -355,7 +313,8 @@
         for (const [index, row] of rowsToUpdateByIndex) {
           const originalRow = (data as any[][])[originalIndices[index]]
           for (const [column, value] of Object.entries(row)) {
-            originalRow[columnIds.indexOf(column)] = value
+            const index = internalColumns?.findIndex(c => c.id === column)
+            originalRow[index!] = value
           }
         }
         break
@@ -371,7 +330,8 @@
     for (const [index, row] of rowsToUpdateByIndex) {
       const renderedRow = (renderedData as any[])[index]
       for (const [column, value] of Object.entries(row)) {
-        renderedRow[columnIds.indexOf(column)] = value
+        const index = internalColumns?.findIndex(c => c.id === column)
+        renderedRow[index!] = value
       }
     }
     renderedData = renderedData
@@ -385,8 +345,8 @@
       case DataType.Matrix:
         for (const row of rows) {
           ;(data as any[][]).push(
-            columnIds.reduce((acc, column) => {
-              acc.push(row[column])
+            columns!.reduce((acc, column) => {
+              acc.push(row[column.position!])
               return acc
             }, [] as any[])
           )
@@ -428,8 +388,8 @@
       case DataType.File:
         return await worker!.getRow(index)
       case DataType.Matrix:
-        return columnIds.reduce((acc, column) => {
-          acc[column] = (data as any[][])[index][columnIds.indexOf(column)]
+        return columns!.reduce((acc, column, idx) => {
+          acc[column.id] = (data as any[][])[index][idx]
           return acc
         }, {} as Record<string, any>)
       case DataType.ArrayOfObjects:
@@ -447,7 +407,15 @@
         case DataType.Matrix:
         case DataType.ArrayOfObjects:
           if (internalColumns!.find(c => c.id === col.id)) console.error(`Column with id ${col.id} already exists`)
-          else uniqueColumns.push(col)
+          else {
+            if (!col.position)
+              col.position =
+                internalColumns!.reduce<number>((acc, cur) => {
+                  if (cur.position! > acc) return cur.position!
+                  else return acc
+                }, 0) + 1 //add new column at end (with last position)
+            uniqueColumns.push(col)
+          }
           break
         default:
           throw new Error('Not yet supported')
@@ -458,8 +426,7 @@
         await worker!.insertColumns(uniqueColumns)
         break
     }
-    columns = columns!.concat(uniqueColumns)
-    applyColumnOptions()
+    internalColumns = internalColumns!.concat(uniqueColumns)
     await render(false)
   }
 
@@ -468,16 +435,11 @@
       if (internalColumns!.find(column => column.id == col.id) == undefined)
         throw new Error(`Column with id ${col.id} doesn't exist`)
       else {
-        const index = columns!.findIndex(column => column.id == col.id)
-        // Only update the given properties and not the whole object
-        for (let key of Object.keys(col)) {
-          // @ts-ignore
-          columns![index][key as keyof Object] = col[key as keyof Object]
-        }
+        const index = internalColumns!.findIndex(column => column.id == col.id)
+        Object.assign(internalColumns![index], col)
       }
     }
-    internalColumns = columns
-    applyColumnOptions()
+    internalColumns = internalColumns
   }
 
   export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
@@ -491,16 +453,16 @@
 
   export function getTablePagination() {
     return {
-      currentPage: pagination.currentPage,
-      rowsPerPage: pagination.rowsPerPage,
-      totalRows,
+      currentPage: internalOptions.currentPage,
+      rowsPerPage: internalOptions.rowsPerPage,
+      totalRows: internalOptions.totalRows,
     }
   }
 
   export function changePagination(pag: { currentPage?: number; rowsPerPage?: number }) {
-    if (pag.currentPage) pagination.currentPage = pag.currentPage
-    if (pag.rowsPerPage) pagination.rowsPerPage = pag.rowsPerPage
-    pagination = pagination
+    if (pag.currentPage) internalOptions.currentPage = pag.currentPage
+    if (pag.rowsPerPage) internalOptions.rowsPerPage = pag.rowsPerPage
+    internalOptions = internalOptions
     render(true)
   }
 
@@ -548,7 +510,7 @@
                   {#if column.sortable !== false}
                     <ColumnSort
                       column={column.id}
-                      sortDirection={sortedColumns.get(column.id)}
+                      sortDirection={column.sortDirection}
                       on:columnSortChanged={onColumnSortChanged}
                     />
                   {/if}
@@ -577,7 +539,7 @@
                     <ColumnFilter
                       column={column.id}
                       inputType="text"
-                      filter={filteredColumns.get(column.id)}
+                      filter={column.filter}
                       on:columnFilterChanged={onColumnFilterChanged}
                     />
                   {/if}
@@ -594,10 +556,10 @@
               <div>
                 <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
                 <Pagination
-                  rowsPerPage={pagination.rowsPerPage}
-                  currentPage={pagination.currentPage}
+                  rowsPerPage={internalOptions.rowsPerPage}
+                  currentPage={internalOptions.currentPage}
                   rowsPerPageOptions={internalOptions.rowsPerPageOptions}
-                  {totalRows}
+                  totalRows={internalOptions.totalRows ?? 0}
                   on:paginationChanged={onPaginationChanged}
                 />
               </div>
