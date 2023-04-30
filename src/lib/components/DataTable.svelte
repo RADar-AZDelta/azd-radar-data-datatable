@@ -528,9 +528,6 @@
 
 <div data-component="RADar-DataTable" data-status={renderStatus}>
   <div data-name="table-container">
-    visibleOrderedColumns: {JSON.stringify(visibleOrderedColumns)}
-    <br />
-    originalColumnPositions: {originalColumnPositions}
     <table>
       <thead>
         {#if visibleOrderedColumns}
