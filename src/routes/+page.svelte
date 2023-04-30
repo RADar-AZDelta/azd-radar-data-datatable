@@ -112,7 +112,8 @@
     {
       id: 'country',
       filter: 'b',
-      position: 0,
+      position: 5,
+      repositionable: false,
     },
     {
       id: 'telephone',
@@ -227,7 +228,7 @@
 </script>
 
 <h1>svelte-radar-datatable demo</h1>
- 
+
 <details open>
   <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
   <DataTable
@@ -235,21 +236,22 @@
     data={matrix}
     bind:this={dataTableMatrix}
     options={{ rowsPerPage: 7, rowsPerPageOptions: [7, 15], actionColumn: true }}
+    let:renderedRow
+    let:index
+    let:columns
   >
-    <tr slot="row" let:renderedRow let:index let:columns>
+    <td>
+      <button on:click={async () => await dataTableMatrix.deleteRows([index])}>Delete row</button>
+    </td>
+    {#each columns || [] as column, i}
       <td>
-        <button on:click={async () => await dataTableMatrix.deleteRows([index])}>Delete row</button>
+        <EditableCell
+          value={renderedRow[i]}
+          on:valueChanged={async event =>
+            await dataTableMatrix.updateRows(new Map([[index, Object.fromEntries([[column.id, event.detail]])]]))}
+        />
       </td>
-      {#each columns || [] as column, i}
-        <td>
-          <EditableCell
-            value={renderedRow[i]}
-            on:valueChanged={async event =>
-              await dataTableMatrix.updateRows(new Map([[index, Object.fromEntries([[column.id, event.detail]])]]))}
-          />
-        </td>
-      {/each}
-    </tr>
+    {/each}
   </DataTable>
 
   <br />

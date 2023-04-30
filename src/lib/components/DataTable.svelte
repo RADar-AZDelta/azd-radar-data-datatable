@@ -13,6 +13,7 @@
     type IPagination,
     DataType,
     type SettingsVisibilityChangedEventDetail,
+    type ColumnPositionChangedEventDetail,
   } from './DataTable.d'
   import ColumnSort from './ColumnSort.svelte'
   import ColumnResize from './ColumnResize.svelte'
@@ -96,13 +97,15 @@
     if (!columns) {
       if (dataType === DataType.ArrayOfObjects) {
         //columns is not defined, and data is an array of objects => extract the columns from the first object
-        internalColumns = Object.keys((data as any[])[0]).map(key => ({
+        internalColumns = Object.keys((data as any[])[0]).map((key, index) => ({
           id: key,
+          position: index + 1,
         }))
       } else if (dataType === DataType.File) {
         //get columns from worker
-        internalColumns = (await worker!.getColumnNames()).map(key => ({
+        internalColumns = (await worker!.getColumnNames()).map((key, index) => ({
           id: key,
+          position: index + 1,
         }))
       } else throw new Error('Columns property is not provided')
     } else {
@@ -111,8 +114,7 @@
           await worker?.insertColumns(columns)
         }
       }
-      internalColumns = []
-      Object.assign(internalColumns, columns)
+      internalColumns = columns
     }
 
     applyColumnOptions()
@@ -224,7 +226,7 @@
 
     //POSITION
     columnPositions = []
-    internalColumns!.sort((a, b) => (a.position || 0) - (b.position || 0)).forEach(col => columnPositions.push(col.id))
+    internalColumns!.sort((a, b) => a.position! - b.position!).forEach(col => columnPositions.push(col.id))
 
     //SORT
     sortedColumns.clear()
@@ -258,6 +260,19 @@
     await render()
   }
 
+  async function onColumnPositionChanged(event: CustomEvent<ColumnPositionChangedEventDetail>) {
+    const sourceColumn = internalColumns?.find(column => column.id === event.detail.column)
+    const sourcePosition = sourceColumn?.position
+    const destinationPosition = event.detail.position
+    internalColumns = internalColumns?.map(column => {
+      if (column.id == event.detail.column) column.position = event.detail.position
+      else if (sourcePosition! < column.position! && column.position! <= destinationPosition) column.position! -= 1
+      else if (destinationPosition <= column.position! && column.position! < sourcePosition!) column.position! += 1
+      return column
+    })
+    applyColumnOptions()
+  }
+
   async function onColumnSortChanged(event: CustomEvent<ColumnSortChangedEventDetail>) {
     if (!event.detail.sortDirection) sortedColumns.delete(event.detail.column)
     else sortedColumns.set(event.detail.column, event.detail.sortDirection)
@@ -285,12 +300,9 @@
   }
 
   async function onColumnVisibilityChanged(e: Event) {
-    const checked = (e.target as HTMLInputElement).checked
-    const id = (e.target as HTMLInputElement).id
-    columns == undefined
-      ? (internalColumns!.find(col => col.id == id)!.visible = checked)
-      : (columns!.find(col => col.id == id)!.visible = checked)
-    Object.assign(internalColumns!, columns)
+    const inputEl = e.target as HTMLInputElement
+    internalColumns!.find(col => col.id == inputEl.id)!.visible = inputEl.checked
+    internalColumns = internalColumns
     applyColumnOptions()
   }
 
@@ -454,7 +466,7 @@
         }
       }
     }
-    Object.assign(internalColumns!, columns)
+    internalColumns = columns
     applyColumnOptions()
   }
 
@@ -520,7 +532,7 @@
                 data-key={column?.id}
                 data-sortable={column?.sortable}
               >
-                <ColumnResize resizable={column.resizable || (true && i < visibleOrderedColumns.length - 1)}>
+                <ColumnResize {column} on:columnPositionChanged={onColumnPositionChanged}>
                   <p>{column.label || column.id}</p>
                   {#if column.sortable !== false}
                     <ColumnSort
@@ -548,7 +560,7 @@
                 data-key={column?.id}
                 data-filterable={column?.filterable}
               >
-                <ColumnResize resizable={column.resizable || (true && i < visibleOrderedColumns.length - 1)}>
+                <ColumnResize {column} on:columnPositionChanged={onColumnPositionChanged}>
                   {#if column.filterable !== false}
                     <ColumnFilter
                       column={column.id}
@@ -584,16 +596,15 @@
       <tbody>
         {#if renderedData && visibleOrderedColumnsOriginalColumnPosition}
           {#each renderedData as row, i}
-            {#if $$slots.row}
-              <slot
-                name="row"
-                renderedRow={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
-                index={i}
-                columns={visibleOrderedColumns}
-                options={internalOptions}
-              />
-            {:else}
-              <tr data-index={i}>
+            <tr data-index={i}>
+              {#if $$slots.default}
+                <slot
+                  renderedRow={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
+                  index={i}
+                  columns={visibleOrderedColumns}
+                  options={internalOptions}
+                />
+              {:else}
                 {#if internalOptions.actionColumn}
                   {#if $$slots.actionCell}
                     <slot
@@ -607,11 +618,11 @@
                     <td />
                   {/if}
                 {/if}
-                {#each visibleOrderedColumnsOriginalColumnPosition as index}
+                {#each visibleOrderedColumnsOriginalColumnPosition as index, j (j)}
                   <td>{row[index]}</td>
                 {/each}
-              </tr>
-            {/if}
+              {/if}
+            </tr>
           {/each}
         {:else if data}
           {#if $$slots.loading}
