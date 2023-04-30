@@ -41,6 +41,13 @@
 >
   <slot />
   {#if column.resizable !== false}
-    <div data-name="column-resize" />
+    <div
+      data-name="column-resize"
+      draggable="true"
+      on:dragover={event => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+    />
   {/if}
 </div>

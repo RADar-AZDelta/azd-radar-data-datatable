@@ -6,6 +6,7 @@
   import { sleep } from '$lib/utils'
   import EditableCell from '$lib/components/EditableCell.svelte'
   import { query } from 'arquero'
+  import { flip } from 'svelte/animate'
 
   const data = [
     {
@@ -243,8 +244,8 @@
     <td>
       <button on:click={async () => await dataTableMatrix.deleteRows([index])}>Delete row</button>
     </td>
-    {#each columns || [] as column, i}
-      <td>
+    {#each columns || [] as column, i (column)}
+      <td animate:flip={{ duration: 500 }}>
         <EditableCell
           value={renderedRow[i]}
           on:valueChanged={async event =>
