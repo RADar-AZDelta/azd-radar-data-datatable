@@ -113,6 +113,7 @@
       id: 'country',
       filter: 'b',
       position: 5,
+      repositionable: false,
     },
     {
       id: 'telephone',

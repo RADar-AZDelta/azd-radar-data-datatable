@@ -9,6 +9,8 @@ We didn't find anything that suited our needs, so we developed our own.
 - Supports multiple data sources: array of object, matrix of values, Function (remote data source) and File (CSV datasource)
 - Sorting (multi column)
 - Filtering (multi column)
+- Reposition columns
+- Show/hide columns
 - Fast for very large CSV files (more than 100.000 rows)
 - Uses [Arquero](https://uwdata.github.io/arquero/) in a web worker for File (CSV) data source
 
@@ -120,7 +122,7 @@ interface IColumnMetaData {
 | **sortable** | is the column sortable | no | yes |
 | **filterable** | is the column filterable | no | yes |
 | **resizable** | FUTURE FUNCTIONALITY: can the column width be adjusted | no | yes |
-| **repositionable** | FUTURE FUNCTIONALITY: can the column be repositioned | no | yes |
+| **repositionable** | can the column be repositioned | no | yes |
 | **sortDirection** | do not sort (undefined), sort the column 'asc' or 'desc' | no | undefined |
 | **sortOrder** | if multiple columns are sorted, this prop defines the sequence of the order | no | undefined |
 | **filter** | filter the column values | no | undefined |
@@ -203,4 +205,3 @@ To run the example app, run `pnpm run dev --open` from the project root.
 ### TODO
 
 - Adjustable column width
-- Adjustable column order

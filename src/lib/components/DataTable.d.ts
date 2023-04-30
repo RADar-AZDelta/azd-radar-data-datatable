@@ -58,6 +58,7 @@ export interface IColumnMetaData {
   sortable?: boolean
   filterable?: boolean
   resizable?: boolean
+  repositionable?: boolean
 
   sortDirection?: SortDirection
   sortOrder?: number

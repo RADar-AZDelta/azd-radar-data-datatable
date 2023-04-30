@@ -10,16 +10,19 @@
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
   function dragStart(event: DragEvent) {
+    if (column.repositionable === false) return
     if (dev) console.log(`DataTable: drag start column ${column.id}`)
     const data = { column: column.id }
     event.dataTransfer!.setData('text/plain', JSON.stringify(data))
   }
 
   function dragover(event: DragEvent) {
+    if (column.repositionable === false) return
     event.preventDefault()
   }
 
   function drop(event: DragEvent) {
+    if (column.repositionable === false) return
     event.preventDefault()
     try {
       const json = event.dataTransfer!.getData('text/plain')
@@ -31,7 +34,7 @@
 </script>
 
 <div
-  draggable={true}
+  draggable={column.repositionable !== false}
   on:dragstart={event => dragStart(event)}
   on:dragover={event => dragover(event)}
   on:drop={event => drop(event)}
