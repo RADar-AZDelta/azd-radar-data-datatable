@@ -103,22 +103,22 @@
       label: 'NAAM',
       sortDirection: 'asc',
       sortOrder: 0,
-      position: 1,
+      position: 0,
     },
     {
       id: 'age',
       sortable: false,
-      position: 2,
+      position: 1,
     },
     {
       id: 'country',
       filter: 'b',
-      position: 5,
+      position: 4,
       repositionable: false,
     },
     {
       id: 'telephone',
-      position: 4,
+      position: 2,
       filterable: false,
     },
     {
@@ -244,7 +244,7 @@
     <td>
       <button on:click={async () => await dataTableMatrix.deleteRows([index])}>Delete row</button>
     </td>
-    {#each columns || [] as column, i (column)}
+    {#each columns || [] as column, i (column.id)}
       <td animate:flip={{ duration: 500 }}>
         <EditableCell
           value={renderedRow[i]}
