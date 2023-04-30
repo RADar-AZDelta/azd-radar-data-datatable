@@ -27,6 +27,7 @@
   import type Query from 'arquero/dist/types/query/query'
   import Options from './Options.svelte'
   import Modal from './Modal.svelte'
+  import { flip } from 'svelte/animate'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -54,6 +55,7 @@
 
   let worker: DataTableWorker | undefined
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
+  let originalColumnPositions: string[] = []
 
   let settingsVisibility: boolean = false
 
@@ -63,9 +65,9 @@
   }
   $: visibleOrderedColumns = internalColumns
     ?.filter(col => visibleColumns?.includes(col.id))
-    .sort((a, b) => (columnPositions?.indexOf(a.id) || 0) - (columnPositions?.indexOf(b.id) || 0))
+    .sort((a, b) => columnPositions?.indexOf(a.id) - columnPositions?.indexOf(b.id))
   $: visibleOrderedColumnsOriginalColumnPosition = visibleOrderedColumns?.map(col =>
-    dataType === DataType.Matrix || dataType === DataType.File ? columnIds.indexOf(col.id) : col.id
+    dataType === DataType.Matrix || dataType === DataType.File ? originalColumnPositions.indexOf(col.id) : col.id
   )
 
   async function init() {
@@ -116,6 +118,10 @@
       }
       internalColumns = columns
     }
+
+    originalColumnPositions = []
+    internalColumns!.sort((a, b) => a.position! - b.position!).forEach(col => originalColumnPositions.push(col.id))
+    if (dev) console.log(`DataTable: originalColumnPositions are ${originalColumnPositions}`)
 
     applyColumnOptions()
 
@@ -227,6 +233,7 @@
     //POSITION
     columnPositions = []
     internalColumns!.sort((a, b) => a.position! - b.position!).forEach(col => columnPositions.push(col.id))
+    if (dev) console.log(`DataTable: columnPositions are ${columnPositions}`)
 
     //SORT
     sortedColumns.clear()
@@ -235,7 +242,7 @@
         if (cur && cur.sortDirection) acc.push(cur)
         return acc
       }, [])
-      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+      .sort((a, b) => a.sortOrder! - b.sortOrder!)
       .forEach(col => sortedColumns.set(col.id, col.sortDirection))
 
     //FILTER
@@ -264,12 +271,15 @@
     const sourceColumn = internalColumns?.find(column => column.id === event.detail.column)
     const sourcePosition = sourceColumn?.position
     const destinationPosition = event.detail.position
-    internalColumns = internalColumns?.map(column => {
+    internalColumns?.forEach(column => {
       if (column.id == event.detail.column) column.position = event.detail.position
       else if (sourcePosition! < column.position! && column.position! <= destinationPosition) column.position! -= 1
       else if (destinationPosition <= column.position! && column.position! < sourcePosition!) column.position! += 1
-      return column
     })
+    if (dev)
+      console.log(
+        `DataTable: column '${sourceColumn!.id}' position changed from '${sourcePosition}' to '${destinationPosition}'`
+      )
     applyColumnOptions()
   }
 
@@ -531,6 +541,7 @@
                 data-resizable={column?.resizable}
                 data-key={column?.id}
                 data-sortable={column?.sortable}
+                animate:flip={{ duration: 500 }}
               >
                 <ColumnResize {column} on:columnPositionChanged={onColumnPositionChanged}>
                   <p>{column.label || column.id}</p>
@@ -559,6 +570,7 @@
                 data-resizable={column?.resizable}
                 data-key={column?.id}
                 data-filterable={column?.filterable}
+                animate:flip={{ duration: 500 }}
               >
                 <ColumnResize {column} on:columnPositionChanged={onColumnPositionChanged}>
                   {#if column.filterable !== false}
@@ -595,7 +607,7 @@
       </tfoot>
       <tbody>
         {#if renderedData && visibleOrderedColumnsOriginalColumnPosition}
-          {#each renderedData as row, i}
+          {#each renderedData as row, i (i)}
             <tr data-index={i}>
               {#if $$slots.default}
                 <slot
@@ -618,8 +630,8 @@
                     <td />
                   {/if}
                 {/if}
-                {#each visibleOrderedColumnsOriginalColumnPosition as index, j (j)}
-                  <td>{row[index]}</td>
+                {#each visibleOrderedColumnsOriginalColumnPosition as index, j (index)}
+                  <td animate:flip={{ duration: 500 }}>{row[index]}</td>
                 {/each}
               {/if}
             </tr>

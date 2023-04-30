@@ -31,6 +31,7 @@ div[data-component=RADar-DataTable] {
                         display: table-cell;
                         box-sizing: content-box;
                         border: 1px solid black;
+                        /*min-width: 50px;*/
 
                         div {
                             display: flex;
@@ -53,6 +54,8 @@ div[data-component=RADar-DataTable] {
 
                 tr[data-name=filters] {
                     th {
+                        /*min-width: 50px;*/
+
                         div {
                             display: flex;
 
@@ -68,7 +71,6 @@ div[data-component=RADar-DataTable] {
                 }
 
                 tr {
-
                     th {
                         div[data-name=column-resize] {
                             width: 3px;
@@ -145,6 +147,11 @@ div[data-component=RADar-DataTable] {
 
                 tr {
                     border-bottom: 1px solid black;
+
+                    td {
+                        width: fit-content;
+                        /*min-width: 50px;*/
+                    }
                 }
 
                 tr:nth-child(even) {
