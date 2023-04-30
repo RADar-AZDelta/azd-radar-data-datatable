@@ -34,14 +34,14 @@ export type HTMLInputTypeAttribute =
   | 'week'
 
 export interface IPagination {
-  currentPage: number
-  rowsPerPage: number
+  currentPage?: number
+  rowsPerPage?: number
 }
 
-export interface ITableOptions {
-  rowsPerPage?: number
+export interface ITableOptions extends IPagination {
   rowsPerPageOptions?: number[]
-  actionColumn?: boolean
+  actionColumn?: boolean,
+  totalRows?: number
 }
 
 export type FetchDataFunc = (
