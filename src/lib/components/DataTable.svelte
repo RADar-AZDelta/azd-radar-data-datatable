@@ -13,6 +13,7 @@
     DataType,
     type SettingsVisibilityChangedEventDetail,
     type ColumnPositionChangedEventDetail,
+    type ColumnWidthChangedEventDetail,
   } from './DataTable.d'
   import ColumnSort from './ColumnSort.svelte'
   import ColumnResize from './ColumnResize.svelte'
@@ -41,10 +42,11 @@
     },
     internalColumns: IColumnMetaData[] | undefined
 
-  let renderStatus: string | null = null
-  let dataType: DataType | undefined = undefined
+  let renderStatus: string
+  let columnResizing: boolean
+  let dataType: DataType
 
-  let worker: DataTableWorker | undefined
+  let worker: DataTableWorker
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
 
   let settingsVisibility: boolean = false
@@ -228,6 +230,14 @@
 
     internalOptions.currentPage = 1
     await render()
+  }
+
+  async function onColumnWidthChanged(event: CustomEvent<ColumnWidthChangedEventDetail>) {
+    columnResizing = event.detail.done !== true
+    const column = internalColumns?.find(column => column.id === event.detail.column)
+    column!.width = event.detail.width
+    internalColumns = internalColumns
+    if (dev) console.log(`DataTable: column '${column!.id}' width changed to '${event.detail.width}'`)
   }
 
   async function onColumnPositionChanged(event: CustomEvent<ColumnPositionChangedEventDetail>) {
@@ -474,7 +484,7 @@
 <Modal on:settingsVisibilityChanged={onSettingsVisibilityChanged} show={settingsVisibility}>
   <h1>Change column visability:</h1>
   {#if internalColumns}
-    {#each internalColumns as column}
+    {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
       <div>
         <input
           type="checkbox"
@@ -488,7 +498,7 @@
   {/if}
 </Modal>
 
-<div data-component="RADar-DataTable" data-status={renderStatus}>
+<div data-component="RADar-DataTable" data-status={renderStatus ?? ''}>
   <div data-name="table-container">
     <table>
       <thead>
@@ -504,8 +514,14 @@
                 data-key={column?.id}
                 data-sortable={column?.sortable}
                 animate:flip={{ duration: 500 }}
+                style="{column.width ? `width: ${column.width}px` : ''};"
               >
-                <ColumnResize {column} on:columnPositionChanged={onColumnPositionChanged}>
+                <ColumnResize
+                  {column}
+                  {columnResizing}
+                  on:columnPositionChanged={onColumnPositionChanged}
+                  on:columnWidthChanged={onColumnWidthChanged}
+                >
                   <p>{column.label || column.id}</p>
                   {#if column.sortable !== false}
                     <ColumnSort
@@ -533,8 +549,14 @@
                 data-key={column?.id}
                 data-filterable={column?.filterable}
                 animate:flip={{ duration: 500 }}
+                style="{column.width ? `width: ${column.width}px` : ''};"
               >
-                <ColumnResize {column} on:columnPositionChanged={onColumnPositionChanged}>
+                <ColumnResize
+                  {column}
+                  {columnResizing}
+                  on:columnPositionChanged={onColumnPositionChanged}
+                  on:columnWidthChanged={onColumnWidthChanged}
+                >
                   {#if column.filterable !== false}
                     <ColumnFilter
                       column={column.id}

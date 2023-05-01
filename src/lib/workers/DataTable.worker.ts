@@ -114,13 +114,13 @@ async function fetchData(data: MessageRequestFetchData) {
   const totalRows = tempDt.numRows()
   const objects = tempDt.objects({
     limit: data.pagination.rowsPerPage,
-    offset: (data.pagination.currentPage - 1) * data.pagination.rowsPerPage,
+    offset: (data.pagination.currentPage! - 1) * data.pagination.rowsPerPage!,
   })
   const indices = tempDt
     .indices()
     .slice(
-      (data.pagination.currentPage - 1) * data.pagination.rowsPerPage,
-      data.pagination.currentPage * data.pagination.rowsPerPage
+      (data.pagination.currentPage! - 1) * data.pagination.rowsPerPage!,
+      data.pagination.currentPage! * data.pagination.rowsPerPage!
     )
   const matrix = objects.map(obj => Object.values(obj))
 
@@ -189,7 +189,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
   for (let [index, row] of rowsByIndex) {
     for (const [column, value] of Object.entries(row)) {
-      if(dt._data[column] != undefined) dt._data[column].data[index] = value
+      if (dt._data[column] != undefined) dt._data[column].data[index] = value
     }
   }
 
@@ -250,10 +250,10 @@ function getRow({ index }: MessageRequestGetRow) {
 }
 
 function insertColumns({ columns }: MessageRequestInsertColumns) {
-  const obj: {[key: string]: any[]} = {}
+  const obj: { [key: string]: any[] } = {}
   // Add a column that is already in the original table
   obj[dt._names[0]] = [dt._data[dt._names[0]].data[0]]
-  for(let col of columns){
+  for (let col of columns) {
     // Add a new column name with an empty array as values
     obj[col.id] = [undefined]
   }
@@ -262,7 +262,7 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
   const message: PostMessage<unknown> = {
     msg: 'insertColumns',
     data: undefined
-   }
+  }
   postMessage(message)
 }
 

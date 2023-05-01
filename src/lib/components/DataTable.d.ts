@@ -67,7 +67,7 @@ export interface IColumnMetaData {
 
   position?: number
 
-  width?: number | 'auto'
+  width?: number
 }
 
 export interface CustomTableEvents {
@@ -76,11 +76,18 @@ export interface CustomTableEvents {
   paginationChanged: PaginationChangedEventDetail
   settingsVisibilityChanged: SettingsVisibilityChangedEventDetail
   columnPositionChanged: ColumnPositionChangedEventDetail
+  columnWidthChanged: ColumnWidthChangedEventDetail
 }
 
 export interface ColumnPositionChangedEventDetail {
   column: string
   position: number
+}
+
+export interface ColumnWidthChangedEventDetail {
+  column: string
+  width: number
+  done?: boolean
 }
 
 export interface ColumnSortChangedEventDetail {
