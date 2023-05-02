@@ -39,6 +39,7 @@ export interface IPagination {
 }
 
 export interface ITableOptions extends IPagination {
+  id?: string,
   rowsPerPageOptions?: number[]
   actionColumn?: boolean,
   totalRows?: number

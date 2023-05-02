@@ -236,7 +236,7 @@
     {columns}
     data={matrix}
     bind:this={dataTableMatrix}
-    options={{ rowsPerPage: 7, rowsPerPageOptions: [7, 15], actionColumn: true }}
+    options={{ id: 'matrix', rowsPerPage: 7, rowsPerPageOptions: [7, 15], actionColumn: true }}
     let:renderedRow
     let:index
     let:columns

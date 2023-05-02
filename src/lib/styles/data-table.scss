@@ -4,7 +4,8 @@ div[data-component=RADar-DataTable] {
 
     div[data-name=table-container] {
         resize: vertical;
-        overflow: hidden;
+        overflow-x: scroll;
+        /*overflow: hidden;*/
 
         table {
             border-collapse: collapse;

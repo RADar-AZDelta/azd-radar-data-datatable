@@ -27,6 +27,8 @@
   import Options from './Options.svelte'
   import Modal from './Modal.svelte'
   import { flip } from 'svelte/animate'
+  import { storeOptions } from '$lib/actions/storeOptions'
+  import { browser } from '$app/environment'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -65,7 +67,7 @@
   )
 
   async function init() {
-    renderStatus = 'rendering'
+    renderStatus = 'initializing'
     if (dev) console.log('DataTable: init')
 
     //OPTIONS
@@ -89,7 +91,7 @@
       URL.revokeObjectURL(url)
     } else return
 
-    //COLUMNS
+    //COLUMNS:
     if (!columns) {
       if (dataType === DataType.ArrayOfObjects) {
         //columns is not defined, and data is an array of objects => extract the columns from the first object
@@ -113,11 +115,12 @@
       internalColumns = columns
     }
 
+    await loadStoredOptions()
     await render()
-    renderStatus = 'completed'
   }
 
   async function render(onlyPaginationChanged = false) {
+    renderStatus = 'rendering'
     if (dev) console.log('DataTable: render')
     renderedData = undefined
     if (dataType === DataType.Function) {
@@ -162,6 +165,7 @@
       renderedData = results!.data
       originalIndices = results!.indices
     }
+    renderStatus = 'completed'
   }
 
   function applyFilter(data: any[][] | any[]): any[][] | any[] {
@@ -476,6 +480,22 @@
     render(true)
   }
 
+  async function loadStoredOptions() {
+    if (!internalOptions?.id || !browser) return
+
+    const storedOptions = localStorage.getItem(`datatable_${internalOptions.id}_options`)
+    if (storedOptions) Object.assign(internalOptions, JSON.parse(storedOptions))
+    const storedColumns = localStorage.getItem(`datatable_${internalOptions.id}_columns`)
+    if (storedColumns) internalColumns = JSON.parse(storedColumns)
+  }
+
+  function onStoreOptions() {
+    if (!internalOptions?.id || !browser) return
+
+    localStorage.setItem(`datatable_${internalOptions.id}_options`, JSON.stringify(internalOptions))
+    localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
+  }
+
   onDestroy(() => {
     worker?.destroy()
   })
@@ -498,7 +518,12 @@
   {/if}
 </Modal>
 
-<div data-component="RADar-DataTable" data-status={renderStatus ?? ''}>
+<div
+  data-component="RADar-DataTable"
+  data-status={renderStatus ?? ''}
+  use:storeOptions
+  on:storeoptions={onStoreOptions}
+>
   <div data-name="table-container">
     <table>
       <thead>
