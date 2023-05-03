@@ -159,6 +159,8 @@ div[data-component='RADar-DataTable'] {
           outline: 0;
           height: 25px;
           align-self: center;
+          border-radius: 5px;
+          border: solid 1px $gray-xx-dark;
         }
       }
 
@@ -257,13 +259,29 @@ div[data-component='RADar-DataTable'] {
 }
 
 div[data-name='modal-visiblity'] {
-  display: block;
+    display: block;
+    position:fixed;
+    top: 50%;
+    left: 50%;
+    
+    transform: translate(-50%, -50%);
+    width: 50%;
+    height: 50%;
+    justify-content: start;
+    text-align: start;
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    box-shadow: 20px 15px 20px 0px rgb(255 255 255 / 20%);
+    border-right: 1px solid rgba(255,255,255,0.2);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    overflow-y: auto;
 
   .modal-diaglog {
     overflow-y: initial;
   }
 
   .modal-body {
+    position: absolute;
     height: 200px;
     overflow-y: auto;
   }
