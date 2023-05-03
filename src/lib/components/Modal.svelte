@@ -19,7 +19,7 @@
   <section data-component="modal-container-medium" in:fade out:fade>
     <div data-component="modal" use:clickOutside on:outclick={close}>
       <button data-component="close" on:click={close}
-        ><SvgIcon href="icons.svg" id="x" height="16px" width="16px" /></button
+        ><SvgIcon href="src/lib/static/icons.svg" id="x" height="16px" width="16px" /></button
       >
       <div data-component="modal-content"><slot /></div>
     </div>

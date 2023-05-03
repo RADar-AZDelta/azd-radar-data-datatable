@@ -54,7 +54,7 @@
 
 <button on:click={onClick}>
   <SvgIcon
-    href="icons.svg"
+    href="src/lib/static/icons.svg"
     id="updown"
     width="16px"
     height="16px"

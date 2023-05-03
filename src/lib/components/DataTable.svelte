@@ -502,20 +502,26 @@
 </script>
 
 <Modal on:settingsVisibilityChanged={onSettingsVisibilityChanged} show={settingsVisibility}>
-  <h1>Change column visability:</h1>
-  {#if internalColumns}
-    {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
-      <div>
-        <input
-          type="checkbox"
-          id={column.id}
-          checked={column.visible == undefined ? true : column.visible}
-          on:change={onColumnVisibilityChanged}
-        />
-        <label for={column.id}>{column.label ?? column.id}</label><br />
+  <div data-name="modal-visiblity">
+    <div class="modal-dialog">
+      <h1>Change column visability:</h1>
+      <div class="modal-body">
+        {#if internalColumns}
+          {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
+            <div>
+              <input
+                type="checkbox"
+                id={column.id}
+                checked={column.visible == undefined ? true : column.visible}
+                on:change={onColumnVisibilityChanged}
+              />
+              <label for={column.id}>{column.label ?? column.id}</label><br />
+            </div>
+          {/each}
+        {/if}
       </div>
-    {/each}
-  {/if}
+    </div>
+  </div>
 </Modal>
 
 <div
