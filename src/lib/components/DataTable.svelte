@@ -22,7 +22,7 @@
   import Pagination from './Pagination.svelte'
   import Spinner from './Spinner.svelte'
   import { dev } from '$app/environment'
-  import { onDestroy } from 'svelte'
+  import { createEventDispatcher, onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
   import Options from './Options.svelte'
@@ -59,6 +59,8 @@
     pagination: true,
     options: true,
   }
+
+  const dispatch = createEventDispatcher()
 
   $: {
     options, columns, data
@@ -128,6 +130,7 @@
 
   async function render(onlyPaginationChanged = false) {
     renderStatus = 'rendering'
+    dispatch('rendering')
     if (dev) console.log('DataTable: render')
     renderedData = undefined
     if (dataType === DataType.Function) {
