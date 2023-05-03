@@ -2,6 +2,7 @@
   import SvgIcon from './SvgIcon.svelte'
   import type { CustomTableEvents } from './DataTable'
   import { createEventDispatcher } from 'svelte'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
@@ -11,5 +12,5 @@
 </script>
 
 <button data-name="settings-button" on:click={onClick}
-  ><SvgIcon href="src/lib/static/icons.svg" id="gear" width="16px" height="16px" /></button
+  ><SvgIcon href={iconsSvgUrl} id="gear" width="16px" height="16px" /></button
 >

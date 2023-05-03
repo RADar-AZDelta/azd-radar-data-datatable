@@ -5,6 +5,7 @@
   import SvgIcon from './SvgIcon.svelte'
   import { createEventDispatcher } from 'svelte'
   import debounce from 'lodash.debounce'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
   export let column: string, inputType: string, filter: TFilter
 
@@ -25,5 +26,5 @@
 
 <input on:input={onInput} type={inputType} {value} placeholder="Filter" />
 <button on:click={onClick}>
-  <SvgIcon href="src/lib/static/icons.svg" id="x" width="16px" height="16px" />
+  <SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" />
 </button>

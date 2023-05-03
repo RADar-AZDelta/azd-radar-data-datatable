@@ -5,6 +5,7 @@
   import type { CustomTableEvents } from './DataTable.d.js'
   import { range } from '../utils.js'
   import SvgIcon from './SvgIcon.svelte'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
   export let rowsPerPage: number = 20,
     currentPage: number = 1,
@@ -55,7 +56,7 @@
 </div>
 <div data-name="pagination-container-pages">
   <button disabled={!totalRows || currentPage === 1} on:click={() => onChangePage(currentPage - 1)}>
-    <SvgIcon href="src/lib/static/icons.svg" id="arrow-left" width="16px" height="16px" />
+    <SvgIcon href={iconsSvgUrl} id="arrow-left" width="16px" height="16px" />
   </button>
   {#each pages as page}
     <button data-active={currentPage === page} disabled={!page} on:click={() => onChangePage(page)}
@@ -63,6 +64,6 @@
     >
   {/each}
   <button disabled={!totalRows || currentPage === totalPages} on:click={() => onChangePage(currentPage + 1)}>
-    <SvgIcon href="src/lib/static/icons.svg" id="arrow-right" width="16px" height="16px" />
+    <SvgIcon href={iconsSvgUrl} id="arrow-right" width="16px" height="16px" />
   </button>
 </div>
