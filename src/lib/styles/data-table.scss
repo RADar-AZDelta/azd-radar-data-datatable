@@ -25,7 +25,6 @@ div[data-component='RADar-DataTable'] {
         display: table-header-group;
         vertical-align: middle;
         background-color: inherit;
-        margin-bottom: 5000000px;
         
 
         tr[data-name='titles'] {
@@ -169,6 +168,10 @@ div[data-component='RADar-DataTable'] {
         border-color: inherit;
 
         tr {
+            button{
+                border-radius: 3px;
+                border: solid 1px $gray-x-light;
+            }
           td {
             width: fit-content;
 
