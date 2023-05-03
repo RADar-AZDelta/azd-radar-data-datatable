@@ -22,7 +22,7 @@ import type Query from 'arquero/dist/types/query/query'
 export class DataTableWorker {
   private worker: Worker | undefined
 
-  constructor() {}
+  constructor() { }
 
   async init() {
     const DataTableWorker = await import('$lib/workers/DataTable.worker?worker')
@@ -38,11 +38,8 @@ export class DataTableWorker {
     if (dev) start = performance.now()
     const result = await new Promise<TResult>((resolve, reject) => {
       this.worker!.onmessage = ({ data: { msg: responseMsg, data } }: MessageEvent<PostMessage<TResult>>) => {
-        if (responseMsg != requestMsg)
-          reject(
-            `Recieved unexpected message from web worker (expected '${requestMsg}', but recieved '${responseMsg}')`
-          )
-        resolve(data as TResult)
+        if (responseMsg === requestMsg)
+          resolve(data as TResult)
       }
       this.worker!.postMessage({ msg: requestMsg, data })
     })
@@ -95,7 +92,7 @@ export class DataTableWorker {
     return await this.executeWorkerMethod<MessageRequestGetRow, MessageResponseGetRow>('getRow', { index })
   }
 
-async insertColumns(columns: IColumnMetaData[]): Promise<void> {
+  async insertColumns(columns: IColumnMetaData[]): Promise<void> {
     return await this.executeWorkerMethod<MessageRequestInsertColumns, void>('insertColumns', { columns })
   }
   async executeQueryAndReturnResults(usedQuery: Query | object): Promise<MessageResponseExecuteQueryAndReturnResults> {

@@ -10,6 +10,8 @@ We didn't find anything that suited our needs, so we developed our own.
 - Sorting (multi column)
 - Filtering (multi column)
 - Reposition columns
+- Resize columns
+- Store column settings in localStorage
 - Show/hide columns
 - Fast for very large CSV files (more than 100.000 rows)
 - Uses [Arquero](https://uwdata.github.io/arquero/) in a web worker for File (CSV) data source
@@ -81,17 +83,21 @@ global options for the DataTable
 
 ```typescript
 interface ITableOptions {
-  rowsPerPage?: number
-  rowsPerPageOptions?: number[]
+  id?: string,
+  currentPage?: number,
+  rowsPerPage?: number,
+  rowsPerPageOptions?: number[],
   actionColumn?: boolean
 }
 ```
 
-| Value | Description | Default |
-| ----- | ----------- |---------|
-| **rowsPerPage** | number of rows visible in a page | 20 |
-| **rowsPerPageOptions** | number of rows visible in a page | [5, 10, 20, 50, 100] |
-| **actionColumn** | Adds an action column as first column. This can be used to add aditional functionality, for example 'selecting multiple columns', or 'add custom action buttoms', etc... | false |
+| Value | Description | Required | Default |
+| ----- | ----------- | -------- | ------- |
+| **id** | identifier for the datatable, so that it settings can be stored in localStorage | no | |
+| **currentPage** | the current page to display | no | 1 |
+| **rowsPerPage** | number of rows visible in a page | no | 20 |
+| **rowsPerPageOptions** | number of rows visible in a page | no | [5, 10, 20, 50, 100] |
+| **actionColumn** | Adds an action column as first column. This can be used to add aditional functionality, for example 'selecting multiple columns', or 'add custom action buttoms', etc... | no | false |
 
 #### Columns property
 
@@ -110,12 +116,12 @@ interface IColumnMetaData {
   sortOrder?: number
   filter?: any
   position?: number
-  width?: number | 'auto'
+  width?: number
 }
 ```
 
 | Value | Description | Required | Default |
-| ----- | ----------- |----------|---------|
+| ----- | ----------- | -------- | ------- |
 | **id** | id or name of the column | yes | |
 | **label** | id or name of the column | no | |
 | **visible** | is the column visible | no | yes |
@@ -123,11 +129,11 @@ interface IColumnMetaData {
 | **filterable** | is the column filterable | no | yes |
 | **resizable** | FUTURE FUNCTIONALITY: can the column width be adjusted | no | yes |
 | **repositionable** | can the column be repositioned | no | yes |
-| **sortDirection** | do not sort (undefined), sort the column 'asc' or 'desc' | no | undefined |
-| **sortOrder** | if multiple columns are sorted, this prop defines the sequence of the order | no | undefined |
-| **filter** | filter the column values | no | undefined |
-| **position** | the visual position (sequence) of the column | no | undefined |
-| **width** | FUTURE FUNCTIONALITY: the width of the column | no | 'auto' |
+| **sortDirection** | do not sort (undefined), sort the column 'asc' or 'desc' | no | |
+| **sortOrder** | if multiple columns are sorted, this prop defines the sequence of the order | no | |
+| **filter** | filter the column values | no | |
+| **position** | the visual position (sequence) of the column | no | |
+| **width** | FUTURE FUNCTIONALITY: the width of the column | no | |
 
 #### Data property
 
@@ -201,7 +207,3 @@ pnpm install
 ```
 
 To run the example app, run `pnpm run dev --open` from the project root.
-
-### TODO
-
-- Adjustable column width
