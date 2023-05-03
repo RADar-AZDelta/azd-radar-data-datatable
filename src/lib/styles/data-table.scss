@@ -1,10 +1,18 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
+
+$primary-xx-light: #85DCFF;
+$primary-x-light: #33C9FF;
+$primary: #0094d3;
+$gray-xx-light: #ededed;
+$gray-x-light: #d3d3d3;
+$gray-xx-dark: #333333;
+
 div[data-component=RADar-DataTable] {
 
     div[data-name=table-container] {
         resize: vertical;
-        overflow-x: scroll;
+        overflow-x: auto;
         /*overflow: hidden;*/
 
         table {
@@ -17,10 +25,10 @@ div[data-component=RADar-DataTable] {
             box-sizing: border-box;
 
             thead {
-                border-bottom: 1px solid;
-                border-left: 1px solid black;
-                border-right: 1px solid black;
-                background-color: #e3e3e3;
+                // border-bottom: 1px solid;
+                // border-left: 1px solid black;
+                // border-right: 1px solid black;
+                background-color: $primary-xx-light;
 
                 tr[data-name=titles] {
                     th {}
@@ -31,7 +39,7 @@ div[data-component=RADar-DataTable] {
                 }
 
                 tr {
-                    border-bottom: 1px solid black;
+                    // border-bottom: 1px solid black;
                     padding: .35em;
                     font-size: 12px;
 
@@ -39,11 +47,13 @@ div[data-component=RADar-DataTable] {
                         width: fit-content;
                         display: table-cell;
                         box-sizing: content-box;
-                        border: 1px solid black;
+                        // border: 1px solid black;
                         /*min-width: 50px;*/
 
                         div[data-name=column-reposition] {
                             display: flex;
+                            align-items: center;
+                            margin: 0.25rem 0 0.25rem 0;
 
                             :first-child {
                                 flex: 1 1 auto;
@@ -51,10 +61,19 @@ div[data-component=RADar-DataTable] {
 
                             p {
                                 width: fit-content;
+                                margin: 0;
                             }
 
                             button {
                                 cursor: pointer;
+                                min-width: 16px;
+                                border: none;
+                                background-color: inherit;
+                                margin: 0;
+                            }
+
+                            button:hover {
+                                background-color: $primary-x-light;
                             }
                         }
 
@@ -72,6 +91,7 @@ div[data-component=RADar-DataTable] {
 
                         div[data-name=column-resize] {
                             display: flex;
+                            align-items: center;
 
                             div[data-name=column-resize-right] {
                                 flex: 0 0 auto;
@@ -94,17 +114,18 @@ div[data-component=RADar-DataTable] {
                 }
 
                 input {
-                    border-radius: 2px;
+                    border-radius: 5px;
                     font-size: 0.75rem;
                     box-shadow: inset 0 0.0625 0.125em rgba(10, 10, 10, .05);
                     background-color: #fff;
-                    border-color: #dbdbdb;
+                    border-color: $gray-xx-light;
                     color: #363636;
                     height: 2.5em;
                     display: inline-flex;
                     border: 1px solid;
                     justify-content: flex-start;
                     height: 25px;
+                    padding: 0 0.5rem;
                 }
 
                 button {
@@ -118,6 +139,7 @@ div[data-component=RADar-DataTable] {
                     text-align: center;
                     white-space: nowrap;
                     font-size: 0.75em;
+                    margin-bottom: 8px;
                 }
             }
 
@@ -166,13 +188,17 @@ div[data-component=RADar-DataTable] {
                     }
                 }
 
-                tr:nth-child(even) {
-                    background: #fff
+                tr {
+                    background: #fff;
                 }
 
-                tr:nth-child(odd) {
-                    background: #e2e8f3
-                }
+                // tr:nth-child(even) {
+                //     background: #fff
+                // }
+
+                // tr:nth-child(odd) {
+                //     background: #e2e8f3
+                // }
             }
         }
     }

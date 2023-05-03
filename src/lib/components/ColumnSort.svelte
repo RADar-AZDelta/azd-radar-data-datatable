@@ -7,7 +7,7 @@
 
   export let column: string,
     sortDirection: SortDirection,
-    filledColor: Hex = '#888888',
+    filledColor: Hex = '#626262',
     notFilledColor: Hex = '#FFFFFF',
     filledOpacity: number = 1,
     notFilledOpadcity: number = 0
