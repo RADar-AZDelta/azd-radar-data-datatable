@@ -53,7 +53,7 @@
   }
 </script>
 
-<button on:click={onClick}>
+<button id="sort" on:click={onClick}>
   <SvgIcon
     href={iconsSvgUrl}
     id="updown"

@@ -238,6 +238,7 @@ div[data-component='RADar-DataTable'] {
 
     button {
       border: none;
+      border-radius: 5px;
       background-color: inherit;
 
       &:not([data-active='true']):hover:enabled {
@@ -270,7 +271,6 @@ div[data-name='modal-visiblity'] {
     justify-content: start;
     text-align: start;
     background: rgba(255,255,255,0.9);
-    border-radius: 20px;
     box-shadow: 20px 15px 20px 0px rgb(255 255 255 / 20%);
     border-right: 1px solid rgba(255,255,255,0.2);
     border-bottom: 1px solid rgba(255,255,255,0.2);
