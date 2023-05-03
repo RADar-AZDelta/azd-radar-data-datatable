@@ -7,6 +7,7 @@
 
   export let column: string,
     sortDirection: SortDirection,
+    disabled: boolean,
     filledColor: Hex = '#626262',
     notFilledColor: Hex = '#FFFFFF',
     filledOpacity: number = 1,
@@ -52,7 +53,7 @@
   }
 </script>
 
-<button on:click={onClick}>
+<button on:click={onClick} {disabled}>
   <SvgIcon
     href="icons.svg"
     id="updown"

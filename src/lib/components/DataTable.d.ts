@@ -45,6 +45,13 @@ export interface ITableOptions extends IPagination {
   totalRows?: number
 }
 
+export interface FunctionalitiesOptions {
+  sorting: boolean
+  filtering: boolean
+  pagination: boolean
+  options: boolean
+}
+
 export type FetchDataFunc = (
   filteredColumns: Map<string, TFilter>,
   sortedColumns: Map<string, SortDirection>,
