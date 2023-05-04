@@ -45,7 +45,6 @@
     internalColumns: IColumnMetaData[] | undefined
 
   let renderStatus: string
-  let columnResizing: boolean
   let dataType: DataType
 
   let worker: DataTableWorker
@@ -237,7 +236,6 @@
   }
 
   async function onColumnWidthChanged(event: CustomEvent<ColumnWidthChangedEventDetail>) {
-    columnResizing = event.detail.done !== true
     const column = internalColumns?.find(column => column.id === event.detail.column)
     column!.width = event.detail.width
     internalColumns = internalColumns
@@ -549,7 +547,6 @@
               >
                 <ColumnResize
                   {column}
-                  {columnResizing}
                   on:columnPositionChanged={onColumnPositionChanged}
                   on:columnWidthChanged={onColumnWidthChanged}
                 >
@@ -584,7 +581,6 @@
               >
                 <ColumnResize
                   {column}
-                  {columnResizing}
                   on:columnPositionChanged={onColumnPositionChanged}
                   on:columnWidthChanged={onColumnWidthChanged}
                 >
