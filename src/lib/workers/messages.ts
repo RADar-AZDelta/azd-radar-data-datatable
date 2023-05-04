@@ -58,4 +58,5 @@ export interface MessageRequestExecuteQueryAndReturnResults {
 
 export interface MessageResponseExecuteQueryAndReturnResults {
   queriedData: any
+  indices: Uint32Array
 }
