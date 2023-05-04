@@ -268,10 +268,11 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
 
 function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
   const query = queryFrom(usedQuery)
-  const queriedData = query.evaluate(dt, () => { }).objects()
+  const queriedData = query.evaluate(dt, () => {}).objects()
+  const indices = query.evaluate(dt, () => {}).indices()
   const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
     msg: 'executeQueryAndReturnResults',
-    data: { queriedData },
+    data: { queriedData, indices },
   }
   postMessage(message)
 }
