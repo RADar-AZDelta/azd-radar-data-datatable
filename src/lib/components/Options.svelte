@@ -2,6 +2,7 @@
   import SvgIcon from './SvgIcon.svelte'
   import type { CustomTableEvents } from './DataTable'
   import { createEventDispatcher } from 'svelte'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
   export let disabled: boolean
 
@@ -12,4 +13,4 @@
   }
 </script>
 
-<button on:click={onClick} {disabled}><SvgIcon href="icons.svg" id="gear" width="16px" height="16px" /></button>
+<button data-name="settings-button" on:click={onClick} {disabled}><SvgIcon href="icons.svg" id="gear" width="16px" height="16px" /></button>

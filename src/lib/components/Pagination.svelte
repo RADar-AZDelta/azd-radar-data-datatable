@@ -5,6 +5,7 @@
   import type { CustomTableEvents } from './DataTable.d.js'
   import { range } from '../utils.js'
   import SvgIcon from './SvgIcon.svelte'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
   export let rowsPerPage: number = 20,
     currentPage: number = 1,

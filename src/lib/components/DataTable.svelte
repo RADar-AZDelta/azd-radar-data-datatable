@@ -45,7 +45,6 @@
     internalColumns: IColumnMetaData[] | undefined
 
   let renderStatus: string
-  let columnResizing: boolean
   let dataType: DataType
 
   let worker: DataTableWorker
@@ -53,6 +52,8 @@
 
   let settingsVisibility: boolean = false
   let disableFeatures: boolean = false
+
+  const dispatch = createEventDispatcher()
 
   const dispatch = createEventDispatcher()
 
@@ -120,6 +121,7 @@
 
     await loadStoredOptions()
     await render()
+    dispatch('initialized')
   }
 
   async function render(onlyPaginationChanged = false) {
@@ -170,6 +172,7 @@
       originalIndices = results!.indices
     }
     renderStatus = 'completed'
+    dispatch('renderingCompleted')
   }
 
   function applyFilter(data: any[][] | any[]): any[][] | any[] {
@@ -241,7 +244,6 @@
   }
 
   async function onColumnWidthChanged(event: CustomEvent<ColumnWidthChangedEventDetail>) {
-    columnResizing = event.detail.done !== true
     const column = internalColumns?.find(column => column.id === event.detail.column)
     column!.width = event.detail.width
     internalColumns = internalColumns
@@ -277,8 +279,10 @@
   }
 
   async function onPaginationChanged(event: CustomEvent<PaginationChangedEventDetail>) {
+    event.detail.rowsPerPage != internalOptions.rowsPerPage
+      ? (internalOptions.currentPage = 1)
+      : (internalOptions.currentPage = event.detail.currentPage)
     internalOptions.rowsPerPage = event.detail.rowsPerPage
-    internalOptions.currentPage = event.detail.currentPage
     internalOptions = internalOptions
 
     if (dev) console.log(`DataTable: pagination changed to ${JSON.stringify(event.detail)}`)
@@ -510,20 +514,26 @@
 </script>
 
 <Modal on:settingsVisibilityChanged={onSettingsVisibilityChanged} show={settingsVisibility}>
-  <h1>Change column visability:</h1>
-  {#if internalColumns}
-    {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
-      <div>
-        <input
-          type="checkbox"
-          id={column.id}
-          checked={column.visible == undefined ? true : column.visible}
-          on:change={onColumnVisibilityChanged}
-        />
-        <label for={column.id}>{column.label ?? column.id}</label><br />
+  <div data-name="modal-visiblity">
+    <div class="modal-dialog">
+      <h1>Change column visability:</h1>
+      <div class="modal-body">
+        {#if internalColumns}
+          {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
+            <div>
+              <input
+                type="checkbox"
+                id={column.id}
+                checked={column.visible == undefined ? true : column.visible}
+                on:change={onColumnVisibilityChanged}
+              />
+              <label for={column.id}>{column.label ?? column.id}</label><br />
+            </div>
+          {/each}
+        {/if}
       </div>
-    {/each}
-  {/if}
+    </div>
+  </div>
 </Modal>
 
 <div
@@ -551,7 +561,6 @@
               >
                 <ColumnResize
                   {column}
-                  {columnResizing}
                   on:columnPositionChanged={onColumnPositionChanged}
                   on:columnWidthChanged={onColumnWidthChanged}
                 >
@@ -587,7 +596,6 @@
               >
                 <ColumnResize
                   {column}
-                  {columnResizing}
                   on:columnPositionChanged={onColumnPositionChanged}
                   on:columnWidthChanged={onColumnWidthChanged}
                 >
