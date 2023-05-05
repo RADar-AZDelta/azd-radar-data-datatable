@@ -35,7 +35,7 @@ export function resizableColumn(node: Node) {
 
         node.dispatchEvent(
             new CustomEvent("resizing", {
-                detail: { x: dx, y: dy, done: true },
+                detail: { x: dx, y: dy },
             })
         );
 

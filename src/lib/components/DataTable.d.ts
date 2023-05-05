@@ -88,7 +88,6 @@ export interface ColumnPositionChangedEventDetail {
 export interface ColumnWidthChangedEventDetail {
   column: string
   width: number
-  done?: boolean
 }
 
 export interface ColumnSortChangedEventDetail {
