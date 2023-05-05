@@ -13,4 +13,6 @@
   }
 </script>
 
-<button data-name="settings-button" on:click={onClick} {disabled}><SvgIcon href="icons.svg" id="gear" width="16px" height="16px" /></button>
+<button data-name="settings-button" on:click={onClick} {disabled}
+  ><SvgIcon href={iconsSvgUrl} id="gear" width="16px" height="16px" /></button
+>

@@ -57,14 +57,17 @@
 </div>
 <div data-name="pagination-container-pages">
   <button disabled={!totalRows || currentPage === 1 || disabled} on:click={() => onChangePage(currentPage - 1)}>
-    <SvgIcon href="icons.svg" id="arrow-left" width="16px" height="16px" />
+    <SvgIcon href={iconsSvgUrl} id="arrow-left" width="16px" height="16px" />
   </button>
   {#each pages as page}
     <button data-active={currentPage === page} disabled={!page || disabled} on:click={() => onChangePage(page)}
       >{page ? page : '...'}</button
     >
   {/each}
-  <button disabled={!totalRows || currentPage === totalPages || disabled} on:click={() => onChangePage(currentPage + 1)}>
-    <SvgIcon href="icons.svg" id="arrow-right" width="16px" height="16px" />
+  <button
+    disabled={!totalRows || currentPage === totalPages || disabled}
+    on:click={() => onChangePage(currentPage + 1)}
+  >
+    <SvgIcon href={iconsSvgUrl} id="arrow-right" width="16px" height="16px" />
   </button>
 </div>

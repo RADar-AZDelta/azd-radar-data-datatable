@@ -62,11 +62,6 @@
   $: visibleOrderedColumns = internalColumns
     ?.filter(col => col.visible !== false)
     .sort((a, b) => a.position! - b.position!)
-  // $: visibleOrderedColumnsOriginalColumnPosition = visibleOrderedColumns?.map(col =>
-  //   dataType === DataType.Matrix || dataType === DataType.File
-  //     ? internalColumns?.findIndex(c => c.id === col.id)!
-  //     : col.id
-  // )
 
   async function init() {
     renderStatus = 'initializing'
@@ -587,7 +582,7 @@
                   <ColumnSort
                     column={column.id}
                     sortDirection={column.sortDirection}
-                    disabled={disabled}
+                    {disabled}
                     on:columnSortChanged={onColumnSortChanged}
                   />
                 {/if}
@@ -622,7 +617,7 @@
                     column={column.id}
                     inputType="text"
                     filter={column.filter}
-                    disabled={disabled}
+                    {disabled}
                     on:columnFilterChanged={onColumnFilterChanged}
                   />
                 {/if}
@@ -637,13 +632,13 @@
         <tr data-name="pagination">
           <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
             <div>
-              <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
+              <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} {disabled} />
               <Pagination
                 rowsPerPage={internalOptions.rowsPerPage}
                 currentPage={internalOptions.currentPage}
                 rowsPerPageOptions={internalOptions.rowsPerPageOptions}
                 totalRows={internalOptions.totalRows ?? 0}
-                disabled={disabled}
+                {disabled}
                 on:paginationChanged={onPaginationChanged}
               />
             </div>
