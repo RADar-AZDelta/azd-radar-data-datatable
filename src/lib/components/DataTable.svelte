@@ -277,8 +277,10 @@
   }
 
   async function onPaginationChanged(event: CustomEvent<PaginationChangedEventDetail>) {
+    event.detail.rowsPerPage != internalOptions.rowsPerPage
+      ? (internalOptions.currentPage = 1)
+      : (internalOptions.currentPage = event.detail.currentPage)
     internalOptions.rowsPerPage = event.detail.rowsPerPage
-    internalOptions.currentPage = event.detail.currentPage
     internalOptions = internalOptions
 
     if (dev) console.log(`DataTable: pagination changed to ${JSON.stringify(event.detail)}`)
