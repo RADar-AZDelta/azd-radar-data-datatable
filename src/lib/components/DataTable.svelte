@@ -14,7 +14,6 @@
     type SettingsVisibilityChangedEventDetail,
     type ColumnPositionChangedEventDetail,
     type ColumnWidthChangedEventDetail,
-    type FunctionalitiesOptions,
   } from './DataTable.d'
   import ColumnSort from './ColumnSort.svelte'
   import ColumnResize from './ColumnResize.svelte'
@@ -53,12 +52,7 @@
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
 
   let settingsVisibility: boolean = false
-  let functionalitiesOptions: FunctionalitiesOptions = {
-    sorting: true,
-    filtering: true,
-    pagination: true,
-    options: true,
-  }
+  let disableFeatures: boolean = false
 
   const dispatch = createEventDispatcher()
 
@@ -490,19 +484,8 @@
     render(true)
   }
 
-  export function enableFunctionalities(functionalities: {
-    sorting?: boolean
-    filtering?: boolean
-    pagination?: boolean
-    options?: boolean
-  }) {
-    functionalitiesOptions.sorting =
-      functionalities.sorting != undefined ? functionalities.sorting : functionalitiesOptions.sorting
-    functionalitiesOptions.filtering =
-      functionalities.filtering != undefined ? functionalities.filtering : functionalitiesOptions.filtering
-    functionalitiesOptions.pagination =
-      functionalities.pagination != undefined ? functionalities.pagination : functionalitiesOptions.pagination
-    functionalitiesOptions.options = functionalities.options != undefined ? functionalities.options : functionalitiesOptions.options
+  export function disableFunctionalities(disable: boolean) {
+    disableFeatures = disable
   }
 
   async function loadStoredOptions() {
@@ -577,7 +560,7 @@
                     <ColumnSort
                       column={column.id}
                       sortDirection={column.sortDirection}
-                      disabled={!functionalitiesOptions.sorting}
+                      disabled={disableFeatures}
                       on:columnSortChanged={onColumnSortChanged}
                     />
                   {/if}
@@ -613,7 +596,7 @@
                       column={column.id}
                       inputType="text"
                       filter={column.filter}
-                      disabled={!functionalitiesOptions.filtering}
+                      disabled={disableFeatures}
                       on:columnFilterChanged={onColumnFilterChanged}
                     />
                   {/if}
@@ -628,13 +611,13 @@
           <tr data-name="pagination">
             <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
               <div>
-                <Options disabled={!functionalitiesOptions.options} on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
+                <Options disabled={disableFeatures} on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
                 <Pagination
                   rowsPerPage={internalOptions.rowsPerPage}
                   currentPage={internalOptions.currentPage}
                   rowsPerPageOptions={internalOptions.rowsPerPageOptions}
                   totalRows={internalOptions.totalRows ?? 0}
-                  disabled={!functionalitiesOptions.pagination}
+                  disabled={disableFeatures}
                   on:paginationChanged={onPaginationChanged}
                 />
               </div>
