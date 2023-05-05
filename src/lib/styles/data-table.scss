@@ -130,9 +130,9 @@ div[data-component='RADar-DataTable'] {
 
       tfoot {
         tr[data-name='pagination'] {
+          vertical-align: bottom;
           th {
             div {
-                margin-top: 15px;
                 align-items: center;
                 display: flex;
 
@@ -208,7 +208,10 @@ div[data-component='RADar-DataTable'] {
       }
     }
   }
-
+  div[data-name='pagination-div']
+  {
+    align-items: end;
+  }
   div[data-name='pagination-container'] {
     float: left;
     clear: both;
@@ -282,7 +285,6 @@ div[data-name='modal-visiblity'] {
 
   .modal-body {
     position: absolute;
-    height: 200px;
     overflow-y: auto;
   }
 }
