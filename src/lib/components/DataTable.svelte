@@ -61,11 +61,11 @@
   $: visibleOrderedColumns = internalColumns
     ?.filter(col => col.visible !== false)
     .sort((a, b) => a.position! - b.position!)
-  $: visibleOrderedColumnsOriginalColumnPosition = visibleOrderedColumns?.map(col =>
-    dataType === DataType.Matrix || dataType === DataType.File
-      ? internalColumns?.findIndex(c => c.id === col.id)!
-      : col.id
-  )
+  // $: visibleOrderedColumnsOriginalColumnPosition = visibleOrderedColumns?.map(col =>
+  //   dataType === DataType.Matrix || dataType === DataType.File
+  //     ? internalColumns?.findIndex(c => c.id === col.id)!
+  //     : col.id
+  // )
 
   async function init() {
     renderStatus = 'initializing'
@@ -144,12 +144,28 @@
       }
       internalOptions.totalRows = results.totalRows
       renderedData = results.data
-    } else if (dataType === DataType.Matrix || dataType === DataType.ArrayOfObjects) {
+    } else if (dataType === DataType.ArrayOfObjects) {
       if (!onlyPaginationChanged || !filteredAndSortedData) {
-        filteredAndSortedData = applySort(applyFilter(data as any[][] | any[]))
+        filteredAndSortedData = applySort(applyFilter(data as any[]))
         internalOptions.totalRows = filteredAndSortedData.length
       }
       renderedData = applyPagination(filteredAndSortedData)
+      originalIndices = (renderedData as any[]).reduce((acc, cur) => {
+        acc.push((data as any[]).indexOf(cur))
+        return acc
+      }, [])
+    } else if (dataType === DataType.Matrix) {
+      if (!onlyPaginationChanged || !filteredAndSortedData) {
+        filteredAndSortedData = applySort(applyFilter(data as any[][]))
+        internalOptions.totalRows = filteredAndSortedData.length
+      }
+      const paginatedFata = applyPagination(filteredAndSortedData)
+      renderedData = paginatedFata.map(row =>
+        internalColumns?.reduce((acc, cur, index) => {
+          acc[cur.id!] = row[index]
+          return acc
+        }, {} as Record<string, any>)
+      )
       originalIndices = (renderedData as any[]).reduce((acc, cur) => {
         acc.push((data as any[]).indexOf(cur))
         return acc
@@ -165,7 +181,12 @@
       }, new Map<string, SortDirection>())
       const results = await worker?.fetchData(filteredColumns, sortedColumns, internalOptions, onlyPaginationChanged)
       internalOptions.totalRows = results!.totalRows
-      renderedData = results!.data
+      renderedData = results!.data.map(row =>
+        internalColumns?.reduce((acc, cur, index) => {
+          acc[cur.id!] = row[index]
+          return acc
+        }, {} as Record<string, any>)
+      )
       originalIndices = results!.indices
     }
     renderStatus = 'completed'
@@ -530,143 +551,138 @@
 </Modal>
 
 <div
-  data-component="RADar-DataTable"
+  data-component="svelte-radar-datatable"
   data-status={renderStatus ?? ''}
   use:storeOptions
   on:storeoptions={onStoreOptions}
 >
-  <div data-name="table-container">
-    <table>
-      <thead>
-        {#if visibleOrderedColumns}
-          <tr data-name="titles">
-            {#if internalOptions.actionColumn}
+  <table>
+    <thead>
+      {#if visibleOrderedColumns}
+        <tr data-name="titles">
+          {#if internalOptions.actionColumn}
+            <th />
+          {/if}
+          {#each visibleOrderedColumns as column, i (column.id)}
+            <th
+              data-direction={column?.sortDirection}
+              data-resizable={column?.resizable}
+              data-key={column?.id}
+              data-sortable={column?.sortable}
+              animate:flip={{ duration: 500 }}
+              style="{column.width ? `width: ${column.width}px` : ''};"
+            >
+              <ColumnResize
+                {column}
+                on:columnPositionChanged={onColumnPositionChanged}
+                on:columnWidthChanged={onColumnWidthChanged}
+              >
+                <p>{column.label || column.id}</p>
+                {#if column.sortable !== false}
+                  <ColumnSort
+                    column={column.id}
+                    sortDirection={column.sortDirection}
+                    on:columnSortChanged={onColumnSortChanged}
+                  />
+                {/if}
+              </ColumnResize>
+            </th>
+          {/each}
+        </tr>
+        <tr data-name="filters">
+          {#if internalOptions.actionColumn}
+            {#if $$slots.actionHeader}
+              <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
+            {:else}
               <th />
             {/if}
-            {#each visibleOrderedColumns as column, i (column.id)}
-              <th
-                data-direction={column?.sortDirection}
-                data-resizable={column?.resizable}
-                data-key={column?.id}
-                data-sortable={column?.sortable}
-                animate:flip={{ duration: 500 }}
-                style="{column.width ? `width: ${column.width}px` : ''};"
+          {/if}
+          {#each visibleOrderedColumns as column, i (column.id)}
+            <th
+              data-direction={column?.sortDirection}
+              data-resizable={column?.resizable}
+              data-key={column?.id}
+              data-filterable={column?.filterable}
+              animate:flip={{ duration: 500 }}
+              style="{column.width ? `width: ${column.width}px` : ''};"
+            >
+              <ColumnResize
+                {column}
+                on:columnPositionChanged={onColumnPositionChanged}
+                on:columnWidthChanged={onColumnWidthChanged}
               >
-                <ColumnResize
-                  {column}
-                  on:columnPositionChanged={onColumnPositionChanged}
-                  on:columnWidthChanged={onColumnWidthChanged}
-                >
-                  <p>{column.label || column.id}</p>
-                  {#if column.sortable !== false}
-                    <ColumnSort
-                      column={column.id}
-                      sortDirection={column.sortDirection}
-                      on:columnSortChanged={onColumnSortChanged}
-                    />
-                  {/if}
-                </ColumnResize>
-              </th>
-            {/each}
-          </tr>
-          <tr data-name="filters">
-            {#if internalOptions.actionColumn}
-              {#if $$slots.actionHeader}
-                <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
-              {:else}
-                <th />
-              {/if}
-            {/if}
-            {#each visibleOrderedColumns as column, i (column.id)}
-              <th
-                data-direction={column?.sortDirection}
-                data-resizable={column?.resizable}
-                data-key={column?.id}
-                data-filterable={column?.filterable}
-                animate:flip={{ duration: 500 }}
-                style="{column.width ? `width: ${column.width}px` : ''};"
-              >
-                <ColumnResize
-                  {column}
-                  on:columnPositionChanged={onColumnPositionChanged}
-                  on:columnWidthChanged={onColumnWidthChanged}
-                >
-                  {#if column.filterable !== false}
-                    <ColumnFilter
-                      column={column.id}
-                      inputType="text"
-                      filter={column.filter}
-                      on:columnFilterChanged={onColumnFilterChanged}
-                    />
-                  {/if}
-                </ColumnResize>
-              </th>
-            {/each}
-          </tr>
-        {/if}
-      </thead>
-      <tfoot>
-        {#if visibleOrderedColumns}
-          <tr data-name="pagination">
-            <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
-              <div>
-                <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
-                <Pagination
-                  rowsPerPage={internalOptions.rowsPerPage}
-                  currentPage={internalOptions.currentPage}
-                  rowsPerPageOptions={internalOptions.rowsPerPageOptions}
-                  totalRows={internalOptions.totalRows ?? 0}
-                  on:paginationChanged={onPaginationChanged}
-                />
-              </div>
-            </th>
-          </tr>
-        {/if}
-      </tfoot>
-      <tbody>
-        {#if renderedData && visibleOrderedColumnsOriginalColumnPosition}
-          {#each renderedData as row, i (i)}
-            <tr data-index={i}>
-              {#if $$slots.default}
-                <slot
-                  renderedRow={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
-                  index={i}
-                  columns={visibleOrderedColumns}
-                  options={internalOptions}
-                />
-              {:else}
-                {#if internalOptions.actionColumn}
-                  {#if $$slots.actionCell}
-                    <slot
-                      name="actionCell"
-                      renderedRow={visibleOrderedColumnsOriginalColumnPosition.map(index => row[index])}
-                      index={i}
-                      columns={visibleOrderedColumns}
-                      options={internalOptions}
-                    />
-                  {:else}
-                    <td />
-                  {/if}
+                {#if column.filterable !== false}
+                  <ColumnFilter
+                    column={column.id}
+                    inputType="text"
+                    filter={column.filter}
+                    on:columnFilterChanged={onColumnFilterChanged}
+                  />
                 {/if}
-                {#each visibleOrderedColumnsOriginalColumnPosition as index, j (index)}
-                  <td animate:flip={{ duration: 500 }}>{row[index]}</td>
+              </ColumnResize>
+            </th>
+          {/each}
+        </tr>
+      {/if}
+    </thead>
+    <tfoot>
+      {#if visibleOrderedColumns}
+        <tr data-name="pagination">
+          <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
+            <div>
+              <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
+              <Pagination
+                rowsPerPage={internalOptions.rowsPerPage}
+                currentPage={internalOptions.currentPage}
+                rowsPerPageOptions={internalOptions.rowsPerPageOptions}
+                totalRows={internalOptions.totalRows ?? 0}
+                on:paginationChanged={onPaginationChanged}
+              />
+            </div>
+          </th>
+        </tr>
+      {/if}
+    </tfoot>
+    <tbody>
+      {#if renderedData}
+        {#each renderedData as row, i (i)}
+          <tr data-index={i}>
+            {#if $$slots.default}
+              <slot renderedRow={row} index={i} columns={visibleOrderedColumns} options={internalOptions} />
+            {:else}
+              {#if internalOptions.actionColumn}
+                {#if $$slots.actionCell}
+                  <slot
+                    name="actionCell"
+                    renderedRow={row}
+                    index={i}
+                    columns={visibleOrderedColumns}
+                    options={internalOptions}
+                  />
+                {:else}
+                  <td />
+                {/if}
+              {/if}
+              {#if visibleOrderedColumns}
+                {#each visibleOrderedColumns as column, j (j)}
+                  <td animate:flip={{ duration: 500 }}>{row[column.id]}</td>
                 {/each}
               {/if}
-            </tr>
-          {/each}
-        {:else if data}
-          {#if $$slots.loading}
-            <slot name="loading" />
-          {:else}
-            <Spinner />
-            <div>Loading...</div>
-          {/if}
-        {:else if $$slots.nodata}
-          <slot name="nodata" />
+            {/if}
+          </tr>
+        {/each}
+      {:else if data}
+        {#if $$slots.loading}
+          <slot name="loading" />
         {:else}
-          <div>No data...</div>
+          <Spinner />
+          <div>Loading...</div>
         {/if}
-      </tbody>
-    </table>
-  </div>
+      {:else if $$slots.nodata}
+        <slot name="nodata" />
+      {:else}
+        <div>No data...</div>
+      {/if}
+    </tbody>
+  </table>
 </div>
