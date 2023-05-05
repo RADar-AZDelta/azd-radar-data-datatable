@@ -21,7 +21,7 @@
   import Pagination from './Pagination.svelte'
   import Spinner from './Spinner.svelte'
   import { dev } from '$app/environment'
-  import { onDestroy } from 'svelte'
+  import { createEventDispatcher, onDestroy } from 'svelte'
   import { DataTableWorker } from './DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
   import Options from './Options.svelte'
@@ -45,13 +45,14 @@
     internalColumns: IColumnMetaData[] | undefined
 
   let renderStatus: string
-  let columnResizing: boolean
   let dataType: DataType
 
   let worker: DataTableWorker
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
 
   let settingsVisibility: boolean = false
+
+  const dispatch = createEventDispatcher()
 
   $: {
     options, columns, data
@@ -117,10 +118,12 @@
 
     await loadStoredOptions()
     await render()
+    dispatch('initialized')
   }
 
   async function render(onlyPaginationChanged = false) {
     renderStatus = 'rendering'
+    dispatch('rendering')
     if (dev) console.log('DataTable: render')
     renderedData = undefined
     if (dataType === DataType.Function) {
@@ -237,7 +240,6 @@
   }
 
   async function onColumnWidthChanged(event: CustomEvent<ColumnWidthChangedEventDetail>) {
-    columnResizing = event.detail.done !== true
     const column = internalColumns?.find(column => column.id === event.detail.column)
     column!.width = event.detail.width
     internalColumns = internalColumns
@@ -273,8 +275,10 @@
   }
 
   async function onPaginationChanged(event: CustomEvent<PaginationChangedEventDetail>) {
+    event.detail.rowsPerPage != internalOptions.rowsPerPage
+      ? (internalOptions.currentPage = 1)
+      : (internalOptions.currentPage = event.detail.currentPage)
     internalOptions.rowsPerPage = event.detail.rowsPerPage
-    internalOptions.currentPage = event.detail.currentPage
     internalOptions = internalOptions
 
     if (dev) console.log(`DataTable: pagination changed to ${JSON.stringify(event.detail)}`)
@@ -549,7 +553,6 @@
               >
                 <ColumnResize
                   {column}
-                  {columnResizing}
                   on:columnPositionChanged={onColumnPositionChanged}
                   on:columnWidthChanged={onColumnWidthChanged}
                 >
@@ -584,7 +587,6 @@
               >
                 <ColumnResize
                   {column}
-                  {columnResizing}
                   on:columnPositionChanged={onColumnPositionChanged}
                   on:columnWidthChanged={onColumnWidthChanged}
                 >

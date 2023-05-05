@@ -1,19 +1,19 @@
 import type { CustomTableEvents, IColumnMetaData } from "$lib/components/DataTable";
 
-export function repositionableColumn(node: Node, column: IColumnMetaData, columnResizing: boolean) { //columnResizing binding doesn't work
+export function repositionableColumn(node: Node, column: IColumnMetaData) {
     function handleDragStart(event: DragEvent) {
-        if (column.repositionable === false || columnResizing) return
+        if (column.repositionable === false) return
         const data = { column: column.id }
         event.dataTransfer!.setData('text/plain', JSON.stringify(data))
     }
 
     function handleDragOver(event: DragEvent) {
-        if (column.repositionable === false || columnResizing) return
+        if (column.repositionable === false) return
         event.preventDefault()
     }
 
     function handleDrop(event: DragEvent) {
-        if (column.repositionable === false || columnResizing) return
+        if (column.repositionable === false) return
         event.preventDefault()
         try {
             const json = event.dataTransfer!.getData('text/plain')

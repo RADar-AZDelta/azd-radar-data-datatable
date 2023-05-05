@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite dev --host=127.0.0.1",
     "build": "npx vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --host=127.0.0.1",
     "package": "svelte-kit sync && svelte-package && publint",
     "prepublishOnly": "echo 'Did you mean to publish `./package/`, instead of `./`?' && exit 1",
     "test": "npx playwright test",
