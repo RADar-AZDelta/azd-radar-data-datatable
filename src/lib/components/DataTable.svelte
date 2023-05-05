@@ -32,7 +32,8 @@
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
-    options: ITableOptions | undefined = undefined
+    options: ITableOptions | undefined = undefined,
+    disabled: boolean = false
 
   let renderedData: any[][] | any[] | undefined,
     filteredAndSortedData: any[][] | any[] | undefined,
@@ -52,7 +53,6 @@
   let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
 
   let settingsVisibility: boolean = false
-  let disableFeatures: boolean = false
 
   const dispatch = createEventDispatcher()
 
@@ -170,6 +170,7 @@
       originalIndices = results!.indices
     }
     renderStatus = 'completed'
+    dispatch('renderingComplete')
   }
 
   function applyFilter(data: any[][] | any[]): any[][] | any[] {
@@ -484,8 +485,8 @@
     render(true)
   }
 
-  export function disableFunctionalities(disable: boolean) {
-    disableFeatures = disable
+  export function setDisabled(value: boolean) {
+    disabled = value
   }
 
   async function loadStoredOptions() {
@@ -560,7 +561,7 @@
                     <ColumnSort
                       column={column.id}
                       sortDirection={column.sortDirection}
-                      disabled={disableFeatures}
+                      disabled={disabled}
                       on:columnSortChanged={onColumnSortChanged}
                     />
                   {/if}
@@ -596,7 +597,7 @@
                       column={column.id}
                       inputType="text"
                       filter={column.filter}
-                      disabled={disableFeatures}
+                      disabled={disabled}
                       on:columnFilterChanged={onColumnFilterChanged}
                     />
                   {/if}
@@ -611,13 +612,13 @@
           <tr data-name="pagination">
             <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
               <div>
-                <Options disabled={disableFeatures} on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
+                <Options disabled={disabled} on:settingsVisibilityChanged={onSettingsVisibilityChanged} />
                 <Pagination
                   rowsPerPage={internalOptions.rowsPerPage}
                   currentPage={internalOptions.currentPage}
                   rowsPerPageOptions={internalOptions.rowsPerPageOptions}
                   totalRows={internalOptions.totalRows ?? 0}
-                  disabled={disableFeatures}
+                  disabled={disabled}
                   on:paginationChanged={onPaginationChanged}
                 />
               </div>
