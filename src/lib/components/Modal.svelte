@@ -4,6 +4,8 @@
   import type { CustomTableEvents } from './DataTable'
   import { fade } from 'svelte/transition'
   import { clickOutside } from '../actions/clickOutside.js'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
+  import { escapeWithKey } from '$lib/actions/escapeWithKey'
 
   export let show: boolean = false
 
@@ -17,9 +19,9 @@
 {#if show}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <section data-component="modal-container-medium" in:fade out:fade>
-    <div data-component="modal" use:clickOutside on:outclick={close}>
+    <div data-component="modal" use:clickOutside on:outclick={close} use:escapeWithKey on:escapeKey={close}>
       <button data-component="close" on:click={close}
-        ><SvgIcon href="icons.svg" id="x" height="16px" width="16px" /></button
+        ><SvgIcon href={iconsSvgUrl} id="x" height="16px" width="16px" /></button
       >
       <div data-component="modal-content"><slot /></div>
     </div>

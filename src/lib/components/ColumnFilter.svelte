@@ -5,6 +5,7 @@
   import SvgIcon from './SvgIcon.svelte'
   import { createEventDispatcher } from 'svelte'
   import debounce from 'lodash.debounce'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
   export let column: string, inputType: string, filter: TFilter, disabled: boolean
 

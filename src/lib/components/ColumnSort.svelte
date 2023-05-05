@@ -4,6 +4,7 @@
   import type { Hex, SortDirection, CustomTableEvents } from './DataTable.d.js'
   import SvgIcon from './SvgIcon.svelte'
   import { createEventDispatcher } from 'svelte'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
   export let column: string,
     sortDirection: SortDirection,
@@ -53,9 +54,9 @@
   }
 </script>
 
-<button on:click={onClick} {disabled}>
+<button id="sort" on:click={onClick} {disabled}>
   <SvgIcon
-    href="icons.svg"
+    href={iconsSvgUrl}
     id="updown"
     width="16px"
     height="16px"
