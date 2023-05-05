@@ -169,6 +169,7 @@
       originalIndices = results!.indices
     }
     renderStatus = 'completed'
+    dispatch('renderingCompleted')
   }
 
   function applyFilter(data: any[][] | any[]): any[][] | any[] {
