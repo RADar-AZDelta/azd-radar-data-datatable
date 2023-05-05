@@ -7,7 +7,7 @@
   import debounce from 'lodash.debounce'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
-  export let column: string, inputType: string, filter: TFilter
+  export let column: string, inputType: string, filter: TFilter, disabled: boolean
 
   let value: TFilter
 
@@ -24,7 +24,7 @@
   }
 </script>
 
-<input on:input={onInput} type={inputType} {value} placeholder="Filter" />
-<button on:click={onClick}>
-  <SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" />
+<input on:input={onInput} type={inputType} {value} placeholder="Filter" {disabled} />
+<button on:click={onClick} {disabled}>
+  <SvgIcon href="icons.svg" id="x" width="16px" height="16px" />
 </button>

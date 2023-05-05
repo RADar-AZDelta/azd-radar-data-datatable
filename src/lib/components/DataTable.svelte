@@ -32,7 +32,8 @@
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
-    options: ITableOptions | undefined = undefined
+    options: ITableOptions | undefined = undefined,
+    disabled: boolean = false
 
   let renderedData: any[][] | any[] | undefined,
     filteredAndSortedData: any[][] | any[] | undefined,
@@ -190,7 +191,7 @@
       originalIndices = results!.indices
     }
     renderStatus = 'completed'
-    dispatch('renderingCompleted')
+    dispatch('renderingComplete')
   }
 
   function applyFilter(data: any[][] | any[]): any[][] | any[] {
@@ -506,6 +507,10 @@
     render(true)
   }
 
+  export function setDisabled(value: boolean) {
+    disabled = value
+  }
+
   async function loadStoredOptions() {
     if (!internalOptions?.id || !browser) return
 
@@ -582,6 +587,7 @@
                   <ColumnSort
                     column={column.id}
                     sortDirection={column.sortDirection}
+                    disabled={disabled}
                     on:columnSortChanged={onColumnSortChanged}
                   />
                 {/if}
@@ -616,6 +622,7 @@
                     column={column.id}
                     inputType="text"
                     filter={column.filter}
+                    disabled={disabled}
                     on:columnFilterChanged={onColumnFilterChanged}
                   />
                 {/if}
@@ -636,6 +643,7 @@
                 currentPage={internalOptions.currentPage}
                 rowsPerPageOptions={internalOptions.rowsPerPageOptions}
                 totalRows={internalOptions.totalRows ?? 0}
+                disabled={disabled}
                 on:paginationChanged={onPaginationChanged}
               />
             </div>
