@@ -29,6 +29,7 @@
   import { flip } from 'svelte/animate'
   import { storeOptions } from '$lib/actions/storeOptions'
   import { browser } from '$app/environment'
+  import { arraysEqual } from '$lib/utils'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -49,7 +50,7 @@
   let dataType: DataType
 
   let worker: DataTableWorker
-  let originalIndices: Uint32Array //the index of the sorted, filtered and paginated record in the original data
+  let originalIndices: number[] //the index of the sorted, filtered and paginated record in the original data
 
   let settingsVisibility: boolean = false
 
@@ -146,8 +147,8 @@
         internalOptions.totalRows = filteredAndSortedData.length
       }
       renderedData = applyPagination(filteredAndSortedData)
-      originalIndices = (renderedData as any[]).reduce((acc, cur) => {
-        acc.push((data as any[]).indexOf(cur))
+      originalIndices = (renderedData as Record<string, any>[]).reduce<number[]>((acc, cur) => {
+        acc.push((data as Record<string, any>[]).indexOf(cur))
         return acc
       }, [])
     } else if (dataType === DataType.Matrix) {
@@ -155,14 +156,14 @@
         filteredAndSortedData = applySort(applyFilter(data as any[][]))
         internalOptions.totalRows = filteredAndSortedData.length
       }
-      const paginatedFata = applyPagination(filteredAndSortedData)
-      renderedData = paginatedFata.map(row =>
+      const paginatedData = applyPagination(filteredAndSortedData)
+      renderedData = paginatedData.map(row =>
         internalColumns?.reduce((acc, cur, index) => {
           acc[cur.id!] = row[index]
           return acc
         }, {} as Record<string, any>)
       )
-      originalIndices = (renderedData as any[]).reduce((acc, cur) => {
+      originalIndices = (paginatedData as any[]).reduce((acc, cur) => {
         acc.push((data as any[]).indexOf(cur))
         return acc
       }, [])
@@ -183,7 +184,10 @@
           return acc
         }, {} as Record<string, any>)
       )
-      originalIndices = results!.indices
+      originalIndices = results!.indices.reduce<number[]>((acc, cur) => {
+        acc.push(cur)
+        return acc
+      }, [])
     }
     renderStatus = 'completed'
     dispatch('renderingComplete')
@@ -366,8 +370,7 @@
     for (const [index, row] of rowsToUpdateByIndex) {
       const renderedRow = (renderedData as any[])[index]
       for (const [column, value] of Object.entries(row)) {
-        const index = internalColumns?.findIndex(c => c.id === column)
-        renderedRow[index!] = value
+        renderedRow[column] = value
       }
     }
     renderedData = renderedData
@@ -668,7 +671,7 @@
               {/if}
               {#if visibleOrderedColumns}
                 {#each visibleOrderedColumns as column, j (j)}
-                  <td animate:flip={{ duration: 500 }}>{row[column.id]}</td>
+                  <td animate:flip={{ duration: 500 }}><p>{row[column.id]}</p></td>
                 {/each}
               {/if}
             {/if}
