@@ -385,7 +385,7 @@
         for (const row of rows) {
           ;(data as any[][]).push(
             columns!.reduce((acc, column) => {
-              acc.push(row[column.position!])
+              acc.push(row[column.id])
               return acc
             }, [] as any[])
           )
