@@ -425,7 +425,11 @@
   export async function getFullRow(index: number): Promise<Record<string, any>> {
     switch (dataType) {
       case DataType.File:
-        return await worker!.getRow(index)
+        const row = (await worker!.getRow(index)).row
+        return columns!.reduce((acc, column, idx) => {
+          acc[column.id!] = row[idx]
+          return acc
+        }, {} as Record<string, any>)
       case DataType.Matrix:
         return columns!.reduce((acc, column, idx) => {
           acc[column.id] = (data as any[][])[index][idx]
