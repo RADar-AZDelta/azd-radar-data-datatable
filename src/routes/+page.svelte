@@ -265,7 +265,11 @@
 
 <details>
   <summary>Table with an array of objects as a data source</summary>
-  <DataTable {data} bind:this={dataTableArrayOfObjects} />
+  <DataTable {data} bind:this={dataTableArrayOfObjects}>
+    <td slot="actionCell" let:index>
+      <button on:click={async () => await dataTableArrayOfObjects.deleteRows([index])}>Delete row</button>
+    </td>
+  </DataTable>
 
   <br />
   <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert row</button>
@@ -288,10 +292,35 @@
     >)</summary
   >
   <input type="file" accept=".csv" on:change={onFileInputChange} />
-  <DataTable data={file} bind:this={dataTableFile} options={{ actionColumn: true }}>
-    <td slot="actionCell" let:index>
+  <DataTable
+    data={file}
+    bind:this={dataTableFile}
+    options={{ actionColumn: true }}
+    let:renderedRow
+    let:index
+    let:columns
+    modifyColumnMetadata={columns =>
+      columns.map((col, index) => {
+        col.editable = index % 2 === 0
+        return col
+      })}
+  >
+    <td>
       <button on:click={async () => await dataTableFile.deleteRows([index])}>Delete row</button>
     </td>
+    {#each columns || [] as column, i (column.id)}
+      <td animate:flip={{ duration: 500 }}>
+        {#if column.editable === false}
+          <p>{renderedRow[column.id]}</p>
+        {:else}
+          <EditableCell
+            value={renderedRow[column.id]}
+            on:valueChanged={async event =>
+              await dataTableMatrix.updateRows(new Map([[index, Object.fromEntries([[column.id, event.detail]])]]))}
+          />
+        {/if}
+      </td>
+    {/each}
   </DataTable>
 
   <br />

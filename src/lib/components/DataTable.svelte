@@ -14,6 +14,7 @@
     type SettingsVisibilityChangedEventDetail,
     type ColumnPositionChangedEventDetail,
     type ColumnWidthChangedEventDetail,
+    type ModifyColumnMetadataFunc,
   } from './DataTable.d'
   import ColumnSort from './ColumnSort.svelte'
   import ColumnResize from './ColumnResize.svelte'
@@ -29,12 +30,12 @@
   import { flip } from 'svelte/animate'
   import { storeOptions } from '$lib/actions/storeOptions'
   import { browser } from '$app/environment'
-  import { arraysEqual } from '$lib/utils'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
     options: ITableOptions | undefined = undefined,
-    disabled: boolean = false
+    disabled: boolean = false,
+    modifyColumnMetadata: ModifyColumnMetadataFunc = undefined
 
   let renderedData: any[][] | any[] | undefined,
     filteredAndSortedData: any[][] | any[] | undefined,
@@ -104,6 +105,8 @@
           position: index + 1,
         }))
       } else throw new Error('Columns property is not provided')
+
+      if (modifyColumnMetadata) internalColumns = modifyColumnMetadata(internalColumns)
     } else {
       if (dataType === DataType.File) {
         if (columns.length != internalColumns?.length) {
@@ -384,7 +387,7 @@
       case DataType.Matrix:
         for (const row of rows) {
           ;(data as any[][]).push(
-            columns!.reduce((acc, column) => {
+            internalColumns!.reduce((acc, column) => {
               acc.push(row[column.id])
               return acc
             }, [] as any[])
@@ -426,12 +429,12 @@
     switch (dataType) {
       case DataType.File:
         const row = (await worker!.getRow(index)).row
-        return columns!.reduce((acc, column, idx) => {
+        return internalColumns!.reduce((acc, column, idx) => {
           acc[column.id!] = row[idx]
           return acc
         }, {} as Record<string, any>)
       case DataType.Matrix:
-        return columns!.reduce((acc, column, idx) => {
+        return internalColumns!.reduce((acc, column, idx) => {
           acc[column.id] = (data as any[][])[index][idx]
           return acc
         }, {} as Record<string, any>)

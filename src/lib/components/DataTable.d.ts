@@ -33,6 +33,8 @@ export type HTMLInputTypeAttribute =
   | 'url'
   | 'week'
 
+export type ModifyColumnMetadataFunc = (columns: IColumnMetaData[]) => IColumnMetaData[]
+
 export interface IPagination {
   currentPage?: number
   rowsPerPage?: number
@@ -60,6 +62,7 @@ export interface IColumnMetaData {
   filterable?: boolean
   resizable?: boolean
   repositionable?: boolean
+  editable?: boolean
 
   sortDirection?: SortDirection
   sortOrder?: number
