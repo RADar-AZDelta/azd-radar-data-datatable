@@ -406,7 +406,7 @@
   export async function deleteRows(indices: number[]) {
     switch (dataType) {
       case DataType.File:
-        const workerIndices = indices.map(index => indices[index]) //translate local index (on GUI) to worker row index
+        const workerIndices = indices.map(index => originalIndices[index]) //translate local index (on GUI) to worker row index
         await worker!.deleteRows(workerIndices.length == 1 && workerIndices[0] == undefined ? indices : workerIndices)
         break
       case DataType.Matrix:
@@ -428,7 +428,7 @@
   export async function getFullRow(index: number): Promise<Record<string, any>> {
     switch (dataType) {
       case DataType.File:
-        const row = (await worker!.getRow(index)).row
+        const row = (await worker!.getRow(originalIndices[index])).row
         return internalColumns!.reduce((acc, column, idx) => {
           acc[column.id!] = row[idx]
           return acc
