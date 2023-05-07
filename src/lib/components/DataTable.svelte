@@ -35,7 +35,7 @@
     columns: IColumnMetaData[] | undefined = undefined,
     options: ITableOptions | undefined = undefined,
     disabled: boolean = false,
-    modifyColumnMetadata: ModifyColumnMetadataFunc = undefined
+    modifyColumnMetadata: ModifyColumnMetadataFunc | undefined = undefined
 
   let renderedData: any[][] | any[] | undefined,
     filteredAndSortedData: any[][] | any[] | undefined,
@@ -106,15 +106,19 @@
         }))
       } else throw new Error('Columns property is not provided')
 
-      if (modifyColumnMetadata) internalColumns = modifyColumnMetadata(internalColumns)
-    } else {
-      if (dataType === DataType.File) {
-        if (columns.length != internalColumns?.length) {
-          await worker?.insertColumns(columns)
-        }
+      if (modifyColumnMetadata) {
+        const internalColumnsCopy = internalColumns.map(col => col.id)
+        internalColumns = modifyColumnMetadata(internalColumns)
+        const addedColumns = internalColumns.map(col => col.id).filter(x => !internalColumnsCopy.includes(x))
+        if (addedColumns.length > 0)
+          await worker?.insertColumns(
+            internalColumns.reduce<IColumnMetaData[]>((acc, cur) => {
+              if (addedColumns.includes(cur.id)) acc.push(cur)
+              return acc
+            }, [])
+          )
       }
-      internalColumns = columns
-    }
+    } else internalColumns = columns
 
     await loadStoredOptions()
     await render()
@@ -520,16 +524,25 @@
     if (!internalOptions?.id || !browser) return
 
     const storedOptions = localStorage.getItem(`datatable_${internalOptions.id}_options`)
-    if (storedOptions) Object.assign(internalOptions, JSON.parse(storedOptions))
+    if (storedOptions) {
+      try {
+        Object.assign(internalOptions, JSON.parse(storedOptions))
+      } catch {}
+    }
     const storedColumns = localStorage.getItem(`datatable_${internalOptions.id}_columns`)
-    if (storedColumns) internalColumns = JSON.parse(storedColumns)
+    if (storedColumns) {
+      try {
+        internalColumns = JSON.parse(storedColumns)
+      } catch {}
+    }
   }
 
   function onStoreOptions() {
     if (!internalOptions?.id || !browser) return
 
     localStorage.setItem(`datatable_${internalOptions.id}_options`, JSON.stringify(internalOptions))
-    localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
+    if (internalColumns)
+      localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
   }
 
   onDestroy(() => {
