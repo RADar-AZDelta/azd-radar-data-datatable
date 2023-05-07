@@ -88,8 +88,11 @@
       const extension = (data as File).name.split('.').pop()
       await worker.loadFile(url, extension!)
       URL.revokeObjectURL(url)
-    } else return
-
+    } else {
+      renderStatus = ''
+      renderedData = undefined
+      return
+    }
     //COLUMNS:
     if (!columns) {
       if (dataType === DataType.ArrayOfObjects) {
