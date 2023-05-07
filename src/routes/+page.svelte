@@ -316,7 +316,7 @@
           <EditableCell
             value={renderedRow[column.id]}
             on:valueChanged={async event =>
-              await dataTableMatrix.updateRows(new Map([[index, Object.fromEntries([[column.id, event.detail]])]]))}
+              await dataTableFile.updateRows(new Map([[index, Object.fromEntries([[column.id, event.detail]])]]))}
           />
         {/if}
       </td>
