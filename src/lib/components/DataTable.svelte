@@ -701,13 +701,17 @@
         {#if $$slots.loading}
           <slot name="loading" />
         {:else}
-          <Spinner />
-          <div>Loading...</div>
+          <div data-name="info">
+            <Spinner />
+            <p>Loading...</p>
+          </div>
         {/if}
       {:else if $$slots.nodata}
         <slot name="nodata" />
       {:else}
-        <div>No data...</div>
+        <div data-name="info">
+          <p>No data...</p>
+        </div>
       {/if}
     </tbody>
   </table>

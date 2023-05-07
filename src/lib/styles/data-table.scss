@@ -211,6 +211,12 @@ div[data-component='svelte-radar-datatable'] {
       tr:hover {
         background-color: $gray-x-light;
       }
+
+      div[data-name='info'] {
+        position: absolute;
+        left: 50%;
+        text-align: center;
+      }
     }
 
     button {
