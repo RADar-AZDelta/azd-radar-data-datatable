@@ -12,25 +12,24 @@ div[data-component='svelte-radar-datatable'] {
   resize: vertical;
   overflow-x: auto;
 
-  table {
-    margin: 0;
-    clear: both;
-    border-collapse: separate;
-    border-spacing: 0;
-    //   border:1px solid black;
-    //   border-radius: 15px;
+    table {
+      max-width: 100%;
+      line-height: 20px;
+      margin: 0;
+      clear: both;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow-x:auto ;
+      thead {
+        display: table-header-group;
+        vertical-align: middle;
+        background-color: inherit;
 
-    thead {
-      display: table-header-group;
-      vertical-align: middle;
-      background-color: inherit;
-
-
-      tr[data-name='titles'] {
-        th:hover {
-          background-color: $gray-xx-light;
+        tr[data-name='titles'] {
+          th:hover {
+            background-color: $gray-xx-light;
+          }
         }
-      }
 
       tr[data-name='filters'] {
         th {
@@ -88,12 +87,13 @@ div[data-component='svelte-radar-datatable'] {
       }
     }
 
-    tfoot {
-      tr[data-name='pagination'] {
-        th {
-          div {
-            align-items: center;
-            display: flex;
+      tfoot {
+        tr[data-name='pagination'] {
+          vertical-align: bottom;
+          th {
+            div {
+              align-items: center;
+              display: flex;
 
             div[data-name='pagination-container'] {
               margin-left: 5px;
@@ -118,13 +118,79 @@ div[data-component='svelte-radar-datatable'] {
               }
             }
 
-            div[data-name='pagination-container-pages'] {
-              margin-left: auto;
-              float: right;
-              text-align: right;
-              height: 30px;
-              margin-top: 5px;
-              padding: 0;
+      tbody {
+        display: table-row-group;
+        vertical-align: middle;
+        border-color: inherit;
+        font-size:16px;
+        tr {
+          button {
+            border-radius: 3px;
+            border: solid 1px $gray-x-light;
+          }
+          td {
+            width: fit-content;
+
+            input {
+              border-radius: 5px;
+              font-size: 0.75rem;
+              box-shadow: inset 0 0.0625 0.125em rgba(10, 10, 10, 0.05);
+              background-color: #fff;
+              border-color: $gray-x-light;
+              color: #363636;
+              height: 2.5em;
+              display: inline-flex;
+              border: 0.2px solid;
+              justify-content: flex-start;
+              height: 25px;
+              padding: 0 0.5rem;
+            }
+          }
+        }
+
+        tr:nth-child(even) {
+          background: #fff;
+        }
+
+        tr:nth-child(odd) {
+          background: #e2e8f3;
+        }
+
+        tr:hover {
+          background-color: $gray-x-light;
+        }
+      }
+    }
+  }
+  div[data-name='pagination-div'] {
+    align-items: end;
+  }
+  div[data-name='pagination-container'] {
+    float: left;
+    clear: both;
+
+    p {
+      padding-right: 5px;
+      padding-left: 5px;
+    }
+  }
+
+  button[data-name='settings-button'] {
+    border: none;
+    background-color: inherit;
+  }
+
+  button[data-name='settings-button']:hover {
+    border: none;
+    background-color: $gray-x-light;
+  }
+
+  div[data-name='pagination-container-pages'] {
+    float: right;
+    text-align: right;
+    height: 30px;
+    margin-top: 5px;
+    padding: 0;
 
               button {
                 border: none;
@@ -173,15 +239,14 @@ div[data-component='svelte-radar-datatable'] {
 
       tr {
         td {
-          width: fit-content;
-
+          max-width: 0;
+          min-width: 75px;
           p {
+            display:block;
+            overflow:hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
             margin: 0;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-            white-space: pre-wrap;
           }
 
           div[data-name='cell'] {
@@ -193,6 +258,7 @@ div[data-component='svelte-radar-datatable'] {
             }
 
             button {
+              height:inherit;
               /*border-radius: 3px;
               border: solid 1px $gray-x-light;*/
             }
@@ -242,8 +308,7 @@ div[data-component='svelte-radar-datatable'] {
       height: 25px;
       padding: 0 0.5rem;
     }
-  }
-}
+  
 
 div[data-name='modal-visiblity'] {
   display: block;
@@ -268,7 +333,6 @@ div[data-name='modal-visiblity'] {
 
   .modal-body {
     position: absolute;
-    height: 200px;
     overflow-y: auto;
   }
 }
@@ -304,5 +368,50 @@ section[data-component='modal-container-medium'] {
     div[data-component='modal-content'] {
       padding: 5px;
     }
+  }
+}
+th[data-name='action-Column']
+{
+  width: 75px;
+}
+@media only screen and (max-width: 1600px)
+{
+  table{
+    line-height: 15px;
+  }
+  tbody{
+    font-size: 14px;
+    color:purple
+  }
+}
+
+@media only screen and (max-width: 1200px)
+{
+  table{
+    line-height: 13px;
+  }
+  tbody{
+    font-size:12px;
+    color:blue
+  }
+}
+@media only screen and (max-width: 900px)
+{
+  table{
+    line-height: 11px;
+  }
+  tbody{
+    font-size:11px;
+    color:red
+  }
+}
+@media only screen and (max-width: 600px)
+{
+  table{
+    line-height: 11px;
+  }
+  tbody{
+    font-size:10px;
+    color:green
   }
 }

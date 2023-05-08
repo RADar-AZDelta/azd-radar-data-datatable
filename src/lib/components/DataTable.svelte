@@ -261,7 +261,7 @@
 
   async function onColumnFilterChanged(event: CustomEvent<ColumnFilterChangedEventDetail>) {
     const column = internalColumns?.find(col => col.id === event.detail.column)
-    column!.filter = event.detail.filter
+    column!.filter = event.detail.filter?.toString().toLowerCase()
     internalColumns = internalColumns
     filteredAndSortedData = undefined
 
@@ -597,7 +597,7 @@
       {#if visibleOrderedColumns}
         <tr data-name="titles">
           {#if internalOptions.actionColumn}
-            <th />
+            <th data-name="action-Column" />
           {/if}
           {#each visibleOrderedColumns as column, i (column.id)}
             <th
