@@ -535,7 +535,17 @@
     const storedColumns = localStorage.getItem(`datatable_${internalOptions.id}_columns`)
     if (storedColumns) {
       try {
-        internalColumns = JSON.parse(storedColumns)
+        const storedInternalColumns: Map<string, IColumnMetaData> = JSON.parse(storedColumns).reduce(
+          (acc: Map<string, IColumnMetaData>, cur: IColumnMetaData) => {
+            acc.set(cur.id, cur)
+            return acc
+          },
+          new Map<string, IColumnMetaData>()
+        )
+        internalColumns = internalColumns?.map((col: IColumnMetaData) => {
+          if (storedInternalColumns.has(col.id)) Object.assign(col, storedInternalColumns.has(col.id))
+          return col
+        })
       } catch {}
     }
   }
