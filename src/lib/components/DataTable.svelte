@@ -140,7 +140,7 @@
         return acc
       }, new Map<string, TFilter>())
       const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
-        if (cur && cur.filter) acc.set(cur.id, cur.sortDirection)
+        if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
         return acc
       }, new Map<string, SortDirection>())
       if (dev) start = performance.now()
