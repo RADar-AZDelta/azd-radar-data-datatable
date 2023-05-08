@@ -309,6 +309,16 @@ div[data-component='svelte-radar-datatable'] {
       padding: 0 0.5rem;
     }
   
+table[data-name='table-skeleton']
+{
+  tr{
+    background-color: #fff;
+  }
+  
+  tr:hover{
+    background-color: #fff;
+  }
+}
 
 div[data-name='modal-visiblity'] {
   display: block;
