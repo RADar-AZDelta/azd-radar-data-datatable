@@ -10,7 +10,8 @@
   export let rowsPerPage: number = 20,
     currentPage: number = 1,
     rowsPerPageOptions: number[] = [5, 10, 20, 50, 100],
-    totalRows: number
+    totalRows: number,
+    disabled: boolean
 
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
@@ -45,7 +46,7 @@
 
 <div data-name="pagination-container">
   <p>Rows:</p>
-  <select bind:value={rowsPerPage} on:change={onChangeRowsPerPage}>
+  <select bind:value={rowsPerPage} on:change={onChangeRowsPerPage} {disabled}>
     {#each rowsPerPageOptions ?? [] as value}
       <option {value}>{value}</option>
     {/each}
@@ -55,15 +56,18 @@
   </p>
 </div>
 <div data-name="pagination-container-pages">
-  <button disabled={!totalRows || currentPage === 1} on:click={() => onChangePage(currentPage - 1)}>
+  <button disabled={!totalRows || currentPage === 1 || disabled} on:click={() => onChangePage(currentPage - 1)}>
     <SvgIcon href={iconsSvgUrl} id="arrow-left" width="16px" height="16px" />
   </button>
   {#each pages as page}
-    <button data-active={currentPage === page} disabled={!page} on:click={() => onChangePage(page)}
+    <button data-active={currentPage === page} disabled={!page || disabled} on:click={() => onChangePage(page)}
       >{page ? page : '...'}</button
     >
   {/each}
-  <button disabled={!totalRows || currentPage === totalPages} on:click={() => onChangePage(currentPage + 1)}>
+  <button
+    disabled={!totalRows || currentPage === totalPages || disabled}
+    on:click={() => onChangePage(currentPage + 1)}
+  >
     <SvgIcon href={iconsSvgUrl} id="arrow-right" width="16px" height="16px" />
   </button>
 </div>

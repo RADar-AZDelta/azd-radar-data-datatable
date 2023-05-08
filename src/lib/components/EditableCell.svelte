@@ -25,12 +25,12 @@
   }
 </script>
 
-<div on:mouseleave={onClickCancel}>
+<div on:mouseleave={onClickCancel} data-name="cell">
   {#if !editMode}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div on:click={() => (editMode = true)}>{value}</div>
+    <p on:click={() => (editMode = true)}>{value}</p>
   {:else}
-    <input bind:value={editValue} />
+    <textarea bind:value={editValue} />
     <button on:click={onClickSave}> Save </button>
   {/if}
 </div>
