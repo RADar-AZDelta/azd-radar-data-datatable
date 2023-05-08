@@ -1,7 +1,9 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
+  import SvgIcon from './SvgIcon.svelte'
   import { createEventDispatcher } from 'svelte'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
   export let value: any
   let editValue: any
@@ -31,6 +33,13 @@
     <p on:click={() => (editMode = true)}>{value}</p>
   {:else}
     <textarea bind:value={editValue} />
-    <button on:click={onClickSave}> Save </button>
+    <button on:click={onClickSave}><SvgIcon href={iconsSvgUrl} id="checkmark" width="20px" height="20px" /></button>
   {/if}
 </div>
+
+<style>
+  button {
+    border: none;
+    background-color: inherit;
+  }
+</style>

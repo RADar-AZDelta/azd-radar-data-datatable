@@ -587,7 +587,7 @@
       {#if visibleOrderedColumns}
         <tr data-name="titles">
           {#if internalOptions.actionColumn}
-            <th />
+            <th data-name="action-Column" />
           {/if}
           {#each visibleOrderedColumns as column, i (column.id)}
             <th

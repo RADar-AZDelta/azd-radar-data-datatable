@@ -13,11 +13,13 @@ div[data-component='svelte-radar-datatable'] {
   overflow-x: auto;
 
     table {
-      line-height: 15px;
+      max-width: 100%;
+      line-height: 20px;
       margin: 0;
       clear: both;
       border-collapse: separate;
       border-spacing: 0;
+      overflow-x:auto ;
       thead {
         display: table-header-group;
         vertical-align: middle;
@@ -120,7 +122,7 @@ div[data-component='svelte-radar-datatable'] {
         display: table-row-group;
         vertical-align: middle;
         border-color: inherit;
-
+        font-size:16px;
         tr {
           button {
             border-radius: 3px;
@@ -237,15 +239,14 @@ div[data-component='svelte-radar-datatable'] {
 
       tr {
         td {
-          width: fit-content;
-
+          max-width: 0;
+          min-width: 75px;
           p {
+            display:block;
+            overflow:hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
             margin: 0;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-            white-space: pre-wrap;
           }
 
           div[data-name='cell'] {
@@ -257,6 +258,7 @@ div[data-component='svelte-radar-datatable'] {
             }
 
             button {
+              height:inherit;
               /*border-radius: 3px;
               border: solid 1px $gray-x-light;*/
             }
@@ -368,21 +370,48 @@ section[data-component='modal-container-medium'] {
     }
   }
 }
-@media only screen and (max-width: 600px)
+th[data-name='action-Column']
 {
-  body{
-    font-size:10px;
+  width: 75px;
+}
+@media only screen and (max-width: 1600px)
+{
+  table{
+    line-height: 15px;
+  }
+  tbody{
+    font-size: 14px;
+    color:purple
+  }
+}
+
+@media only screen and (max-width: 1200px)
+{
+  table{
+    line-height: 13px;
+  }
+  tbody{
+    font-size:12px;
+    color:blue
   }
 }
 @media only screen and (max-width: 900px)
 {
-  body{
+  table{
+    line-height: 11px;
+  }
+  tbody{
     font-size:11px;
+    color:red
   }
 }
-@media only screen and (min-width: 1200px)
+@media only screen and (max-width: 600px)
 {
-  body{
-    font-size:12px;
+  table{
+    line-height: 11px;
+  }
+  tbody{
+    font-size:10px;
+    color:green
   }
 }
