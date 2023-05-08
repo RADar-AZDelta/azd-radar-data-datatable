@@ -230,7 +230,7 @@
 
   async function onColumnFilterChanged(event: CustomEvent<ColumnFilterChangedEventDetail>) {
     const column = internalColumns?.find(col => col.id === event.detail.column)
-    column!.filter = event.detail.filter
+    column!.filter = event.detail.filter?.toString().toLowerCase()
     internalColumns = internalColumns
     filteredAndSortedData = undefined
 

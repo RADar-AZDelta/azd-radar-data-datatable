@@ -14,18 +14,15 @@ div[data-component='RADar-DataTable'] {
     overflow-x: auto;
 
     table {
+      line-height: 15px;
       margin: 0;
       clear: both;
       border-collapse: separate;
       border-spacing: 0;
-    //   border:1px solid black;
-    //   border-radius: 15px;
-
       thead {
         display: table-header-group;
         vertical-align: middle;
         background-color: inherit;
-        
 
         tr[data-name='titles'] {
           th:hover {
@@ -133,8 +130,8 @@ div[data-component='RADar-DataTable'] {
           vertical-align: bottom;
           th {
             div {
-                align-items: center;
-                display: flex;
+              align-items: center;
+              display: flex;
 
               div[data-name='pagination-container'] {
                 margin-left: 5px;
@@ -170,10 +167,10 @@ div[data-component='RADar-DataTable'] {
         border-color: inherit;
 
         tr {
-            button{
-                border-radius: 3px;
-                border: solid 1px $gray-x-light;
-            }
+          button {
+            border-radius: 3px;
+            border: solid 1px $gray-x-light;
+          }
           td {
             width: fit-content;
 
@@ -208,8 +205,7 @@ div[data-component='RADar-DataTable'] {
       }
     }
   }
-  div[data-name='pagination-div']
-  {
+  div[data-name='pagination-div'] {
     align-items: end;
   }
   div[data-name='pagination-container'] {
@@ -263,21 +259,21 @@ div[data-component='RADar-DataTable'] {
 }
 
 div[data-name='modal-visiblity'] {
-    display: block;
-    position:fixed;
-    top: 50%;
-    left: 50%;
-    
-    transform: translate(-50%, -50%);
-    width: 50%;
-    height: 50%;
-    justify-content: start;
-    text-align: start;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 20px 15px 20px 0px rgb(255 255 255 / 20%);
-    border-right: 1px solid rgba(255,255,255,0.2);
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    overflow-y: auto;
+  display: block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 50%;
+  justify-content: start;
+  text-align: start;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 20px 15px 20px 0px rgb(255 255 255 / 20%);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  overflow-y: auto;
 
   .modal-diaglog {
     overflow-y: initial;
@@ -320,5 +316,23 @@ section[data-component='modal-container-medium'] {
     div[data-component='modal-content'] {
       padding: 5px;
     }
+  }
+}
+@media only screen and (max-width: 600px)
+{
+  body{
+    font-size:10px;
+  }
+}
+@media only screen and (max-width: 900px)
+{
+  body{
+    font-size:11px;
+  }
+}
+@media only screen and (min-width: 1200px)
+{
+  body{
+    font-size:12px;
   }
 }
