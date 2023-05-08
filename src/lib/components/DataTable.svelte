@@ -543,7 +543,7 @@
           new Map<string, IColumnMetaData>()
         )
         internalColumns = internalColumns?.map((col: IColumnMetaData) => {
-          if (storedInternalColumns.has(col.id)) Object.assign(col, storedInternalColumns.has(col.id))
+          if (storedInternalColumns.has(col.id)) Object.assign(col, storedInternalColumns.get(col.id))
           return col
         })
       } catch {}
