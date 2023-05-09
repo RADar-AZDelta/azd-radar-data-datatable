@@ -11,7 +11,6 @@
     type PaginationChangedEventDetail,
     type FetchDataFunc,
     DataType,
-    type SettingsVisibilityChangedEventDetail,
     type ColumnPositionChangedEventDetail,
     type ColumnWidthChangedEventDetail,
     type ModifyColumnMetadataFunc,
@@ -26,10 +25,11 @@
   import { DataTableWorker } from './DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
   import Options from './Options.svelte'
-  import Modal from './Modal.svelte'
   import { flip } from 'svelte/animate'
   import { storeOptions } from '$lib/actions/storeOptions'
   import { browser } from '$app/environment'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
+  import SvgIcon from './SvgIcon.svelte'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -53,7 +53,7 @@
   let worker: DataTableWorker
   let originalIndices: number[] //the index of the sorted, filtered and paginated record in the original data
 
-  let settingsVisibility: boolean = false
+  let settingsDialog: HTMLDialogElement
 
   const dispatch = createEventDispatcher()
 
@@ -318,8 +318,8 @@
     await render(true)
   }
 
-  async function onSettingsVisibilityChanged(event: CustomEvent<SettingsVisibilityChangedEventDetail>) {
-    settingsVisibility = event.detail.visibility
+  async function onSettingsVisibilityChanged() {
+    settingsDialog.showModal()
   }
 
   async function onColumnVisibilityChanged(e: Event) {
@@ -558,33 +558,38 @@
       localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
   }
 
+  function closeDialog() {
+    settingsDialog.close()
+  }
+
   onDestroy(() => {
     worker?.destroy()
   })
 </script>
 
-<Modal on:settingsVisibilityChanged={onSettingsVisibilityChanged} show={settingsVisibility}>
-  <div data-name="modal-visiblity">
-    <div class="modal-dialog">
-      <h1>Change column visability:</h1>
-      <div class="modal-body">
-        {#if internalColumns}
-          {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
-            <div>
-              <input
-                type="checkbox"
-                id={column.id}
-                checked={column.visible == undefined ? true : column.visible}
-                on:change={onColumnVisibilityChanged}
-              />
-              <label for={column.id}>{column.label ?? column.id}</label><br />
-            </div>
-          {/each}
-        {/if}
-      </div>
+<dialog data-name="settings-dialog" bind:this={settingsDialog}>
+  <button data-name="close-button" on:click={closeDialog}
+    ><SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" /></button
+  >
+  <div class="modal-dialog">
+    <h1>Change column visability:</h1>
+    <div class="modal-body">
+      {#if internalColumns}
+        {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
+          <div>
+            <input
+              type="checkbox"
+              id={column.id}
+              checked={column.visible == undefined ? true : column.visible}
+              on:change={onColumnVisibilityChanged}
+            />
+            <label for={column.id}>{column.label ?? column.id}</label><br />
+          </div>
+        {/each}
+      {/if}
     </div>
   </div>
-</Modal>
+</dialog>
 
 <div
   data-component="svelte-radar-datatable"

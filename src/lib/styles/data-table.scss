@@ -309,29 +309,26 @@ div[data-component='svelte-radar-datatable'] {
       padding: 0 0.5rem;
     }
   
-
-div[data-name='modal-visiblity'] {
-  display: block;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-
-  transform: translate(-50%, -50%);
+dialog[data-name="settings-dialog"] {
   width: 50%;
   height: 50%;
-  justify-content: start;
-  text-align: start;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 20px 15px 20px 0px rgb(255 255 255 / 20%);
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  overflow-y: auto;
+  border: none;
+  border-radius: 10px;
 
-  .modal-diaglog {
+  button[data-name="close-button"] {
+    position: absolute;
+    right: 0;
+    margin-right: 1rem;
+    border: none;
+    background-color: inherit;
+    cursor: pointer;
+  }
+
+  div[data-name="modal-dialog"] {
     overflow-y: initial;
   }
 
-  .modal-body {
+  div[data-name="modal-body"] {
     position: absolute;
     overflow-y: auto;
   }
