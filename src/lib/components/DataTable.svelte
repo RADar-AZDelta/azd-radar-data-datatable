@@ -558,17 +558,13 @@
       localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
   }
 
-  function closeDialog() {
-    settingsDialog.close()
-  }
-
   onDestroy(() => {
     worker?.destroy()
   })
 </script>
 
 <dialog data-name="settings-dialog" bind:this={settingsDialog}>
-  <button data-name="close-button" on:click={closeDialog}
+  <button data-name="close-button" on:click={() => settingsDialog.close()}
     ><SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" /></button
   >
   <div class="modal-dialog">
