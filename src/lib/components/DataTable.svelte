@@ -386,12 +386,31 @@
     renderedData = renderedData
   }
 
-  export async function insertRows(rows: Record<string, any>[]) {
+  export async function updateNonRenderedRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
     switch (dataType) {
       case DataType.File:
-        await worker!.insertRows(rows)
+        const rowsToUpdateByWorkerIndex = [...rowsToUpdateByOriginalIndex].reduce<Map<number, Record<string, any>>>(
+          (acc, [index, row]) => {
+            acc.set(index, row) //swap the local index with the worker index
+            return acc
+          },
+          new Map<number, Record<string, any>>()
+        )
+        await worker!.updateRows(rowsToUpdateByWorkerIndex)
+        break
+      default:
+        throw new Error('Not yet supported')
+    }
+  }
+
+  export async function insertRows(rows: Record<string, any>[]): Promise<number[]> {
+    let indices: number[]
+    switch (dataType) {
+      case DataType.File:
+        indices = (await worker!.insertRows(rows)).indices
         break
       case DataType.Matrix:
+        indices = Array.from({ length: rows.length }, (_, i) => (data as any[][]).length + i)
         for (const row of rows) {
           ;(data as any[][]).push(
             internalColumns!.reduce((acc, column) => {
@@ -402,12 +421,14 @@
         }
         break
       case DataType.ArrayOfObjects:
+        indices = Array.from({ length: rows.length }, (_, i) => (data as any[]).length + i)
         ;(data as any[]).push(...rows)
         break
       default:
         throw new Error('Not yet supported')
     }
     await render(false)
+    return indices
   }
 
   export async function deleteRows(indices: number[]) {

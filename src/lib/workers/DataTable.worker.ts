@@ -16,6 +16,7 @@ import type {
   MessageRequestInsertColumns,
   MessageRequestExecuteQueryAndReturnResults,
   MessageResponseExecuteQueryAndReturnResults,
+  MessageRespnseInsertColumns,
 } from './messages'
 import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, addFunction, fromJSON } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
@@ -203,11 +204,14 @@ function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
 function insertRows({ rows }: MessageRequestInsertRows) {
   tempDt = undefined
 
+  const indices: number[] = Array.from({ length: rows.length }, (_, i) => dt._total + i);
   dt = dt.concat(from(rows))
 
-  const message: PostMessage<unknown> = {
+  const message: PostMessage<MessageRespnseInsertColumns> = {
     msg: 'insertRows',
-    data: undefined,
+    data: {
+      indices
+    },
   }
   postMessage(message)
 }

@@ -52,6 +52,10 @@ export interface MessageRequestInsertColumns {
   columns: IColumnMetaData[]
 }
 
+export interface MessageRespnseInsertColumns {
+  indices: number[]
+}
+
 export interface MessageRequestExecuteQueryAndReturnResults {
   usedQuery: Query | object
 }
