@@ -439,21 +439,21 @@
     return internalColumns
   }
 
-  export async function getFullRow(index: number): Promise<Record<string, any>> {
+  export async function getFullRow(originalIndex: number): Promise<Record<string, any>> {
     switch (dataType) {
       case DataType.File:
-        const row = (await worker!.getRow(originalIndices[index])).row
+        const row = (await worker!.getRow(originalIndex)).row
         return internalColumns!.reduce((acc, column, idx) => {
           acc[column.id!] = row[idx]
           return acc
         }, {} as Record<string, any>)
       case DataType.Matrix:
         return internalColumns!.reduce((acc, column, idx) => {
-          acc[column.id] = (data as any[][])[index][idx]
+          acc[column.id] = (data as any[][])[originalIndex][idx]
           return acc
         }, {} as Record<string, any>)
       case DataType.ArrayOfObjects:
-        return (data as any[])[index]
+        return (data as any[])[originalIndex]
       default:
         throw new Error('Not yet supported')
     }
