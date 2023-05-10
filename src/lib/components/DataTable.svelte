@@ -149,6 +149,7 @@
         const end = performance.now()
         console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
       }
+      originalIndices = Array.from({ length: results.data.length }, (_, i) => i)
       internalOptions.totalRows = results.totalRows
       renderedData = results.data
     } else if (dataType === DataType.ArrayOfObjects) {
@@ -347,12 +348,12 @@
     }
   }
 
-  export async function updateRows(rowsToUpdateByIndex: Map<number, Record<string, any>>) {
+  export async function updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
     switch (dataType) {
       case DataType.File:
-        const rowsToUpdateByWorkerIndex = [...rowsToUpdateByIndex].reduce<Map<number, Record<string, any>>>(
-          (acc, [index, row]) => {
-            acc.set(originalIndices[index], row) //swap the local index with the worker index
+        const rowsToUpdateByWorkerIndex = [...rowsToUpdateByOriginalIndex].reduce<Map<number, Record<string, any>>>(
+          (acc, [originalIndex, row]) => {
+            acc.set(originalIndex, row) //swap the local index with the worker index
             return acc
           },
           new Map<number, Record<string, any>>()
@@ -360,8 +361,8 @@
         await worker!.updateRows(rowsToUpdateByWorkerIndex)
         break
       case DataType.Matrix:
-        for (const [index, row] of rowsToUpdateByIndex) {
-          const originalRow = (data as any[][])[originalIndices[index]]
+        for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
+          const originalRow = (data as any[][])[originalIndex]
           for (const [column, value] of Object.entries(row)) {
             const index = internalColumns?.findIndex(c => c.id === column)
             originalRow[index!] = value
@@ -369,16 +370,17 @@
         }
         break
       case DataType.ArrayOfObjects:
-        for (const [index, row] of rowsToUpdateByIndex) {
-          Object.assign((data as any[])[originalIndices[index]], row)
+        for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
+          Object.assign((data as any[])[originalIndex], row)
         }
         break
       default:
         throw new Error('Not yet supported')
     }
 
-    for (const [index, row] of rowsToUpdateByIndex) {
-      const renderedRow = (renderedData as any[])[index]
+    for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
+      const renderedIndex = originalIndices.findIndex(i => i === originalIndex)
+      const renderedRow = (renderedData as any[])[renderedIndex]
       for (const [column, value] of Object.entries(row)) {
         renderedRow[column] = value
       }
@@ -386,31 +388,14 @@
     renderedData = renderedData
   }
 
-  export async function updateNonRenderedRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
-    switch (dataType) {
-      case DataType.File:
-        const rowsToUpdateByWorkerIndex = [...rowsToUpdateByOriginalIndex].reduce<Map<number, Record<string, any>>>(
-          (acc, [index, row]) => {
-            acc.set(index, row) //swap the local index with the worker index
-            return acc
-          },
-          new Map<number, Record<string, any>>()
-        )
-        await worker!.updateRows(rowsToUpdateByWorkerIndex)
-        break
-      default:
-        throw new Error('Not yet supported')
-    }
-  }
-
   export async function insertRows(rows: Record<string, any>[]): Promise<number[]> {
-    let indices: number[]
+    let originalIndices: number[]
     switch (dataType) {
       case DataType.File:
-        indices = (await worker!.insertRows(rows)).indices
+        originalIndices = (await worker!.insertRows(rows)).indices
         break
       case DataType.Matrix:
-        indices = Array.from({ length: rows.length }, (_, i) => (data as any[][]).length + i)
+        originalIndices = Array.from({ length: rows.length }, (_, i) => (data as any[][]).length + i)
         for (const row of rows) {
           ;(data as any[][]).push(
             internalColumns!.reduce((acc, column) => {
@@ -421,26 +406,25 @@
         }
         break
       case DataType.ArrayOfObjects:
-        indices = Array.from({ length: rows.length }, (_, i) => (data as any[]).length + i)
+        originalIndices = Array.from({ length: rows.length }, (_, i) => (data as any[]).length + i)
         ;(data as any[]).push(...rows)
         break
       default:
         throw new Error('Not yet supported')
     }
     await render(false)
-    return indices
+    return originalIndices
   }
 
-  export async function deleteRows(indices: number[]) {
+  export async function deleteRows(originalIndices: number[]) {
     switch (dataType) {
       case DataType.File:
-        const workerIndices = indices.map(index => originalIndices[index]) //translate local index (on GUI) to worker row index
-        await worker!.deleteRows(workerIndices.length == 1 && workerIndices[0] == undefined ? indices : workerIndices)
+        await worker!.deleteRows(originalIndices)
         break
       case DataType.Matrix:
       case DataType.ArrayOfObjects:
-        for (const index of indices.sort((a, b) => b - a)) {
-          ;(data as any[]).splice(originalIndices[index], 1)
+        for (const originalIndex of originalIndices.sort((a, b) => b - a)) {
+          ;(data as any[]).splice(originalIndex, 1)
         }
         break
       default:
@@ -709,14 +693,21 @@
         {#each renderedData as row, i (i)}
           <tr data-index={i}>
             {#if $$slots.default}
-              <slot renderedRow={row} index={i} columns={visibleOrderedColumns} options={internalOptions} />
+              <slot
+                renderedRow={row}
+                renderedIndex={i}
+                originalIndex={originalIndices[i]}
+                columns={visibleOrderedColumns}
+                options={internalOptions}
+              />
             {:else}
               {#if internalOptions.actionColumn}
                 {#if $$slots.actionCell}
                   <slot
                     name="actionCell"
                     renderedRow={row}
-                    index={i}
+                    renderedIndex={i}
+                    originalIndex={originalIndices[i]}
                     columns={visibleOrderedColumns}
                     options={internalOptions}
                   />

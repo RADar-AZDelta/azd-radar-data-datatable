@@ -238,18 +238,20 @@
     bind:this={dataTableMatrix}
     options={{ id: 'matrix', rowsPerPage: 7, rowsPerPageOptions: [7, 15], actionColumn: true }}
     let:renderedRow
-    let:index
+    let:originalIndex
     let:columns
   >
     <td>
-      <button on:click={async () => await dataTableMatrix.deleteRows([index])}>Delete row</button>
+      <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
     </td>
     {#each columns || [] as column, i (column.id)}
       <td animate:flip={{ duration: 500 }}>
         <EditableCell
           value={renderedRow[column.id]}
           on:valueChanged={async event =>
-            await dataTableMatrix.updateRows(new Map([[index, Object.fromEntries([[column.id, event.detail]])]]))}
+            await dataTableMatrix.updateRows(
+              new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
+            )}
         />
       </td>
     {/each}
@@ -266,8 +268,8 @@
 <details>
   <summary>Table with an array of objects as a data source</summary>
   <DataTable {data} bind:this={dataTableArrayOfObjects}>
-    <td slot="actionCell" let:index>
-      <button on:click={async () => await dataTableArrayOfObjects.deleteRows([index])}>Delete row</button>
+    <td slot="actionCell" let:originalIndex>
+      <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
     </td>
   </DataTable>
 
@@ -297,7 +299,7 @@
     bind:this={dataTableFile}
     options={{ actionColumn: true }}
     let:renderedRow
-    let:index
+    let:originalIndex
     let:columns
     modifyColumnMetadata={columns =>
       columns.map((col, index) => {
@@ -306,7 +308,7 @@
       })}
   >
     <td>
-      <button on:click={async () => await dataTableFile.deleteRows([index])}>Delete row</button>
+      <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
     </td>
     {#each columns || [] as column, i (column.id)}
       <td animate:flip={{ duration: 500 }}>
@@ -316,7 +318,9 @@
           <EditableCell
             value={renderedRow[column.id]}
             on:valueChanged={async event =>
-              await dataTableFile.updateRows(new Map([[index, Object.fromEntries([[column.id, event.detail]])]]))}
+              await dataTableFile.updateRows(
+                new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
+              )}
           />
         {/if}
       </td>
