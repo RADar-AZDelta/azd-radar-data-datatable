@@ -190,7 +190,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
 function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
   for (let [index, row] of rowsByIndex) {
     for (const [column, value] of Object.entries(row)) {
-      if (dt._data[column] != undefined) dt._data[column].data[index] = value
+      if (dt._data[column]) dt._data[column].data[index] = value
     }
   }
 
@@ -219,15 +219,8 @@ function insertRows({ rows }: MessageRequestInsertRows) {
 function deleteRows({ indices }: MessageRequestDeleteRows) {
   tempDt = undefined
 
-  const rowObjects = indices.reduce((acc, cur) => {
-    acc.push(dt.object(cur!))
-    return acc
-  }, [] as Record<string, any>[])
+  indices.sort((a, b) => b - a) //sort descending
 
-  //TODO: test if we can run without escape (better performance)
-  //TODO: use op.equal to handle null values because join semantics do not consider null or undefined values to be equal (that is, null !== null)
-  //      or delete based on the index
-  //dt = dt.antijoin(from(rowObjects))
   for (const index of indices) {
     for (const column of Object.keys(dt._data)) {
       ; (dt._data[column] as Column).data.splice(index, 1)
@@ -254,7 +247,7 @@ function getRow({ index }: MessageRequestGetRow) {
 }
 
 function insertColumns({ columns }: MessageRequestInsertColumns) {
-  const obj: { [key: string]: any[] } = {}
+  const obj: Record<string, any> = {}
   // Add a column that is already in the original table
   obj[dt._names[0]] = [dt._data[dt._names[0]].data[0]]
   for (let col of columns) {
@@ -263,6 +256,13 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
   }
   // Left join the new table into the original table
   dt = dt.join_left(fromJSON(obj))
+
+  // const existingColumns = Object.keys(dt._data)
+  // for (const col of columns) {
+  //   if (existingColumns.includes(col.id))
+  //     continue
+  //   dt._data[col.id].data = new Array(dt._total).fill(null);
+  // }
   const message: PostMessage<unknown> = {
     msg: 'insertColumns',
     data: undefined
