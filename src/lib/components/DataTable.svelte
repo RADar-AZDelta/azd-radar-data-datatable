@@ -380,9 +380,11 @@
 
     for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
       const renderedIndex = originalIndices.findIndex(i => i === originalIndex)
-      const renderedRow = (renderedData as any[])[renderedIndex]
-      for (const [column, value] of Object.entries(row)) {
-        renderedRow[column] = value
+      if (renderedIndex !== -1) {
+        const renderedRow = (renderedData as any[])[renderedIndex]
+        for (const [column, value] of Object.entries(row)) {
+          renderedRow[column] = value
+        }
       }
     }
     renderedData = renderedData
