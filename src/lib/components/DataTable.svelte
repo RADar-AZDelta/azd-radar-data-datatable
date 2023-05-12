@@ -11,7 +11,6 @@
     type PaginationChangedEventDetail,
     type FetchDataFunc,
     DataType,
-    type SettingsVisibilityChangedEventDetail,
     type ColumnPositionChangedEventDetail,
     type ColumnWidthChangedEventDetail,
     type ModifyColumnMetadataFunc,
@@ -26,11 +25,12 @@
   import { DataTableWorker } from './DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
   import Options from './Options.svelte'
-  import Modal from './Modal.svelte'
   import { flip } from 'svelte/animate'
   import { storeOptions } from '$lib/actions/storeOptions'
   import { browser } from '$app/environment'
   import Skeleton from './Skeleton.svelte'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
+  import SvgIcon from './SvgIcon.svelte'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -54,7 +54,7 @@
   let worker: DataTableWorker
   let originalIndices: number[] //the index of the sorted, filtered and paginated record in the original data
 
-  let settingsVisibility: boolean = false
+  let settingsDialog: HTMLDialogElement
 
   const dispatch = createEventDispatcher()
 
@@ -141,7 +141,7 @@
         return acc
       }, new Map<string, TFilter>())
       const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
-        if (cur && cur.filter) acc.set(cur.id, cur.sortDirection)
+        if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
         return acc
       }, new Map<string, SortDirection>())
       if (dev) start = performance.now()
@@ -150,6 +150,7 @@
         const end = performance.now()
         console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
       }
+      originalIndices = Array.from({ length: results.data.length }, (_, i) => i)
       internalOptions.totalRows = results.totalRows
       renderedData = results.data
     } else if (dataType === DataType.ArrayOfObjects) {
@@ -184,7 +185,7 @@
         return acc
       }, new Map<string, TFilter>())
       const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
-        if (cur && cur.filter) acc.set(cur.id, cur.sortDirection)
+        if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
         return acc
       }, new Map<string, SortDirection>())
       const results = await worker?.fetchData(filteredColumns, sortedColumns, internalOptions, onlyPaginationChanged)
@@ -320,8 +321,8 @@
     await render(true)
   }
 
-  async function onSettingsVisibilityChanged(event: CustomEvent<SettingsVisibilityChangedEventDetail>) {
-    settingsVisibility = event.detail.visibility
+  async function onSettingsVisibilityChanged() {
+    settingsDialog.showModal()
   }
 
   async function onColumnVisibilityChanged(e: Event) {
@@ -349,12 +350,12 @@
     }
   }
 
-  export async function updateRows(rowsToUpdateByIndex: Map<number, Record<string, any>>) {
+  export async function updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
     switch (dataType) {
       case DataType.File:
-        const rowsToUpdateByWorkerIndex = [...rowsToUpdateByIndex].reduce<Map<number, Record<string, any>>>(
-          (acc, [index, row]) => {
-            acc.set(originalIndices[index], row) //swap the local index with the worker index
+        const rowsToUpdateByWorkerIndex = [...rowsToUpdateByOriginalIndex].reduce<Map<number, Record<string, any>>>(
+          (acc, [originalIndex, row]) => {
+            acc.set(originalIndex, row) //swap the local index with the worker index
             return acc
           },
           new Map<number, Record<string, any>>()
@@ -362,8 +363,8 @@
         await worker!.updateRows(rowsToUpdateByWorkerIndex)
         break
       case DataType.Matrix:
-        for (const [index, row] of rowsToUpdateByIndex) {
-          const originalRow = (data as any[][])[originalIndices[index]]
+        for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
+          const originalRow = (data as any[][])[originalIndex]
           for (const [column, value] of Object.entries(row)) {
             const index = internalColumns?.findIndex(c => c.id === column)
             originalRow[index!] = value
@@ -371,29 +372,34 @@
         }
         break
       case DataType.ArrayOfObjects:
-        for (const [index, row] of rowsToUpdateByIndex) {
-          Object.assign((data as any[])[originalIndices[index]], row)
+        for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
+          Object.assign((data as any[])[originalIndex], row)
         }
         break
       default:
         throw new Error('Not yet supported')
     }
 
-    for (const [index, row] of rowsToUpdateByIndex) {
-      const renderedRow = (renderedData as any[])[index]
-      for (const [column, value] of Object.entries(row)) {
-        renderedRow[column] = value
+    for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
+      const renderedIndex = originalIndices.findIndex(i => i === originalIndex)
+      if (renderedIndex !== -1) {
+        const renderedRow = (renderedData as any[])[renderedIndex]
+        for (const [column, value] of Object.entries(row)) {
+          renderedRow[column] = value
+        }
       }
     }
     renderedData = renderedData
   }
 
-  export async function insertRows(rows: Record<string, any>[]) {
+  export async function insertRows(rows: Record<string, any>[]): Promise<number[]> {
+    let originalIndices: number[]
     switch (dataType) {
       case DataType.File:
-        await worker!.insertRows(rows)
+        originalIndices = (await worker!.insertRows(rows)).indices
         break
       case DataType.Matrix:
+        originalIndices = Array.from({ length: rows.length }, (_, i) => (data as any[][]).length + i)
         for (const row of rows) {
           ;(data as any[][]).push(
             internalColumns!.reduce((acc, column) => {
@@ -404,24 +410,25 @@
         }
         break
       case DataType.ArrayOfObjects:
+        originalIndices = Array.from({ length: rows.length }, (_, i) => (data as any[]).length + i)
         ;(data as any[]).push(...rows)
         break
       default:
         throw new Error('Not yet supported')
     }
     await render(false)
+    return originalIndices
   }
 
-  export async function deleteRows(indices: number[]) {
+  export async function deleteRows(originalIndices: number[]) {
     switch (dataType) {
       case DataType.File:
-        const workerIndices = indices.map(index => originalIndices[index]) //translate local index (on GUI) to worker row index
-        await worker!.deleteRows(workerIndices.length == 1 && workerIndices[0] == undefined ? indices : workerIndices)
+        await worker!.deleteRows(originalIndices)
         break
       case DataType.Matrix:
       case DataType.ArrayOfObjects:
-        for (const index of indices.sort((a, b) => b - a)) {
-          ;(data as any[]).splice(originalIndices[index], 1)
+        for (const originalIndex of originalIndices.sort((a, b) => b - a)) {
+          ;(data as any[]).splice(originalIndex, 1)
         }
         break
       default:
@@ -434,21 +441,21 @@
     return internalColumns
   }
 
-  export async function getFullRow(index: number): Promise<Record<string, any>> {
+  export async function getFullRow(originalIndex: number): Promise<Record<string, any>> {
     switch (dataType) {
       case DataType.File:
-        const row = (await worker!.getRow(originalIndices[index])).row
+        const row = (await worker!.getRow(originalIndex)).row
         return internalColumns!.reduce((acc, column, idx) => {
           acc[column.id!] = row[idx]
           return acc
         }, {} as Record<string, any>)
       case DataType.Matrix:
         return internalColumns!.reduce((acc, column, idx) => {
-          acc[column.id] = (data as any[][])[index][idx]
+          acc[column.id] = (data as any[][])[originalIndex][idx]
           return acc
         }, {} as Record<string, any>)
       case DataType.ArrayOfObjects:
-        return (data as any[])[index]
+        return (data as any[])[originalIndex]
       default:
         throw new Error('Not yet supported')
     }
@@ -537,7 +544,17 @@
     const storedColumns = localStorage.getItem(`datatable_${internalOptions.id}_columns`)
     if (storedColumns) {
       try {
-        internalColumns = JSON.parse(storedColumns)
+        const storedInternalColumns: Map<string, IColumnMetaData> = JSON.parse(storedColumns).reduce(
+          (acc: Map<string, IColumnMetaData>, cur: IColumnMetaData) => {
+            acc.set(cur.id, cur)
+            return acc
+          },
+          new Map<string, IColumnMetaData>()
+        )
+        internalColumns = internalColumns?.map((col: IColumnMetaData) => {
+          if (storedInternalColumns.has(col.id)) Object.assign(col, storedInternalColumns.get(col.id))
+          return col
+        })
       } catch {}
     }
   }
@@ -558,28 +575,29 @@
 {#if renderStatus === 'initializing' || renderStatus === 'rendering'}
   <Skeleton />
 {:else}
-  <Modal on:settingsVisibilityChanged={onSettingsVisibilityChanged} show={settingsVisibility}>
-    <div data-name="modal-visiblity">
-      <div class="modal-dialog">
-        <h1>Change column visability:</h1>
-        <div class="modal-body">
-          {#if internalColumns}
-            {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
-              <div>
-                <input
-                  type="checkbox"
-                  id={column.id}
-                  checked={column.visible == undefined ? true : column.visible}
-                  on:change={onColumnVisibilityChanged}
-                />
-                <label for={column.id}>{column.label ?? column.id}</label><br />
-              </div>
-            {/each}
-          {/if}
-        </div>
+  <dialog data-name="settings-dialog" bind:this={settingsDialog}>
+    <button data-name="close-button" on:click={() => settingsDialog.close()}
+      ><SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" /></button
+    >
+    <div class="modal-dialog">
+      <h1>Change column visability:</h1>
+      <div class="modal-body">
+        {#if internalColumns}
+          {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
+            <div>
+              <input
+                type="checkbox"
+                id={column.id}
+                checked={column.visible == undefined ? true : column.visible}
+                on:change={onColumnVisibilityChanged}
+              />
+              <label for={column.id}>{column.label ?? column.id}</label><br />
+            </div>
+          {/each}
+        {/if}
       </div>
     </div>
-  </Modal>
+  </dialog>
 
   <div
     data-component="svelte-radar-datatable"
@@ -587,143 +605,141 @@
     use:storeOptions
     on:storeoptions={onStoreOptions}
   >
-    <div data-name="DataTable-scroll-container">
-      <table data-name="RADar-DataTable">
-        <thead>
-          {#if visibleOrderedColumns}
-            <tr data-name="titles">
-              {#if internalOptions.actionColumn}
-                <th data-name="action-Column" />
-              {/if}
-              {#each visibleOrderedColumns as column, i (column.id)}
-                <th
-                  data-direction={column?.sortDirection}
-                  data-resizable={column?.resizable}
-                  data-key={column?.id}
-                  data-sortable={column?.sortable}
-                  animate:flip={{ duration: 500 }}
-                  style="{column.width ? `width: ${column.width}px` : ''};"
-                >
-                  <ColumnResize
-                    {column}
-                    on:columnPositionChanged={onColumnPositionChanged}
-                    on:columnWidthChanged={onColumnWidthChanged}
-                  >
-                    <p>{column.label || column.id}</p>
-                    {#if column.sortable !== false}
-                      <ColumnSort
-                        column={column.id}
-                        sortDirection={column.sortDirection}
-                        {disabled}
-                        on:columnSortChanged={onColumnSortChanged}
-                      />
-                    {/if}
-                  </ColumnResize>
-                </th>
-              {/each}
-            </tr>
-            <tr data-name="filters">
-              {#if internalOptions.actionColumn}
-                {#if $$slots.actionHeader}
-                  <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
-                {:else}
-                  <th />
-                {/if}
-              {/if}
-              {#each visibleOrderedColumns as column, i (column.id)}
-                <th
-                  data-direction={column?.sortDirection}
-                  data-resizable={column?.resizable}
-                  data-key={column?.id}
-                  data-filterable={column?.filterable}
-                  animate:flip={{ duration: 500 }}
-                  style="{column.width ? `width: ${column.width}px` : ''};"
-                >
-                  <ColumnResize
-                    {column}
-                    on:columnPositionChanged={onColumnPositionChanged}
-                    on:columnWidthChanged={onColumnWidthChanged}
-                  >
-                    {#if column.filterable !== false}
-                      <ColumnFilter
-                        column={column.id}
-                        inputType="text"
-                        filter={column.filter}
-                        {disabled}
-                        on:columnFilterChanged={onColumnFilterChanged}
-                      />
-                    {/if}
-                  </ColumnResize>
-                </th>
-              {/each}
-            </tr>
-          {/if}
-        </thead>
-        <tfoot>
-          {#if visibleOrderedColumns}
-            <tr data-name="pagination">
-              <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
-                <div>
-                  <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} {disabled} />
-                  <Pagination
-                    rowsPerPage={internalOptions.rowsPerPage}
-                    currentPage={internalOptions.currentPage}
-                    rowsPerPageOptions={internalOptions.rowsPerPageOptions}
-                    totalRows={internalOptions.totalRows ?? 0}
-                    {disabled}
-                    on:paginationChanged={onPaginationChanged}
-                  />
-                </div>
-              </th>
-            </tr>
-          {/if}
-        </tfoot>
-        <tbody>
-          {#if renderedData}
-            {#each renderedData as row, i (i)}
-              <tr data-index={i}>
-                {#if $$slots.default}
-                  <slot renderedRow={row} index={i} columns={visibleOrderedColumns} options={internalOptions} />
-                {:else}
-                  {#if internalOptions.actionColumn}
-                    {#if $$slots.actionCell}
-                      <slot
-                        name="actionCell"
-                        renderedRow={row}
-                        index={i}
-                        columns={visibleOrderedColumns}
-                        options={internalOptions}
-                      />
-                    {:else}
-                      <td />
-                    {/if}
-                  {/if}
-                  {#if visibleOrderedColumns}
-                    {#each visibleOrderedColumns as column, j (j)}
-                      <td animate:flip={{ duration: 500 }}><p>{row[column.id]}</p></td>
-                    {/each}
-                  {/if}
-                {/if}
-              </tr>
-            {/each}
-          {:else if data}
-            {#if $$slots.loading}
-              <slot name="loading" />
-            {:else}
-              <div data-name="info">
-                <Spinner />
-                <p>Loading...</p>
-              </div>
+    <table>
+      <thead>
+        {#if visibleOrderedColumns}
+          <tr data-name="titles">
+            {#if internalOptions.actionColumn}
+              <th data-name="action-Column" />
             {/if}
-          {:else if $$slots.nodata}
-            <slot name="nodata" />
+            {#each visibleOrderedColumns as column, i (column.id)}
+              <th
+                data-direction={column?.sortDirection}
+                data-resizable={column?.resizable}
+                data-key={column?.id}
+                data-sortable={column?.sortable}
+                animate:flip={{ duration: 500 }}
+                style="{column.width ? `width: ${column.width}px` : ''};"
+              >
+                <ColumnResize
+                  {column}
+                  on:columnPositionChanged={onColumnPositionChanged}
+                  on:columnWidthChanged={onColumnWidthChanged}
+                >
+                  <p>{column.label || column.id}</p>
+                  {#if column.sortable !== false}
+                    <ColumnSort
+                      column={column.id}
+                      sortDirection={column.sortDirection}
+                      {disabled}
+                      on:columnSortChanged={onColumnSortChanged}
+                    />
+                  {/if}
+                </ColumnResize>
+              </th>
+            {/each}
+          </tr>
+          <tr data-name="filters">
+            {#if internalOptions.actionColumn}
+              {#if $$slots.actionHeader}
+                <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
+              {:else}
+                <th />
+              {/if}
+            {/if}
+            {#each visibleOrderedColumns as column, i (column.id)}
+              <th
+                data-direction={column?.sortDirection}
+                data-resizable={column?.resizable}
+                data-key={column?.id}
+                data-filterable={column?.filterable}
+                animate:flip={{ duration: 500 }}
+                style="{column.width ? `width: ${column.width}px` : ''};"
+              >
+                <ColumnResize
+                  {column}
+                  on:columnPositionChanged={onColumnPositionChanged}
+                  on:columnWidthChanged={onColumnWidthChanged}
+                >
+                  {#if column.filterable !== false}
+                    <ColumnFilter
+                      column={column.id}
+                      inputType="text"
+                      filter={column.filter}
+                      {disabled}
+                      on:columnFilterChanged={onColumnFilterChanged}
+                    />
+                  {/if}
+                </ColumnResize>
+              </th>
+            {/each}
+          </tr>
+        {/if}
+      </thead>
+      <tfoot>
+        {#if visibleOrderedColumns}
+          <tr data-name="pagination">
+            <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
+              <div>
+                <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} {disabled} />
+                <Pagination
+                  rowsPerPage={internalOptions.rowsPerPage}
+                  currentPage={internalOptions.currentPage}
+                  rowsPerPageOptions={internalOptions.rowsPerPageOptions}
+                  totalRows={internalOptions.totalRows ?? 0}
+                  {disabled}
+                  on:paginationChanged={onPaginationChanged}
+                />
+              </div>
+            </th>
+          </tr>
+        {/if}
+      </tfoot>
+      <tbody>
+        {#if renderedData}
+          {#each renderedData as row, i (i)}
+            <tr data-index={i}>
+              {#if $$slots.default}
+                <slot renderedRow={row} index={i} columns={visibleOrderedColumns} options={internalOptions} />
+              {:else}
+                {#if internalOptions.actionColumn}
+                  {#if $$slots.actionCell}
+                    <slot
+                      name="actionCell"
+                      renderedRow={row}
+                      index={i}
+                      columns={visibleOrderedColumns}
+                      options={internalOptions}
+                    />
+                  {:else}
+                    <td />
+                  {/if}
+                {/if}
+                {#if visibleOrderedColumns}
+                  {#each visibleOrderedColumns as column, j (j)}
+                    <td animate:flip={{ duration: 500 }}><p>{row[column.id]}</p></td>
+                  {/each}
+                {/if}
+              {/if}
+            </tr>
+          {/each}
+        {:else if data}
+          {#if $$slots.loading}
+            <slot name="loading" />
           {:else}
             <div data-name="info">
-              <p>No data...</p>
+              <Spinner />
+              <p>Loading...</p>
             </div>
           {/if}
-        </tbody>
-      </table>
-    </div>
+        {:else if $$slots.nodata}
+          <slot name="nodata" />
+        {:else}
+          <div data-name="info">
+            <p>No data...</p>
+          </div>
+        {/if}
+      </tbody>
+    </table>
   </div>
 {/if}

@@ -78,7 +78,7 @@ export interface CustomTableEvents {
   columnSortChanged: ColumnSortChangedEventDetail
   columnFilterChanged: ColumnFilterChangedEventDetail
   paginationChanged: PaginationChangedEventDetail
-  settingsVisibilityChanged: SettingsVisibilityChangedEventDetail
+  settingsVisibilityChanged: void
   columnPositionChanged: ColumnPositionChangedEventDetail
   columnWidthChanged: ColumnWidthChangedEventDetail
 }
@@ -106,10 +106,6 @@ export interface ColumnFilterChangedEventDetail {
 }
 
 export interface PaginationChangedEventDetail extends IPagination { }
-
-export interface SettingsVisibilityChangedEventDetail {
-  visibility: boolean
-}
 
 export enum DataType {
   Matrix,

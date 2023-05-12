@@ -9,7 +9,7 @@
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
   function onClick() {
-    dispatch('settingsVisibilityChanged', { visibility: true })
+    dispatch('settingsVisibilityChanged')
   }
 </script>
 
