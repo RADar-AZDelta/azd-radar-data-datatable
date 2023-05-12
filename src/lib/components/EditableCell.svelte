@@ -2,8 +2,11 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import SvgIcon from './SvgIcon.svelte'
+  import { clickOutside } from '../actions/clickOutside.js'
   import { createEventDispatcher } from 'svelte'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
+  import { escapeWithKey } from '$lib/actions/escapeWithKey'
+  import { saveWithKey } from '$lib/actions/saveWithKey'
 
   export let value: any
   let editValue: any
@@ -27,7 +30,15 @@
   }
 </script>
 
-<div on:mouseleave={onClickCancel} data-name="cell">
+<div
+  use:saveWithKey
+  on:saveKey={onClickSave}
+  use:clickOutside
+  on:outclick={onClickCancel}
+  use:escapeWithKey
+  on:escapeKey={onClickCancel}
+  data-name="cell"
+>
   {#if !editMode}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <p on:click={() => (editMode = true)}>{value}</p>

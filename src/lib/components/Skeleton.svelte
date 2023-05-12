@@ -33,14 +33,14 @@
   th {
     min-width: 250px;
   }
-  tr {
-    min-height: 300px;
+  td {
+    min-height: 500px;
     background-color: #fff;
   }
   .spinner {
     border: none;
     text-align: center;
     vertical-align: middle;
-    height: 250px;
+    height: 500px;
   }
 </style>
