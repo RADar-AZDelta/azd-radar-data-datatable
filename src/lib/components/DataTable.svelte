@@ -664,6 +664,7 @@
                   {#if column.filterable !== false}
                     <ColumnFilter
                       column={column.id}
+                      width={column.width}
                       inputType="text"
                       filter={column.filter}
                       {disabled}

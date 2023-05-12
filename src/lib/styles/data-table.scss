@@ -55,9 +55,9 @@ div[data-component='svelte-radar-datatable'] {
           div[data-name='column-reposition'] {
             display: flex;
 
-            :first-child {
-              flex: 1 1 auto;
-            }
+            // :first-child {
+            //   flex: 1 1 auto;
+            // }
 
             button {
               cursor: pointer;
