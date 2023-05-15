@@ -8,9 +8,21 @@ $gray-xx-light: #ededed;
 $gray-x-light: #d3d3d3;
 $gray-xx-dark: #333333;
 
+div[data-component='full-datatable']
+{
+  display: block;
+  box-sizing: border-box;
+  overscroll-behavior: contain;
+  outline: none;
+  position: relative;
+  user-select: none;
 div[data-component='svelte-radar-datatable'] {
   resize: vertical;
+  box-sizing: border-box;
   overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100vw;
+  max-height: 90vh;
   table[data-name='table-skeleton'] {
     tr {
       background-color: #fff;
@@ -21,9 +33,16 @@ div[data-component='svelte-radar-datatable'] {
     }
   }
   table {
+    //width:0 breaks table component array as data source and file as data source
     line-height: 20px;
-    border-collapse: collapse;
-    overflow-x: auto;
+    border-collapse: separate;
+    table-layout: fixed;
+    margin:0;
+    white-space: nowrap;
+    empty-cells: show;
+    border:0px;
+    //width: 0;
+    border-spacing: 0px;
     thead {
       display: table-header-group;
       vertical-align: middle;
@@ -34,7 +53,7 @@ div[data-component='svelte-radar-datatable'] {
           background-color: $gray-xx-light;
         }
         th[data-name='action-Column'] {
-          min-width: 75px;
+          width: 75px;
         }
       }
 
@@ -55,9 +74,9 @@ div[data-component='svelte-radar-datatable'] {
           div[data-name='column-reposition'] {
             display: flex;
 
-            // :first-child {
-            //   flex: 1 1 auto;
-            // }
+             :first-child {
+               flex: 1 1 auto;
+             }
 
             button {
               cursor: pointer;
@@ -76,7 +95,7 @@ div[data-component='svelte-radar-datatable'] {
 
             div[data-name='column-resize-right'] {
               flex: 0 0 auto;
-              width: 2px;
+              width: 3px;
               cursor: col-resize;
             }
 
@@ -86,7 +105,7 @@ div[data-component='svelte-radar-datatable'] {
 
             div[data-name='column-resize-left'] {
               flex: 0 0 auto;
-              width: 2px;
+              width: 3px;
               cursor: col-resize;
             }
           }
@@ -221,6 +240,7 @@ div[data-component='svelte-radar-datatable'] {
     }
   }
 }
+}
 button {
   cursor: pointer;
   border-radius: 5px;
@@ -244,9 +264,9 @@ input {
   height: 25px;
   padding: 0 0.5rem;
 }
-
-div[data-name='modal-visiblity'] {
-  display: block;
+dialog{
+  border:none;
+  border-radius:10px ;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -254,8 +274,6 @@ div[data-name='modal-visiblity'] {
   transform: translate(-50%, -50%);
   width: 50%;
   height: 50%;
-  border: none;
-  border-radius: 10px;
 
   button[data-name="close-button"] {
     position: absolute;
@@ -265,7 +283,6 @@ div[data-name='modal-visiblity'] {
     background-color: inherit;
     cursor: pointer;
   }
-
   div[data-name="modal-dialog"] {
     overflow-y: initial;
   }
@@ -273,6 +290,11 @@ div[data-name='modal-visiblity'] {
   div[data-name="modal-body"] {
     position: absolute;
     overflow-y: auto;
+    display: block;
+    div{
+      display:flex;
+      align-items: center;
+    }
   }
 }
 
@@ -303,9 +325,8 @@ section[data-component='modal-container-medium'] {
       position: absolute;
       right: 21vw;
     }
-
     div[data-component='modal-content'] {
-      padding: 5px;
+      display: block;
     }
   }
 }
