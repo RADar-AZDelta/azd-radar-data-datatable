@@ -272,8 +272,18 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
 
 function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
   const query = queryFrom(usedQuery)
-  const queriedData = query.evaluate(dt, () => { }).objects()
-  const indices = query.evaluate(dt, () => { }).indices()
+  const queriedDt: ColumnTable = query.evaluate(dt, () => {})
+  const queriedData = queriedDt.objects()
+  let indices = []
+  // Check every row and see if it is in the queried table, and if so add the index to the indices array
+  for (let row of queriedDt._data['sourceCode'].data) {
+    if (dt._data['sourceCode'].data.includes(row)) {
+      indices.push(dt._data['sourceCode'].data.indexOf(row))
+    }
+  }
+  // The indices here are from the queried table so these are not the original indices
+  // const indices = query.evaluate(dt, () => { }).indices()
+
   const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
     msg: 'executeQueryAndReturnResults',
     data: { queriedData, indices },
