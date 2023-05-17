@@ -8,28 +8,54 @@ $gray-xx-light: #ededed;
 $gray-x-light: #d3d3d3;
 $gray-xx-dark: #333333;
 
+div[data-component='full-datatable']
+{
+  display: block;
+  box-sizing: border-box;
+  overscroll-behavior: contain;
+  outline: none;
+  position: relative;
+  user-select: none;
 div[data-component='svelte-radar-datatable'] {
   resize: vertical;
+  box-sizing: border-box;
   overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100vw;
+  max-height: 100vh;
+  table[data-name='table-skeleton'] {
+    tr {
+      background-color: #fff;
+    }
 
-    table {
-      max-width: 100%;
-      line-height: 20px;
-      margin: 0;
-      clear: both;
-      border-collapse: separate;
-      border-spacing: 0;
-      overflow-x:auto ;
-      thead {
-        display: table-header-group;
-        vertical-align: middle;
-        background-color: inherit;
+    tr:hover {
+      background-color: #fff;
+    }
+  }
+  table {
+    //width:0 breaks table component array as data source and file as data source
+    line-height: 20px;
+    border-collapse: separate;
+    table-layout: fixed;
+    margin:0;
+    white-space: nowrap;
+    empty-cells: show;
+    border:0px;
+    //width: 0;
+    border-spacing: 0px;
+    thead {
+      display: table-header-group;
+      vertical-align: middle;
+      background-color: inherit;
 
-        tr[data-name='titles'] {
-          th:hover {
-            background-color: $gray-xx-light;
-          }
+      tr[data-name='titles'] {
+        th:hover {
+          background-color: $gray-xx-light;
         }
+        th[data-name='action-Column'] {
+          width: 75px;
+        }
+      }
 
       tr[data-name='filters'] {
         th {
@@ -38,6 +64,7 @@ div[data-component='svelte-radar-datatable'] {
       }
 
       tr {
+        display: table-row;
         padding: 0.35em;
         font-size: 12px;
 
@@ -48,9 +75,9 @@ div[data-component='svelte-radar-datatable'] {
           div[data-name='column-reposition'] {
             display: flex;
 
-            :first-child {
-              flex: 1 1 auto;
-            }
+             :first-child {
+               flex: 1 1 auto;
+             }
 
             button {
               cursor: pointer;
@@ -69,8 +96,9 @@ div[data-component='svelte-radar-datatable'] {
 
             div[data-name='column-resize-right'] {
               flex: 0 0 auto;
-              width: 2px;
+              width: 3px;
               cursor: col-resize;
+              
             }
 
             div[data-name='column-reposition'] {
@@ -79,7 +107,7 @@ div[data-component='svelte-radar-datatable'] {
 
             div[data-name='column-resize-left'] {
               flex: 0 0 auto;
-              width: 2px;
+              width: 3px;
               cursor: col-resize;
             }
           }
@@ -87,19 +115,25 @@ div[data-component='svelte-radar-datatable'] {
       }
     }
 
-      tfoot {
-        tr[data-name='pagination'] {
-          vertical-align: bottom;
-          th {
-            div {
-              align-items: center;
-              display: flex;
+    tfoot {
+      tr[data-name='pagination'] {
+        vertical-align: bottom;
+        th {
+          div {
+            align-items: center;
+            display: flex;
+            button[data-name='settings-button'] {
+              border: none;
+              background-color: inherit;
+            }
 
+            button[data-name='settings-button']:hover {
+              background-color: $gray-x-light;
+            }
+            
             div[data-name='pagination-container'] {
+              width: 100%;
               margin-left: 5px;
-              float: left;
-              clear: both;
-
               p {
                 padding-right: 5px;
                 padding-left: 5px;
@@ -117,80 +151,13 @@ div[data-component='svelte-radar-datatable'] {
                 border: solid 1px $gray-xx-dark;
               }
             }
-
-      tbody {
-        display: table-row-group;
-        vertical-align: middle;
-        border-color: inherit;
-        font-size:16px;
-        tr {
-          button {
-            border-radius: 3px;
-            border: solid 1px $gray-x-light;
-          }
-          td {
-            width: fit-content;
-
-            input {
-              border-radius: 5px;
-              font-size: 0.75rem;
-              box-shadow: inset 0 0.0625 0.125em rgba(10, 10, 10, 0.05);
-              background-color: #fff;
-              border-color: $gray-x-light;
-              color: #363636;
-              height: 2.5em;
-              display: inline-flex;
-              border: 0.2px solid;
-              justify-content: flex-start;
-              height: 25px;
-              padding: 0 0.5rem;
-            }
-          }
-        }
-
-        tr:nth-child(even) {
-          background: #fff;
-        }
-
-        tr:nth-child(odd) {
-          background: #e2e8f3;
-        }
-
-        tr:hover {
-          background-color: $gray-x-light;
-        }
-      }
-    }
-  }
-  div[data-name='pagination-div'] {
-    align-items: end;
-  }
-  div[data-name='pagination-container'] {
-    float: left;
-    clear: both;
-
-    p {
-      padding-right: 5px;
-      padding-left: 5px;
-    }
-  }
-
-  button[data-name='settings-button'] {
-    border: none;
-    background-color: inherit;
-  }
-
-  button[data-name='settings-button']:hover {
-    border: none;
-    background-color: $gray-x-light;
-  }
-
-  div[data-name='pagination-container-pages'] {
-    float: right;
-    text-align: right;
-    height: 30px;
-    margin-top: 5px;
-    padding: 0;
+            div[data-name='pagination-container-pages'] {
+              margin-left: auto;              
+              text-align: right;
+              float:right;
+              height: 30px;
+              margin-top: 5px;
+              padding: 0;
 
               button {
                 border: none;
@@ -209,63 +176,18 @@ div[data-component='svelte-radar-datatable'] {
                   padding-bottom: 2.8px;
                 }
 
-                &:disabled {}
+                &:disabled {
+                }
               }
-            }
-
-            button[data-name='settings-button'] {
-              border: none;
-              background-color: inherit;
-              height: auto;
-            }
-
-            button[data-name='settings-button']:hover {
-              border: none;
-              background-color: $gray-x-light;
             }
           }
         }
       }
-
-      tr:last-child {
-        border: none;
-      }
     }
-
     tbody {
       display: table-row-group;
       vertical-align: middle;
       border-color: inherit;
-
-      tr {
-        td {
-          max-width: 0;
-          min-width: 75px;
-          p {
-            display:block;
-            overflow:hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            margin: 0;
-          }
-
-          div[data-name='cell'] {
-            display: flex;
-            text-wrap: balance;
-
-            textarea {
-              flex: 1 1 auto;
-            }
-
-            button {
-              height:inherit;
-              /*border-radius: 3px;
-              border: solid 1px $gray-x-light;*/
-            }
-          }
-        }
-      }
-
       tr:nth-child(even) {
         background: #fff;
       }
@@ -277,43 +199,83 @@ div[data-component='svelte-radar-datatable'] {
       tr:hover {
         background-color: $gray-x-light;
       }
-
+      tr {
+        td {
+          div[data-name='cell'] {
+            display: flex;
+            textarea {
+              flex: 1 1 auto;
+            }
+            button {
+              height: inherit;
+              border: none;
+            }
+          }
+          p {
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            margin: 0;
+          }
+          input {
+            border-radius: 5px;
+            font-size: 0.75rem;
+            box-shadow: inset 0 0.0625 0.125em rgba(10, 10, 10, 0.05);
+            background-color: #fff;
+            border-color: $gray-x-light;
+            color: #363636;
+            height: 2.5em;
+            display: inline-flex;
+            border: 0.2px solid;
+            justify-content: flex-start;
+            height: 25px;
+            padding: 0 0.5rem;
+          }
+        }
+      }
       div[data-name='info'] {
         position: absolute;
         left: 50%;
         text-align: center;
       }
     }
+  }
+}
+}
+button {
+  cursor: pointer;
+  border-radius: 5px;
+  border-color: $gray-x-light;
+  border-width: 1px;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 0.75em;
+  height: 25px;
+}
 
-    button {
-      cursor: pointer;
-      border-radius: 5px;
-      border-color: $gray-x-light;
-      border-width: 1px;
-      justify-content: center;
-      text-align: center;
-      white-space: nowrap;
-      font-size: 0.75em;
-      height: 25px;
-    }
+input {
+  background-color: #fff;
+  border-radius: 5px;
+  border-color: $gray-x-light;
+  border-width: 1px;
+  font-size: 0.75rem;
+  box-shadow: inset 0 0.0625 0.125em rgba(10, 10, 10, 0.05);
+  color: #363636;
+  height: 25px;
+  padding: 0 0.5rem;
+}
+dialog{
+  border:none;
+  border-radius:10px ;
+  position: fixed;
+  top: 50%;
+  left: 50%;
 
-    input {
-      background-color: #fff;
-      border-radius: 5px;
-      border-color: $gray-x-light;
-      border-width: 1px;
-      font-size: 0.75rem;
-      box-shadow: inset 0 0.0625 0.125em rgba(10, 10, 10, 0.05);
-      color: #363636;
-      height: 25px;
-      padding: 0 0.5rem;
-    }
-  
-dialog[data-name="settings-dialog"] {
+  transform: translate(-50%, -50%);
   width: 50%;
   height: 50%;
-  border: none;
-  border-radius: 10px;
 
   button[data-name="close-button"] {
     position: absolute;
@@ -323,7 +285,6 @@ dialog[data-name="settings-dialog"] {
     background-color: inherit;
     cursor: pointer;
   }
-
   div[data-name="modal-dialog"] {
     overflow-y: initial;
   }
@@ -331,6 +292,11 @@ dialog[data-name="settings-dialog"] {
   div[data-name="modal-body"] {
     position: absolute;
     overflow-y: auto;
+    display: block;
+    div{
+      display:flex;
+      align-items: center;
+    }
   }
 }
 
@@ -361,54 +327,42 @@ section[data-component='modal-container-medium'] {
       position: absolute;
       right: 21vw;
     }
-
     div[data-component='modal-content'] {
-      padding: 5px;
+      display: block;
     }
   }
 }
-th[data-name='action-Column']
-{
-  width: 75px;
-}
-@media only screen and (max-width: 1600px)
-{
-  table{
+
+@media only screen and (max-width: 1600px) {
+  table {
     line-height: 15px;
   }
-  tbody{
+  tbody {
     font-size: 14px;
-    color:purple
   }
 }
 
-@media only screen and (max-width: 1200px)
-{
-  table{
+@media only screen and (max-width: 1200px) {
+  table {
     line-height: 13px;
   }
-  tbody{
-    font-size:12px;
-    color:blue
+  tbody {
+    font-size: 12px;
   }
 }
-@media only screen and (max-width: 900px)
-{
-  table{
+@media only screen and (max-width: 900px) {
+  table {
     line-height: 11px;
   }
-  tbody{
-    font-size:11px;
-    color:red
+  tbody {
+    font-size: 11px;
   }
 }
-@media only screen and (max-width: 600px)
-{
-  table{
+@media only screen and (max-width: 600px) {
+  table {
     line-height: 11px;
   }
-  tbody{
-    font-size:10px;
-    color:green
+  tbody {
+    font-size: 10px;
   }
 }
