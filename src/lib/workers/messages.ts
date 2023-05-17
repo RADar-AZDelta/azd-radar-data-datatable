@@ -58,9 +58,18 @@ export interface MessageRespnseInsertColumns {
 
 export interface MessageRequestExecuteQueryAndReturnResults {
   usedQuery: Query | object
+  uidColumns: string[]
 }
 
 export interface MessageResponseExecuteQueryAndReturnResults {
   queriedData: any
   indices: number[]
+}
+
+export interface MessageRequestExecuteExpressionsAndReturnResults {
+  expressions: Record<string, any>
+}
+
+export interface MessageResponseExecuteExpressionsAndReturnResults {
+  expressionData: any
 }

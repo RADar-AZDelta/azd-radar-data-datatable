@@ -16,6 +16,8 @@ import type {
   MessageResponseExecuteQueryAndReturnResults,
   MessageRequestExecuteQueryAndReturnResults,
   MessageRespnseInsertColumns,
+  MessageResponseExecuteExpressionsAndReturnResults,
+  MessageRequestExecuteExpressionsAndReturnResults,
 } from '$lib/workers/messages'
 import type { IColumnMetaData, IPagination, SortDirection, TFilter } from './DataTable'
 import type Query from 'arquero/dist/types/query/query'
@@ -23,7 +25,7 @@ import type Query from 'arquero/dist/types/query/query'
 export class DataTableWorker {
   private worker: Worker | undefined
 
-  constructor() { }
+  constructor() {}
 
   async init() {
     const DataTableWorker = await import('$lib/workers/DataTable.worker?worker')
@@ -39,8 +41,7 @@ export class DataTableWorker {
     if (dev) start = performance.now()
     const result = await new Promise<TResult>((resolve, reject) => {
       this.worker!.onmessage = ({ data: { msg: responseMsg, data } }: MessageEvent<PostMessage<TResult>>) => {
-        if (responseMsg === requestMsg)
-          resolve(data as TResult)
+        if (responseMsg === requestMsg) resolve(data as TResult)
       }
       this.worker!.postMessage({ msg: requestMsg, data })
     })
@@ -96,12 +97,25 @@ export class DataTableWorker {
   async insertColumns(columns: IColumnMetaData[]): Promise<void> {
     return await this.executeWorkerMethod<MessageRequestInsertColumns, void>('insertColumns', { columns })
   }
-  async executeQueryAndReturnResults(usedQuery: Query | object): Promise<MessageResponseExecuteQueryAndReturnResults> {
+  async executeQueryAndReturnResults(
+    usedQuery: Query | object,
+    uidColumns: string[]
+  ): Promise<MessageResponseExecuteQueryAndReturnResults> {
     return await this.executeWorkerMethod<
       MessageRequestExecuteQueryAndReturnResults,
       MessageResponseExecuteQueryAndReturnResults
     >('executeQueryAndReturnResults', {
-      usedQuery: usedQuery,
+      usedQuery,
+      uidColumns,
+    })
+  }
+
+  async executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<MessageResponseExecuteExpressionsAndReturnResults> {
+    return await this.executeWorkerMethod<
+      MessageRequestExecuteExpressionsAndReturnResults,
+      MessageResponseExecuteExpressionsAndReturnResults
+    >('executeExpressionsAndReturnResults', {
+      expressions,
     })
   }
 }

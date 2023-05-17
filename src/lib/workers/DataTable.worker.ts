@@ -17,6 +17,8 @@ import type {
   MessageRequestExecuteQueryAndReturnResults,
   MessageResponseExecuteQueryAndReturnResults,
   MessageRespnseInsertColumns,
+  MessageRequestExecuteExpressionsAndReturnResults,
+  MessageResponseExecuteExpressionsAndReturnResults,
 } from './messages'
 import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, addFunction, fromJSON } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
@@ -55,6 +57,9 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case 'executeQueryAndReturnResults':
       await executeQueryAndReturnResults(data as MessageRequestExecuteQueryAndReturnResults)
+      break
+    case 'executeExpressionsAndReturnResults':
+      await executeExpressionsAndReturnResults(data as MessageRequestExecuteExpressionsAndReturnResults)
       break
   }
 }
@@ -156,10 +161,10 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
     value == null
       ? ''
       : value instanceof Date
-        ? (value as Date).toISOString()
-        : reFormat.test((value += ''))
-          ? '"' + value.replace(/"/g, '""') + '"'
-          : value
+      ? (value as Date).toISOString()
+      : reFormat.test((value += ''))
+      ? '"' + value.replace(/"/g, '""') + '"'
+      : value
 
   let buffer = []
 
@@ -204,13 +209,13 @@ function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
 function insertRows({ rows }: MessageRequestInsertRows) {
   tempDt = undefined
 
-  const indices: number[] = Array.from({ length: rows.length }, (_, i) => dt._total + i);
+  const indices: number[] = Array.from({ length: rows.length }, (_, i) => dt._total + i)
   dt = dt.concat(from(rows))
 
   const message: PostMessage<MessageRespnseInsertColumns> = {
     msg: 'insertRows',
     data: {
-      indices
+      indices,
     },
   }
   postMessage(message)
@@ -223,7 +228,7 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
 
   for (const index of indices) {
     for (const column of Object.keys(dt._data)) {
-      ; (dt._data[column] as Column).data.splice(index, 1)
+      ;(dt._data[column] as Column).data.splice(index, 1)
     }
     dt._total -= 1
     dt._nrows -= 1
@@ -265,28 +270,63 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
   // }
   const message: PostMessage<unknown> = {
     msg: 'insertColumns',
-    data: undefined
+    data: undefined,
   }
   postMessage(message)
 }
 
-function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
+function executeQueryAndReturnResults({ usedQuery, uidColumns }: MessageRequestExecuteQueryAndReturnResults) {
   const query = queryFrom(usedQuery)
   const queriedDt: ColumnTable = query.evaluate(dt, () => {})
   const queriedData = queriedDt.objects()
-  let indices = []
+  let indices: number[] = []
+
   // Check every row and see if it is in the queried table, and if so add the index to the indices array
-  for (let row of queriedDt._data['sourceCode'].data) {
-    if (dt._data['sourceCode'].data.includes(row)) {
-      indices.push(dt._data['sourceCode'].data.indexOf(row))
+  for (let row of queriedData) {
+    for (let column of uidColumns) {
+      const value = row[column as keyof Object]
+      if (dt._data[column].data.includes(value)) {
+        let chosenValues = dt._data[column].data.reduce(function (accumulator: any, currenValue: any, index: number) {
+          if (currenValue === value) accumulator.push(index)
+          return accumulator
+        }, [])
+        indices = indices.concat(chosenValues)
+      }
     }
   }
+  let uniqueIndexes = new Set(indices)
+  for (let index of uniqueIndexes) {
+    if (indices.filter((value: number) => value === index).length < uidColumns.length) {
+      uniqueIndexes.delete(index)
+    }
+  }
+  indices = Array.from(uniqueIndexes)
+
   // The indices here are from the queried table so these are not the original indices
-  // const indices = query.evaluate(dt, () => { }).indices()
+  // TODO: change to array of numbers
+  const ind = query.evaluate(dt, () => { })
+  console.log("IND ", ind)
 
   const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
     msg: 'executeQueryAndReturnResults',
     data: { queriedData, indices },
+  }
+  postMessage(message)
+}
+
+function executeExpressionsAndReturnResults({ expressions }: MessageRequestExecuteExpressionsAndReturnResults) {
+  const expressionData: any[] = []
+  for(let expr of Object.keys(expressions)) {
+    // console.log("EXPR ", JSON.parse(expressions[expr]))
+    // expressionData.push(dt.rollup({[expr]: expressions[expr]}).object())
+    expressionData.push(dt.rollup({[expr]: expressions[expr]}).object())
+    // expressionData.push(dt.rollup({ count: }).object())
+  }
+  const row1 = dt.get('conceptId', 1)
+  console.log("RESULTS ", row1)
+  const message: PostMessage<MessageResponseExecuteExpressionsAndReturnResults> = {
+    msg: 'executeExpressionsAndReturnResults',
+    data: { expressionData },
   }
   postMessage(message)
 }

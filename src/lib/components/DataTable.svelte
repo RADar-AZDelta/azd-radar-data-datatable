@@ -502,12 +502,19 @@
     internalColumns = internalColumns
   }
 
-  export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
+  export async function executeQueryAndReturnResults(query: Query | object, uidColumns: string[]): Promise<any> {
     switch (dataType) {
       case DataType.File:
-        return await worker!.executeQueryAndReturnResults(query)!
+        return await worker!.executeQueryAndReturnResults(query, uidColumns)
       default:
         throw new Error('Not yet supported')
+    }
+  }
+
+  export async function executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any> {
+    switch (dataType) {
+      case DataType.File:
+        return await worker!.executeExpressionsAndReturnResults(expressions)
     }
   }
 
