@@ -207,3 +207,16 @@ pnpm install
 ```
 
 To run the example app, run `pnpm run dev --open` from the project root.
+
+### Reorder Column
+![reorderColumn](https://github.com/RADar-AZDelta/svelte-radar-datatable/assets/71766353/897b813e-76f7-4739-b815-30fb4dc1857f)
+### Resize Column
+![ResizeColumn](https://github.com/RADar-AZDelta/svelte-radar-datatable/assets/71766353/4d84eae1-dbe3-4c39-b02b-2d7097ce7685)
+### Visible Columns
+![VisibleColumns](https://github.com/RADar-AZDelta/svelte-radar-datatable/assets/71766353/ef02fdfb-d8d0-453e-b28b-9e1195914bfb)
+### Edit cell
+Als EditableCell is toegevoegd in het Datatable component dan kan u doubel klikken op de tekst om die aan te passen.  
+escape key kan gebruikt worden om uit de input te gaan zonder aanpassing op te slaan.  
+enter key kan gebruikt worden of check button om de aanpassing op te slaan.  
+
+![EditCell](https://github.com/RADar-AZDelta/svelte-radar-datatable/assets/71766353/55ffe46d-718e-41b3-b05d-56763829e99c)
