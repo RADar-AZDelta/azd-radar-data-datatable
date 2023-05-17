@@ -98,19 +98,19 @@ export class DataTableWorker {
     return await this.executeWorkerMethod<MessageRequestInsertColumns, void>('insertColumns', { columns })
   }
   async executeQueryAndReturnResults(
-    usedQuery: Query | object,
-    uidColumns: string[]
+    usedQuery: Query | object
   ): Promise<MessageResponseExecuteQueryAndReturnResults> {
     return await this.executeWorkerMethod<
       MessageRequestExecuteQueryAndReturnResults,
       MessageResponseExecuteQueryAndReturnResults
     >('executeQueryAndReturnResults', {
-      usedQuery,
-      uidColumns,
+      usedQuery
     })
   }
 
-  async executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<MessageResponseExecuteExpressionsAndReturnResults> {
+  async executeExpressionsAndReturnResults(
+    expressions: Record<string, any>
+  ): Promise<MessageResponseExecuteExpressionsAndReturnResults> {
     return await this.executeWorkerMethod<
       MessageRequestExecuteExpressionsAndReturnResults,
       MessageResponseExecuteExpressionsAndReturnResults

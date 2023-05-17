@@ -275,37 +275,16 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
   postMessage(message)
 }
 
-function executeQueryAndReturnResults({ usedQuery, uidColumns }: MessageRequestExecuteQueryAndReturnResults) {
+function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
   const query = queryFrom(usedQuery)
   const queriedDt: ColumnTable = query.evaluate(dt, () => {})
   const queriedData = queriedDt.objects()
-  let indices: number[] = []
 
-  // Check every row and see if it is in the queried table, and if so add the index to the indices array
-  for (let row of queriedData) {
-    for (let column of uidColumns) {
-      const value = row[column as keyof Object]
-      if (dt._data[column].data.includes(value)) {
-        let chosenValues = dt._data[column].data.reduce(function (accumulator: any, currenValue: any, index: number) {
-          if (currenValue === value) accumulator.push(index)
-          return accumulator
-        }, [])
-        indices = indices.concat(chosenValues)
-      }
-    }
-  }
-  let uniqueIndexes = new Set(indices)
-  for (let index of uniqueIndexes) {
-    if (indices.filter((value: number) => value === index).length < uidColumns.length) {
-      uniqueIndexes.delete(index)
-    }
-  }
-  indices = Array.from(uniqueIndexes)
-
-  // The indices here are from the queried table so these are not the original indices
-  // TODO: change to array of numbers
-  const ind = query.evaluate(dt, () => { })
-  console.log("IND ", ind)
+  let columns: Record<string, any> = {}
+  queriedDt._names.forEach(col => (columns[col] = () => 0))
+  const tempDt = dt.impute(columns)
+  const tempQueriedDt = queriedDt.impute(columns)
+  const indices = tempDt.semijoin(tempQueriedDt).indices()
 
   const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
     msg: 'executeQueryAndReturnResults',
@@ -316,14 +295,9 @@ function executeQueryAndReturnResults({ usedQuery, uidColumns }: MessageRequestE
 
 function executeExpressionsAndReturnResults({ expressions }: MessageRequestExecuteExpressionsAndReturnResults) {
   const expressionData: any[] = []
-  for(let expr of Object.keys(expressions)) {
-    // console.log("EXPR ", JSON.parse(expressions[expr]))
-    // expressionData.push(dt.rollup({[expr]: expressions[expr]}).object())
-    expressionData.push(dt.rollup({[expr]: expressions[expr]}).object())
-    // expressionData.push(dt.rollup({ count: }).object())
+  for (let expr of Object.keys(expressions)) {
+    expressionData.push(dt.rollup({ [expr]: expressions[expr] }).object())
   }
-  const row1 = dt.get('conceptId', 1)
-  console.log("RESULTS ", row1)
   const message: PostMessage<MessageResponseExecuteExpressionsAndReturnResults> = {
     msg: 'executeExpressionsAndReturnResults',
     data: { expressionData },
