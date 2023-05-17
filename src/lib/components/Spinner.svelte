@@ -13,9 +13,9 @@
 <style>
   /* BIG SPINNER */
   .spinnerBig {
-    --line-length: 15px;
-    --line-offset: 4px;
-    --line-width: 3px;
+    --line-length: 20px;
+    --line-offset: 2px;
+    --line-width: 6px;
     --color-ring1: #0093d5;
     --color-ring2: #00a7a7;
     --gradient-circle: circle at 80% 20%, var(--color-ring2) 50%, var(--color-ring1) 50%;
@@ -30,8 +30,8 @@
   .spinnerBig {
     background: var(--color-background);
     margin: calc(var(--line-length) + var(--line-offset) + 0px);
-    width: 100px;
-    height: 100px;
+    width: 60px;
+    height: 60px;
     display: inline-block;
     border-radius: 50%;
     position: relative;
@@ -45,24 +45,15 @@
     left: calc(-1 * var(--line-length) - var(--line-offset));
     right: calc(-1 * var(--line-length) - var(--line-offset));
     border-radius: inherit;
-    background: linear-gradient(-90deg, var(--gradient-lines)), linear-gradient(-85deg, var(--gradient-lines)),
-      linear-gradient(-80deg, var(--gradient-lines)), linear-gradient(-75deg, var(--gradient-lines)),
-      linear-gradient(-70deg, var(--gradient-lines)), linear-gradient(-65deg, var(--gradient-lines)),
-      linear-gradient(-60deg, var(--gradient-lines)), linear-gradient(-55deg, var(--gradient-lines)),
-      linear-gradient(-50deg, var(--gradient-lines)), linear-gradient(-45deg, var(--gradient-lines)),
-      linear-gradient(-40deg, var(--gradient-lines)), linear-gradient(-35deg, var(--gradient-lines)),
-      linear-gradient(-30deg, var(--gradient-lines)), linear-gradient(-25deg, var(--gradient-lines)),
-      linear-gradient(-20deg, var(--gradient-lines)), linear-gradient(-15deg, var(--gradient-lines)),
-      linear-gradient(-10deg, var(--gradient-lines)), linear-gradient(-5deg, var(--gradient-lines)),
-      linear-gradient(0deg, var(--gradient-lines)), linear-gradient(5deg, var(--gradient-lines)),
-      linear-gradient(10deg, var(--gradient-lines)), linear-gradient(15deg, var(--gradient-lines)),
-      linear-gradient(20deg, var(--gradient-lines)), linear-gradient(25deg, var(--gradient-lines)),
-      linear-gradient(30deg, var(--gradient-lines)), linear-gradient(35deg, var(--gradient-lines)),
-      linear-gradient(40deg, var(--gradient-lines)), linear-gradient(45deg, var(--gradient-lines)),
-      linear-gradient(50deg, var(--gradient-lines)), linear-gradient(55deg, var(--gradient-lines)),
-      linear-gradient(60deg, var(--gradient-lines)), linear-gradient(65deg, var(--gradient-lines)),
-      linear-gradient(70deg, var(--gradient-lines)), linear-gradient(75deg, var(--gradient-lines)),
-      linear-gradient(80deg, var(--gradient-lines)), linear-gradient(85deg, var(--gradient-lines)),
+    background: linear-gradient(-90deg, var(--gradient-lines)), linear-gradient(-80deg, var(--gradient-lines)),
+      linear-gradient(-70deg, var(--gradient-lines)), linear-gradient(-60deg, var(--gradient-lines)),
+      linear-gradient(-50deg, var(--gradient-lines)), linear-gradient(-40deg, var(--gradient-lines)),
+      linear-gradient(-30deg, var(--gradient-lines)), linear-gradient(-20deg, var(--gradient-lines)),
+      linear-gradient(-10deg, var(--gradient-lines)), linear-gradient(0deg, var(--gradient-lines)),
+      linear-gradient(10deg, var(--gradient-lines)), linear-gradient(20deg, var(--gradient-lines)),
+      linear-gradient(30deg, var(--gradient-lines)), linear-gradient(40deg, var(--gradient-lines)),
+      linear-gradient(50deg, var(--gradient-lines)), linear-gradient(60deg, var(--gradient-lines)),
+      linear-gradient(70deg, var(--gradient-lines)), linear-gradient(80deg, var(--gradient-lines)),
       linear-gradient(90deg, var(--gradient-lines)), radial-gradient(var(--gradient-circle));
     mask: radial-gradient(var(--gradient-circle-mask));
     -webkit-mask: radial-gradient(var(--gradient-circle-mask));

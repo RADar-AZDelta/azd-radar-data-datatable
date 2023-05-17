@@ -267,7 +267,7 @@
 
 <details>
   <summary>Table with an array of objects as a data source</summary>
-  <DataTable {data} bind:this={dataTableArrayOfObjects}>
+  <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ id: 'array' }}>
     <td slot="actionCell" let:originalIndex>
       <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
     </td>
@@ -281,7 +281,7 @@
 
 <details>
   <summary>Table with a async function as a data source (ex: fetch data from web server)</summary>
-  <DataTable {columns} data={fetchData} bind:this={dataTableFetchFunction} />
+  <DataTable {columns} data={fetchData} bind:this={dataTableFetchFunction} options={{ id: 'function' }} />
 </details>
 
 <hr />
@@ -297,7 +297,7 @@
   <DataTable
     data={file}
     bind:this={dataTableFile}
-    options={{ actionColumn: true }}
+    options={{ id: 'file', actionColumn: true }}
     let:renderedRow
     let:originalIndex
     let:columns

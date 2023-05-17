@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Spinner from './Spinner.svelte'
 </script>
 
@@ -16,7 +16,12 @@
     </thead>
     <tbody>
       <tr>
-        <td class="spinner" rowspan="5" colspan="5"><Spinner big={true} /> <br />loading...</td>
+        <td class="spinner"
+          ><div>
+            <Spinner big={true} /><br />
+            <p>Loading...</p>
+          </div></td
+        >
       </tr>
     </tbody>
     <tfoot>
@@ -29,18 +34,27 @@
   table {
     opacity: 60%;
     background-color: inherit;
+    line-height: 20px;
+    border-collapse: separate;
+    border-spacing: 0px;
+  }
+  tr {
+    display: table-row;
+    height: 20px;
   }
   th {
     min-width: 250px;
+    height: 60px;
   }
   td {
-    min-height: 500px;
     background-color: #fff;
+    height: 400px;
   }
   .spinner {
     border: none;
     text-align: center;
     vertical-align: middle;
-    height: 500px;
+    position: relative;
+    left: 500px;
   }
 </style>
