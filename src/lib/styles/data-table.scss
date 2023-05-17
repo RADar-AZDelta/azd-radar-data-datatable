@@ -22,7 +22,7 @@ div[data-component='svelte-radar-datatable'] {
   overflow-x: auto;
   overflow-y: auto;
   max-width: 100vw;
-  max-height: 90vh;
+  max-height: 100vh;
   table[data-name='table-skeleton'] {
     tr {
       background-color: #fff;
@@ -64,6 +64,7 @@ div[data-component='svelte-radar-datatable'] {
       }
 
       tr {
+        display: table-row;
         padding: 0.35em;
         font-size: 12px;
 
@@ -97,6 +98,7 @@ div[data-component='svelte-radar-datatable'] {
               flex: 0 0 auto;
               width: 3px;
               cursor: col-resize;
+              
             }
 
             div[data-name='column-reposition'] {

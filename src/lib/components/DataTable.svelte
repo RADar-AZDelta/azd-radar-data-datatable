@@ -558,22 +558,12 @@
       } catch {}
     }
   }
-  let columnsWidths: Array<number> = []
   function onStoreOptions() {
     if (!internalOptions?.id || !browser) return
     console.log(internalOptions.id)
     localStorage.setItem(`datatable_${internalOptions.id}_options`, JSON.stringify(internalOptions))
     if (internalColumns)
       localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
-
-    if (internalColumns) {
-      internalColumns.forEach(col => {
-        if (col.width) {
-          columnsWidths.push(col?.width)
-        }
-      })
-    }
-    console.log(columnsWidths, 'ARRAY IN DATATABLE')
   }
 
   onDestroy(() => {
@@ -582,7 +572,7 @@
 </script>
 
 {#if renderStatus === 'initializing' || renderStatus === 'rendering'}
-  <Skeleton numberOfRows={internalOptions.rowsPerPage} columnWidth={columnsWidths} />
+  <Skeleton />
 {:else}
   <dialog data-name="settings-dialog" bind:this={settingsDialog}>
     <button data-name="close-button" on:click={() => settingsDialog.close()}
