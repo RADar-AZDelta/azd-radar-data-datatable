@@ -340,10 +340,31 @@
         },
       ],
     }
-    const fileHandle = await (<any>window).showSaveFilePicker(opts)
+    const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(opts)
     switch (dataType) {
       case DataType.File:
         await worker!.saveToFile(fileHandle)
+        break
+      case DataType.ArrayOfObjects:
+        let csv = ''
+        let keyCounter: number = 0
+        for (let row = 0; row <= data!.length; row++) {
+          for (let col of internalColumns!) {
+            if (row == 0) {
+              csv += col.id + (keyCounter + 1 < internalColumns!.length ? ',' : '\r\n')
+              keyCounter++
+            } else {
+              const value = (<any[]>data)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
+              csv += value + (keyCounter + 1 < internalColumns!.length ? ',' : '\r\n')
+              keyCounter++
+            }
+          }
+          keyCounter = 0
+        }
+        const writable = await fileHandle.createWritable()
+        await writable.write(csv)
+        await writable.close()
+
         break
       default:
         throw new Error('Not yet supported')
@@ -543,6 +564,11 @@
     switch (dataType) {
       case DataType.File:
         return await worker.replaceValuesOfColumn(currentValue, updatedValue, column)
+      case DataType.ArrayOfObjects:
+        for (let i = 0; i < data!.length; i++) {
+          if ((<any[]>data)[i][column] == currentValue) (<any[]>data)[i][column] = updatedValue
+        }
+        break
       default:
         throw new Error('Not yet supported')
     }
