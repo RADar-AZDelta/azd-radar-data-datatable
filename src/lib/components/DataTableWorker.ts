@@ -18,6 +18,7 @@ import type {
   MessageRespnseInsertColumns,
   MessageResponseExecuteExpressionsAndReturnResults,
   MessageRequestExecuteExpressionsAndReturnResults,
+  MessageRequestReplaceValuesOfColumn,
 } from '$lib/workers/messages'
 import type { IColumnMetaData, IPagination, SortDirection, TFilter } from './DataTable'
 import type Query from 'arquero/dist/types/query/query'
@@ -97,14 +98,12 @@ export class DataTableWorker {
   async insertColumns(columns: IColumnMetaData[]): Promise<void> {
     return await this.executeWorkerMethod<MessageRequestInsertColumns, void>('insertColumns', { columns })
   }
-  async executeQueryAndReturnResults(
-    usedQuery: Query | object
-  ): Promise<MessageResponseExecuteQueryAndReturnResults> {
+  async executeQueryAndReturnResults(usedQuery: Query | object): Promise<MessageResponseExecuteQueryAndReturnResults> {
     return await this.executeWorkerMethod<
       MessageRequestExecuteQueryAndReturnResults,
       MessageResponseExecuteQueryAndReturnResults
     >('executeQueryAndReturnResults', {
-      usedQuery
+      usedQuery,
     })
   }
 
@@ -116,6 +115,14 @@ export class DataTableWorker {
       MessageResponseExecuteExpressionsAndReturnResults
     >('executeExpressionsAndReturnResults', {
       expressions,
+    })
+  }
+
+  async replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void> {
+    return await this.executeWorkerMethod<MessageRequestReplaceValuesOfColumn, void>('replaceValuesOfColumn', {
+      currentValue,
+      updatedValue,
+      column,
     })
   }
 }

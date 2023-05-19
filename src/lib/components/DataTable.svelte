@@ -539,6 +539,15 @@
     disabled = value
   }
 
+  export async function replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string) {
+    switch (dataType) {
+      case DataType.File:
+        return await worker.replaceValuesOfColumn(currentValue, updatedValue, column)
+      default:
+        throw new Error('Not yet supported')
+    }
+  }
+
   async function loadStoredOptions() {
     if (!internalOptions?.id || !browser) return
 
@@ -706,14 +715,19 @@
             {#each renderedData as row, i (i)}
               <tr data-index={i}>
                 {#if $$slots.default}
-                  <slot renderedRow={row} index={i} columns={visibleOrderedColumns} options={internalOptions} />
+                  <slot
+                    renderedRow={row}
+                    originalIndex={originalIndices[i]}
+                    columns={visibleOrderedColumns}
+                    options={internalOptions}
+                  />
                 {:else}
                   {#if internalOptions.actionColumn}
                     {#if $$slots.actionCell}
                       <slot
                         name="actionCell"
                         renderedRow={row}
-                        index={i}
+                        originalIndex={originalIndices[i]}
                         columns={visibleOrderedColumns}
                         options={internalOptions}
                       />

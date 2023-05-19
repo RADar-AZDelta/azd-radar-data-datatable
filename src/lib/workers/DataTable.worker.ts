@@ -19,9 +19,11 @@ import type {
   MessageRespnseInsertColumns,
   MessageRequestExecuteExpressionsAndReturnResults,
   MessageResponseExecuteExpressionsAndReturnResults,
+  MessageRequestReplaceValuesOfColumn,
 } from './messages'
 import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, addFunction, fromJSON } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
+import type { TableData } from 'arquero/dist/types/table/table'
 
 let dt: ColumnTable
 let tempDt: ColumnTable | undefined
@@ -60,6 +62,9 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case 'executeExpressionsAndReturnResults':
       await executeExpressionsAndReturnResults(data as MessageRequestExecuteExpressionsAndReturnResults)
+      break
+    case 'replaceValuesOfColumn':
+      await replaceValuesOfColumn(data as MessageRequestReplaceValuesOfColumn)
       break
   }
 }
@@ -301,6 +306,19 @@ function executeExpressionsAndReturnResults({ expressions }: MessageRequestExecu
   const message: PostMessage<MessageResponseExecuteExpressionsAndReturnResults> = {
     msg: 'executeExpressionsAndReturnResults',
     data: { expressionData },
+  }
+  postMessage(message)
+}
+
+function replaceValuesOfColumn({ currentValue, updatedValue, column }: MessageRequestReplaceValuesOfColumn) {
+  dt.scan((row?: number | undefined, data?: TableData | undefined) => {
+    if (data[column as keyof Object].data[row] == currentValue) {
+      data![column as keyof Object].data[row] = updatedValue
+    }
+  })
+  const message: PostMessage<unknown> = {
+    msg: 'replaceValuesOfColumn',
+    data: undefined,
   }
   postMessage(message)
 }

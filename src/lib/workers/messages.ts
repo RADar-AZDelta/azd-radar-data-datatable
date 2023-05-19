@@ -72,3 +72,9 @@ export interface MessageRequestExecuteExpressionsAndReturnResults {
 export interface MessageResponseExecuteExpressionsAndReturnResults {
   expressionData: any
 }
+
+export interface MessageRequestReplaceValuesOfColumn {
+  currentValue: any
+  updatedValue: any
+  column: string
+}
