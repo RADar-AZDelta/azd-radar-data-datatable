@@ -778,22 +778,6 @@
                 </div>
               </td>
             </tr>
-            <!-- {#each Array(internalOptions.rowsPerPage) as _, i}
-              <tr style="height: 15px">
-                {#if visibleOrderedColumns}
-                  {#if internalOptions.actionColumn}
-                    <td><p data-name="loading">&nbsp;</p></td>
-                  {/if}
-                  {#each visibleOrderedColumns as column, i (column.id)}
-                    <td><p data-name="loading">&nbsp;</p></td>
-                  {/each}
-                {/if} 
-              </tr>
-            {/each} -->
-            <!-- <div data-name="info">
-                <Spinner />
-                <p>Loading...</p>
-              </div> -->
           {/if}
         {:else if $$slots.nodata}
           <slot name="nodata" />
