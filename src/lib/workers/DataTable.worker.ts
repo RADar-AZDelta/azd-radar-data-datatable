@@ -280,8 +280,16 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
   postMessage(message)
 }
 
-function executeQueryAndReturnResults({ usedQuery, sortedColumns }: MessageRequestExecuteQueryAndReturnResults) {
+function executeQueryAndReturnResults({
+  usedQuery,
+  filteredColumns,
+  sortedColumns,
+}: MessageRequestExecuteQueryAndReturnResults) {
   let tempDt = dt
+  for (const [column, filter] of [...filteredColumns].values()) {
+    const lowerCaseFilter = filter?.toString().toLowerCase()
+    tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
+  }
   for (const [column, sortDirection] of [...sortedColumns].reverse()) {
     switch (sortDirection) {
       case 'asc':
