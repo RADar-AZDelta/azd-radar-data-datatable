@@ -1,9 +1,5 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
-<script lang="ts">
-  export let big: Boolean | undefined = false
-</script>
-
 <div class="spinner" />
 
 <style>

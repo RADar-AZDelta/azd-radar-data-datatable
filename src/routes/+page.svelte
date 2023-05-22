@@ -228,107 +228,117 @@
   }
 </script>
 
-<h1>svelte-radar-datatable demo</h1>
+<article>
+  <header>
+    <h1>svelte-radar-datatable demo</h1>
+    <p>
+      Why yet another datatable component? During the development of <a href="https://github.com/RADar-AZDelta/Keun"
+        >Keun</a
+      >, we needed a datatable component that could handle CSV's with more than 100.000 rows. We didn't find anything
+      that suited our needs, so we developed our own.
+    </p>
+  </header>
 
-<details open>
-  <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
-  <DataTable
-    {columns}
-    data={matrix}
-    bind:this={dataTableMatrix}
-    options={{ id: 'matrix', rowsPerPage: 7, rowsPerPageOptions: [7, 15], actionColumn: true }}
-    let:renderedRow
-    let:originalIndex
-    let:columns
-  >
-    <td>
-      <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
-    </td>
-    {#each columns || [] as column, i (column.id)}
-      <td animate:flip={{ duration: 500 }}>
-        <EditableCell
-          value={renderedRow[column.id]}
-          on:valueChanged={async event =>
-            await dataTableMatrix.updateRows(
-              new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
-            )}
-        />
+  <details open>
+    <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
+    <DataTable
+      {columns}
+      data={matrix}
+      bind:this={dataTableMatrix}
+      options={{ id: 'matrix', rowsPerPage: 7, rowsPerPageOptions: [7, 15], actionColumn: true }}
+      let:renderedRow
+      let:originalIndex
+      let:columns
+    >
+      <td>
+        <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
       </td>
-    {/each}
-  </DataTable>
+      {#each columns || [] as column, i (column.id)}
+        <td animate:flip={{ duration: 500 }}>
+          <EditableCell
+            value={renderedRow[column.id]}
+            on:valueChanged={async event =>
+              await dataTableMatrix.updateRows(
+                new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
+              )}
+          />
+        </td>
+      {/each}
+    </DataTable>
+  </details>
 
   <br />
   <button on:click={() => onClickInsertRows(dataTableMatrix)}
     >Insert row (remove country filter to view updated records)</button
   >
-</details>
 
-<hr />
+  <hr />
 
-<details>
-  <summary>Table with an array of objects as a data source</summary>
-  <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ id: 'array' }}>
-    <td slot="actionCell" let:originalIndex>
-      <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
-    </td>
-  </DataTable>
-
-  <br />
-  <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert row</button>
-</details>
-
-<hr />
-
-<details>
-  <summary>Table with a async function as a data source (ex: fetch data from web server)</summary>
-  <DataTable {columns} data={fetchData} bind:this={dataTableFetchFunction} options={{ id: 'function' }} />
-</details>
-
-<hr />
-
-<details open>
-  <summary
-    >Table with a CSV file as a data source (ex: <a
-      href="https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv"
-      >medicatie_usagi.csv</a
-    >)</summary
-  >
-  <input type="file" accept=".csv" on:change={onFileInputChange} />
-  <DataTable
-    data={file}
-    bind:this={dataTableFile}
-    options={{ id: 'file', actionColumn: true }}
-    let:renderedRow
-    let:originalIndex
-    let:columns
-    modifyColumnMetadata={columns =>
-      columns.map((col, index) => {
-        col.editable = index % 2 === 0
-        return col
-      })}
-  >
-    <td>
-      <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
-    </td>
-    {#each columns || [] as column, i (column.id)}
-      <td animate:flip={{ duration: 500 }}>
-        {#if column.editable === false}
-          <p>{renderedRow[column.id]}</p>
-        {:else}
-          <EditableCell
-            value={renderedRow[column.id]}
-            on:valueChanged={async event =>
-              await dataTableFile.updateRows(
-                new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
-              )}
-          />
-        {/if}
+  <details>
+    <summary>Table with an array of objects as a data source</summary>
+    <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ id: 'array' }}>
+      <td slot="actionCell" let:originalIndex>
+        <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
       </td>
-    {/each}
-  </DataTable>
+    </DataTable>
 
-  <br />
-  <button disabled={!file} on:click={() => onClickSaveButton(dataTableFile)}>Save table</button>
-  <br />
-  <button disabled={!file} on:click={() => onClickInsertRowsCSV(dataTableFile)}>Insert row</button>
-</details>
+    <br />
+    <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert row</button>
+  </details>
+
+  <hr />
+
+  <details>
+    <summary>Table with a async function as a data source (ex: fetch data from web server)</summary>
+    <DataTable {columns} data={fetchData} bind:this={dataTableFetchFunction} options={{ id: 'function' }} />
+  </details>
+
+  <hr />
+
+  <details open>
+    <summary
+      >Table with a CSV file as a data source (ex: <a
+        href="https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv"
+        >medicatie_usagi.csv</a
+      >)</summary
+    >
+    <input type="file" accept=".csv" on:change={onFileInputChange} />
+    <DataTable
+      data={file}
+      bind:this={dataTableFile}
+      options={{ id: 'file', actionColumn: true }}
+      let:renderedRow
+      let:originalIndex
+      let:columns
+      modifyColumnMetadata={columns =>
+        columns.map((col, index) => {
+          col.editable = index % 2 === 0
+          return col
+        })}
+    >
+      <td>
+        <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
+      </td>
+      {#each columns || [] as column, i (column.id)}
+        <td animate:flip={{ duration: 500 }}>
+          {#if column.editable === false}
+            <p>{renderedRow[column.id]}</p>
+          {:else}
+            <EditableCell
+              value={renderedRow[column.id]}
+              on:valueChanged={async event =>
+                await dataTableFile.updateRows(
+                  new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
+                )}
+            />
+          {/if}
+        </td>
+      {/each}
+    </DataTable>
+
+    <br />
+    <button disabled={!file} on:click={() => onClickSaveButton(dataTableFile)}>Save table</button>
+    <br />
+    <button disabled={!file} on:click={() => onClickInsertRowsCSV(dataTableFile)}>Insert row</button>
+  </details>
+</article>

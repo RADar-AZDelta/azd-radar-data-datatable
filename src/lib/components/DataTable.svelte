@@ -636,16 +636,24 @@
   </div>
 </dialog>
 
-<div data-component="full-datatable">
+<div data-component="svelte-radar-datatable">
   <div
-    data-component="svelte-radar-datatable"
+    data-component="datatable-content"
     data-status={renderStatus ?? ''}
     use:storeOptions
     on:storeoptions={onStoreOptions}
   >
     <table>
-      <thead>
-        {#if visibleOrderedColumns}
+      {#if visibleOrderedColumns}
+        <colgroup>
+          {#if internalOptions.actionColumn}
+            <col width="0*" />
+          {/if}
+          {#each visibleOrderedColumns as column, i (column.id)}
+            <col width={column.width ? column.width : '0*'} />
+          {/each}
+        </colgroup>
+        <thead>
           <tr data-name="titles">
             {#if internalOptions.actionColumn}
               <th data-name="action-Column" />
@@ -657,7 +665,6 @@
                 data-key={column?.id}
                 data-sortable={column?.sortable}
                 animate:flip={{ duration: 500 }}
-                style="{column.width ? `width: ${column.width}px` : ''};"
               >
                 <ColumnResize
                   {column}
@@ -692,7 +699,6 @@
                 data-key={column?.id}
                 data-filterable={column?.filterable}
                 animate:flip={{ duration: 500 }}
-                style="{column.width ? `width: ${column.width}px` : ''};"
               >
                 <ColumnResize
                   {column}
@@ -712,10 +718,8 @@
               </th>
             {/each}
           </tr>
-        {/if}
-      </thead>
-      <tfoot>
-        {#if visibleOrderedColumns}
+        </thead>
+        <tfoot>
           <tr data-name="pagination">
             <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
               <div>
@@ -731,8 +735,8 @@
               </div>
             </th>
           </tr>
-        {/if}
-      </tfoot>
+        </tfoot>
+      {/if}
       <tbody>
         {#if renderedData}
           {#each renderedData as row, i (i)}

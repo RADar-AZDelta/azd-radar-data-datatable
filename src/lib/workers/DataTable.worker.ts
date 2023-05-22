@@ -21,7 +21,7 @@ import type {
   MessageResponseExecuteExpressionsAndReturnResults,
   MessageRequestReplaceValuesOfColumn,
 } from './messages'
-import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, addFunction, fromJSON } from 'arquero'
+import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, fromJSON } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 import type { TableData } from 'arquero/dist/types/table/table'
 
@@ -166,10 +166,10 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
     value == null
       ? ''
       : value instanceof Date
-      ? (value as Date).toISOString()
-      : reFormat.test((value += ''))
-      ? '"' + value.replace(/"/g, '""') + '"'
-      : value
+        ? (value as Date).toISOString()
+        : reFormat.test((value += ''))
+          ? '"' + value.replace(/"/g, '""') + '"'
+          : value
 
   let buffer = []
 
@@ -233,7 +233,7 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
 
   for (const index of indices) {
     for (const column of Object.keys(dt._data)) {
-      ;(dt._data[column] as Column).data.splice(index, 1)
+      ; (dt._data[column] as Column).data.splice(index, 1)
     }
     dt._total -= 1
     dt._nrows -= 1
@@ -282,7 +282,7 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
 
 function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
   const query = queryFrom(usedQuery)
-  const queriedDt: ColumnTable = query.evaluate(dt, () => {})
+  const queriedDt: ColumnTable = query.evaluate(dt, () => { })
   const queriedData = queriedDt.objects()
 
   let columns: Record<string, any> = {}
