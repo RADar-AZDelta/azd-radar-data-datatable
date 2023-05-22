@@ -102,11 +102,27 @@ async function fetchData(data: MessageRequestFetchData) {
   if (!data.onlyPaginationChanged || !tempDt) {
     tempDt = dt
     //filter
-    for (const [column, filter] of [...data.filteredColumns].values()) {
+    if (data.filteredColumns.size === 1 && [...data.filteredColumns.keys()][0] === "all") {
+      const filter = [...data.filteredColumns.values()][0]
       const lowerCaseFilter = filter?.toString().toLowerCase()
-      tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
-      //TODO: test if we can run without escape (better performance)
-      //tempDt = tempDt.params({ column, lowerCaseFilter: new RegExp(lowerCaseFilter!) }).filter(d => op.lower(d[column]).match(lowerCaseFilter))
+      const columns = tempDt.columnNames()
+      tempDt = tempDt.filter(escape((d: any) => {
+        let expr
+        for (const column of columns) {
+          if (!expr)
+            expr = op.lower(d[column]).includes(lowerCaseFilter)
+          else
+            expr = expr || op.lower(d[column]).includes(lowerCaseFilter)
+        }
+        return expr
+      }))
+    } else {
+      for (const [column, filter] of [...data.filteredColumns.entries()]) {
+        const lowerCaseFilter = filter?.toString().toLowerCase()
+        tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
+        //TODO: test if we can run without escape (better performance)
+        //tempDt = tempDt.params({ column, lowerCaseFilter: new RegExp(lowerCaseFilter!) }).filter(d => op.lower(d[column]).match(lowerCaseFilter))
+      }
     }
     //sort
     for (const [column, sortDirection] of [...data.sortedColumns].reverse()) {
@@ -166,10 +182,10 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
     value == null
       ? ''
       : value instanceof Date
-      ? (value as Date).toISOString()
-      : reFormat.test((value += ''))
-      ? '"' + value.replace(/"/g, '""') + '"'
-      : value
+        ? (value as Date).toISOString()
+        : reFormat.test((value += ''))
+          ? '"' + value.replace(/"/g, '""') + '"'
+          : value
 
   let buffer = []
 
@@ -233,7 +249,7 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
 
   for (const index of indices) {
     for (const column of Object.keys(dt._data)) {
-      ;(dt._data[column] as Column).data.splice(index, 1)
+      ; (dt._data[column] as Column).data.splice(index, 1)
     }
     dt._total -= 1
     dt._nrows -= 1
@@ -282,7 +298,7 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
 
 function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
   const query = queryFrom(usedQuery)
-  const queriedDt: ColumnTable = query.evaluate(dt, () => {})
+  const queriedDt: ColumnTable = query.evaluate(dt, () => { })
   const queriedData = queriedDt.objects()
 
   let columns: Record<string, any> = {}

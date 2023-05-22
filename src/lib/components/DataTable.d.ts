@@ -45,7 +45,7 @@ export interface ITableOptions extends IPagination {
   rowsPerPageOptions?: number[]
   actionColumn?: boolean,
   totalRows?: number,
-  singleFilter?: singleFilter
+  globalFilter?: GlobalFilter
 }
 
 export type FetchDataFunc = (
@@ -104,10 +104,9 @@ export type TFilter = string | number | RegExp | Date | boolean | string[] | und
 export interface ColumnFilterChangedEventDetail {
   column: string
   filter: TFilter
-  single: boolean
 }
 
-export interface singleFilter {
+export interface GlobalFilter {
   column: string
   filter: TFilter
 }

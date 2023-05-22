@@ -300,8 +300,8 @@
     options={{
       id: 'file',
       actionColumn: true,
-      singleFilter: {
-        column: 'sourceName',
+      globalFilter: {
+        column: 'all',
         filter: undefined,
       },
     }}

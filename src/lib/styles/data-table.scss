@@ -66,6 +66,14 @@ div[data-component='full-datatable'] {
         tr[data-name='filters'] {
           th {
             padding-bottom: 5px;
+
+            div[data-name='column-filter'] {
+              display: flex;
+
+              :first-child {
+                flex: 1 1 auto;
+              }
+            }
           }
         }
 

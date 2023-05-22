@@ -128,77 +128,100 @@
     dispatch('initialized')
   }
 
+  async function renderDataTypeFunction() {
+    let start: number
+    const filteredColumns = internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
+      if (cur && cur.filter) acc.set(cur.id, cur.filter)
+      return acc
+    }, new Map<string, TFilter>())
+    const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
+      if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
+      return acc
+    }, new Map<string, SortDirection>())
+    if (dev) start = performance.now()
+    const results = await (data as FetchDataFunc)(filteredColumns, sortedColumns, internalOptions)
+    if (dev) {
+      const end = performance.now()
+      console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
+    }
+    originalIndices = Array.from({ length: results.data.length }, (_, i) => i)
+    internalOptions.totalRows = results.totalRows
+    renderedData = results.data
+  }
+
+  function renderDataTypeArrayOfObjects(onlyPaginationChanged: boolean) {
+    if (!onlyPaginationChanged || !filteredAndSortedData) {
+      filteredAndSortedData = applySort(applyFilter(data as any[]))
+      internalOptions.totalRows = filteredAndSortedData.length
+    }
+    renderedData = applyPagination(filteredAndSortedData)
+    originalIndices = (renderedData as Record<string, any>[]).reduce<number[]>((acc, cur) => {
+      acc.push((data as Record<string, any>[]).indexOf(cur))
+      return acc
+    }, [])
+  }
+
+  function renderDataTypeMatrix(onlyPaginationChanged: boolean) {
+    if (!onlyPaginationChanged || !filteredAndSortedData) {
+      filteredAndSortedData = applySort(applyFilter(data as any[][]))
+      internalOptions.totalRows = filteredAndSortedData.length
+    }
+    const paginatedData = applyPagination(filteredAndSortedData)
+    renderedData = paginatedData.map(row =>
+      internalColumns?.reduce((acc, cur, index) => {
+        acc[cur.id!] = row[index]
+        return acc
+      }, {} as Record<string, any>)
+    )
+    originalIndices = (paginatedData as any[]).reduce((acc, cur) => {
+      acc.push((data as any[]).indexOf(cur))
+      return acc
+    }, [])
+  }
+
+  async function renderDataTypeFile(onlyPaginationChanged: boolean) {
+    const filteredColumns = internalOptions?.globalFilter?.filter
+      ? new Map<string, TFilter>([[internalOptions!.globalFilter!.column, internalOptions!.globalFilter!.filter]])
+      : internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
+          if (cur && cur.filter) acc.set(cur.id, cur.filter)
+          return acc
+        }, new Map<string, TFilter>())
+    const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
+      if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
+      return acc
+    }, new Map<string, SortDirection>())
+    const results = await worker?.fetchData(filteredColumns, sortedColumns, internalOptions, onlyPaginationChanged)
+    internalOptions.totalRows = results!.totalRows
+    renderedData = results!.data.map(row =>
+      internalColumns?.reduce((acc, cur, index) => {
+        acc[cur.id!] = row[index]
+        return acc
+      }, {} as Record<string, any>)
+    )
+    originalIndices = results!.indices.reduce<number[]>((acc, cur) => {
+      acc.push(cur)
+      return acc
+    }, [])
+  }
+
   async function render(onlyPaginationChanged = false) {
     renderStatus = 'rendering'
     dispatch('rendering')
     if (dev) console.log('DataTable: render')
     renderedData = undefined
-    if (dataType === DataType.Function) {
-      let start: number
-      const filteredColumns = internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
-        if (cur && cur.filter) acc.set(cur.id, cur.filter)
-        return acc
-      }, new Map<string, TFilter>())
-      const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
-        if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
-        return acc
-      }, new Map<string, SortDirection>())
-      if (dev) start = performance.now()
-      const results = await (data as FetchDataFunc)(filteredColumns, sortedColumns, internalOptions)
-      if (dev) {
-        const end = performance.now()
-        console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
-      }
-      originalIndices = Array.from({ length: results.data.length }, (_, i) => i)
-      internalOptions.totalRows = results.totalRows
-      renderedData = results.data
-    } else if (dataType === DataType.ArrayOfObjects) {
-      if (!onlyPaginationChanged || !filteredAndSortedData) {
-        filteredAndSortedData = applySort(applyFilter(data as any[]))
-        internalOptions.totalRows = filteredAndSortedData.length
-      }
-      renderedData = applyPagination(filteredAndSortedData)
-      originalIndices = (renderedData as Record<string, any>[]).reduce<number[]>((acc, cur) => {
-        acc.push((data as Record<string, any>[]).indexOf(cur))
-        return acc
-      }, [])
-    } else if (dataType === DataType.Matrix) {
-      if (!onlyPaginationChanged || !filteredAndSortedData) {
-        filteredAndSortedData = applySort(applyFilter(data as any[][]))
-        internalOptions.totalRows = filteredAndSortedData.length
-      }
-      const paginatedData = applyPagination(filteredAndSortedData)
-      renderedData = paginatedData.map(row =>
-        internalColumns?.reduce((acc, cur, index) => {
-          acc[cur.id!] = row[index]
-          return acc
-        }, {} as Record<string, any>)
-      )
-      originalIndices = (paginatedData as any[]).reduce((acc, cur) => {
-        acc.push((data as any[]).indexOf(cur))
-        return acc
-      }, [])
-    } else if (dataType === DataType.File) {
-      const filteredColumns = internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
-        if (cur && cur.filter) acc.set(cur.id, cur.filter)
-        return acc
-      }, new Map<string, TFilter>())
-      const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
-        if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
-        return acc
-      }, new Map<string, SortDirection>())
-      const results = await worker?.fetchData(filteredColumns, sortedColumns, internalOptions, onlyPaginationChanged)
-      internalOptions.totalRows = results!.totalRows
-      renderedData = results!.data.map(row =>
-        internalColumns?.reduce((acc, cur, index) => {
-          acc[cur.id!] = row[index]
-          return acc
-        }, {} as Record<string, any>)
-      )
-      originalIndices = results!.indices.reduce<number[]>((acc, cur) => {
-        acc.push(cur)
-        return acc
-      }, [])
+    switch (dataType) {
+      case DataType.Function:
+        await renderDataTypeFunction()
+        break
+      case DataType.ArrayOfObjects:
+        renderDataTypeArrayOfObjects(onlyPaginationChanged)
+        break
+      case DataType.Matrix:
+        renderDataTypeMatrix(onlyPaginationChanged)
+        break
+      case DataType.File:
+        await renderDataTypeFile(onlyPaginationChanged)
+        break
     }
     renderStatus = 'completed'
     dispatch('renderingComplete')
@@ -261,9 +284,15 @@
   }
 
   async function onColumnFilterChanged(event: CustomEvent<ColumnFilterChangedEventDetail>) {
-    const column = internalColumns?.find(col => col.id === event.detail.column)
-    column!.filter = event.detail.filter?.toString().toLowerCase()
-    if(event.detail.single) internalOptions.singleFilter!.filter = event.detail.filter?.toString().toLowerCase()
+    if (internalOptions?.globalFilter)
+      internalOptions.globalFilter!.filter = event.detail.filter?.toString().toLowerCase()
+
+    if (event.detail.column === 'all')
+      internalColumns?.forEach(column => (column!.filter = event.detail.filter?.toString().toLowerCase()))
+    else {
+      const column = internalColumns?.find(col => col.id === event.detail.column)
+      column!.filter = event.detail.filter?.toString().toLowerCase()
+    }
     internalColumns = internalColumns
     filteredAndSortedData = undefined
 
@@ -602,7 +631,7 @@
   }
   function onStoreOptions() {
     if (!internalOptions?.id || !browser) return
-    console.log(internalOptions.id)
+    if (dev) console.log(`DataTable: onStoreOptions for ${internalOptions.id}`)
     localStorage.setItem(`datatable_${internalOptions.id}_options`, JSON.stringify(internalOptions))
     if (internalColumns)
       localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
@@ -644,20 +673,6 @@
     use:storeOptions
     on:storeoptions={onStoreOptions}
   >
-    {#if internalOptions}
-      {#if internalOptions.singleFilter}
-        <div data-name="filter-big">
-          <ColumnFilter
-            column={internalOptions.singleFilter.column}
-            inputType="text"
-            filter={internalOptions.singleFilter.filter}
-            {disabled}
-            single={true}
-            on:columnFilterChanged={onColumnFilterChanged}
-          />
-        </div>
-      {/if}
-    {/if}
     <table>
       <thead>
         {#if visibleOrderedColumns}
@@ -692,45 +707,46 @@
               </th>
             {/each}
           </tr>
-          {#if options}
-            {#if !options.singleFilter}
-              <tr data-name="filters">
-                {#if internalOptions.actionColumn}
-                  {#if $$slots.actionHeader}
-                    <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
-                  {:else}
-                    <th />
-                  {/if}
-                {/if}
-                {#each visibleOrderedColumns as column, i (column.id)}
-                  <th
-                    data-direction={column?.sortDirection}
-                    data-resizable={column?.resizable}
-                    data-key={column?.id}
-                    data-filterable={column?.filterable}
-                    animate:flip={{ duration: 500 }}
-                    style="{column.width ? `width: ${column.width}px` : ''};"
-                  >
-                    <ColumnResize
-                      {column}
-                      on:columnPositionChanged={onColumnPositionChanged}
-                      on:columnWidthChanged={onColumnWidthChanged}
-                    >
-                      {#if column.filterable !== false}
-                        <ColumnFilter
-                          column={column.id}
-                          inputType="text"
-                          filter={column.filter}
-                          {disabled}
-                          on:columnFilterChanged={onColumnFilterChanged}
-                        />
-                      {/if}
-                    </ColumnResize>
-                  </th>
-                {/each}
-              </tr>
+          <tr data-name="filters">
+            {#if internalOptions.actionColumn}
+              {#if $$slots.actionHeader}
+                <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
+              {:else}
+                <th />
+              {/if}
             {/if}
-          {/if}
+            {#if internalOptions?.globalFilter}
+              <th colspan={visibleOrderedColumns.length}>
+                <ColumnFilter
+                  column={internalOptions.globalFilter.column ?? 'all'}
+                  inputType="text"
+                  filter={internalOptions.globalFilter.filter}
+                  {disabled}
+                  on:columnFilterChanged={onColumnFilterChanged}
+                />
+              </th>
+            {:else}
+              {#each visibleOrderedColumns as column, i (column.id)}
+                <th
+                  data-resizable={column?.resizable}
+                  data-key={column?.id}
+                  data-filterable={column?.filterable}
+                  animate:flip={{ duration: 500 }}
+                  style="{column.width ? `width: ${column.width}px` : ''};"
+                >
+                  {#if column.filterable !== false}
+                    <ColumnFilter
+                      column={column.id}
+                      inputType="text"
+                      filter={column.filter}
+                      {disabled}
+                      on:columnFilterChanged={onColumnFilterChanged}
+                    />
+                  {/if}
+                </th>
+              {/each}
+            {/if}
+          </tr>
         {/if}
       </thead>
       <tfoot>
