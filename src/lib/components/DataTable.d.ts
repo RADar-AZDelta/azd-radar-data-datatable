@@ -45,6 +45,7 @@ export interface ITableOptions extends IPagination {
   rowsPerPageOptions?: number[]
   actionColumn?: boolean,
   totalRows?: number,
+  defaultColumnWidth?: number,
   globalFilter?: GlobalFilter
 }
 

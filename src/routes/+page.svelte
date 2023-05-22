@@ -265,12 +265,12 @@
         </td>
       {/each}
     </DataTable>
-  </details>
 
-  <br />
-  <button on:click={() => onClickInsertRows(dataTableMatrix)}
-    >Insert row (remove country filter to view updated records)</button
-  >
+    <br />
+    <button on:click={() => onClickInsertRows(dataTableMatrix)}
+      >Insert row (remove country filter to view updated records)</button
+    >
+  </details>
 
   <hr />
 
@@ -307,7 +307,6 @@
       data={file}
       bind:this={dataTableFile}
       options={{
-        id: 'file',
         actionColumn: true,
         globalFilter: {
           column: 'all',
