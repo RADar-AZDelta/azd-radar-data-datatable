@@ -21,7 +21,7 @@ import type {
   MessageResponseExecuteExpressionsAndReturnResults,
   MessageRequestReplaceValuesOfColumn,
 } from './messages'
-import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, addFunction, fromJSON } from 'arquero'
+import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, fromJSON } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 import type { TableData } from 'arquero/dist/types/table/table'
 

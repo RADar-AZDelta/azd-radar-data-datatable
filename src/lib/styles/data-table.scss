@@ -8,7 +8,7 @@ $gray-xx-light: #ededed;
 $gray-x-light: #d3d3d3;
 $gray-xx-dark: #333333;
 
-div[data-component='full-datatable'] {
+div[data-component='svelte-radar-datatable'] {
   display: block;
   box-sizing: border-box;
   overscroll-behavior: contain;
@@ -16,8 +16,8 @@ div[data-component='full-datatable'] {
   position: relative;
   user-select: none;
 
-  div[data-component='svelte-radar-datatable'] {
-    resize: vertical;
+  div[data-component='datatable-content'] {
+    position: relative;
     box-sizing: border-box;
     overflow-x: auto;
     overflow-y: auto;
