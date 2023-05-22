@@ -295,50 +295,36 @@
 
   <hr />
 
-<details open>
-  <summary
-    >Table with a CSV file as a data source (ex: <a
-      href="https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv"
-      >medicatie_usagi.csv</a
-    >)</summary
-  >
-  <input type="file" accept=".csv" on:change={onFileInputChange} />
-  <DataTable
-    data={file}
-    bind:this={dataTableFile}
-    options={{
-      id: 'file',
-      actionColumn: true,
-      globalFilter: {
-        column: 'all',
-        filter: undefined,
-      },
-    }}
-    let:renderedRow
-    let:originalIndex
-    let:columns
-    modifyColumnMetadata={columns =>
-      columns.map((col, index) => {
-        col.editable = index % 2 === 0
-        return col
-      })}
-  >
-    <td>
-      <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
-    </td>
-    {#each columns || [] as column, i (column.id)}
-      <td animate:flip={{ duration: 500 }}>
-        {#if column.editable === false}
-          <p>{renderedRow[column.id]}</p>
-        {:else}
-          <EditableCell
-            value={renderedRow[column.id]}
-            on:valueChanged={async event =>
-              await dataTableFile.updateRows(
-                new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
-              )}
-          />
-        {/if}
+  <details open>
+    <summary
+      >Table with a CSV file as a data source (ex: <a
+        href="https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv"
+        >medicatie_usagi.csv</a
+      >)</summary
+    >
+    <input type="file" accept=".csv" on:change={onFileInputChange} />
+    <DataTable
+      data={file}
+      bind:this={dataTableFile}
+      options={{
+        id: 'file',
+        actionColumn: true,
+        globalFilter: {
+          column: 'all',
+          filter: undefined,
+        },
+      }}
+      let:renderedRow
+      let:originalIndex
+      let:columns
+      modifyColumnMetadata={columns =>
+        columns.map((col, index) => {
+          col.editable = index % 2 === 0
+          return col
+        })}
+    >
+      <td>
+        <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
       </td>
       {#each columns || [] as column, i (column.id)}
         <td animate:flip={{ duration: 500 }}>
