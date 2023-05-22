@@ -24,7 +24,9 @@
   }
 </script>
 
-<input on:input={onInput} type={inputType} {value} placeholder="Filter" {disabled} />
-<button on:click={onClick} {disabled}>
-  <SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" />
-</button>
+<div data-name="column-filter">
+  <input on:input={onInput} type={inputType} {value} placeholder="Filter" {disabled} />
+  <button on:click={onClick} {disabled}>
+    <SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" />
+  </button>
+</div>

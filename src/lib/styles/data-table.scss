@@ -23,6 +23,18 @@ div[data-component='svelte-radar-datatable'] {
     overflow-y: auto;
     max-width: 100vw;
     max-height: 100vh;
+    width: max-content;
+
+    div[data-name='filter-big'] {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 0.5rem;
+
+      input {
+        flex: 1 1 auto;
+      }
+    }
 
     table {
       //width:0 breaks table component array as data source and file as data source
@@ -54,6 +66,14 @@ div[data-component='svelte-radar-datatable'] {
         tr[data-name='filters'] {
           th {
             padding-bottom: 5px;
+
+            div[data-name='column-filter'] {
+              display: flex;
+
+              :first-child {
+                flex: 1 1 auto;
+              }
+            }
           }
         }
 

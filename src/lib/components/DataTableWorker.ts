@@ -98,12 +98,14 @@ export class DataTableWorker {
   async insertColumns(columns: IColumnMetaData[]): Promise<void> {
     return await this.executeWorkerMethod<MessageRequestInsertColumns, void>('insertColumns', { columns })
   }
-  async executeQueryAndReturnResults(usedQuery: Query | object): Promise<MessageResponseExecuteQueryAndReturnResults> {
+  async executeQueryAndReturnResults(usedQuery: Query | object, filteredColumns: Map<string, TFilter>, sortedColumns: Map<string, SortDirection>): Promise<MessageResponseExecuteQueryAndReturnResults> {
     return await this.executeWorkerMethod<
       MessageRequestExecuteQueryAndReturnResults,
       MessageResponseExecuteQueryAndReturnResults
     >('executeQueryAndReturnResults', {
       usedQuery,
+      filteredColumns,
+      sortedColumns
     })
   }
 

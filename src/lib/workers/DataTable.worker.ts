@@ -102,11 +102,27 @@ async function fetchData(data: MessageRequestFetchData) {
   if (!data.onlyPaginationChanged || !tempDt) {
     tempDt = dt
     //filter
-    for (const [column, filter] of [...data.filteredColumns].values()) {
+    if (data.filteredColumns.size === 1 && [...data.filteredColumns.keys()][0] === "all") {
+      const filter = [...data.filteredColumns.values()][0]
       const lowerCaseFilter = filter?.toString().toLowerCase()
-      tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
-      //TODO: test if we can run without escape (better performance)
-      //tempDt = tempDt.params({ column, lowerCaseFilter: new RegExp(lowerCaseFilter!) }).filter(d => op.lower(d[column]).match(lowerCaseFilter))
+      const columns = tempDt.columnNames()
+      tempDt = tempDt.filter(escape((d: any) => {
+        let expr
+        for (const column of columns) {
+          if (!expr)
+            expr = op.lower(d[column]).includes(lowerCaseFilter)
+          else
+            expr = expr || op.lower(d[column]).includes(lowerCaseFilter)
+        }
+        return expr
+      }))
+    } else {
+      for (const [column, filter] of [...data.filteredColumns.entries()]) {
+        const lowerCaseFilter = filter?.toString().toLowerCase()
+        tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
+        //TODO: test if we can run without escape (better performance)
+        //tempDt = tempDt.params({ column, lowerCaseFilter: new RegExp(lowerCaseFilter!) }).filter(d => op.lower(d[column]).match(lowerCaseFilter))
+      }
     }
     //sort
     for (const [column, sortDirection] of [...data.sortedColumns].reverse()) {
@@ -280,16 +296,35 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
   postMessage(message)
 }
 
-function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
+function executeQueryAndReturnResults({
+  usedQuery,
+  filteredColumns,
+  sortedColumns,
+}: MessageRequestExecuteQueryAndReturnResults) {
+  let tempDt = dt
+  for (const [column, filter] of [...filteredColumns].values()) {
+    const lowerCaseFilter = filter?.toString().toLowerCase()
+    tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
+  }
+  for (const [column, sortDirection] of [...sortedColumns].reverse()) {
+    switch (sortDirection) {
+      case 'asc':
+        tempDt = tempDt.orderby(column)
+        break
+      case 'desc':
+        tempDt = tempDt.orderby(desc(column))
+        break
+    }
+  }
   const query = queryFrom(usedQuery)
   const queriedDt: ColumnTable = query.evaluate(dt, () => { })
   const queriedData = queriedDt.objects()
 
   let columns: Record<string, any> = {}
   queriedDt._names.forEach(col => (columns[col] = () => 0))
-  const tempDt = dt.impute(columns)
+  const imputedDt = tempDt.impute(columns)
   const tempQueriedDt = queriedDt.impute(columns)
-  const indices = tempDt.semijoin(tempQueriedDt).indices()
+  const indices = imputedDt.semijoin(tempQueriedDt).indices()
 
   const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
     msg: 'executeQueryAndReturnResults',
