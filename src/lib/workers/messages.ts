@@ -58,6 +58,8 @@ export interface MessageRespnseInsertColumns {
 
 export interface MessageRequestExecuteQueryAndReturnResults {
   usedQuery: Query | object
+  filteredColumns: Map<string, TFilter>
+  sortedColumns: Map<string, SortDirection>
 }
 
 export interface MessageResponseExecuteQueryAndReturnResults {

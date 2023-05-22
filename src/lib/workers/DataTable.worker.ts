@@ -296,16 +296,35 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
   postMessage(message)
 }
 
-function executeQueryAndReturnResults({ usedQuery }: MessageRequestExecuteQueryAndReturnResults) {
+function executeQueryAndReturnResults({
+  usedQuery,
+  filteredColumns,
+  sortedColumns,
+}: MessageRequestExecuteQueryAndReturnResults) {
+  let tempDt = dt
+  for (const [column, filter] of [...filteredColumns].values()) {
+    const lowerCaseFilter = filter?.toString().toLowerCase()
+    tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
+  }
+  for (const [column, sortDirection] of [...sortedColumns].reverse()) {
+    switch (sortDirection) {
+      case 'asc':
+        tempDt = tempDt.orderby(column)
+        break
+      case 'desc':
+        tempDt = tempDt.orderby(desc(column))
+        break
+    }
+  }
   const query = queryFrom(usedQuery)
   const queriedDt: ColumnTable = query.evaluate(dt, () => { })
   const queriedData = queriedDt.objects()
 
   let columns: Record<string, any> = {}
   queriedDt._names.forEach(col => (columns[col] = () => 0))
-  const tempDt = dt.impute(columns)
+  const imputedDt = tempDt.impute(columns)
   const tempQueriedDt = queriedDt.impute(columns)
-  const indices = tempDt.semijoin(tempQueriedDt).indices()
+  const indices = imputedDt.semijoin(tempQueriedDt).indices()
 
   const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
     msg: 'executeQueryAndReturnResults',

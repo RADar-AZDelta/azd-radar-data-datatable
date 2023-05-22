@@ -557,7 +557,15 @@
   export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
     switch (dataType) {
       case DataType.File:
-        return await worker!.executeQueryAndReturnResults(query)
+        const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
+          if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
+          return acc
+        }, new Map<string, SortDirection>())
+        const filteredColumns = internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
+          if (cur && cur.filter) acc.set(cur.id, cur.filter)
+          return acc
+        }, new Map<string, TFilter>())
+        return await worker!.executeQueryAndReturnResults(query, filteredColumns, sortedColumns)
       default:
         throw new Error('Not yet supported')
     }
