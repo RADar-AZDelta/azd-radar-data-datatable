@@ -297,7 +297,14 @@
   <DataTable
     data={file}
     bind:this={dataTableFile}
-    options={{ id: 'file', actionColumn: true }}
+    options={{
+      id: 'file',
+      actionColumn: true,
+      singleFilter: {
+        column: 'sourceName',
+        filter: undefined,
+      },
+    }}
     let:renderedRow
     let:originalIndex
     let:columns

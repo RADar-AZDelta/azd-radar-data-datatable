@@ -263,6 +263,7 @@
   async function onColumnFilterChanged(event: CustomEvent<ColumnFilterChangedEventDetail>) {
     const column = internalColumns?.find(col => col.id === event.detail.column)
     column!.filter = event.detail.filter?.toString().toLowerCase()
+    if(event.detail.single) internalOptions.singleFilter!.filter = event.detail.filter?.toString().toLowerCase()
     internalColumns = internalColumns
     filteredAndSortedData = undefined
 
@@ -643,6 +644,20 @@
     use:storeOptions
     on:storeoptions={onStoreOptions}
   >
+    {#if internalOptions}
+      {#if internalOptions.singleFilter}
+        <div data-name="filter-big">
+          <ColumnFilter
+            column={internalOptions.singleFilter.column}
+            inputType="text"
+            filter={internalOptions.singleFilter.filter}
+            {disabled}
+            single={true}
+            on:columnFilterChanged={onColumnFilterChanged}
+          />
+        </div>
+      {/if}
+    {/if}
     <table>
       <thead>
         {#if visibleOrderedColumns}
@@ -677,41 +692,45 @@
               </th>
             {/each}
           </tr>
-          <tr data-name="filters">
-            {#if internalOptions.actionColumn}
-              {#if $$slots.actionHeader}
-                <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
-              {:else}
-                <th />
-              {/if}
-            {/if}
-            {#each visibleOrderedColumns as column, i (column.id)}
-              <th
-                data-direction={column?.sortDirection}
-                data-resizable={column?.resizable}
-                data-key={column?.id}
-                data-filterable={column?.filterable}
-                animate:flip={{ duration: 500 }}
-                style="{column.width ? `width: ${column.width}px` : ''};"
-              >
-                <ColumnResize
-                  {column}
-                  on:columnPositionChanged={onColumnPositionChanged}
-                  on:columnWidthChanged={onColumnWidthChanged}
-                >
-                  {#if column.filterable !== false}
-                    <ColumnFilter
-                      column={column.id}
-                      inputType="text"
-                      filter={column.filter}
-                      {disabled}
-                      on:columnFilterChanged={onColumnFilterChanged}
-                    />
+          {#if options}
+            {#if !options.singleFilter}
+              <tr data-name="filters">
+                {#if internalOptions.actionColumn}
+                  {#if $$slots.actionHeader}
+                    <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
+                  {:else}
+                    <th />
                   {/if}
-                </ColumnResize>
-              </th>
-            {/each}
-          </tr>
+                {/if}
+                {#each visibleOrderedColumns as column, i (column.id)}
+                  <th
+                    data-direction={column?.sortDirection}
+                    data-resizable={column?.resizable}
+                    data-key={column?.id}
+                    data-filterable={column?.filterable}
+                    animate:flip={{ duration: 500 }}
+                    style="{column.width ? `width: ${column.width}px` : ''};"
+                  >
+                    <ColumnResize
+                      {column}
+                      on:columnPositionChanged={onColumnPositionChanged}
+                      on:columnWidthChanged={onColumnWidthChanged}
+                    >
+                      {#if column.filterable !== false}
+                        <ColumnFilter
+                          column={column.id}
+                          inputType="text"
+                          filter={column.filter}
+                          {disabled}
+                          on:columnFilterChanged={onColumnFilterChanged}
+                        />
+                      {/if}
+                    </ColumnResize>
+                  </th>
+                {/each}
+              </tr>
+            {/if}
+          {/if}
         {/if}
       </thead>
       <tfoot>

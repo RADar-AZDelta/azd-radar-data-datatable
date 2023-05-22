@@ -7,7 +7,7 @@
   import debounce from 'lodash.debounce'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
 
-  export let column: string, inputType: string, filter: TFilter, disabled: boolean
+  export let column: string, inputType: string, filter: TFilter, disabled: boolean, single: boolean = false
 
   let value: TFilter
 
@@ -16,11 +16,11 @@
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
   const onInput = debounce(e => {
-    dispatch('columnFilterChanged', { column, filter: e.target.value })
+    dispatch('columnFilterChanged', { column, filter: e.target.value, single })
   }, 500)
 
   function onClick() {
-    dispatch('columnFilterChanged', { column, filter: undefined })
+    dispatch('columnFilterChanged', { column, filter: undefined, single })
   }
 </script>
 
