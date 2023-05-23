@@ -8,7 +8,6 @@
 
   export let column: IColumnMetaData,
     minWidth: number = 10
-  let w: number
 
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
@@ -17,12 +16,12 @@
   }
 
   function onResizing(event: CustomEvent<{ x: number }>) {
-    const width = w + event.detail.x
+    const width = column.width! + event.detail.x
     if (width > minWidth) dispatch('columnWidthChanged', { column: column.id, width })
   }
 </script>
 
-<div data-name="column-resize" bind:clientWidth={w}>
+<div data-name="column-resize">
   <!-- {#if column.resizable !== false}
     <div data-name="column-resize-right" use:resizableColumn on:resizing={onResizing} />
   {/if} -->

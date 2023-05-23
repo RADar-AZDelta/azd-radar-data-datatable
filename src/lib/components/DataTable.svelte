@@ -44,6 +44,7 @@
       rowsPerPage: 20,
       rowsPerPageOptions: [5, 10, 20, 50, 100],
       actionColumn: false,
+      defaultColumnWidth: 200,
     },
     internalColumns: IColumnMetaData[] | undefined
 
@@ -122,6 +123,9 @@
           )
       }
     } else internalColumns = columns
+    internalColumns.forEach(col => {
+      if (!col.width) col.width = internalOptions.defaultColumnWidth
+    })
 
     await loadStoredOptions()
     await render()
