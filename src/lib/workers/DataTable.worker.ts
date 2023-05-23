@@ -102,20 +102,23 @@ async function fetchData(data: MessageRequestFetchData) {
   if (!data.onlyPaginationChanged || !tempDt) {
     tempDt = dt
     //filter
-    if (data.filteredColumns.size === 1 && [...data.filteredColumns.keys()][0] === "all") {
+    if (data.filteredColumns.size === 1 && [...data.filteredColumns.keys()][0] === 'all') {
       const filter = [...data.filteredColumns.values()][0]
       const lowerCaseFilter = filter?.toString().toLowerCase()
       const columns = tempDt.columnNames()
-      tempDt = tempDt.filter(escape((d: any) => {
-        let expr
-        for (const column of columns) {
-          if (!expr)
-            expr = op.lower(d[column]).includes(lowerCaseFilter)
-          else
-            expr = expr || op.lower(d[column]).includes(lowerCaseFilter)
-        }
-        return expr
-      }))
+      tempDt = tempDt.filter(
+        escape((d: any) => {
+          let expr
+          for (const column of columns) {
+            if (!expr) {
+              if (op.lower(d[column])) expr = op.lower(d[column]).includes(lowerCaseFilter)
+            } else {
+              if (op.lower(d[column])) expr = expr || op.lower(d[column]).includes(lowerCaseFilter)
+            }
+          }
+          return expr
+        })
+      )
     } else {
       for (const [column, filter] of [...data.filteredColumns.entries()]) {
         const lowerCaseFilter = filter?.toString().toLowerCase()

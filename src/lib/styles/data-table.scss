@@ -35,6 +35,12 @@ div[data-component='svelte-radar-datatable'] {
       width: 0;
       border-spacing: 0px;
 
+      colgroup {
+        col[data-name="col-action"] {
+          width: auto;
+        }
+      }
+
       thead {
         display: table-header-group;
         vertical-align: middle;

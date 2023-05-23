@@ -689,7 +689,7 @@
       {#if visibleOrderedColumns}
         <colgroup>
           {#if internalOptions.actionColumn}
-            <col width="0*" />
+            <col data-name="col-action" width="0*" />
           {/if}
           {#each visibleOrderedColumns as column, i (column.id)}
             <col width={column.width ? column.width : '0*'} />
