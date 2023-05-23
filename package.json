@@ -9,6 +9,7 @@
   "homepage": "https://radar-azdelta.github.io/svelte-radar-datatable/",
   "scripts": {
     "dev": "vite dev --host=127.0.0.1",
+    "unlighthouse": "pnpm dlx unlighthouse --site https://radar-azdelta.github.io/svelte-radar-datatable/",
     "build": "npx vite build",
     "preview": "vite preview --host=127.0.0.1",
     "package": "svelte-kit sync && svelte-package && publint",
