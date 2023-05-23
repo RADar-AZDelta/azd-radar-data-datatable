@@ -56,7 +56,7 @@
   </p>
 </div>
 <div data-name="pagination-container-pages">
-  <button disabled={!totalRows || currentPage === 1 || disabled} on:click={() => onChangePage(currentPage - 1)}>
+  <button disabled={!totalRows || currentPage === 1 || disabled} on:click={() => onChangePage(currentPage - 1)} id="Previous page {Math.random()}" aria-label="Previous page">
     <SvgIcon href={iconsSvgUrl} id="arrow-left" width="16px" height="16px" />
   </button>
   {#each pages as page}
@@ -67,6 +67,8 @@
   <button
     disabled={!totalRows || currentPage === totalPages || disabled}
     on:click={() => onChangePage(currentPage + 1)}
+    id="Next page {Math.random()}"
+    aria-label="Next page"
   >
     <SvgIcon href={iconsSvgUrl} id="arrow-right" width="16px" height="16px" />
   </button>

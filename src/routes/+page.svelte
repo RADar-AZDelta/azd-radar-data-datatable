@@ -228,6 +228,14 @@
   }
 </script>
 
+<svelte:head>
+  <title>Radar DataTable</title>
+  <meta
+    name="description"
+    content="The Svelte Radar DataTable is a datatable component that can handle CSV's with more than 100.000 rows. It does not only work with CSV's but also with a fetch function, matrix of data or a list of objects."
+  />
+</svelte:head>
+
 <article>
   <header>
     <h1>svelte-radar-datatable demo</h1>
@@ -302,7 +310,8 @@
         >medicatie_usagi.csv</a
       >)</summary
     >
-    <input type="file" accept=".csv" on:change={onFileInputChange} />
+    <label for="fileInput">Upload a file</label>
+    <input id="fileInput" type="file" accept=".csv" on:change={onFileInputChange} />
     <DataTable
       data={file}
       bind:this={dataTableFile}

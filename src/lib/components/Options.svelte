@@ -13,6 +13,6 @@
   }
 </script>
 
-<button data-name="settings-button" on:click={onClick} {disabled}
+<button data-name="settings-button" on:click={onClick} {disabled} id="Settings button {Math.random()}" aria-label="Settings button"
   ><SvgIcon href={iconsSvgUrl} id="gear" width="16px" height="16px" /></button
 >

@@ -54,7 +54,7 @@
   }
 </script>
 
-<button id="sort" on:click={onClick} {disabled}>
+<button id="sort-{column}-{Math.random()}" on:click={onClick} {disabled} aria-label="Sorting">
   <SvgIcon
     href={iconsSvgUrl}
     id="updown"

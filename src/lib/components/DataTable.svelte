@@ -360,7 +360,7 @@
 
   async function onColumnVisibilityChanged(e: Event) {
     const inputEl = e.target as HTMLInputElement
-    internalColumns!.find(col => col.id == inputEl.id)!.visible = inputEl.checked
+    internalColumns!.find(col => col.id == inputEl.name)!.visible = inputEl.checked
     internalColumns = internalColumns
   }
 
@@ -666,7 +666,8 @@
           <div>
             <input
               type="checkbox"
-              id={column.id}
+              name={column.id}
+              id="{column.id}-{Math.random()}"
               checked={column.visible == undefined ? true : column.visible}
               on:change={onColumnVisibilityChanged}
             />
