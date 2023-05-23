@@ -317,7 +317,7 @@ function executeQueryAndReturnResults({
     }
   }
   const query = queryFrom(usedQuery)
-  const queriedDt: ColumnTable = query.evaluate(dt, () => { })
+  const queriedDt: ColumnTable = query.evaluate(tempDt, () => { })
   const queriedData = queriedDt.objects()
 
   let columns: Record<string, any> = {}
