@@ -238,7 +238,7 @@
 
 <article>
   <header>
-    <h1>svelte-radar-datatable demo</h1>
+    <h1>@radar-azdelta/svelte-datatable demo</h1>
     <p>
       Why yet another datatable component? During the development of <a href="https://github.com/RADar-AZDelta/Keun"
         >Keun</a

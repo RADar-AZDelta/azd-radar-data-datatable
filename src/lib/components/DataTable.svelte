@@ -708,7 +708,7 @@
   </div>
 </dialog>
 
-<div data-component="svelte-radar-datatable">
+<div data-component="svelte-datatable">
   <div
     data-component="datatable-content"
     data-status={renderStatus ?? ''}
