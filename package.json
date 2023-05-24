@@ -1,15 +1,18 @@
 {
-  "name": "svelte-radar-datatable",
-  "version": "0.0.27",
+  "name": "@radar-azdelta/svelte-datatable",
+  "version": "0.0.28",
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RADar-AZDelta/svelte-radar-datatable.git"
+    "url": "https://github.com/RADar-AZDelta/svelte-datatable.git"
   },
-  "homepage": "https://radar-azdelta.github.io/svelte-radar-datatable/",
+  "homepage": "https://radar-azdelta.github.io/svelte-datatable/",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "vite dev --host=127.0.0.1",
-    "unlighthouse": "pnpm dlx unlighthouse --site https://radar-azdelta.github.io/svelte-radar-datatable/",
+    "unlighthouse": "pnpm dlx unlighthouse --site https://radar-azdelta.github.io/svelte-datatable/",
     "build": "npx vite build",
     "preview": "vite preview --host=127.0.0.1",
     "package": "svelte-kit sync && svelte-package && publint",
