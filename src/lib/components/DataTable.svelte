@@ -379,28 +379,46 @@
         await worker!.saveToFile(fileHandle)
         break
       case DataType.ArrayOfObjects:
-        let csv = ''
-        let keyCounter: number = 0
-        for (let row = 0; row <= data!.length; row++) {
+      case DataType.Function:
+        let csvArrayObjObjects = ''
+        let keyCounterArrayOfObjects: number = 0
+        for (let row = 0; row <= renderedData!.length; row++) {
           for (let col of internalColumns!) {
             if (row == 0) {
-              csv += col.id + (keyCounter + 1 < internalColumns!.length ? ',' : '\r\n')
-              keyCounter++
+              csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < internalColumns!.length ? ',' : '\r\n')
+              keyCounterArrayOfObjects++
             } else {
-              const value = (<any[]>data)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
-              csv += value + (keyCounter + 1 < internalColumns!.length ? ',' : '\r\n')
-              keyCounter++
+              const value = (<any[]>renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
+              csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < internalColumns!.length ? ',' : '\r\n')
+              keyCounterArrayOfObjects++
             }
           }
-          keyCounter = 0
+          keyCounterArrayOfObjects = 0
         }
-        const writable = await fileHandle.createWritable()
-        await writable.write(csv)
-        await writable.close()
-
+        const writableArrayOfObjects = await fileHandle.createWritable()
+        await writableArrayOfObjects.write(csvArrayObjObjects)
+        await writableArrayOfObjects.close()
         break
-      default:
-        throw new Error('Not yet supported')
+      case DataType.Matrix:
+        let csvMatrix = ''
+        let keyCounterMatrix: number = 0
+        for (let col of internalColumns!) {
+          csvMatrix += col.id + (keyCounterMatrix + 1 < internalColumns!.length ? ',' : '\r\n')
+          keyCounterMatrix++
+        }
+        keyCounterMatrix = 0
+        for (let row of <any[][]>data) {
+          for (let cell of row) {
+            const value = cell.toString().replaceAll(',', ';')
+            csvMatrix += value + (keyCounterMatrix + 1 < internalColumns!.length ? ',' : '\r\n')
+            keyCounterMatrix++
+          }
+          keyCounterMatrix = 0
+        }
+        const writableMatrix = await fileHandle.createWritable()
+        await writableMatrix.write(csvMatrix)
+        await writableMatrix.close()
+        break
     }
   }
 
@@ -607,11 +625,22 @@
         return await worker.replaceValuesOfColumn(currentValue, updatedValue, column)
       case DataType.ArrayOfObjects:
         for (let i = 0; i < data!.length; i++) {
-          if ((<any[]>data)[i][column] == currentValue) (<any[]>data)[i][column] = updatedValue
+          if ((<any[]>data)[i][column] === currentValue) (<any[]>data)[i][column] = updatedValue
         }
         break
-      default:
-        throw new Error('Not yet supported')
+      case DataType.Matrix:
+        let columnIndex = internalColumns!.findIndex(col => col.id === column)
+        for (let i = 0; i < (<any[][]>data).length; i++) {
+          if ((<any[][]>data)[i][columnIndex] === currentValue) {
+            ;(<any[][]>data)[i][columnIndex] = updatedValue
+          }
+        }
+        break
+      case DataType.Function:
+        for (let i = 0; i < renderedData!.length; i++) {
+          if (renderedData![i][column] === currentValue) renderedData![i][column] = updatedValue
+        }
+        data = data
     }
   }
 
