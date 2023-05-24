@@ -1,4 +1,4 @@
-# svelte-radar-datatable
+# @radar-azdelta/svelte-datatable
 
 Why yet another datatable component?
 During the development of [Keun](https://github.com/RADar-AZDelta/Keun), we needed a datatable component that could handle CSV's with more than 100.000 rows.
@@ -21,14 +21,14 @@ We didn't find anything that suited our needs, so we developed our own.
 install the package
 
 ```bash
-pnpm install svelte-radar-datatable
+pnpm install @radar-azdelta/svelte-datatable
 ```
 
 add the component to a svelte page
 
 ```svelte
 <script lang="ts">
-  import DataTable from 'svelte-radar-datatable'
+  import DataTable from '@radar-azdelta/svelte-datatable'
   
   const data = [
     {
@@ -51,13 +51,13 @@ add the component to a svelte page
 <DataTable {data} />
 ```
 
-Also add the folowing config to your vite.config.ts, otherwise svelte-radar-datatable worker can't be downloaded. 
+Also add the folowing config to your vite.config.ts, otherwise @radar-azdelta/svelte-datatable worker can't be downloaded. 
 
 ```js
 export default defineConfig({
   ...
   optimizeDeps: {
-    exclude: ['svelte-radar-datatable'],
+    exclude: ['@radar-azdelta/svelte-datatable'],
   }
   ...
 })
@@ -65,7 +65,7 @@ export default defineConfig({
 
 ## Example
 
-see [demo](https://radar-azdelta.github.io/svelte-radar-datatable/) site
+see [demo](https://radar-azdelta.github.io/svelte-datatable/) site
 
 ## Manual
 
@@ -201,22 +201,22 @@ const data = new File([data], "medicatie_usagi.csv", metadata);
 Run these commands to get started:
 
 ```bash
-git clone git@github.com:RADar-AZDelta/svelte-radar-datatable.git
-cd svelte-radar-datatable
+git clone git@github.com:RADar-AZDelta/svelte-datatable.git
+cd svelte-datatable
 pnpm install
 ```
 
 To run the example app, run `pnpm run dev --open` from the project root.
 
 ### Reorder Column
-![reorderColumn](https://github.com/RADar-AZDelta/svelte-radar-datatable/assets/71766353/897b813e-76f7-4739-b815-30fb4dc1857f)
+![reorderColumn](https://github.com/RADar-AZDelta/svelte-datatable/assets/71766353/897b813e-76f7-4739-b815-30fb4dc1857f)
 ### Resize Column
-![ResizeColumn](https://github.com/RADar-AZDelta/svelte-radar-datatable/assets/71766353/4d84eae1-dbe3-4c39-b02b-2d7097ce7685)
+![ResizeColumn](https://github.com/RADar-AZDelta/svelte-datatable/assets/71766353/4d84eae1-dbe3-4c39-b02b-2d7097ce7685)
 ### Visible Columns
-![VisibleColumns](https://github.com/RADar-AZDelta/svelte-radar-datatable/assets/71766353/ef02fdfb-d8d0-453e-b28b-9e1195914bfb)
+![VisibleColumns](https://github.com/RADar-AZDelta/svelte-datatable/assets/71766353/ef02fdfb-d8d0-453e-b28b-9e1195914bfb)
 ### Edit cell
 Als EditableCell is toegevoegd in het Datatable component dan kan u doubel klikken op de tekst om die aan te passen.  
 escape key kan gebruikt worden om uit de input te gaan zonder aanpassing op te slaan.  
 enter key kan gebruikt worden of check button om de aanpassing op te slaan.  
 
-![EditCell](https://github.com/RADar-AZDelta/svelte-radar-datatable/assets/71766353/55ffe46d-718e-41b3-b05d-56763829e99c)
+![EditCell](https://github.com/RADar-AZDelta/svelte-datatable/assets/71766353/55ffe46d-718e-41b3-b05d-56763829e99c)
