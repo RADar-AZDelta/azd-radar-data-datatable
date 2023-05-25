@@ -47,6 +47,7 @@ export interface ITableOptions extends IPagination {
   totalRows?: number,
   defaultColumnWidth?: number,
   globalFilter?: GlobalFilter
+  saveOptions?: boolean | undefined
 }
 
 export type FetchDataFunc = (

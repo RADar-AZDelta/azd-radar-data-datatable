@@ -671,11 +671,16 @@
     }
   }
   function onStoreOptions() {
-    if (!internalOptions?.id || !browser) return
-    if (dev) console.log(`DataTable: onStoreOptions for ${internalOptions.id}`)
-    localStorage.setItem(`datatable_${internalOptions.id}_options`, JSON.stringify(internalOptions))
-    if (internalColumns)
-      localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
+    if (internalOptions.saveOptions == undefined || internalOptions.saveOptions == true) {
+      if (!internalOptions?.id || !browser) return
+      if (dev) console.log(`DataTable: onStoreOptions for ${internalOptions.id}`)
+      localStorage.setItem(`datatable_${internalOptions.id}_options`, JSON.stringify(internalOptions))
+      if (internalColumns)
+        localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
+    } else {
+      if(localStorage.getItem(`datatable_${internalOptions.id}_options`) !== null) localStorage.removeItem(`datatable_${internalOptions.id}_options`)
+      if(localStorage.getItem(`datatable_${internalOptions.id}_columns`)) localStorage.removeItem(`datatable_${internalOptions.id}_columns`)
+    }
   }
 
   onDestroy(() => {
