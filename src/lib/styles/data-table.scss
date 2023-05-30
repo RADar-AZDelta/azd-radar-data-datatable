@@ -39,6 +39,9 @@ div[data-component='svelte-datatable'] {
         col[data-name="col-action"] {
           width: auto;
         }
+        col {
+          min-width: 100px;
+        }
       }
 
       thead {
@@ -65,12 +68,17 @@ div[data-component='svelte-datatable'] {
         tr[data-name='filters'] {
           th {
             padding-bottom: 5px;
+            min-width: 100px;
 
             div[data-name='column-filter'] {
               display: flex;
 
               :first-child {
                 flex: 1 1 auto;
+              }
+
+              input {
+                min-width: 50px;
               }
 
               button {
