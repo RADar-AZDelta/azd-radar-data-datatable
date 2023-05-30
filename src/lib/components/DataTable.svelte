@@ -55,6 +55,7 @@
   let originalIndices: number[] //the index of the sorted, filtered and paginated record in the original data
 
   let settingsDialog: HTMLDialogElement
+  let filterVisibility: boolean = true
 
   const dispatch = createEventDispatcher()
 
@@ -678,9 +679,18 @@
       if (internalColumns)
         localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
     } else {
-      if(localStorage.getItem(`datatable_${internalOptions.id}_options`) !== null) localStorage.removeItem(`datatable_${internalOptions.id}_options`)
-      if(localStorage.getItem(`datatable_${internalOptions.id}_columns`)) localStorage.removeItem(`datatable_${internalOptions.id}_columns`)
+      if (localStorage.getItem(`datatable_${internalOptions.id}_options`) !== null)
+        localStorage.removeItem(`datatable_${internalOptions.id}_options`)
+      if (localStorage.getItem(`datatable_${internalOptions.id}_columns`))
+        localStorage.removeItem(`datatable_${internalOptions.id}_columns`)
     }
+  }
+
+  function toggleFilterVisibility() {
+    filterVisibility = !filterVisibility
+    columns?.forEach(col => {
+      col.filterable = filterVisibility
+    })
   }
 
   onDestroy(() => {
@@ -733,7 +743,11 @@
         <thead>
           <tr data-name="titles">
             {#if internalOptions.actionColumn}
-              <th data-name="action-Column" />
+              <th data-name="action-Column">
+                <button on:click={toggleFilterVisibility}
+                  ><SvgIcon href={iconsSvgUrl} id="filter" width="16px" height="16px" /></button
+                >
+              </th>
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
               <th
@@ -770,15 +784,17 @@
               {/if}
             {/if}
             {#if internalOptions?.globalFilter}
-              <th colspan={visibleOrderedColumns.length}>
-                <ColumnFilter
-                  column={internalOptions.globalFilter.column ?? 'all'}
-                  inputType="text"
-                  filter={internalOptions.globalFilter.filter}
-                  {disabled}
-                  on:columnFilterChanged={onColumnFilterChanged}
-                />
-              </th>
+              {#if filterVisibility == true}
+                <th colspan={visibleOrderedColumns.length}>
+                  <ColumnFilter
+                    column={internalOptions.globalFilter.column ?? 'all'}
+                    inputType="text"
+                    filter={internalOptions.globalFilter.filter}
+                    {disabled}
+                    on:columnFilterChanged={onColumnFilterChanged}
+                  />
+                </th>
+              {/if}
             {:else}
               {#each visibleOrderedColumns as column, i (column.id)}
                 <th

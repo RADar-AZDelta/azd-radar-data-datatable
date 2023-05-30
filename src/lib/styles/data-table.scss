@@ -53,6 +53,12 @@ div[data-component='svelte-datatable'] {
 
           th[data-name='action-Column'] {
             width: 75px;
+
+            button {
+              background-color: inherit;
+              border: none;
+              cursor: pointer;
+            }
           }
         }
 
