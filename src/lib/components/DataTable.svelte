@@ -44,6 +44,7 @@
       rowsPerPage: 20,
       rowsPerPageOptions: [5, 10, 20, 50, 100],
       actionColumn: false,
+      singleSort: false,
       defaultColumnWidth: 200,
     },
     internalColumns: IColumnMetaData[] | undefined
@@ -332,6 +333,9 @@
   }
 
   async function onColumnSortChanged(event: CustomEvent<ColumnSortChangedEventDetail>) {
+    if(internalOptions.singleSort) {
+      internalColumns?.forEach((col) => col.sortDirection = undefined)
+    }
     const column = internalColumns?.find(col => col.id === event.detail.column)
     column!.sortDirection = event.detail.sortDirection
     internalColumns = internalColumns
