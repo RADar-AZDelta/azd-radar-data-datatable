@@ -803,7 +803,7 @@
                   data-filterable={column?.filterable}
                   animate:flip={{ duration: 500 }}
                 >
-                  {#if column.filterable !== false}
+                  {#if filterVisibility == true && column.filterable !== false}
                     <ColumnFilter
                       column={column.id}
                       inputType="text"
