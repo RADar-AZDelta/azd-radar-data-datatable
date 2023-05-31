@@ -30,6 +30,7 @@
   import { browser } from '$app/environment'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import SvgIcon from './SvgIcon.svelte'
+  import { clickOutside } from '$lib/actions/clickOutside'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -333,8 +334,8 @@
   }
 
   async function onColumnSortChanged(event: CustomEvent<ColumnSortChangedEventDetail>) {
-    if(internalOptions.singleSort) {
-      internalColumns?.forEach((col) => col.sortDirection = undefined)
+    if (internalOptions.singleSort) {
+      internalColumns?.forEach(col => (col.sortDirection = undefined))
     }
     const column = internalColumns?.find(col => col.id === event.detail.column)
     column!.sortDirection = event.detail.sortDirection
@@ -703,26 +704,28 @@
 </script>
 
 <dialog data-name="settings-dialog" bind:this={settingsDialog}>
-  <button data-name="close-button" on:click={() => settingsDialog.close()}
-    ><SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" /></button
-  >
-  <div data-name="modal-dialog">
-    <h1>Change column visibility:</h1>
-    <div data-name="modal-body">
-      {#if internalColumns}
-        {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
-          <div>
-            <input
-              type="checkbox"
-              name={column.id}
-              id="{column.id}-{Math.random()}"
-              checked={column.visible == undefined ? true : column.visible}
-              on:change={onColumnVisibilityChanged}
-            />
-            <label for={column.id}>{column.label ?? column.id}</label><br />
-          </div>
-        {/each}
-      {/if}
+  <div data-name="dialog-container" use:clickOutside on:outclick={() => {if(settingsDialog.attributes.getNamedItem('open') != null) settingsDialog.close()}}>
+    <button data-name="close-button" on:click={() => settingsDialog.close()}
+      ><SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" /></button
+    >
+    <div data-name="modal-dialog">
+      <h1>Change column visibility:</h1>
+      <div data-name="modal-body">
+        {#if internalColumns}
+          {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
+            <div>
+              <input
+                type="checkbox"
+                name={column.id}
+                id="{column.id}-{Math.random()}"
+                checked={column.visible == undefined ? true : column.visible}
+                on:change={onColumnVisibilityChanged}
+              />
+              <label for={column.id}>{column.label ?? column.id}</label><br />
+            </div>
+          {/each}
+        {/if}
+      </div>
     </div>
   </div>
 </dialog>
@@ -748,9 +751,11 @@
           <tr data-name="titles">
             {#if internalOptions.actionColumn}
               <th data-name="action-Column">
-                <button on:click={toggleFilterVisibility}
-                  ><SvgIcon href={iconsSvgUrl} id="filter" width="16px" height="16px" /></button
-                >
+                {#if internalOptions.singleSort}
+                  <button on:click={toggleFilterVisibility}
+                    ><SvgIcon href={iconsSvgUrl} id="filter" width="16px" height="16px" /></button
+                  >
+                {/if}
               </th>
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}

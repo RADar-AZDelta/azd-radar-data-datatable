@@ -36,7 +36,7 @@ div[data-component='svelte-datatable'] {
       border-spacing: 0px;
 
       colgroup {
-        col[data-name="col-action"] {
+        col[data-name='col-action'] {
           width: auto;
         }
         col {
@@ -123,7 +123,6 @@ div[data-component='svelte-datatable'] {
                 flex: 0 0 auto;
                 width: 3px;
                 cursor: col-resize;
-
               }
 
               div[data-name='column-reposition'] {
@@ -205,7 +204,8 @@ div[data-component='svelte-datatable'] {
                     padding-bottom: 2.8px;
                   }
 
-                  &:disabled {}
+                  &:disabled {
+                  }
                 }
               }
             }
@@ -314,17 +314,21 @@ input {
 }
 
 dialog {
+  padding: 1rem;
   border: none;
   border-radius: 10px;
   position: fixed;
-  top: 50%;
-  left: 50%;
-
-  transform: translate(-50%, -50%);
   width: 50%;
   height: 50%;
 
-  button[data-name="close-button"] {
+  div[data-name='dialog-container'] {
+    width: auto;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  button[data-name='close-button'] {
     position: absolute;
     right: 0;
     margin-right: 1rem;
@@ -333,11 +337,16 @@ dialog {
     cursor: pointer;
   }
 
-  div[data-name="modal-dialog"] {
+  h1 {
+    margin: 0;
+    padding-bottom: 1rem;
+  }
+
+  div[data-name='modal-dialog'] {
     overflow-y: initial;
   }
 
-  div[data-name="modal-body"] {
+  div[data-name='modal-body'] {
     position: absolute;
     overflow-y: auto;
     display: block;
