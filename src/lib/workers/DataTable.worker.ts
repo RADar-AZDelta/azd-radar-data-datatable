@@ -122,7 +122,11 @@ async function fetchData(data: MessageRequestFetchData) {
     } else {
       for (const [column, filter] of [...data.filteredColumns.entries()]) {
         const lowerCaseFilter = filter?.toString().toLowerCase()
-        tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
+        tempDt = tempDt.filter(
+          escape((d: any) => {
+            if (op.lower(d[column])) op.lower(d[column]).includes(lowerCaseFilter)
+          })
+        )
         //TODO: test if we can run without escape (better performance)
         //tempDt = tempDt.params({ column, lowerCaseFilter: new RegExp(lowerCaseFilter!) }).filter(d => op.lower(d[column]).match(lowerCaseFilter))
       }
@@ -185,10 +189,10 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
     value == null
       ? ''
       : value instanceof Date
-        ? (value as Date).toISOString()
-        : reFormat.test((value += ''))
-          ? '"' + value.replace(/"/g, '""') + '"'
-          : value
+      ? (value as Date).toISOString()
+      : reFormat.test((value += ''))
+      ? '"' + value.replace(/"/g, '""') + '"'
+      : value
 
   let buffer = []
 
@@ -252,7 +256,7 @@ function deleteRows({ indices }: MessageRequestDeleteRows) {
 
   for (const index of indices) {
     for (const column of Object.keys(dt._data)) {
-      ; (dt._data[column] as Column).data.splice(index, 1)
+      ;(dt._data[column] as Column).data.splice(index, 1)
     }
     dt._total -= 1
     dt._nrows -= 1
@@ -320,7 +324,7 @@ function executeQueryAndReturnResults({
     }
   }
   const query = queryFrom(usedQuery)
-  const queriedDt: ColumnTable = query.evaluate(tempDt, () => { })
+  const queriedDt: ColumnTable = query.evaluate(tempDt, () => {})
   const queriedData = queriedDt.objects()
 
   let columns: Record<string, any> = {}
