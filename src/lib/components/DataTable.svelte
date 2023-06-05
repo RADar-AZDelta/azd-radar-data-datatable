@@ -717,7 +717,7 @@
               <input
                 type="checkbox"
                 name={column.id}
-                id="{column.id}-{Math.random()}"
+                id={column.id}
                 checked={column.visible == undefined ? true : column.visible}
                 on:change={onColumnVisibilityChanged}
               />
