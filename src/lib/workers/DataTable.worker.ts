@@ -20,6 +20,7 @@ import type {
   MessageRequestExecuteExpressionsAndReturnResults,
   MessageResponseExecuteExpressionsAndReturnResults,
   MessageRequestReplaceValuesOfColumn,
+  MessageRequestRenameColumns,
 } from './messages'
 import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, fromJSON } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
@@ -65,6 +66,9 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case 'replaceValuesOfColumn':
       await replaceValuesOfColumn(data as MessageRequestReplaceValuesOfColumn)
+      break
+    case 'renameColumns':
+      await renameColumns(data as MessageRequestRenameColumns)
       break
   }
 }
@@ -360,6 +364,15 @@ function replaceValuesOfColumn({ currentValue, updatedValue, column }: MessageRe
   })
   const message: PostMessage<unknown> = {
     msg: 'replaceValuesOfColumn',
+    data: undefined,
+  }
+  postMessage(message)
+}
+
+function renameColumns({ columns }: MessageRequestRenameColumns) {
+  dt = dt.rename(columns)
+  const message: PostMessage<unknown> = {
+    msg: 'renameColumns',
     data: undefined,
   }
   postMessage(message)

@@ -650,6 +650,49 @@
     }
   }
 
+  export async function renameColumns(columns: Record<string, string>) {
+    switch (dataType) {
+      case DataType.File:
+        await worker.renameColumns(columns)
+        if (internalColumns) {
+          Object.keys(columns).forEach(col => {
+            const index = internalColumns!.findIndex(c => c.id === col)
+            if (index !== -1) internalColumns![index].id = columns[col]
+          })
+          internalColumns = internalColumns
+        }
+        await render()
+        break
+      case DataType.Matrix:
+        if (internalColumns) {
+          Object.keys(columns).forEach(col => {
+            const index = internalColumns!.findIndex(c => c.id === col)
+            if (index !== -1) internalColumns![index].id = columns[col]
+          })
+          internalColumns = internalColumns
+        }
+        await render()
+        break
+      case DataType.ArrayOfObjects:
+        if (internalColumns) {
+          Object.keys(columns).forEach(col => {
+            const index = internalColumns!.findIndex(c => c.id === col)
+            if (index !== -1) internalColumns![index].id = columns[col]
+
+            for (let obj of data as any[]) {
+              obj[columns[col]] = obj[col]
+              delete obj[col]
+            }
+          })
+          internalColumns = internalColumns
+        }
+        await render()
+        break
+      case DataType.Function:
+        throw new Error('Not yet supported')
+    }
+  }
+
   async function loadStoredOptions() {
     if (!internalOptions?.id || !browser) return
 

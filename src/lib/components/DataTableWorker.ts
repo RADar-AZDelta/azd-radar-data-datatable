@@ -19,6 +19,7 @@ import type {
   MessageResponseExecuteExpressionsAndReturnResults,
   MessageRequestExecuteExpressionsAndReturnResults,
   MessageRequestReplaceValuesOfColumn,
+  MessageRequestRenameColumns,
 } from '$lib/workers/messages'
 import type { IColumnMetaData, IPagination, SortDirection, TFilter } from './DataTable'
 import type Query from 'arquero/dist/types/query/query'
@@ -126,5 +127,9 @@ export class DataTableWorker {
       updatedValue,
       column,
     })
+  }
+
+  async renameColumns(columns: Record<string, string>): Promise<void> {
+    return await this.executeWorkerMethod<MessageRequestRenameColumns, void>('renameColumns', { columns })
   }
 }

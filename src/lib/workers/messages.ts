@@ -80,3 +80,7 @@ export interface MessageRequestReplaceValuesOfColumn {
   updatedValue: any
   column: string
 }
+
+export interface MessageRequestRenameColumns {
+  columns: Record<string, string>
+}
