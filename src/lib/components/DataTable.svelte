@@ -656,8 +656,13 @@
         await worker.renameColumns(columns)
         for (let [oldCol, newCol] of Object.entries(columns)) {
           if (internalColumns!.find(col => col.id === newCol)) {
-            const index = internalColumns!.findIndex(col => col.id === oldCol)
-            internalColumns!.splice(index, 1)
+            const oldIndex = internalColumns!.findIndex(col => col.id === oldCol)
+            const newIndex = internalColumns!.findIndex(col => col.id === newCol)
+            internalColumns!.splice(newIndex, 1)
+            let {id, ...col} = internalColumns![newIndex]
+            internalColumns![oldIndex] = Object.assign(col, { id: newCol })
+          } else {
+            internalColumns!.find(col => col.id === oldCol)!.id = newCol
           }
         }
         internalColumns = internalColumns
