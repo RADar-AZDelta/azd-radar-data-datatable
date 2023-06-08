@@ -22,7 +22,7 @@ import type {
   MessageRequestReplaceValuesOfColumn,
   MessageRequestRenameColumns,
 } from './messages'
-import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, fromJSON } from 'arquero'
+import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, fromJSON, not } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
 import type { TableData } from 'arquero/dist/types/table/table'
 
@@ -126,13 +126,9 @@ async function fetchData(data: MessageRequestFetchData) {
     } else {
       for (const [column, filter] of [...data.filteredColumns.entries()]) {
         const lowerCaseFilter = filter?.toString().toLowerCase()
-        tempDt = tempDt.filter(
-          escape((d: any) => {
-            if (op.lower(d[column])) op.lower(d[column]).includes(lowerCaseFilter)
-          })
-        )
+        tempDt = tempDt.filter(escape((d: any) => d[column] && op.lower(d[column]).includes(lowerCaseFilter)))
         //TODO: test if we can run without escape (better performance)
-        //tempDt = tempDt.params({ column, lowerCaseFilter: new RegExp(lowerCaseFilter!) }).filter(d => op.lower(d[column]).match(lowerCaseFilter))
+        // tempDt = tempDt.params({ column, lowerCaseFilter }).filter((d: any, params: any) => op.lower(d[column]).includes(params.lowerCaseFilter))
       }
     }
     //sort
@@ -370,7 +366,13 @@ function replaceValuesOfColumn({ currentValue, updatedValue, column }: MessageRe
 }
 
 function renameColumns({ columns }: MessageRequestRenameColumns) {
-  dt = dt.rename(columns)
+  let remove: string[] = []
+  for (let [oldCol, newCol] of Object.entries(columns)) {
+    if (dt._names.includes(oldCol)) {
+      remove.push(newCol)
+    }
+  }
+  dt = dt.select(not(remove), columns)
   const message: PostMessage<unknown> = {
     msg: 'renameColumns',
     data: undefined,

@@ -654,13 +654,13 @@
     switch (dataType) {
       case DataType.File:
         await worker.renameColumns(columns)
-        if (internalColumns) {
-          Object.keys(columns).forEach(col => {
-            const index = internalColumns!.findIndex(c => c.id === col)
-            if (index !== -1) internalColumns![index].id = columns[col]
-          })
-          internalColumns = internalColumns
+        for (let [oldCol, newCol] of Object.entries(columns)) {
+          if (internalColumns!.find(col => col.id === newCol)) {
+            const index = internalColumns!.findIndex(col => col.id === oldCol)
+            internalColumns!.splice(index, 1)
+          }
         }
+        internalColumns = internalColumns
         await render()
         break
       case DataType.Matrix:
