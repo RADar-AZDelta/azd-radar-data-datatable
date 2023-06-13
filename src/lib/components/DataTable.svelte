@@ -31,6 +31,7 @@
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import SvgIcon from './SvgIcon.svelte'
   import { clickOutside } from '$lib/actions/clickOutside'
+  import { localStorageOptions } from '../classes/storageClasses'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -60,6 +61,8 @@
   let filterVisibility: boolean = true
 
   const dispatch = createEventDispatcher()
+
+  let localStorageSaveMethod: localStorageOptions | undefined = undefined
 
   $: {
     options, columns, data
@@ -130,7 +133,12 @@
       if (!col.width) col.width = internalOptions.defaultColumnWidth
     })
 
-    await loadStoredOptions()
+    if(!localStorageSaveMethod && browser) localStorageSaveMethod = new localStorageOptions(options)
+    if (browser && localStorageSaveMethod) {
+      const { savedOptions, savedColumns } = await localStorageSaveMethod.load(internalOptions, internalColumns)
+      if (savedColumns) internalColumns = savedColumns
+      if (savedOptions) internalOptions = savedOptions
+    }
     await render()
     dispatch('initialized')
   }
@@ -659,7 +667,7 @@
             const oldIndex = internalColumns!.findIndex(col => col.id === oldCol)
             const newIndex = internalColumns!.findIndex(col => col.id === newCol)
             internalColumns!.splice(newIndex, 1)
-            let {id, ...col} = internalColumns![newIndex]
+            let { id, ...col } = internalColumns![newIndex]
             internalColumns![oldIndex] = Object.assign(col, { id: newCol })
           } else {
             internalColumns!.find(col => col.id === oldCol)!.id = newCol
@@ -698,45 +706,8 @@
     }
   }
 
-  async function loadStoredOptions() {
-    if (!internalOptions?.id || !browser) return
-
-    const storedOptions = localStorage.getItem(`datatable_${internalOptions.id}_options`)
-    if (storedOptions) {
-      try {
-        Object.assign(internalOptions, JSON.parse(storedOptions))
-      } catch {}
-    }
-    const storedColumns = localStorage.getItem(`datatable_${internalOptions.id}_columns`)
-    if (storedColumns) {
-      try {
-        const storedInternalColumns: Map<string, IColumnMetaData> = JSON.parse(storedColumns).reduce(
-          (acc: Map<string, IColumnMetaData>, cur: IColumnMetaData) => {
-            acc.set(cur.id, cur)
-            return acc
-          },
-          new Map<string, IColumnMetaData>()
-        )
-        internalColumns = internalColumns?.map((col: IColumnMetaData) => {
-          if (storedInternalColumns.has(col.id)) Object.assign(col, storedInternalColumns.get(col.id))
-          return col
-        })
-      } catch {}
-    }
-  }
   function onStoreOptions() {
-    if (internalOptions.saveOptions == undefined || internalOptions.saveOptions == true) {
-      if (!internalOptions?.id || !browser) return
-      if (dev) console.log(`DataTable: onStoreOptions for ${internalOptions.id}`)
-      localStorage.setItem(`datatable_${internalOptions.id}_options`, JSON.stringify(internalOptions))
-      if (internalColumns)
-        localStorage.setItem(`datatable_${internalOptions.id}_columns`, JSON.stringify(internalColumns))
-    } else {
-      if (localStorage.getItem(`datatable_${internalOptions.id}_options`) !== null)
-        localStorage.removeItem(`datatable_${internalOptions.id}_options`)
-      if (localStorage.getItem(`datatable_${internalOptions.id}_columns`))
-        localStorage.removeItem(`datatable_${internalOptions.id}_columns`)
-    }
+    if (browser && localStorageSaveMethod) localStorageSaveMethod.store(internalOptions, internalColumns)
   }
 
   function toggleFilterVisibility() {

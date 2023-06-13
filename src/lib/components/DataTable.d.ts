@@ -122,3 +122,13 @@ export enum DataType {
   Function,
   File,
 }
+
+export interface IStoreOptions {
+  load(options: ITableOptions, columns: IColumnMetaData[]): loadStore
+  store(options: ITableOptions, columns: IColumnMetaData[]): void
+}
+
+export interface loadStore {
+  savedOptions: ITableOptions
+  savedColumns: IColumnMetaData[] | undefined
+}
