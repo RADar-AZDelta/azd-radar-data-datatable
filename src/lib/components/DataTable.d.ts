@@ -42,13 +42,14 @@ export interface IPagination {
 
 export interface ITableOptions extends IPagination {
   id?: string,
+  storageMethod?: "localStorage" | "Firebase"
   rowsPerPageOptions?: number[]
   actionColumn?: boolean,
   totalRows?: number,
   defaultColumnWidth?: number,
   globalFilter?: GlobalFilter
   singleSort?: boolean
-  saveOptions?: boolean | undefined
+  saveOptions?: boolean
 }
 
 export type FetchDataFunc = (
@@ -124,7 +125,7 @@ export enum DataType {
 }
 
 export interface IStoreOptions {
-  load(options: ITableOptions, columns: IColumnMetaData[]): loadStore
+  load(columns?: IColumnMetaData[]): loadStore | Promise<loadStore>
   store(options: ITableOptions, columns: IColumnMetaData[]): void
 }
 

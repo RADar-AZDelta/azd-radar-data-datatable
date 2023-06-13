@@ -253,7 +253,14 @@
       {columns}
       data={matrix}
       bind:this={dataTableMatrix}
-      options={{ id: 'matrix', rowsPerPage: 7, rowsPerPageOptions: [7, 15], actionColumn: true, singleSort: false }}
+      options={{
+        id: 'matrix',
+        rowsPerPage: 7,
+        rowsPerPageOptions: [7, 15],
+        actionColumn: true,
+        singleSort: false,
+        storageMethod: 'localStorage',
+      }}
       let:renderedRow
       let:originalIndex
       let:columns

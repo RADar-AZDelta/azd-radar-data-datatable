@@ -50,6 +50,7 @@
   "dependencies": {
     "@types/lodash": "^4.14.194",
     "arquero": "^5.2.0",
+    "firebase": "^9.22.2",
     "lodash.debounce": "^4.0.8"
   },
   "type": "module"

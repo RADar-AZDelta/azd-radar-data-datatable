@@ -31,7 +31,7 @@
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import SvgIcon from './SvgIcon.svelte'
   import { clickOutside } from '$lib/actions/clickOutside'
-  import { localStorageOptions } from '../classes/storageClasses'
+  import { firebaseStorageOptions, localStorageOptions } from '../classes/storageClasses'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -62,7 +62,7 @@
 
   const dispatch = createEventDispatcher()
 
-  let localStorageSaveMethod: localStorageOptions | undefined = undefined
+  let storageMethod: localStorageOptions | firebaseStorageOptions | undefined = undefined
 
   $: {
     options, columns, data
@@ -133,11 +133,24 @@
       if (!col.width) col.width = internalOptions.defaultColumnWidth
     })
 
-    if(!localStorageSaveMethod && browser) localStorageSaveMethod = new localStorageOptions(options)
-    if (browser && localStorageSaveMethod) {
-      const { savedOptions, savedColumns } = await localStorageSaveMethod.load(internalOptions, internalColumns)
-      if (savedColumns) internalColumns = savedColumns
-      if (savedOptions) internalOptions = savedOptions
+    if (internalOptions) {
+      if (!storageMethod && browser) {
+        switch (internalOptions.storageMethod) {
+          case 'localStorage':
+          case undefined:
+            storageMethod = new localStorageOptions(options)
+            break
+
+          case 'Firebase':
+            storageMethod = new firebaseStorageOptions(options)
+            break
+        }
+      }
+      if (browser && storageMethod) {
+        const { savedOptions, savedColumns } = await storageMethod.load(internalColumns)
+        if (savedColumns) internalColumns = savedColumns
+        if (savedOptions) internalOptions = savedOptions
+      }
     }
     await render()
     dispatch('initialized')
@@ -707,7 +720,7 @@
   }
 
   function onStoreOptions() {
-    if (browser && localStorageSaveMethod) localStorageSaveMethod.store(internalOptions, internalColumns)
+    if (browser && storageMethod) storageMethod.store(internalOptions, internalColumns)
   }
 
   function toggleFilterVisibility() {
