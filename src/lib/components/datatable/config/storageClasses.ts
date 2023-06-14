@@ -1,5 +1,5 @@
 import { readOnce, write } from '$lib/useFirebase'
-import type { IColumnMetaData, IStoreOptions, ITableOptions, loadStore } from '../components/DataTable'
+import type { IColumnMetaData, IStoreOptions, ITableOptions, loadStore } from '$lib/components/DataTable'
 
 export class localStorageOptions implements IStoreOptions {
   storedOptions: ITableOptions
@@ -7,18 +7,18 @@ export class localStorageOptions implements IStoreOptions {
 
   constructor(options: ITableOptions | undefined) {
     // Set standard options
+    this.storedOptions = {
+      id: undefined,
+      currentPage: 1,
+      rowsPerPage: 20,
+      rowsPerPageOptions: [5, 10, 20, 50, 100],
+      actionColumn: false,
+      singleSort: false,
+      defaultColumnWidth: 200,
+    }
     if (options) {
-      this.storedOptions = options
-    } else
-      this.storedOptions = {
-        id: undefined,
-        currentPage: 1,
-        rowsPerPage: 20,
-        rowsPerPageOptions: [5, 10, 20, 50, 100],
-        actionColumn: false,
-        singleSort: false,
-        defaultColumnWidth: 200,
-      }
+      Object.assign(this.storedOptions, options)
+    }
   }
 
   load = (internalColumns?: IColumnMetaData[]): loadStore => {

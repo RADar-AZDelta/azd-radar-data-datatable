@@ -2,7 +2,7 @@
 //SPDX-License-Identifier: gpl3+
 
 declare module '*.svelte' {
-  export { SvelteComponentDev as default } from 'svelte/internal';
+  export { SvelteComponentDev as default } from 'svelte/internal'
 }
 
 export type Hex = `#${string}`
@@ -41,15 +41,16 @@ export interface IPagination {
 }
 
 export interface ITableOptions extends IPagination {
-  id?: string,
-  storageMethod?: "localStorage" | "Firebase"
+  id?: string
+  storageMethod?: 'localStorage' | 'Firebase'
   rowsPerPageOptions?: number[]
-  actionColumn?: boolean,
-  totalRows?: number,
-  defaultColumnWidth?: number,
+  actionColumn?: boolean
+  totalRows?: number
+  defaultColumnWidth?: number
   globalFilter?: GlobalFilter
   singleSort?: boolean
   saveOptions?: boolean
+  dataTypeClass?: IDataTypeFunctionalities
 }
 
 export type FetchDataFunc = (
@@ -115,14 +116,7 @@ export interface GlobalFilter {
   filter: TFilter
 }
 
-export interface PaginationChangedEventDetail extends IPagination { }
-
-export enum DataType {
-  Matrix,
-  ArrayOfObjects,
-  Function,
-  File,
-}
+export interface PaginationChangedEventDetail extends IPagination {}
 
 export interface IStoreOptions {
   load(columns?: IColumnMetaData[]): loadStore | Promise<loadStore>
@@ -132,4 +126,43 @@ export interface IStoreOptions {
 export interface loadStore {
   savedOptions: ITableOptions
   savedColumns: IColumnMetaData[] | undefined
+}
+
+export interface IDataTypeFunctionalities {
+  render(
+    onlyPaginationChanged: boolean,
+    data: any[] | any[][] | FetchDataFunc | File,
+    filteredAndSortedData: any[] | undefined,
+    internalColumns: IColumnMetaData[],
+    internalOptions: ITableOptions
+  ): IRender | Promise<IRender>
+  setData(data: {
+    data: any[] | any[][] | FetchDataFunc | File
+    internalOptions: ITableOptions
+    internalColumns: IColumnMetaData[] | undefined
+    renderedData: any[] | any[][] | undefined
+    modifyColumnMetadata?: ModifyColumnMetadataFunc
+  }): Promise<void> | void
+  setup?(): void | Promise<void>
+  setInternalColumns(columns: IColumnMetaData[]): IColumnMetaData[] | Promise<IColumnMetaData[]>
+  saveToFile(): Promise<void> | void
+  replaceValuesOfColumn?(currentValue: any, updatedValue: any, column: string): Promise<void> | void
+  executeExpressionsAndReturnResults?(expressions: Record<string, any>): Promise<any> | void
+  executeQueryAndReturnResults?(query: Query | object): Promise<any> | void
+  insertColumns?(cols: IColumnMetaData[]): Promise<IColumnMetaData[]> | IColumnMetaData[] | void
+  getFullRow?(originalIndex: number): Promise<Record<string, any>> | Record<string, any> | void
+  deleteRows?(originalIndices: number[]): Promise<void> | void
+  insertRows?(rows: Record<string, any>[]): Promise<number[]> | number[] | void
+  updateRows?(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> | void
+  renameColumns?(columns: Record<string, string>): Promise<void> | void
+  applySort?(internalColumns: IColumnMetaData[], data: any[]): any[] | any[][] | FetchDataFunc | File
+  applyFilter?(internalColumns: IColumnMetaData[], data: any[]): any[] | any[][] | FetchDataFunc | File
+  applyPagination?(internalOptions: ITableOptions, data: any[]): any[] | any[][] | FetchDataFunc | File
+}
+
+export interface IRender {
+  renderedData: any[] | any[][] | undefined
+  originalIndices: number[]
+  totalRows?: number
+  internalColumns: IColumnMetaData[] | undefined
 }

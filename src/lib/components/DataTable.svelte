@@ -1,20 +1,6 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import {
-    type ITableOptions,
-    type ColumnSortChangedEventDetail,
-    type ColumnFilterChangedEventDetail,
-    type SortDirection,
-    type TFilter,
-    type IColumnMetaData,
-    type PaginationChangedEventDetail,
-    type FetchDataFunc,
-    DataType,
-    type ColumnPositionChangedEventDetail,
-    type ColumnWidthChangedEventDetail,
-    type ModifyColumnMetadataFunc,
-  } from './DataTable.d'
   import ColumnSort from './ColumnSort.svelte'
   import ColumnResize from './ColumnResize.svelte'
   import ColumnFilter from './ColumnFilter.svelte'
@@ -22,7 +8,7 @@
   import Spinner from './Spinner.svelte'
   import { dev } from '$app/environment'
   import { createEventDispatcher, onDestroy } from 'svelte'
-  import { DataTableWorker } from './DataTableWorker'
+  import type { DataTableWorker } from '$lib/components/DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
   import Options from './Options.svelte'
   import { flip } from 'svelte/animate'
@@ -31,7 +17,22 @@
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import SvgIcon from './SvgIcon.svelte'
   import { clickOutside } from '$lib/actions/clickOutside'
-  import { firebaseStorageOptions, localStorageOptions } from '../classes/storageClasses'
+  import { firebaseStorageOptions, localStorageOptions } from '$lib/components/datatable/config/storageClasses'
+  import { dataTypeArrayOfObjects } from './datatable/data/dataTypeArrayOfObjects'
+  import { dataTypeFile } from './datatable/data/dataTypeFile'
+  import { dataTypeFunction } from './datatable/data/dataTypeFunction'
+  import { dataTypeMatrix } from './datatable/data/dataTypeMatrix'
+  import type {
+    ColumnFilterChangedEventDetail,
+    ColumnPositionChangedEventDetail,
+    ColumnSortChangedEventDetail,
+    ColumnWidthChangedEventDetail,
+    FetchDataFunc,
+    IColumnMetaData,
+    ITableOptions,
+    ModifyColumnMetadataFunc,
+    PaginationChangedEventDetail,
+  } from './DataTable'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -40,7 +41,6 @@
     modifyColumnMetadata: ModifyColumnMetadataFunc | undefined = undefined
 
   let renderedData: any[][] | any[] | undefined,
-    filteredAndSortedData: any[][] | any[] | undefined,
     internalOptions: ITableOptions = {
       currentPage: 1,
       rowsPerPage: 20,
@@ -52,7 +52,7 @@
     internalColumns: IColumnMetaData[] | undefined
 
   let renderStatus: string
-  let dataType: DataType
+  let dataTypeClass: dataTypeArrayOfObjects | dataTypeFile | dataTypeFunction | dataTypeMatrix | undefined = undefined
 
   let worker: DataTableWorker
   let originalIndices: number[] //the index of the sorted, filtered and paginated record in the original data
@@ -77,159 +77,35 @@
     if (dev) console.log('DataTable: init')
 
     //OPTIONS
+    await getStorage()
     if (options) Object.assign(internalOptions, options)
     internalOptions = internalOptions
 
     //DATA
     if (data && Array.isArray(data) && data.length > 0 && typeof data === 'object') {
-      if (Array.isArray(data[0])) dataType = DataType.Matrix
-      else if (typeof data[0] === 'object') dataType = DataType.ArrayOfObjects
-    } else if (typeof data === 'function') dataType = DataType.Function
-    else if (data instanceof File) {
-      dataType = DataType.File
-      const url = URL.createObjectURL(data as File)
-      if (!worker) {
-        worker = new DataTableWorker()
-        await worker.init()
+      if (Array.isArray(data[0])) {
+        if (!dataTypeClass) dataTypeClass = new dataTypeMatrix()
+        dataTypeClass.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+      } else if (typeof data[0] === 'object') {
+        if (!dataTypeClass) dataTypeClass = new dataTypeArrayOfObjects()
+        dataTypeClass.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
       }
-      const extension = (data as File).name.split('.').pop()
-      await worker.loadFile(url, extension!)
-      URL.revokeObjectURL(url)
+    } else if (typeof data === 'function') {
+      if (!dataTypeClass) dataTypeClass = new dataTypeFunction()
+      dataTypeClass.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+    } else if (data instanceof File) {
+      if (!dataTypeClass) dataTypeClass = new dataTypeFile()
+      await dataTypeClass.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
     } else {
       renderStatus = ''
       renderedData = undefined
       return
     }
     //COLUMNS:
-    if (!columns) {
-      if (dataType === DataType.ArrayOfObjects) {
-        //columns is not defined, and data is an array of objects => extract the columns from the first object
-        internalColumns = Object.keys((data as any[])[0]).map((key, index) => ({
-          id: key,
-          position: index + 1,
-        }))
-      } else if (dataType === DataType.File) {
-        //get columns from worker
-        internalColumns = (await worker!.getColumnNames()).map((key, index) => ({
-          id: key,
-          position: index + 1,
-        }))
-      } else throw new Error('Columns property is not provided')
-
-      if (modifyColumnMetadata) {
-        const internalColumnsCopy = internalColumns.map(col => col.id)
-        internalColumns = modifyColumnMetadata(internalColumns)
-        const addedColumns = internalColumns.map(col => col.id).filter(x => !internalColumnsCopy.includes(x))
-        if (addedColumns.length > 0)
-          await worker?.insertColumns(
-            internalColumns.reduce<IColumnMetaData[]>((acc, cur) => {
-              if (addedColumns.includes(cur.id)) acc.push(cur)
-              return acc
-            }, [])
-          )
-      }
-    } else internalColumns = columns
-    internalColumns.forEach(col => {
-      if (!col.width) col.width = internalOptions.defaultColumnWidth
-    })
-
-    if (internalOptions) {
-      if (!storageMethod && browser) {
-        switch (internalOptions.storageMethod) {
-          case 'localStorage':
-          case undefined:
-            storageMethod = new localStorageOptions(options)
-            break
-
-          case 'Firebase':
-            storageMethod = new firebaseStorageOptions(options)
-            break
-        }
-      }
-      if (browser && storageMethod) {
-        const { savedOptions, savedColumns } = await storageMethod.load(internalColumns)
-        if (savedColumns) internalColumns = savedColumns
-        if (savedOptions) internalOptions = savedOptions
-      }
-    }
+    const resultedColumns = await dataTypeClass!.setInternalColumns(columns)
+    if (resultedColumns) internalColumns = resultedColumns
     await render()
     dispatch('initialized')
-  }
-
-  async function renderDataTypeFunction() {
-    let start: number
-    const filteredColumns = internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
-      if (cur && cur.filter) acc.set(cur.id, cur.filter)
-      return acc
-    }, new Map<string, TFilter>())
-    const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
-      if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
-      return acc
-    }, new Map<string, SortDirection>())
-    if (dev) start = performance.now()
-    const results = await (data as FetchDataFunc)(filteredColumns, sortedColumns, internalOptions)
-    if (dev) {
-      const end = performance.now()
-      console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
-    }
-    originalIndices = Array.from({ length: results.data.length }, (_, i) => i)
-    internalOptions.totalRows = results.totalRows
-    renderedData = results.data
-  }
-
-  function renderDataTypeArrayOfObjects(onlyPaginationChanged: boolean) {
-    if (!onlyPaginationChanged || !filteredAndSortedData) {
-      filteredAndSortedData = applySort(applyFilter(data as any[]))
-      internalOptions.totalRows = filteredAndSortedData.length
-    }
-    renderedData = applyPagination(filteredAndSortedData)
-    originalIndices = (renderedData as Record<string, any>[]).reduce<number[]>((acc, cur) => {
-      acc.push((data as Record<string, any>[]).indexOf(cur))
-      return acc
-    }, [])
-  }
-
-  function renderDataTypeMatrix(onlyPaginationChanged: boolean) {
-    if (!onlyPaginationChanged || !filteredAndSortedData) {
-      filteredAndSortedData = applySort(applyFilter(data as any[][]))
-      internalOptions.totalRows = filteredAndSortedData.length
-    }
-    const paginatedData = applyPagination(filteredAndSortedData)
-    renderedData = paginatedData.map(row =>
-      internalColumns?.reduce((acc, cur, index) => {
-        acc[cur.id!] = row[index]
-        return acc
-      }, {} as Record<string, any>)
-    )
-    originalIndices = (paginatedData as any[]).reduce((acc, cur) => {
-      acc.push((data as any[]).indexOf(cur))
-      return acc
-    }, [])
-  }
-
-  async function renderDataTypeFile(onlyPaginationChanged: boolean) {
-    const filteredColumns = internalOptions?.globalFilter?.filter
-      ? new Map<string, TFilter>([[internalOptions!.globalFilter!.column, internalOptions!.globalFilter!.filter]])
-      : internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
-          if (cur && cur.filter) acc.set(cur.id, cur.filter)
-          return acc
-        }, new Map<string, TFilter>())
-    const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
-      if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
-      return acc
-    }, new Map<string, SortDirection>())
-    const results = await worker?.fetchData(filteredColumns, sortedColumns, internalOptions, onlyPaginationChanged)
-    internalOptions.totalRows = results!.totalRows
-    renderedData = results!.data.map(row =>
-      internalColumns?.reduce((acc, cur, index) => {
-        acc[cur.id!] = row[index]
-        return acc
-      }, {} as Record<string, any>)
-    )
-    originalIndices = results!.indices.reduce<number[]>((acc, cur) => {
-      acc.push(cur)
-      return acc
-    }, [])
   }
 
   async function render(onlyPaginationChanged = false) {
@@ -237,78 +113,14 @@
     dispatch('rendering')
     if (dev) console.log('DataTable: render')
     renderedData = undefined
-    switch (dataType) {
-      case DataType.Function:
-        await renderDataTypeFunction()
-        break
-      case DataType.ArrayOfObjects:
-        renderDataTypeArrayOfObjects(onlyPaginationChanged)
-        break
-      case DataType.Matrix:
-        renderDataTypeMatrix(onlyPaginationChanged)
-        break
-      case DataType.File:
-        await renderDataTypeFile(onlyPaginationChanged)
-        break
-    }
+    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+    const renderResults = await dataTypeClass!.render(onlyPaginationChanged)
+    renderedData = renderResults.renderedData
+    originalIndices = renderResults.originalIndices
+    internalOptions.totalRows = renderResults.totalRows
+    internalColumns = renderResults.internalColumns
     renderStatus = 'completed'
     dispatch('renderingComplete')
-  }
-
-  function applyFilter(data: any[][] | any[]): any[][] | any[] {
-    internalColumns
-      ?.filter(col => col.filter)
-      .forEach(col => {
-        if (dev) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
-        if (dataType === DataType.Matrix) {
-          const index = internalColumns?.findIndex(c => c.id === col.id)
-          data = data.filter(row => row[index!]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
-        } else if (dataType === DataType.ArrayOfObjects) {
-          data = data.filter(obj => obj[col.id]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
-        }
-      })
-    return data
-  }
-
-  function applySort(data: any[][] | any[]): any[][] | any[] {
-    //TODO: ignore case, use localCompare for strings, convert Dates to milliseconds using .getTime()
-    let compareFn: ((a: any[] | any, b: any[] | any) => number) | undefined
-    internalColumns
-      ?.filter(col => col.sortDirection)
-      .slice()
-      .reverse() //Sort is applied in reverse order !!!
-      .forEach((col, index) => {
-        if (dev) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
-        if (dataType === DataType.Matrix) {
-          switch (col.sortDirection) {
-            case 'asc':
-              compareFn = (a, b) => (a[index] < b[index] ? -1 : a[index] > b[index] ? 1 : 0)
-              break
-            case 'desc':
-              compareFn = (a, b) => (b[index] < a[index] ? -1 : b[index] > a[index] ? 1 : 0)
-              break
-          }
-        } else if (dataType === DataType.ArrayOfObjects) {
-          switch (col.sortDirection) {
-            case 'asc':
-              compareFn = (a, b) => (a[col.id] < b[col.id] ? -1 : a[col.id] > b[col.id] ? 1 : 0)
-              break
-            case 'desc':
-              compareFn = (a, b) => (b[col.id] < a[col.id] ? -1 : b[col.id] > a[col.id] ? 1 : 0)
-              break
-          }
-        }
-        data = data.sort(compareFn)
-      })
-    return data
-  }
-
-  function applyPagination(data: any[][] | any[]): any[][] | any[] {
-    const start = (internalOptions.currentPage! - 1) * internalOptions.rowsPerPage!
-    const end = internalOptions.currentPage! * internalOptions.rowsPerPage!
-    if (dev) console.log(`DataTable: applying pagination row ${start} - ${end}`)
-    data = data.slice(start, end)
-    return data
   }
 
   async function onColumnFilterChanged(event: CustomEvent<ColumnFilterChangedEventDetail>) {
@@ -322,7 +134,6 @@
       column!.filter = event.detail.filter?.toString().toLowerCase()
     }
     internalColumns = internalColumns
-    filteredAndSortedData = undefined
 
     if (dev) console.log(`DataTable: column '${event.detail.column}' filter changed to '${event.detail.filter}'`)
 
@@ -335,6 +146,7 @@
     column!.width = event.detail.width
 
     internalColumns = internalColumns
+    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
     if (dev) console.log(`DataTable: column '${column!.id}' width changed to '${event.detail.width}'`)
   }
 
@@ -348,6 +160,7 @@
       else if (destinationPosition <= column.position! && column.position! < sourcePosition!) column.position! += 1
     })
     internalColumns = internalColumns
+    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
     if (dev)
       console.log(
         `DataTable: column '${sourceColumn!.id}' position changed from '${sourcePosition}' to '${destinationPosition}'`
@@ -361,8 +174,6 @@
     const column = internalColumns?.find(col => col.id === event.detail.column)
     column!.sortDirection = event.detail.sortDirection
     internalColumns = internalColumns
-    filteredAndSortedData = undefined
-
     if (dev) console.log(`DataTable: column '${event.detail.column}' sort changed to '${event.detail.sortDirection}'`)
 
     internalOptions.currentPage = 1
@@ -389,95 +200,15 @@
     const inputEl = e.target as HTMLInputElement
     internalColumns!.find(col => col.id == inputEl.name)!.visible = inputEl.checked
     internalColumns = internalColumns
+    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
   }
 
   export async function saveToFile() {
-    const opts = {
-      types: [
-        {
-          description: 'CSV file',
-          accept: { 'text/csv': ['.csv'] },
-        },
-      ],
-    }
-    const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(opts)
-    switch (dataType) {
-      case DataType.File:
-        await worker!.saveToFile(fileHandle)
-        break
-      case DataType.ArrayOfObjects:
-      case DataType.Function:
-        let csvArrayObjObjects = ''
-        let keyCounterArrayOfObjects: number = 0
-        for (let row = 0; row <= renderedData!.length; row++) {
-          for (let col of internalColumns!) {
-            if (row == 0) {
-              csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < internalColumns!.length ? ',' : '\r\n')
-              keyCounterArrayOfObjects++
-            } else {
-              const value = (<any[]>renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
-              csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < internalColumns!.length ? ',' : '\r\n')
-              keyCounterArrayOfObjects++
-            }
-          }
-          keyCounterArrayOfObjects = 0
-        }
-        const writableArrayOfObjects = await fileHandle.createWritable()
-        await writableArrayOfObjects.write(csvArrayObjObjects)
-        await writableArrayOfObjects.close()
-        break
-      case DataType.Matrix:
-        let csvMatrix = ''
-        let keyCounterMatrix: number = 0
-        for (let col of internalColumns!) {
-          csvMatrix += col.id + (keyCounterMatrix + 1 < internalColumns!.length ? ',' : '\r\n')
-          keyCounterMatrix++
-        }
-        keyCounterMatrix = 0
-        for (let row of <any[][]>data) {
-          for (let cell of row) {
-            const value = cell.toString().replaceAll(',', ';')
-            csvMatrix += value + (keyCounterMatrix + 1 < internalColumns!.length ? ',' : '\r\n')
-            keyCounterMatrix++
-          }
-          keyCounterMatrix = 0
-        }
-        const writableMatrix = await fileHandle.createWritable()
-        await writableMatrix.write(csvMatrix)
-        await writableMatrix.close()
-        break
-    }
+    await dataTypeClass!.saveToFile()
   }
 
   export async function updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
-    switch (dataType) {
-      case DataType.File:
-        const rowsToUpdateByWorkerIndex = [...rowsToUpdateByOriginalIndex].reduce<Map<number, Record<string, any>>>(
-          (acc, [originalIndex, row]) => {
-            acc.set(originalIndex, row) //swap the local index with the worker index
-            return acc
-          },
-          new Map<number, Record<string, any>>()
-        )
-        await worker!.updateRows(rowsToUpdateByWorkerIndex)
-        break
-      case DataType.Matrix:
-        for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
-          const originalRow = (data as any[][])[originalIndex]
-          for (const [column, value] of Object.entries(row)) {
-            const index = internalColumns?.findIndex(c => c.id === column)
-            originalRow[index!] = value
-          }
-        }
-        break
-      case DataType.ArrayOfObjects:
-        for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
-          Object.assign((data as any[])[originalIndex], row)
-        }
-        break
-      default:
-        throw new Error('Not yet supported')
-    }
+    await dataTypeClass!.updateRows(rowsToUpdateByOriginalIndex)
 
     for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
       const renderedIndex = originalIndices.findIndex(i => i === originalIndex)
@@ -492,47 +223,15 @@
   }
 
   export async function insertRows(rows: Record<string, any>[]): Promise<number[]> {
-    let originalIndices: number[]
-    switch (dataType) {
-      case DataType.File:
-        originalIndices = (await worker!.insertRows(rows)).indices
-        break
-      case DataType.Matrix:
-        originalIndices = Array.from({ length: rows.length }, (_, i) => (data as any[][]).length + i)
-        for (const row of rows) {
-          ;(data as any[][]).push(
-            internalColumns!.reduce((acc, column) => {
-              acc.push(row[column.id])
-              return acc
-            }, [] as any[])
-          )
-        }
-        break
-      case DataType.ArrayOfObjects:
-        originalIndices = Array.from({ length: rows.length }, (_, i) => (data as any[]).length + i)
-        ;(data as any[]).push(...rows)
-        break
-      default:
-        throw new Error('Not yet supported')
-    }
+    let originalIndices: number[] = []
+    const indices = await dataTypeClass!.insertRows(rows)
+    if (indices) originalIndices = indices
     await render(false)
     return originalIndices
   }
 
   export async function deleteRows(originalIndices: number[]) {
-    switch (dataType) {
-      case DataType.File:
-        await worker!.deleteRows(originalIndices)
-        break
-      case DataType.Matrix:
-      case DataType.ArrayOfObjects:
-        for (const originalIndex of originalIndices.sort((a, b) => b - a)) {
-          ;(data as any[]).splice(originalIndex, 1)
-        }
-        break
-      default:
-        throw new Error('Not yet supported')
-    }
+    await dataTypeClass!.deleteRows(originalIndices)
     await render(false)
   }
 
@@ -541,53 +240,14 @@
   }
 
   export async function getFullRow(originalIndex: number): Promise<Record<string, any>> {
-    switch (dataType) {
-      case DataType.File:
-        const row = (await worker!.getRow(originalIndex)).row
-        return internalColumns!.reduce((acc, column, idx) => {
-          acc[column.id!] = row[idx]
-          return acc
-        }, {} as Record<string, any>)
-      case DataType.Matrix:
-        return internalColumns!.reduce((acc, column, idx) => {
-          acc[column.id] = (data as any[][])[originalIndex][idx]
-          return acc
-        }, {} as Record<string, any>)
-      case DataType.ArrayOfObjects:
-        return (data as any[])[originalIndex]
-      default:
-        throw new Error('Not yet supported')
-    }
+    const fullRow = await dataTypeClass?.getFullRow(originalIndex)
+    if (fullRow) return fullRow
+    else throw new Error('Getting the full row did not work. Are you using a supported data method?')
   }
 
   export async function insertColumns(cols: IColumnMetaData[]) {
-    let uniqueColumns: IColumnMetaData[] = []
-    for (let col of cols) {
-      switch (dataType) {
-        case DataType.File:
-        case DataType.Matrix:
-        case DataType.ArrayOfObjects:
-          if (internalColumns!.find(c => c.id === col.id)) console.error(`Column with id ${col.id} already exists`)
-          else {
-            if (!col.position)
-              col.position =
-                internalColumns!.reduce<number>((acc, cur) => {
-                  if (cur.position! > acc) return cur.position!
-                  else return acc
-                }, 0) + 1 //add new column at end (with last position)
-            uniqueColumns.push(col)
-          }
-          break
-        default:
-          throw new Error('Not yet supported')
-      }
-    }
-    switch (dataType) {
-      case DataType.File:
-        await worker!.insertColumns(uniqueColumns)
-        break
-    }
-    internalColumns = internalColumns!.concat(uniqueColumns)
+    const updatedColumns = await dataTypeClass!.insertColumns(cols)
+    if (updatedColumns) internalColumns = updatedColumns
     await render(false)
   }
 
@@ -601,30 +261,15 @@
       }
     }
     internalColumns = internalColumns
+    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
   }
 
   export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
-    switch (dataType) {
-      case DataType.File:
-        const sortedColumns = internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
-          if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
-          return acc
-        }, new Map<string, SortDirection>())
-        const filteredColumns = internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
-          if (cur && cur.filter) acc.set(cur.id, cur.filter)
-          return acc
-        }, new Map<string, TFilter>())
-        return await worker!.executeQueryAndReturnResults(query, filteredColumns, sortedColumns)
-      default:
-        throw new Error('Not yet supported')
-    }
+    return await dataTypeClass!.executeQueryAndReturnResults(query)
   }
 
   export async function executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any> {
-    switch (dataType) {
-      case DataType.File:
-        return await worker!.executeExpressionsAndReturnResults(expressions)
-    }
+    await dataTypeClass!.executeExpressionsAndReturnResults(expressions)
   }
 
   export function getTablePagination() {
@@ -647,76 +292,12 @@
   }
 
   export async function replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string) {
-    switch (dataType) {
-      case DataType.File:
-        return await worker.replaceValuesOfColumn(currentValue, updatedValue, column)
-      case DataType.ArrayOfObjects:
-        for (let i = 0; i < data!.length; i++) {
-          if ((<any[]>data)[i][column] === currentValue) (<any[]>data)[i][column] = updatedValue
-        }
-        break
-      case DataType.Matrix:
-        let columnIndex = internalColumns!.findIndex(col => col.id === column)
-        for (let i = 0; i < (<any[][]>data).length; i++) {
-          if ((<any[][]>data)[i][columnIndex] === currentValue) {
-            ;(<any[][]>data)[i][columnIndex] = updatedValue
-          }
-        }
-        break
-      case DataType.Function:
-        for (let i = 0; i < renderedData!.length; i++) {
-          if (renderedData![i][column] === currentValue) renderedData![i][column] = updatedValue
-        }
-        data = data
-    }
+    await dataTypeClass!.replaceValuesOfColumn(currentValue, updatedValue, column)
   }
 
   export async function renameColumns(columns: Record<string, string>) {
-    switch (dataType) {
-      case DataType.File:
-        await worker.renameColumns(columns)
-        for (let [oldCol, newCol] of Object.entries(columns)) {
-          if (internalColumns!.find(col => col.id === newCol)) {
-            const oldIndex = internalColumns!.findIndex(col => col.id === oldCol)
-            const newIndex = internalColumns!.findIndex(col => col.id === newCol)
-            internalColumns!.splice(newIndex, 1)
-            let { id, ...col } = internalColumns![newIndex]
-            internalColumns![oldIndex] = Object.assign(col, { id: newCol })
-          } else {
-            internalColumns!.find(col => col.id === oldCol)!.id = newCol
-          }
-        }
-        internalColumns = internalColumns
-        await render()
-        break
-      case DataType.Matrix:
-        if (internalColumns) {
-          Object.keys(columns).forEach(col => {
-            const index = internalColumns!.findIndex(c => c.id === col)
-            if (index !== -1) internalColumns![index].id = columns[col]
-          })
-          internalColumns = internalColumns
-        }
-        await render()
-        break
-      case DataType.ArrayOfObjects:
-        if (internalColumns) {
-          Object.keys(columns).forEach(col => {
-            const index = internalColumns!.findIndex(c => c.id === col)
-            if (index !== -1) internalColumns![index].id = columns[col]
-
-            for (let obj of data as any[]) {
-              obj[columns[col]] = obj[col]
-              delete obj[col]
-            }
-          })
-          internalColumns = internalColumns
-        }
-        await render()
-        break
-      case DataType.Function:
-        throw new Error('Not yet supported')
-    }
+    await dataTypeClass!.renameColumns(columns)
+    await render()
   }
 
   function onStoreOptions() {
@@ -728,6 +309,28 @@
     columns?.forEach(col => {
       col.filterable = filterVisibility
     })
+  }
+
+  async function getStorage() {
+    if (internalOptions) {
+      if (!storageMethod && browser) {
+        switch (internalOptions.storageMethod) {
+          case 'localStorage':
+          case undefined:
+            storageMethod = new localStorageOptions(options)
+            break
+
+          case 'Firebase':
+            storageMethod = new firebaseStorageOptions(options)
+            break
+        }
+      }
+      if (browser && storageMethod) {
+        const { savedOptions, savedColumns } = await storageMethod.load(internalColumns)
+        if (savedColumns) internalColumns = savedColumns
+        if (savedOptions) internalOptions = savedOptions
+      }
+    }
   }
 
   onDestroy(() => {
