@@ -29,6 +29,7 @@
     ColumnWidthChangedEventDetail,
     FetchDataFunc,
     IColumnMetaData,
+    IDataTypeFunctionalities,
     ITableOptions,
     ModifyColumnMetadataFunc,
     PaginationChangedEventDetail,
@@ -52,7 +53,7 @@
     internalColumns: IColumnMetaData[] | undefined
 
   let renderStatus: string
-  let dataTypeClass: dataTypeArrayOfObjects | dataTypeFile | dataTypeFunction | dataTypeMatrix | undefined = undefined
+  let dataTypeImpl: IDataTypeFunctionalities | undefined = undefined
 
   let worker: DataTableWorker
   let originalIndices: number[] //the index of the sorted, filtered and paginated record in the original data
@@ -82,27 +83,34 @@
     internalOptions = internalOptions
 
     //DATA
-    if (data && Array.isArray(data) && data.length > 0 && typeof data === 'object') {
-      if (Array.isArray(data[0])) {
-        if (!dataTypeClass) dataTypeClass = new dataTypeMatrix()
-        dataTypeClass.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
-      } else if (typeof data[0] === 'object') {
-        if (!dataTypeClass) dataTypeClass = new dataTypeArrayOfObjects()
-        dataTypeClass.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+    if (!internalOptions.dataTypeImpl) {
+      if (data && Array.isArray(data) && data.length > 0 && typeof data === 'object') {
+        if (Array.isArray(data[0])) {
+          if (!dataTypeImpl) dataTypeImpl = new dataTypeMatrix()
+          dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+        } else if (typeof data[0] === 'object') {
+          if (!dataTypeImpl) dataTypeImpl = new dataTypeArrayOfObjects()
+          dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+        }
+      } else if (typeof data === 'function') {
+        if (!dataTypeImpl) dataTypeImpl = new dataTypeFunction()
+        dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+      } else if (data instanceof File) {
+        if (!dataTypeImpl) dataTypeImpl = new dataTypeFile()
+        await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+      } else {
+        renderStatus = ''
+        renderedData = undefined
+        return
       }
-    } else if (typeof data === 'function') {
-      if (!dataTypeClass) dataTypeClass = new dataTypeFunction()
-      dataTypeClass.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
-    } else if (data instanceof File) {
-      if (!dataTypeClass) dataTypeClass = new dataTypeFile()
-      await dataTypeClass.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
     } else {
-      renderStatus = ''
-      renderedData = undefined
-      return
+      if (data) {
+        if (!dataTypeImpl) dataTypeImpl = internalOptions.dataTypeImpl
+        dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+      }
     }
     //COLUMNS:
-    const resultedColumns = await dataTypeClass!.setInternalColumns(columns)
+    const resultedColumns = await dataTypeImpl!.setInternalColumns(columns)
     if (resultedColumns) internalColumns = resultedColumns
     await render()
     dispatch('initialized')
@@ -113,8 +121,8 @@
     dispatch('rendering')
     if (dev) console.log('DataTable: render')
     renderedData = undefined
-    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
-    const renderResults = await dataTypeClass!.render(onlyPaginationChanged)
+    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+    const renderResults = await dataTypeImpl!.render(onlyPaginationChanged)
     renderedData = renderResults.renderedData
     originalIndices = renderResults.originalIndices
     internalOptions.totalRows = renderResults.totalRows
@@ -146,7 +154,7 @@
     column!.width = event.detail.width
 
     internalColumns = internalColumns
-    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
     if (dev) console.log(`DataTable: column '${column!.id}' width changed to '${event.detail.width}'`)
   }
 
@@ -160,7 +168,7 @@
       else if (destinationPosition <= column.position! && column.position! < sourcePosition!) column.position! += 1
     })
     internalColumns = internalColumns
-    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
     if (dev)
       console.log(
         `DataTable: column '${sourceColumn!.id}' position changed from '${sourcePosition}' to '${destinationPosition}'`
@@ -200,15 +208,15 @@
     const inputEl = e.target as HTMLInputElement
     internalColumns!.find(col => col.id == inputEl.name)!.visible = inputEl.checked
     internalColumns = internalColumns
-    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
   }
 
   export async function saveToFile() {
-    await dataTypeClass!.saveToFile()
+    await dataTypeImpl!.saveToFile()
   }
 
   export async function updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
-    await dataTypeClass!.updateRows(rowsToUpdateByOriginalIndex)
+    await dataTypeImpl!.updateRows(rowsToUpdateByOriginalIndex)
 
     for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
       const renderedIndex = originalIndices.findIndex(i => i === originalIndex)
@@ -224,14 +232,14 @@
 
   export async function insertRows(rows: Record<string, any>[]): Promise<number[]> {
     let originalIndices: number[] = []
-    const indices = await dataTypeClass!.insertRows(rows)
+    const indices = await dataTypeImpl!.insertRows(rows)
     if (indices) originalIndices = indices
     await render(false)
     return originalIndices
   }
 
   export async function deleteRows(originalIndices: number[]) {
-    await dataTypeClass!.deleteRows(originalIndices)
+    await dataTypeImpl!.deleteRows(originalIndices)
     await render(false)
   }
 
@@ -240,13 +248,13 @@
   }
 
   export async function getFullRow(originalIndex: number): Promise<Record<string, any>> {
-    const fullRow = await dataTypeClass?.getFullRow(originalIndex)
+    const fullRow = await dataTypeImpl?.getFullRow(originalIndex)
     if (fullRow) return fullRow
     else throw new Error('Getting the full row did not work. Are you using a supported data method?')
   }
 
   export async function insertColumns(cols: IColumnMetaData[]) {
-    const updatedColumns = await dataTypeClass!.insertColumns(cols)
+    const updatedColumns = await dataTypeImpl!.insertColumns(cols)
     if (updatedColumns) internalColumns = updatedColumns
     await render(false)
   }
@@ -261,15 +269,15 @@
       }
     }
     internalColumns = internalColumns
-    if (data) dataTypeClass!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
   }
 
   export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
-    return await dataTypeClass!.executeQueryAndReturnResults(query)
+    return await dataTypeImpl!.executeQueryAndReturnResults(query)
   }
 
   export async function executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any> {
-    await dataTypeClass!.executeExpressionsAndReturnResults(expressions)
+    await dataTypeImpl!.executeExpressionsAndReturnResults(expressions)
   }
 
   export function getTablePagination() {
@@ -292,11 +300,11 @@
   }
 
   export async function replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string) {
-    await dataTypeClass!.replaceValuesOfColumn(currentValue, updatedValue, column)
+    await dataTypeImpl!.replaceValuesOfColumn(currentValue, updatedValue, column)
   }
 
   export async function renameColumns(columns: Record<string, string>) {
-    await dataTypeClass!.renameColumns(columns)
+    await dataTypeImpl!.renameColumns(columns)
     await render()
   }
 
@@ -333,13 +341,17 @@
     }
   }
 
+  function closeModal() {
+    if (settingsDialog.attributes.getNamedItem('open') != null) settingsDialog.close()
+  }
+
   onDestroy(() => {
     worker?.destroy()
   })
 </script>
 
 <dialog data-name="settings-dialog" bind:this={settingsDialog}>
-  <div data-name="dialog-container" use:clickOutside on:outclick={() => {if(settingsDialog.attributes.getNamedItem('open') != null) settingsDialog.close()}}>
+  <div data-name="dialog-container" use:clickOutside on:outclick={closeModal}>
     <button data-name="close-button" on:click={() => settingsDialog.close()}
       ><SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" /></button
     >

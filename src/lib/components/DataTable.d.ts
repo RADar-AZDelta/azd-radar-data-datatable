@@ -50,7 +50,7 @@ export interface ITableOptions extends IPagination {
   globalFilter?: GlobalFilter
   singleSort?: boolean
   saveOptions?: boolean
-  dataTypeClass?: IDataTypeFunctionalities
+  dataTypeImpl?: IDataTypeFunctionalities
 }
 
 export type FetchDataFunc = (
@@ -129,13 +129,7 @@ export interface loadStore {
 }
 
 export interface IDataTypeFunctionalities {
-  render(
-    onlyPaginationChanged: boolean,
-    data: any[] | any[][] | FetchDataFunc | File,
-    filteredAndSortedData: any[] | undefined,
-    internalColumns: IColumnMetaData[],
-    internalOptions: ITableOptions
-  ): IRender | Promise<IRender>
+  render(onlyPaginationChanged: boolean): IRender | Promise<IRender>
   setData(data: {
     data: any[] | any[][] | FetchDataFunc | File
     internalOptions: ITableOptions
@@ -144,17 +138,17 @@ export interface IDataTypeFunctionalities {
     modifyColumnMetadata?: ModifyColumnMetadataFunc
   }): Promise<void> | void
   setup?(): void | Promise<void>
-  setInternalColumns(columns: IColumnMetaData[]): IColumnMetaData[] | Promise<IColumnMetaData[]>
+  setInternalColumns(columns: IColumnMetaData[] | undefined): IColumnMetaData[] | Promise<IColumnMetaData[]>
   saveToFile(): Promise<void> | void
-  replaceValuesOfColumn?(currentValue: any, updatedValue: any, column: string): Promise<void> | void
-  executeExpressionsAndReturnResults?(expressions: Record<string, any>): Promise<any> | void
-  executeQueryAndReturnResults?(query: Query | object): Promise<any> | void
-  insertColumns?(cols: IColumnMetaData[]): Promise<IColumnMetaData[]> | IColumnMetaData[] | void
-  getFullRow?(originalIndex: number): Promise<Record<string, any>> | Record<string, any> | void
-  deleteRows?(originalIndices: number[]): Promise<void> | void
-  insertRows?(rows: Record<string, any>[]): Promise<number[]> | number[] | void
-  updateRows?(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> | void
-  renameColumns?(columns: Record<string, string>): Promise<void> | void
+  replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void> | void
+  executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any> | void
+  executeQueryAndReturnResults(query: Query | object): Promise<any> | void
+  insertColumns(cols: IColumnMetaData[]): Promise<IColumnMetaData[]> | IColumnMetaData[] | void
+  getFullRow(originalIndex: number): Promise<Record<string, any>> | Record<string, any> | void
+  deleteRows(originalIndices: number[]): Promise<void> | void
+  insertRows(rows: Record<string, any>[]): Promise<number[]> | number[] | void
+  updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> | void
+  renameColumns(columns: Record<string, string>): Promise<void> | void
   applySort?(internalColumns: IColumnMetaData[], data: any[]): any[] | any[][] | FetchDataFunc | File
   applyFilter?(internalColumns: IColumnMetaData[], data: any[]): any[] | any[][] | FetchDataFunc | File
   applyPagination?(internalOptions: ITableOptions, data: any[]): any[] | any[][] | FetchDataFunc | File
