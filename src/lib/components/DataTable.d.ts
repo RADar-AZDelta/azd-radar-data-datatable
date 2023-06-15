@@ -51,6 +51,7 @@ export interface ITableOptions extends IPagination {
   singleSort?: boolean
   saveOptions?: boolean
   dataTypeImpl?: IDataTypeFunctionalities
+  userId?: string | undefined | null
 }
 
 export type FetchDataFunc = (

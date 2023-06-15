@@ -17,7 +17,6 @@
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import SvgIcon from './SvgIcon.svelte'
   import { clickOutside } from '$lib/actions/clickOutside'
-  import { firebaseStorageOptions, localStorageOptions } from '$lib/components/datatable/config/storageClasses'
   import { dataTypeArrayOfObjects } from './datatable/data/dataTypeArrayOfObjects'
   import { dataTypeFile } from './datatable/data/dataTypeFile'
   import { dataTypeFunction } from './datatable/data/dataTypeFunction'
@@ -30,10 +29,13 @@
     FetchDataFunc,
     IColumnMetaData,
     IDataTypeFunctionalities,
+    IStoreOptions,
     ITableOptions,
     ModifyColumnMetadataFunc,
     PaginationChangedEventDetail,
   } from './DataTable'
+    import { localStorageOptions } from './datatable/config/localstorageClass'
+    import { firebaseStorageOptions } from './datatable/config/firebaseClass'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -45,10 +47,12 @@
     internalOptions: ITableOptions = {
       currentPage: 1,
       rowsPerPage: 20,
+      storageMethod: undefined,
       rowsPerPageOptions: [5, 10, 20, 50, 100],
       actionColumn: false,
       singleSort: false,
       defaultColumnWidth: 200,
+      userId: undefined
     },
     internalColumns: IColumnMetaData[] | undefined
 
@@ -63,7 +67,7 @@
 
   const dispatch = createEventDispatcher()
 
-  let storageMethod: localStorageOptions | firebaseStorageOptions | undefined = undefined
+  let storageMethod: IStoreOptions | undefined = undefined
 
   $: {
     options, columns, data
@@ -277,7 +281,7 @@
   }
 
   export async function executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any> {
-    await dataTypeImpl!.executeExpressionsAndReturnResults(expressions)
+    return await dataTypeImpl!.executeExpressionsAndReturnResults(expressions)
   }
 
   export function getTablePagination() {
@@ -309,7 +313,9 @@
   }
 
   function onStoreOptions() {
-    if (browser && storageMethod) storageMethod.store(internalOptions, internalColumns)
+    if (browser && storageMethod) {
+      storageMethod.store(internalOptions, internalColumns!)
+    }
   }
 
   function toggleFilterVisibility() {
@@ -322,7 +328,8 @@
   async function getStorage() {
     if (internalOptions) {
       if (!storageMethod && browser) {
-        switch (internalOptions.storageMethod) {
+        let storageMeth = options?.storageMethod
+        switch (storageMeth) {
           case 'localStorage':
           case undefined:
             storageMethod = new localStorageOptions(options)
