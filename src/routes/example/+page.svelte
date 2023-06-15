@@ -59,16 +59,6 @@
   ]
 
   const classAthena = new athenaClass()
-
-  if (dev) {
-    if (browser) {
-      window.addEventListener('beforeunload', e => {
-        const confirmationMessage = 'Save the file you were mapping before leaving the application.'
-        ;(e || window.event).returnValue = confirmationMessage
-        return confirmationMessage
-      })
-    }
-  }
 </script>
 
 <p>Click the delete button and check the logs in the console, it should say it is a custom error</p>

@@ -34,8 +34,8 @@
     ModifyColumnMetadataFunc,
     PaginationChangedEventDetail,
   } from './DataTable'
-    import { localStorageOptions } from './datatable/config/localstorageClass'
-    import { firebaseStorageOptions } from './datatable/config/firebaseClass'
+  import { localStorageOptions } from './datatable/config/localstorageClass'
+  import { firebaseStorageOptions } from './datatable/config/firebaseClass'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -52,7 +52,7 @@
       actionColumn: false,
       singleSort: false,
       defaultColumnWidth: 200,
-      userId: undefined
+      userId: undefined,
     },
     internalColumns: IColumnMetaData[] | undefined
 
@@ -82,7 +82,9 @@
     if (dev) console.log('DataTable: init')
 
     //OPTIONS
-    await getStorage()
+    if (internalOptions !== options) {
+      await getStorage()
+    }
     if (options) Object.assign(internalOptions, options)
     internalOptions = internalOptions
 

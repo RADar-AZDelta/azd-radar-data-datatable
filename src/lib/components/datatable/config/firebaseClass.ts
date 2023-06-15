@@ -37,10 +37,14 @@ export class firebaseStorageOptions implements IStoreOptions {
 
       if (this.storedOptions.userId && this.storedOptions.id) {
         // Read the data for the DataTable with the given id
-        const data = await readOnce(`${this.storedOptions.userId}/${this.storedOptions.id}`)
-        if (data) {
-          this.storedOptions = data.options
-          this.storedColumns = data.columns
+        try {
+          const data = await readOnce(`${this.storedOptions.userId}/${this.storedOptions.id}`)
+          if (data) {
+            this.storedOptions = data.options
+            this.storedColumns = data.columns
+          }
+        } catch (e) {
+          this.store(this.storedOptions, this.storedColumns)
         }
       }
       resolve({ savedOptions: this.storedOptions, savedColumns: this.storedColumns })
