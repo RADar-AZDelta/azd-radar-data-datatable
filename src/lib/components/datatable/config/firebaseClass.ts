@@ -38,7 +38,7 @@ export class firebaseStorageOptions implements IStoreOptions {
       if (this.storedOptions.userId && this.storedOptions.id) {
         // Read the data for the DataTable with the given id
         try {
-          const data = await readOnce(`${this.storedOptions.userId}/${this.storedOptions.id}`)
+          const data = await readOnce(`${this.storedOptions.userId}/${this.storedOptions.id}/Datatable`)
           if (data) {
             this.storedOptions = data.options
             this.storedColumns = data.columns
@@ -53,18 +53,20 @@ export class firebaseStorageOptions implements IStoreOptions {
 
   store = (options: ITableOptions, columns: IColumnMetaData[] | undefined): void => {
     // If there is no userId given for authentication, create a deviceId and save it in the localStorage to identify the device
+    this.storedOptions = options
+    this.storedColumns = columns
     if (!this.storedOptions.userId) {
       let id: string
       if (!localStorage.getItem('deviceId')) {
         id = crypto.randomUUID()
         localStorage.setItem('deviceId', id)
       } else id = localStorage.getItem('deviceId')!
-      this.storedOptions.userId
+      this.storedOptions.userId = id
     }
     // Remove all the undefined values and replace them with "null" because the database can't work with undefined
     if (this.storedOptions.userId && this.storedOptions.id) {
       // Write the options and columns to the database under the given DataTable id
-      delete options.dataTypeImpl
+      delete this.storedOptions.dataTypeImpl
       for (let col of Object.keys(columns!)) {
         for (let [key, prop] of Object.entries(columns![col as keyof object])) {
           if (prop === undefined) {
@@ -77,11 +79,9 @@ export class firebaseStorageOptions implements IStoreOptions {
           options![key as keyof object] = null
         }
       }
-      write(this.storedOptions.userId, {
-        [this.storedOptions.id]: {
-          options: options,
-          columns: columns,
-        },
+      write(`${this.storedOptions.userId}/${this.storedOptions.id}/Datatable`, {
+        options: options,
+        columns: columns,
       })
     }
   }

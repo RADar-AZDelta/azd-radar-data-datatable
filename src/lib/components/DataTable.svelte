@@ -116,8 +116,7 @@
       }
     }
     //COLUMNS:
-    const resultedColumns = await dataTypeImpl!.setInternalColumns(columns)
-    if (resultedColumns) internalColumns = resultedColumns
+    if(!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
     await render()
     dispatch('initialized')
   }
@@ -330,7 +329,7 @@
   async function getStorage() {
     if (internalOptions) {
       if (!storageMethod && browser) {
-        let storageMeth = options?.storageMethod
+        let storageMeth = options?.storageMethod !== undefined ? options?.storageMethod : internalOptions.storageMethod
         switch (storageMeth) {
           case 'localStorage':
           case undefined:
