@@ -250,7 +250,7 @@
         rowsPerPageOptions: [7, 15],
         actionColumn: true,
         singleSort: false,
-        storageMethod: 'Firebase',
+        storageMethod: 'localStorage',
       }}
       let:renderedRow
       let:originalIndex
