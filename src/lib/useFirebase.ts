@@ -13,11 +13,13 @@ const firebaseConfig: FirebaseOptions = {
 }
 
 let firebaseApp: FirebaseApp | undefined
-let database: Database | undefined
+let database: Database | undefined = undefined
 
-if (!getApps().length) {
-  firebaseApp = initializeApp(firebaseConfig)
-  database = getDatabase(firebaseApp)
+if(PUBLIC_FIREBASE_API_KEY) {
+  if (!getApps().length) {
+    firebaseApp = initializeApp(firebaseConfig)
+    database = getDatabase(firebaseApp)
+  }
 }
 
 function write(reference: string, data: Object) {
