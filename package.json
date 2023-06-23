@@ -48,7 +48,6 @@
     "vitest": "^0.25.8"
   },
   "dependencies": {
-    "@firebase/database": "^0.14.4",
     "@types/lodash": "^4.14.194",
     "arquero": "^5.2.0",
     "firebase": "^9.22.2",

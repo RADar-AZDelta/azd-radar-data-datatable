@@ -84,8 +84,7 @@
     //OPTIONS
     if (internalOptions !== options) {
       await getStorage()
-    }
-    if (options) Object.assign(internalOptions, options)
+    } else internalOptions = options
     internalOptions = internalOptions
 
     //DATA
@@ -116,7 +115,7 @@
       }
     }
     //COLUMNS:
-    if(!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
+    if (!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
     await render()
     dispatch('initialized')
   }
@@ -314,7 +313,9 @@
   }
 
   function onStoreOptions() {
+    console.log('ON STORE OPTIONS')
     if (browser && storageMethod) {
+      console.log('ON STORE OPTIONS INSIDE')
       storageMethod.store(internalOptions, internalColumns!)
     }
   }
@@ -342,9 +343,15 @@
         }
       }
       if (browser && storageMethod) {
-        const { savedOptions, savedColumns } = await storageMethod.load(internalColumns)
-        if (savedColumns) internalColumns = savedColumns
-        if (savedOptions) internalOptions = savedOptions
+        const id = options ? options.id : internalOptions.id
+        if (id) {
+          const { savedOptions, savedColumns } = await storageMethod.load(id, internalColumns)
+          if (savedColumns) {
+            internalColumns = savedColumns
+          }
+          if (savedOptions) internalOptions = savedOptions
+          else if (options) internalOptions = options
+        }
       }
     }
   }

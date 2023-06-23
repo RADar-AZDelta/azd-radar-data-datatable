@@ -8,43 +8,55 @@ export class firebaseStorageOptions implements IStoreOptions {
   constructor(options: ITableOptions | undefined) {
     // Set standard options
     if (options) {
-      this.storedOptions = options
-    } else
-      this.storedOptions = {
+      let defaultOptions = {
         id: undefined,
         currentPage: 1,
         rowsPerPage: 20,
-        rowsPerPageOptions: [5, 10, 20, 50, 100],
+        rowsPerPageOptions: [10, 20, 50, 100],
+        actionColumn: false,
+        singleSort: false,
+        defaultColumnWidth: 200,
+      }
+      Object.assign(defaultOptions, options)
+      this.storedOptions = defaultOptions
+    } else
+      this.storedOptions = {
+        id: 'default',
+        currentPage: 1,
+        rowsPerPage: 20,
+        rowsPerPageOptions: [10, 20, 50, 100],
         actionColumn: false,
         singleSort: false,
         defaultColumnWidth: 200,
       }
   }
 
-  load = async (): Promise<loadStore> => {
+  load = async (id: string): Promise<loadStore> => {
     return new Promise(async (resolve, reject) => {
       // If there is no userId given for authentication, create a deviceId and save it in the localStorage to identify the device
-      if (!this.storedOptions.userId) {
-        let id: string
-        if (!localStorage.getItem('deviceId')) {
-          id = crypto.randomUUID()
-          localStorage.setItem('deviceId', id)
-        } else id = localStorage.getItem('deviceId')!
-        this.storedOptions.userId = id
-      }
-      if (!this.storedOptions.userId || !this.storedOptions.id)
-        resolve({ savedOptions: this.storedOptions, savedColumns: this.storedColumns })
-
-      if (this.storedOptions.userId && this.storedOptions.id) {
-        // Read the data for the DataTable with the given id
-        try {
-          const data = await readOnce(`${this.storedOptions.userId}/${this.storedOptions.id}/Datatable`)
-          if (data) {
-            this.storedOptions = data.options
-            this.storedColumns = data.columns
+      this.storedOptions.id = id
+      if (this.storedOptions) {
+        if (!this.storedOptions.userId) {
+          let id: string
+          if (!localStorage.getItem('deviceId')) {
+            id = crypto.randomUUID()
+            localStorage.setItem('deviceId', id)
+          } else id = localStorage.getItem('deviceId')!
+          this.storedOptions.userId = id
+        }
+        if (!this.storedOptions.userId || !this.storedOptions.id)
+          resolve({ savedOptions: this.storedOptions, savedColumns: this.storedColumns })
+        if (this.storedOptions.userId && id) {
+          // Read the data for the DataTable with the given id
+          try {
+            const data = await readOnce(`${this.storedOptions.userId}/${this.storedOptions.id}/Datatable`)
+            if (data) {
+              Object.assign(this.storedOptions, data.options)
+              this.storedColumns = data.columns
+            } else this.store(this.storedOptions, this.storedColumns)
+          } catch (e) {
+            this.store(this.storedOptions, this.storedColumns)
           }
-        } catch (e) {
-          this.store(this.storedOptions, this.storedColumns)
         }
       }
       resolve({ savedOptions: this.storedOptions, savedColumns: this.storedColumns })
@@ -67,10 +79,12 @@ export class firebaseStorageOptions implements IStoreOptions {
     if (this.storedOptions.userId && this.storedOptions.id) {
       // Write the options and columns to the database under the given DataTable id
       delete this.storedOptions.dataTypeImpl
-      for (let col of Object.keys(columns!)) {
-        for (let [key, prop] of Object.entries(columns![col as keyof object])) {
-          if (prop === undefined) {
-            columns![col as keyof object][key] = null
+      if(columns) {
+        for (let col of Object.keys(columns!)) {
+          for (let [key, prop] of Object.entries(columns![col as keyof object])) {
+            if (prop === undefined) {
+              columns[col as keyof object][key] = null
+            }
           }
         }
       }
@@ -79,10 +93,10 @@ export class firebaseStorageOptions implements IStoreOptions {
           options![key as keyof object] = null
         }
       }
-      write(`${this.storedOptions.userId}/${this.storedOptions.id}/Datatable`, {
-        options: options,
-        columns: columns,
-      })
+      let storeObj: Record<string, any> = {}
+      if(options) storeObj["options"] = options
+      if(columns) storeObj["columns"] = columns
+      write(`${this.storedOptions.userId}/${this.storedOptions.id}/Datatable`, storeObj)
     }
   }
 }

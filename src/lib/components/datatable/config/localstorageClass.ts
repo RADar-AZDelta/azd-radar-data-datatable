@@ -20,8 +20,9 @@ export class localStorageOptions implements IStoreOptions {
     }
   }
 
-  load = (internalColumns?: IColumnMetaData[]): loadStore => {
+  load = (id: string, internalColumns?: IColumnMetaData[]): loadStore => {
     // If the id is not filled in, it will return the standard options
+    this.storedOptions.id = id
     if (!this.storedOptions.id) return { savedOptions: this.storedOptions, savedColumns: this.storedColumns }
 
     // Check the settings and apply them to the standard settings

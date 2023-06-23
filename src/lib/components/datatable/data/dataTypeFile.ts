@@ -145,7 +145,7 @@ export class dataTypeFile implements IDataTypeFunctionalities {
   }
 
   executeExpressionsAndReturnResults = async (expressions: Record<string, any>): Promise<any> => {
-    await this.worker!.executeExpressionsAndReturnResults(expressions)
+    return await this.worker!.executeExpressionsAndReturnResults(expressions)
   }
 
   executeQueryAndReturnResults = async (query: Query | object): Promise<any> => {

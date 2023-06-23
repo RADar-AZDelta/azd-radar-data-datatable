@@ -120,7 +120,7 @@ export interface GlobalFilter {
 export interface PaginationChangedEventDetail extends IPagination {}
 
 export interface IStoreOptions {
-  load(columns?: IColumnMetaData[]): loadStore | Promise<loadStore>
+  load(id: string, columns?: IColumnMetaData[]): loadStore | Promise<loadStore>
   store(options: ITableOptions, columns: IColumnMetaData[]): void
 }
 
