@@ -6,6 +6,7 @@
   import { range } from '../utils.js'
   import SvgIcon from './SvgIcon.svelte'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
+  import debounce from 'lodash.debounce'
 
   export let rowsPerPage: number = 20,
     currentPage: number = 1,
@@ -42,6 +43,10 @@
   function onChangePage(newPage: number) {
     dispatch('paginationChanged', { rowsPerPage, currentPage: newPage })
   }
+
+  const onChangeInputPage = debounce(e => {
+    onChangePage(e.target.value)
+  }, 500)
 </script>
 
 <div data-name="pagination-container">
@@ -56,13 +61,24 @@
   </p>
 </div>
 <div data-name="pagination-container-pages">
-  <button disabled={!totalRows || currentPage === 1 || disabled} on:click={() => onChangePage(currentPage - 1)} id="Previous page {Math.random()}" aria-label="Previous page">
+  <button
+    disabled={!totalRows || currentPage === 1 || disabled}
+    on:click={() => onChangePage(currentPage - 1)}
+    id="Previous page {Math.random()}"
+    aria-label="Previous page"
+  >
     <SvgIcon href={iconsSvgUrl} id="arrow-left" width="16px" height="16px" />
   </button>
-  {#each pages as page}
-    <button data-active={currentPage === page} disabled={!page || disabled} on:click={() => onChangePage(page)}
-      >{page ? page : '...'}</button
-    >
+  {#each pages as page, i}
+    {#if page}
+      <button data-active={currentPage === page} disabled={!page || disabled} on:click={() => onChangePage(page)}>
+        {page}
+      </button>
+    {:else if pages[0] && pages[2] && pages[2] - pages[0] > 2 && i == 1}
+      <p>...</p>
+    {:else}
+      <input type="number" data-name="pagination-input" on:input={onChangeInputPage} />
+    {/if}
   {/each}
   <button
     disabled={!totalRows || currentPage === totalPages || disabled}

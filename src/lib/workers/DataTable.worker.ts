@@ -311,7 +311,11 @@ function executeQueryAndReturnResults({
   let tempDt = dt
   for (const [column, filter] of [...filteredColumns].values()) {
     const lowerCaseFilter = filter?.toString().toLowerCase()
-    tempDt = tempDt.filter(escape((d: any) => op.lower(d[column]).includes(lowerCaseFilter)))
+    tempDt = tempDt.filter(escape((d: any) => {
+      if(op.lower(d[column])) {
+        if(op.lower(d[column]).includes(lowerCaseFilter)) return d[column]
+      }
+    }))
   }
   for (const [column, sortDirection] of [...sortedColumns].reverse()) {
     switch (sortDirection) {

@@ -207,6 +207,10 @@ div[data-component='svelte-datatable'] {
                   &:disabled {
                   }
                 }
+
+                input[data-name="pagination-input"] {
+                  width: 50px;
+                }
               }
             }
           }

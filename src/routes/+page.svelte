@@ -1,12 +1,11 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import DataTable from '$lib/components/DataTable.svelte'
   import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/components/DataTable.d'
   import { sleep } from '$lib/utils'
   import EditableCell from '$lib/components/EditableCell.svelte'
-  import { query } from 'arquero'
   import { flip } from 'svelte/animate'
+  import DataTable from '$lib/components/DataTable.svelte'
 
   const data = [
     {
@@ -218,14 +217,6 @@
 
     await dataTable.insertRows([dummyRow!])
   }
-
-  async function executeQueryAndReturnResults() {
-    const q = query()
-      .filter(d => d!.sourceCode == 'AD')
-      .toObject()
-    const res = await dataTableFile.executeQueryAndReturnResults(q)
-    console.log('DataTable: queried data ', res)
-  }
 </script>
 
 <svelte:head>
@@ -253,7 +244,14 @@
       {columns}
       data={matrix}
       bind:this={dataTableMatrix}
-      options={{ id: 'matrix', rowsPerPage: 7, rowsPerPageOptions: [7, 15], actionColumn: true, singleSort: false }}
+      options={{
+        id: 'matrix',
+        rowsPerPage: 7,
+        rowsPerPageOptions: [7, 15],
+        actionColumn: true,
+        singleSort: false,
+        storageMethod: 'localStorage',
+      }}
       let:renderedRow
       let:originalIndex
       let:columns
