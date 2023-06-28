@@ -4,7 +4,6 @@ import type {
   IColumnMetaData,
   IDataTypeFunctionalities,
   IRender,
-  ITableOptions,
   SortDirection,
   TFilter,
 } from '$lib/components/DataTable'

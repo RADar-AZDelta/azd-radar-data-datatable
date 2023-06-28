@@ -1,10 +1,8 @@
 <script lang="ts">
-  import { browser, dev } from '$app/environment'
   import DataTable from '$lib/components/DataTable.svelte'
   import EditableCell from '$lib/components/EditableCell.svelte'
-  import { athenaClass } from '$lib/components/datatable/customData/athenaClass'
+  import { AthenaClass } from '$lib/example/AthenaClass'
   import { flip } from 'svelte/animate'
-    import { AthenaClass } from './AthenaClass'
 
   let dataTableCustomAthena: DataTable
 
@@ -58,8 +56,6 @@
       visible: false,
     },
   ]
-
-  const classAthena = new athenaClass()
 </script>
 
 <p>Click the delete button and check the logs in the console, it should say it is a custom error</p>
