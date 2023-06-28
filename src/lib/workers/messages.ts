@@ -28,6 +28,15 @@ export interface MessageRequestSaveToFile {
   options?: any
 }
 
+export interface MessageRequestGetBlob {
+  extension: string
+  options?: any
+}
+
+export interface MessageResponseGetBlob {
+  buffer: any[]
+}
+
 export interface MessageRequestUpdateRows {
   rowsByIndex: Map<number, Record<string, any>>
 }

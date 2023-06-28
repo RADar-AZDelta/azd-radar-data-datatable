@@ -4,6 +4,7 @@
   import EditableCell from '$lib/components/EditableCell.svelte'
   import { athenaClass } from '$lib/components/datatable/customData/athenaClass'
   import { flip } from 'svelte/animate'
+    import { AthenaClass } from './AthenaClass'
 
   let dataTableCustomAthena: DataTable
 
@@ -72,8 +73,7 @@
     rowsPerPageOptions: [7, 15],
     actionColumn: true,
     singleSort: false,
-    storageMethod: 'Firebase',
-    dataTypeImpl: classAthena,
+    dataTypeImpl: new AthenaClass(),
   }}
   let:originalIndex
   let:renderedRow

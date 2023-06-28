@@ -101,7 +101,7 @@
       id: 'name',
       label: 'NAAM',
       sortDirection: 'asc',
-      sortOrder: 0,
+      // sortOrder: 0,
       position: 0,
     },
     {
@@ -111,7 +111,7 @@
     },
     {
       id: 'country',
-      filter: 'b',
+      // filter: 'b',
       position: 4,
       repositionable: false,
     },
@@ -123,7 +123,7 @@
     {
       id: 'address',
       position: 3,
-      sortDirection: 'desc',
+      // sortDirection: 'desc',
       sortOrder: 1,
     },
   ]
@@ -239,69 +239,6 @@
   </header>
 
   <details open>
-    <summary>Table with a matrix of values as a data source (columns property needs to be supplied)</summary>
-    <DataTable
-      {columns}
-      data={matrix}
-      bind:this={dataTableMatrix}
-      options={{
-        id: 'matrix',
-        rowsPerPage: 7,
-        rowsPerPageOptions: [7, 15],
-        actionColumn: true,
-        singleSort: false,
-        storageMethod: 'localStorage',
-      }}
-      let:renderedRow
-      let:originalIndex
-      let:columns
-    >
-      <td>
-        <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
-      </td>
-      {#each columns || [] as column, i (column.id)}
-        <td animate:flip={{ duration: 500 }}>
-          <EditableCell
-            value={renderedRow[column.id]}
-            on:valueChanged={async event =>
-              await dataTableMatrix.updateRows(
-                new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
-              )}
-          />
-        </td>
-      {/each}
-    </DataTable>
-
-    <br />
-    <button on:click={() => onClickInsertRows(dataTableMatrix)}
-      >Insert row (remove country filter to view updated records)</button
-    >
-  </details>
-
-  <hr />
-
-  <details>
-    <summary>Table with an array of objects as a data source</summary>
-    <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ id: 'array' }}>
-      <td slot="actionCell" let:originalIndex>
-        <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
-      </td>
-    </DataTable>
-
-    <br />
-    <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert row</button>
-  </details>
-
-  <hr />
-
-  <details>
-    <summary>Table with a async function as a data source (ex: fetch data from web server)</summary>
-    <DataTable {columns} data={fetchData} bind:this={dataTableFetchFunction} options={{ id: 'function' }} />
-  </details>
-
-  <hr />
-
-  <details open>
     <summary
       >Table with a CSV file as a data source (ex: <a
         href="https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv"
@@ -314,6 +251,7 @@
       data={file}
       bind:this={dataTableFile}
       options={{
+        id: "fileUsagi",
         actionColumn: true,
         globalFilter: {
           column: 'all',

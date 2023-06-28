@@ -8,42 +8,11 @@ import type {
   SortDirection,
   TFilter,
 } from '$lib/components/DataTable'
+import { DataTypeBase } from '$lib/components/datatable/data/DataTypeBase'
 import type Query from 'arquero/dist/types/query/query'
 
-export class dataTypeFunction implements IDataTypeFunctionalities {
-  data: FetchDataFunc | undefined
-  renderedData: any[] | any[][] | undefined
-  internalColumns: IColumnMetaData[] | undefined
-  internalOptions: ITableOptions | undefined
-  saveOptions = {
-    types: [
-      {
-        description: 'CSV file',
-        accept: { 'text/csv': ['.csv'] },
-      },
-    ],
-  }
-
-  constructor() {
-    this.data = undefined
-    this.renderedData = undefined
-    this.internalColumns = undefined
-    this.internalOptions = undefined
-  }
-
-  setData = (data: {
-    data: any[] | any[][] | FetchDataFunc | File
-    internalOptions: ITableOptions
-    internalColumns: IColumnMetaData[] | undefined
-    renderedData: any[] | any[][] | undefined
-  }): void => {
-    if (data.data) this.data = data.data as FetchDataFunc
-    if (data.internalOptions) this.internalOptions = data.internalOptions
-    if (data.internalColumns) this.internalColumns = data.internalColumns
-    if (data.renderedData) this.renderedData = data.renderedData
-  }
-
-  setInternalColumns = (columns: IColumnMetaData[] | undefined): IColumnMetaData[] => {
+export class AthenaClass extends DataTypeBase implements IDataTypeFunctionalities {
+  async setInternalColumns (columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
     if (!columns) throw new Error('Columns property is not provided')
     else this.internalColumns = columns
 
@@ -54,7 +23,7 @@ export class dataTypeFunction implements IDataTypeFunctionalities {
     return this.internalColumns
   }
 
-  render = async (onlyPaginationChanged: boolean): Promise<IRender> => {
+  async render (onlyPaginationChanged: boolean): Promise<IRender> {
     let start: number
     const filteredColumns = this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
       if (cur && cur.filter) acc.set(cur.id, cur.filter)
@@ -82,7 +51,7 @@ export class dataTypeFunction implements IDataTypeFunctionalities {
     }
   }
 
-  saveToFile = async (): Promise<void> => {
+  async saveToFile (): Promise<void> {
     const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(this.saveOptions)
     let csvArrayObjObjects = ''
     let keyCounterArrayOfObjects: number = 0
@@ -103,40 +72,55 @@ export class dataTypeFunction implements IDataTypeFunctionalities {
     await writableArrayOfObjects.write(csvArrayObjObjects)
     await writableArrayOfObjects.close()
   }
-
-  replaceValuesOfColumn = (currentValue: any, updatedValue: any, column: string): void => {
-    throw new Error('Can not replace values in a column on a function dataset')
+  
+  async getBlob (): Promise<Blob> {
+    let csvArrayObjObjects = ''
+    let keyCounterArrayOfObjects: number = 0
+    for (let row = 0; row <= this.renderedData!.length; row++) {
+      for (let col of this.internalColumns!) {
+        if (row == 0) {
+          csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
+          keyCounterArrayOfObjects++
+        } else {
+          const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
+          csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
+          keyCounterArrayOfObjects++
+        }
+      }
+      keyCounterArrayOfObjects = 0
+    }
+    const blob = new Blob([csvArrayObjObjects], { type: 'text/csv'})
+    return blob
   }
 
-  executeExpressionsAndReturnResults = (expressions: Record<string, any>): void => {
-    throw new Error('Can not execute an expression on a function dataset')
+  async replaceValuesOfColumn (currentValue: any, updatedValue: any, column: string): Promise<void> {
   }
 
-  executeQueryAndReturnResults = (query: Query | object): void => {
-    throw new Error('Can not execute a query on a function dataset')
+  async executeExpressionsAndReturnResults (expressions: Record<string, any>): Promise<void> {
   }
 
-  insertColumns = (cols: IColumnMetaData[]): void => {
-    throw new Error('Can not insert a column on a function dataset')
+  async executeQueryAndReturnResults (query: Query | object): Promise<void> {
   }
 
-  getFullRow = (originalIndex: number): void => {
-    throw new Error('Can not get a full row on a function dataset')
+  async insertColumns (cols: IColumnMetaData[]): Promise<void> {
   }
 
-  deleteRows = (originalIndices: number[]): void => {
-    throw new Error('Can not delete a row on a function dataset')
+  async getFullRow (originalIndex: number): Promise<void> {
   }
 
-  insertRows = (rows: Record<string, any>[]): void => {
-    throw new Error('Can not insert a row on a function dataset')
+  async deleteRows (originalIndices: number[]): Promise<void> {
   }
 
-  updateRows = (rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): void => {
-    throw new Error('Can not update a row on a function dataset')
+  async insertRows (rows: Record<string, any>[]): Promise<void> {
   }
 
-  renameColumns = (columns: Record<string, string>): void => {
-    throw new Error('Can not rename a column on a function dataset')
+  async updateRows (rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> {
   }
+
+  async renameColumns (columns: Record<string, string>): Promise<void> {
+  }
+
+  async applyFilter (data: any[] | any[][]): Promise<void> {}
+
+  async applySort(data: any[] | any[][]): Promise<void> {}
 }

@@ -21,6 +21,8 @@ import type {
   MessageResponseExecuteExpressionsAndReturnResults,
   MessageRequestReplaceValuesOfColumn,
   MessageRequestRenameColumns,
+  MessageResponseGetBlob,
+  MessageRequestGetBlob,
 } from './messages'
 import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, fromJSON, not } from 'arquero'
 import type ColumnTable from 'arquero/dist/types/table/column-table'
@@ -42,6 +44,9 @@ onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) 
       break
     case 'saveToFile':
       await saveToFile(data as MessageRequestSaveToFile)
+      break
+    case 'getBlob':
+      await getBlob(data as MessageRequestGetBlob)
       break
     case 'updateRows':
       await updateRows(data as MessageRequestUpdateRows)
@@ -176,6 +181,15 @@ async function saveToFile({ fileHandle, options }: MessageRequestSaveToFile) {
   }
 }
 
+async function getBlob({ extension, options }: MessageRequestGetBlob) {
+  switch(extension) {
+    case 'csv':
+      return await createBlobCSV(options)
+    default:
+      throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
+  }
+}
+
 async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   const writable = await fileHandle.createWritable()
 
@@ -204,7 +218,6 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   for (let rowIndex = 0; rowIndex < dt.totalRows(); rowIndex++) {
     if (rowIndex % bufferRowSize == 0) {
       await writable.write(buffer.join(''))
-      //if (dev) console.log(`DataTable: saved ${rowIndex} rows to file`)
       buffer = []
     }
     const cells = names.map(col => formatValue(dt.get(col, rowIndex)))
@@ -216,6 +229,40 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   const message: PostMessage<URL> = {
     msg: 'saveToFile',
     data: undefined,
+  }
+  postMessage(message)
+}
+
+async function createBlobCSV(options?: any) {
+  const names: string[] = options?.columns || dt.columnNames()
+  const delim = options?.delimiter || ','
+  const reFormat = new RegExp(`["${delim}\n\r]`)
+
+  const formatValue = (value: any) =>
+    value == null
+      ? ''
+      : value instanceof Date
+      ? (value as Date).toISOString()
+      : reFormat.test((value += ''))
+      ? '"' + value.replace(/"/g, '""') + '"'
+      : value
+
+  let buffer = []
+
+  //write the header
+  const cells = names.map(formatValue)
+  buffer.push(cells.join(delim) + '\n')
+
+  //write the rows
+  for (let rowIndex = 0; rowIndex < dt.totalRows(); rowIndex++) {
+    const cells = names.map(col => formatValue(dt.get(col, rowIndex)))
+    buffer.push(cells.join(delim) + '\n')
+  }
+  const message: PostMessage<MessageResponseGetBlob> = {
+    msg: 'getBlob',
+    data: {
+      buffer
+    }
   }
   postMessage(message)
 }
@@ -358,8 +405,10 @@ function executeExpressionsAndReturnResults({ expressions }: MessageRequestExecu
 
 function replaceValuesOfColumn({ currentValue, updatedValue, column }: MessageRequestReplaceValuesOfColumn) {
   dt.scan((row?: number | undefined, data?: TableData | undefined) => {
-    if (data[column as keyof Object].data[row] == currentValue) {
-      data![column as keyof Object].data[row] = updatedValue
+    if(data) {
+      if (data[column as keyof Object].data[row] == currentValue) {
+        data![column as keyof Object].data[row] = updatedValue
+      }
     }
   })
   const message: PostMessage<unknown> = {

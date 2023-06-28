@@ -42,7 +42,6 @@ export interface IPagination {
 
 export interface ITableOptions extends IPagination {
   id?: string
-  storageMethod?: 'localStorage' | 'Firebase'
   rowsPerPageOptions?: number[]
   actionColumn?: boolean
   totalRows?: number
@@ -51,7 +50,7 @@ export interface ITableOptions extends IPagination {
   singleSort?: boolean
   saveOptions?: boolean
   dataTypeImpl?: IDataTypeFunctionalities
-  userId?: string | undefined | null
+  saveImpl?: ICustomStoreOptions
 }
 
 export type FetchDataFunc = (
@@ -119,40 +118,46 @@ export interface GlobalFilter {
 
 export interface PaginationChangedEventDetail extends IPagination {}
 
-export interface IStoreOptions {
-  load(id: string, columns?: IColumnMetaData[]): loadStore | Promise<loadStore>
+export interface ICustomStoreOptions {
+  load(id: string, columns?: IColumnMetaData[]): IStoredOptions | Promise<IStoredOptions>
   store(options: ITableOptions, columns: IColumnMetaData[]): void
 }
 
-export interface loadStore {
-  savedOptions: ITableOptions
-  savedColumns: IColumnMetaData[] | undefined
+export interface IStoredOptions {
+  tableOptions: ITableOptions
+  columnMetaData: IColumnMetaData[] | undefined
 }
 
-export interface IDataTypeFunctionalities {
-  render(onlyPaginationChanged: boolean): IRender | Promise<IRender>
-  setData(data: {
+export interface IDataTypeInfo {
     data: any[] | any[][] | FetchDataFunc | File
     internalOptions: ITableOptions
     internalColumns: IColumnMetaData[] | undefined
     renderedData: any[] | any[][] | undefined
     modifyColumnMetadata?: ModifyColumnMetadataFunc
-  }): Promise<void> | void
-  setup?(): void | Promise<void>
-  setInternalColumns(columns: IColumnMetaData[] | undefined): IColumnMetaData[] | Promise<IColumnMetaData[]>
-  saveToFile(): Promise<void> | void
-  replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void> | void
-  executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any> | void
-  executeQueryAndReturnResults(query: Query | object): Promise<any> | void
-  insertColumns(cols: IColumnMetaData[]): Promise<IColumnMetaData[]> | IColumnMetaData[] | void
-  getFullRow(originalIndex: number): Promise<Record<string, any>> | Record<string, any> | void
-  deleteRows(originalIndices: number[]): Promise<void> | void
-  insertRows(rows: Record<string, any>[]): Promise<number[]> | number[] | void
-  updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> | void
-  renameColumns(columns: Record<string, string>): Promise<void> | void
-  applySort?(internalColumns: IColumnMetaData[], data: any[]): any[] | any[][] | FetchDataFunc | File
-  applyFilter?(internalColumns: IColumnMetaData[], data: any[]): any[] | any[][] | FetchDataFunc | File
-  applyPagination?(internalOptions: ITableOptions, data: any[]): any[] | any[][] | FetchDataFunc | File
+}
+
+export interface IDataTypeBasicFunctionalities {
+  setData(data: IDataTypeInfo): Promise<void>
+  setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]>
+  applyPagination(internalOptions: ITableOptions, data: any[] | any[][]): Promise<any[] | any[][]>
+  insertColumns(cols: IColumnMetaData[]): Promise<IColumnMetaData[] | void>
+  deleteRows(originalIndices: number[]): Promise<void>
+  destroy(): Promise<void>
+}
+
+export interface IDataTypeFunctionalities extends IDataTypeBasicFunctionalities {
+  render(onlyPaginationChanged: boolean): Promise<IRender>
+  saveToFile(): Promise<void>
+  getBlob(): Promise<Blob>
+  replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void>
+  executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any>
+  executeQueryAndReturnResults(query: Query | object): Promise<any>
+  getFullRow(originalIndex: number): Promise<Record<string, any>> | Promise<void>
+  insertRows(rows: Record<string, any>[]): Promise<number[]> | Promise<void>
+  updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void>
+  renameColumns(columns: Record<string, string>): Promise<void>
+  applyFilter(data: any[] | any[][]): Promise<any[] | any[][]> | Promise<void>
+  applySort(data: any[] | any[][]): Promise<any[] | any[][]> | Promise<void>
 }
 
 export interface IRender {

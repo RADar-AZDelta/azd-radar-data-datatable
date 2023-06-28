@@ -1,6 +1,6 @@
-import type { IColumnMetaData, IStoreOptions, ITableOptions, loadStore } from '$lib/components/DataTable'
+import type { IColumnMetaData, ICustomStoreOptions, ITableOptions, IStoredOptions } from '$lib/components/DataTable'
 
-export class localStorageOptions implements IStoreOptions {
+export default class LocalStorageOptions implements ICustomStoreOptions {
   storedOptions: ITableOptions
   storedColumns: IColumnMetaData[] | undefined
 
@@ -13,17 +13,17 @@ export class localStorageOptions implements IStoreOptions {
       rowsPerPageOptions: [5, 10, 20, 50, 100],
       actionColumn: false,
       singleSort: false,
-      defaultColumnWidth: 200,
+      defaultColumnWidth: 200
     }
-    if (options) {
-      Object.assign(this.storedOptions, options)
-    }
+    if (options) Object.assign(this.storedOptions, options)
   }
 
-  load = (id: string, internalColumns?: IColumnMetaData[]): loadStore => {
+  load = (id: string, internalColumns?: IColumnMetaData[]): IStoredOptions => {
     // If the id is not filled in, it will return the standard options
     this.storedOptions.id = id
-    if (!this.storedOptions.id) return { savedOptions: this.storedOptions, savedColumns: this.storedColumns }
+    if (!this.storedOptions.id) {
+      return { tableOptions: this.storedOptions, columnMetaData: this.storedColumns }
+    }
 
     // Check the settings and apply them to the standard settings
     const storedOptions = localStorage.getItem(`datatable_${this.storedOptions.id}_options`)
@@ -45,7 +45,7 @@ export class localStorageOptions implements IStoreOptions {
       })
     }
 
-    return { savedOptions: this.storedOptions, savedColumns: this.storedColumns }
+    return { tableOptions: this.storedOptions, columnMetaData: this.storedColumns }
   }
 
   store = (options: ITableOptions, columns: IColumnMetaData[] | undefined): void => {
@@ -56,6 +56,7 @@ export class localStorageOptions implements IStoreOptions {
       // Save the options and the columns in the localStorage
       let copyOfOptions = options
       delete copyOfOptions.dataTypeImpl
+      delete copyOfOptions.saveImpl
       localStorage.setItem(`datatable_${this.storedOptions.id}_options`, JSON.stringify(copyOfOptions))
       if (columns) localStorage.setItem(`datatable_${this.storedOptions.id}_columns`, JSON.stringify(columns))
     } else {

@@ -1,26 +1,24 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import ColumnSort from './ColumnSort.svelte'
-  import ColumnResize from './ColumnResize.svelte'
-  import ColumnFilter from './ColumnFilter.svelte'
-  import Pagination from './Pagination.svelte'
-  import Spinner from './Spinner.svelte'
+  import ColumnSort from '$lib/components/ColumnSort.svelte'
+  import ColumnResize from '$lib/components/ColumnResize.svelte'
+  import ColumnFilter from '$lib/components/ColumnFilter.svelte'
+  import Pagination from '$lib/components/Pagination.svelte'
+  import Spinner from '$lib/components/Spinner.svelte'
   import { dev } from '$app/environment'
   import { createEventDispatcher, onDestroy } from 'svelte'
-  import type { DataTableWorker } from '$lib/components/DataTableWorker'
   import type Query from 'arquero/dist/types/query/query'
   import Options from './Options.svelte'
   import { flip } from 'svelte/animate'
   import { storeOptions } from '$lib/actions/storeOptions'
   import { browser } from '$app/environment'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
-  import SvgIcon from './SvgIcon.svelte'
+  import SvgIcon from '$lib/components/SvgIcon.svelte'
   import { clickOutside } from '$lib/actions/clickOutside'
-  import { dataTypeArrayOfObjects } from './datatable/data/dataTypeArrayOfObjects'
-  import { dataTypeFile } from './datatable/data/dataTypeFile'
-  import { dataTypeFunction } from './datatable/data/dataTypeFunction'
-  import { dataTypeMatrix } from './datatable/data/dataTypeMatrix'
+  import { DataTypeArrayOfObjects } from '$lib/components/datatable/data/DataTypeArrayOfObjects'
+  import { DataTypeFile } from '$lib/components/datatable/data/DataTypeFile'
+  import { DataTypeMatrix } from '$lib/components/datatable/data/DataTypeMatrix'
   import type {
     ColumnFilterChangedEventDetail,
     ColumnPositionChangedEventDetail,
@@ -29,13 +27,12 @@
     FetchDataFunc,
     IColumnMetaData,
     IDataTypeFunctionalities,
-    IStoreOptions,
     ITableOptions,
     ModifyColumnMetadataFunc,
     PaginationChangedEventDetail,
   } from './DataTable'
-  import { localStorageOptions } from './datatable/config/localstorageClass'
-  import { firebaseStorageOptions } from './datatable/config/firebaseClass'
+  // @ts-ignore
+  import isEqual from 'lodash.isequal'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -47,27 +44,21 @@
     internalOptions: ITableOptions = {
       currentPage: 1,
       rowsPerPage: 20,
-      storageMethod: undefined,
       rowsPerPageOptions: [5, 10, 20, 50, 100],
       actionColumn: false,
       singleSort: false,
       defaultColumnWidth: 200,
-      userId: undefined,
     },
     internalColumns: IColumnMetaData[] | undefined
 
   let renderStatus: string
   let dataTypeImpl: IDataTypeFunctionalities | undefined = undefined
-
-  let worker: DataTableWorker
   let originalIndices: number[] //the index of the sorted, filtered and paginated record in the original data
 
   let settingsDialog: HTMLDialogElement
   let filterVisibility: boolean = true
 
   const dispatch = createEventDispatcher()
-
-  let storageMethod: IStoreOptions | undefined = undefined
 
   $: {
     options, columns, data
@@ -82,26 +73,28 @@
     if (dev) console.log('DataTable: init')
 
     //OPTIONS
-    if (internalOptions !== options) {
-      await getStorage()
-    } else internalOptions = options
+    if (!internalOptions.saveImpl && browser) {
+      await import('$lib/components/datatable/config/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
+        internalOptions.saveImpl = new LocalStorageOptions(options)
+      })
+    }
+    if (!isEqual(internalOptions, options)) {
+      await loadStoredOptions()
+    } else if(options) Object.assign(internalOptions, options)
     internalOptions = internalOptions
 
     //DATA
     if (!internalOptions.dataTypeImpl) {
       if (data && Array.isArray(data) && data.length > 0 && typeof data === 'object') {
         if (Array.isArray(data[0])) {
-          if (!dataTypeImpl) dataTypeImpl = new dataTypeMatrix()
+          if (!dataTypeImpl) dataTypeImpl = new DataTypeMatrix()
           dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
         } else if (typeof data[0] === 'object') {
-          if (!dataTypeImpl) dataTypeImpl = new dataTypeArrayOfObjects()
+          if (!dataTypeImpl) dataTypeImpl = new DataTypeArrayOfObjects()
           dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
         }
-      } else if (typeof data === 'function') {
-        if (!dataTypeImpl) dataTypeImpl = new dataTypeFunction()
-        dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
       } else if (data instanceof File) {
-        if (!dataTypeImpl) dataTypeImpl = new dataTypeFile()
+        if (!dataTypeImpl) dataTypeImpl = new DataTypeFile()
         await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
       } else {
         renderStatus = ''
@@ -125,12 +118,12 @@
     dispatch('rendering')
     if (dev) console.log('DataTable: render')
     renderedData = undefined
-    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
-    const renderResults = await dataTypeImpl!.render(onlyPaginationChanged)
-    renderedData = renderResults.renderedData
-    originalIndices = renderResults.originalIndices
-    internalOptions.totalRows = renderResults.totalRows
-    internalColumns = renderResults.internalColumns
+    let totalRows: number | undefined
+    if (data && dataTypeImpl) {
+      dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+    }
+    ;({ renderedData, originalIndices, totalRows, internalColumns } = await dataTypeImpl!.render(onlyPaginationChanged))
+    internalOptions.totalRows = totalRows
     renderStatus = 'completed'
     dispatch('renderingComplete')
   }
@@ -158,7 +151,6 @@
     column!.width = event.detail.width
 
     internalColumns = internalColumns
-    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
     if (dev) console.log(`DataTable: column '${column!.id}' width changed to '${event.detail.width}'`)
   }
 
@@ -219,6 +211,11 @@
     await dataTypeImpl!.saveToFile()
   }
 
+  export async function getBlob() {
+    const blob = await dataTypeImpl!.getBlob()
+    return blob
+  }
+
   export async function updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
     await dataTypeImpl!.updateRows(rowsToUpdateByOriginalIndex)
 
@@ -235,9 +232,8 @@
   }
 
   export async function insertRows(rows: Record<string, any>[]): Promise<number[]> {
-    let originalIndices: number[] = []
     const indices = await dataTypeImpl!.insertRows(rows)
-    if (indices) originalIndices = indices
+    if (typeof indices == 'number') originalIndices = indices
     await render(false)
     return originalIndices
   }
@@ -313,10 +309,9 @@
   }
 
   function onStoreOptions() {
-    console.log('ON STORE OPTIONS')
-    if (browser && storageMethod) {
-      console.log('ON STORE OPTIONS INSIDE')
-      storageMethod.store(internalOptions, internalColumns!)
+    if (dev) console.log('onStoreOptions: Storing options ', internalOptions.saveImpl)
+    if (browser && internalOptions.saveImpl) {
+      internalOptions.saveImpl.store(internalOptions, internalColumns!)
     }
   }
 
@@ -327,33 +322,20 @@
     })
   }
 
-  async function getStorage() {
+  async function loadStoredOptions() {
     if (internalOptions) {
-      if (!storageMethod && browser) {
-        let storageMeth = options?.storageMethod !== undefined ? options?.storageMethod : internalOptions.storageMethod
-        switch (storageMeth) {
-          case 'localStorage':
-          case undefined:
-            storageMethod = new localStorageOptions(options)
-            break
-
-          case 'Firebase':
-            storageMethod = new firebaseStorageOptions(options)
-            break
-        }
-      }
-      if (browser && storageMethod) {
+      if (browser && internalOptions.saveImpl) {
         const id = options ? options.id : internalOptions.id
         if (id) {
-          const { savedOptions, savedColumns } = await storageMethod.load(id, internalColumns)
-          if (savedColumns) {
-            internalColumns = savedColumns
+          const { tableOptions, columnMetaData } = await internalOptions.saveImpl.load(id, internalColumns)
+          if (columnMetaData) {
+            internalColumns = columnMetaData
           }
-          if (savedOptions) internalOptions = savedOptions
-          else if (options) internalOptions = options
+          if (tableOptions) Object.assign(internalOptions, tableOptions)
+          else if (options) Object.assign(internalOptions, options)
         }
-      }
-    }
+      } else Object.assign(internalOptions, options)
+    } else Object.assign(internalOptions, options)
   }
 
   function closeModal() {
@@ -361,8 +343,17 @@
   }
 
   onDestroy(() => {
-    worker?.destroy()
+    if (dataTypeImpl) dataTypeImpl.destroy()
   })
+
+  if (browser) {
+    window.addEventListener('beforeunload', e => {
+      const confirmationMessage = 'Save the file you were mapping before leaving the application.'
+      ;(e || window.event).returnValue = confirmationMessage
+      // if (file && firebase) firebase.store(settings, file)
+      return confirmationMessage
+    })
+  }
 </script>
 
 <dialog data-name="settings-dialog" bind:this={settingsDialog}>
