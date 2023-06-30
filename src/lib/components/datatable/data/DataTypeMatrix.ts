@@ -73,9 +73,11 @@ export class DataTypeMatrix extends DataTypeBase implements IDataTypeFunctionali
     keyCounterMatrix = 0
     for (let row of (this.data as any[][])!) {
       for (let cell of row) {
-        const value = cell.toString().replaceAll(',', ';')
-        csvMatrix += value + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
-        keyCounterMatrix++
+        if(cell){
+          const value = cell.toString().replaceAll(',', ';')
+          csvMatrix += value + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
+          keyCounterMatrix++
+        }
       }
       keyCounterMatrix = 0
     }

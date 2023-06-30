@@ -91,9 +91,11 @@ export class DataTypeArrayOfObjects extends DataTypeBase implements IDataTypeFun
           csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
           keyCounterArrayOfObjects++
         } else {
-          const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
-          csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
-          keyCounterArrayOfObjects++
+          if((<any[]>this.renderedData)[row - 1][col.id as keyof object]){
+            const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
+            csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
+            keyCounterArrayOfObjects++
+          }
         }
       }
       keyCounterArrayOfObjects = 0
