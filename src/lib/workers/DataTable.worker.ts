@@ -108,7 +108,7 @@ function getColumnNames() {
 }
 
 async function fetchData(data: MessageRequestFetchData) {
-  if (!data.onlyPaginationChanged || !tempDt) {
+  if ((!data.onlyPaginationChanged || !tempDt)) {
     tempDt = dt
     //filter
     if (data.filteredColumns.size === 1 && [...data.filteredColumns.keys()][0] === 'all') {
@@ -150,18 +150,21 @@ async function fetchData(data: MessageRequestFetchData) {
     }
   }
   //pagination
-  const totalRows = tempDt.numRows()
-  const objects = tempDt.objects({
-    limit: data.pagination.rowsPerPage,
-    offset: (data.pagination.currentPage! - 1) * data.pagination.rowsPerPage!,
-  })
-  const indices = tempDt
-    .indices()
-    .slice(
-      (data.pagination.currentPage! - 1) * data.pagination.rowsPerPage!,
-      data.pagination.currentPage! * data.pagination.rowsPerPage!
-    )
-  const matrix = objects.map(obj => Object.values(obj))
+  let totalRows: number = 0, matrix: any[][] = [], indices: any = []
+  if(tempDt) {
+    totalRows = tempDt.numRows()
+    const objects = tempDt.objects({
+      limit: data.pagination.rowsPerPage,
+      offset: (data.pagination.currentPage! - 1) * data.pagination.rowsPerPage!,
+    })
+    indices = tempDt
+      .indices()
+      .slice(
+        (data.pagination.currentPage! - 1) * data.pagination.rowsPerPage!,
+        data.pagination.currentPage! * data.pagination.rowsPerPage!
+      )
+    matrix = objects.map(obj => Object.values(obj))
+  }
 
   const message: PostMessage<MessageResponseFetchData> = {
     msg: 'fetchData',

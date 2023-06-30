@@ -11,10 +11,18 @@ import type Query from 'arquero/dist/types/query/query'
 import { DataTypeBase } from './DataTypeBase'
 import { dev } from '$app/environment'
 import type { MessageRequestLoadFile, MessageRequestInsertColumns, MessageRequestFetchData, MessageResponseFetchData, MessageRequestSaveToFile, MessageRequestGetBlob, MessageResponseGetBlob, MessageRequestReplaceValuesOfColumn, MessageRequestExecuteExpressionsAndReturnResults, MessageResponseExecuteExpressionsAndReturnResults, MessageRequestExecuteQueryAndReturnResults, MessageResponseExecuteQueryAndReturnResults, MessageRequestGetRow, MessageResponseGetRow, MessageRequestDeleteRows, MessageRequestInsertRows, MessageRespnseInsertColumns, MessageRequestUpdateRows, MessageRequestRenameColumns, PostMessage } from '$lib/workers/messages'
+import DataTableWorker from '$lib/workers/DataTable.worker?worker'
 
 export class DataTypeFile extends DataTypeBase implements IDataTypeFunctionalities {
   worker: Worker | undefined
   modifyColumnMetaData: ModifyColumnMetadataFunc | undefined
+  setup: boolean | undefined
+
+  constructor() {
+    super()
+
+    this.worker = new DataTableWorker()
+  }
 
   async setData (data: IDataTypeInfo): Promise<void> {
     if (data.data) this.data = data.data as File
@@ -22,18 +30,16 @@ export class DataTypeFile extends DataTypeBase implements IDataTypeFunctionaliti
     if (data.internalColumns) this.internalColumns = data.internalColumns
     if (data.renderedData) this.renderedData = data.renderedData
     this.modifyColumnMetaData = data.modifyColumnMetadata
-    if(!this.worker) {
-      const DataTableWorker = await import('$lib/workers/DataTable.worker?worker')
-      this.worker = new DataTableWorker.default()
+    if(this.worker) {
       const url = URL.createObjectURL(this.data as File)
       const extension = (this.data as File)!.name.split('.').pop()!
-      await this.executeWorkerMethod<MessageRequestLoadFile, undefined>('loadFile', { url, extension })
+      await this.executeWorkerMethod<MessageRequestLoadFile, undefined>('loadFile', { url, extension }).then(() => this.setup = true)
       URL.revokeObjectURL(url)
     }
   }
 
   async setInternalColumns (columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
-      if (!columns) {
+      if (!columns && this.setup) {
         //get columns from worker
         this.internalColumns = (await this.executeWorkerMethod<unknown, string[]>('getColumnNames')).map((key, index) => ({
           id: key,

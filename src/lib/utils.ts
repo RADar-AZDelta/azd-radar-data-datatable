@@ -20,3 +20,17 @@ export const arraysEqual = (a: any[], b: any[]) => {
 
   return true
 }
+
+export function convertHexStringToBlob(hex: string, mimeType: string): Blob {
+  if (hex.startsWith("\\x"))
+      hex = hex.slice("\\x".length)
+  let previousValue = ""
+  const bytes = [...hex].reduce((acc, _, i) => { 
+      if (i - 1 & 1) //even
+          previousValue = _
+      else //odd  
+          acc.push(parseInt(previousValue.concat(_), 16))
+      return acc
+  }, [] as number[])
+  return new Blob([new Uint8Array(bytes)], {type: mimeType})
+}

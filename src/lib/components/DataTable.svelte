@@ -80,7 +80,7 @@
     }
     if (!isEqual(internalOptions, options)) {
       await loadStoredOptions()
-    } else if(options) Object.assign(internalOptions, options)
+    } else if (options) Object.assign(internalOptions, options)
     internalOptions = internalOptions
 
     //DATA
@@ -88,10 +88,10 @@
       if (data && Array.isArray(data) && data.length > 0 && typeof data === 'object') {
         if (Array.isArray(data[0])) {
           if (!dataTypeImpl) dataTypeImpl = new DataTypeMatrix()
-          dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+          await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
         } else if (typeof data[0] === 'object') {
           if (!dataTypeImpl) dataTypeImpl = new DataTypeArrayOfObjects()
-          dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+          await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
         }
       } else if (data instanceof File) {
         if (!dataTypeImpl) dataTypeImpl = new DataTypeFile()
@@ -104,7 +104,7 @@
     } else {
       if (data) {
         if (!dataTypeImpl) dataTypeImpl = internalOptions.dataTypeImpl
-        dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+        await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
       }
     }
     //COLUMNS:
