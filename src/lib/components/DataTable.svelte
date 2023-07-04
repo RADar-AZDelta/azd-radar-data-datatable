@@ -74,9 +74,13 @@
 
     //OPTIONS
     if (!internalOptions.saveImpl && browser) {
-      await import('$lib/components/datatable/config/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
-        internalOptions.saveImpl = new LocalStorageOptions(options)
-      })
+      if (!options?.saveImpl) {
+        await import('$lib/components/datatable/config/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
+          internalOptions.saveImpl = new LocalStorageOptions(options)
+        })
+      } else {
+        internalOptions.saveImpl = options.saveImpl
+      }
     }
     if (!isEqual(internalOptions, options)) {
       await loadStoredOptions()
@@ -85,21 +89,29 @@
 
     //DATA
     if (!internalOptions.dataTypeImpl) {
-      if (data && Array.isArray(data) && data.length > 0 && typeof data === 'object') {
-        if (Array.isArray(data[0])) {
-          if (!dataTypeImpl) dataTypeImpl = new DataTypeMatrix()
+      if (!options?.dataTypeImpl) {
+        if (data && Array.isArray(data) && data.length > 0 && typeof data === 'object') {
+          if (Array.isArray(data[0])) {
+            if (!dataTypeImpl) dataTypeImpl = new DataTypeMatrix()
+            await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+          } else if (typeof data[0] === 'object') {
+            if (!dataTypeImpl) dataTypeImpl = new DataTypeArrayOfObjects()
+            await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+          }
+        } else if (data instanceof File) {
+          if (!dataTypeImpl) dataTypeImpl = new DataTypeFile()
           await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
-        } else if (typeof data[0] === 'object') {
-          if (!dataTypeImpl) dataTypeImpl = new DataTypeArrayOfObjects()
+        } else {
+          renderStatus = ''
+          renderedData = undefined
+          return
+        }
+      } else {
+        internalOptions.dataTypeImpl = options.dataTypeImpl
+        if (data) {
+          if (!dataTypeImpl) dataTypeImpl = options.dataTypeImpl
           await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
         }
-      } else if (data instanceof File) {
-        if (!dataTypeImpl) dataTypeImpl = new DataTypeFile()
-        await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
-      } else {
-        renderStatus = ''
-        renderedData = undefined
-        return
       }
     } else {
       if (data) {
@@ -347,12 +359,26 @@
   })
 
   if (browser) {
-    window.addEventListener('beforeunload', e => {
-      const confirmationMessage = 'Save the file you were mapping before leaving the application.'
-      ;(e || window.event).returnValue = confirmationMessage
-      // if (file && firebase) firebase.store(settings, file)
-      return confirmationMessage
-    })
+    window.addEventListener(
+      'beforeunload',
+      e => {
+        if (dev) console.log('onStoreOptions: Storing options before unloading ', internalOptions.saveImpl)
+        if (browser && data && internalOptions.saveImpl)
+          internalOptions.saveImpl.store(internalOptions, internalColumns!)
+      },
+      true
+    )
+  }
+  if (browser && document) {
+    document.addEventListener(
+      'visibilitychange',
+      e => {
+        if (dev) console.log('onStoreOptions: Storing options when visiblity changes ', internalOptions.saveImpl)
+        if (browser && data && internalOptions.saveImpl)
+          internalOptions.saveImpl.store(internalOptions, internalColumns!)
+      },
+      true
+    )
   }
 </script>
 

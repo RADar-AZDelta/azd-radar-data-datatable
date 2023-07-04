@@ -8,12 +8,12 @@ import type {
   TFilter,
 } from '$lib/components/DataTable'
 import type Query from 'arquero/dist/types/query/query'
-import { DataTypeBase } from './DataTypeBase'
 import { dev } from '$app/environment'
 import type { MessageRequestLoadFile, MessageRequestInsertColumns, MessageRequestFetchData, MessageResponseFetchData, MessageRequestSaveToFile, MessageRequestGetBlob, MessageResponseGetBlob, MessageRequestReplaceValuesOfColumn, MessageRequestExecuteExpressionsAndReturnResults, MessageResponseExecuteExpressionsAndReturnResults, MessageRequestExecuteQueryAndReturnResults, MessageResponseExecuteQueryAndReturnResults, MessageRequestGetRow, MessageResponseGetRow, MessageRequestDeleteRows, MessageRequestInsertRows, MessageRespnseInsertColumns, MessageRequestUpdateRows, MessageRequestRenameColumns, PostMessage } from '$lib/workers/messages'
 import DataTableWorker from '$lib/workers/DataTable.worker?worker'
+import { DataTypeCommonBase } from './DataTypeCommonBase'
 
-export class DataTypeFile extends DataTypeBase implements IDataTypeFunctionalities {
+export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctionalities {
   worker: Worker | undefined
   modifyColumnMetaData: ModifyColumnMetadataFunc | undefined
   setup: boolean | undefined

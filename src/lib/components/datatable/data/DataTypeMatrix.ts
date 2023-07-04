@@ -1,16 +1,9 @@
 import { dev } from '$app/environment'
-import type {
-  FetchDataFunc,
-  IColumnMetaData,
-  IDataTypeFunctionalities,
-  IDataTypeInfo,
-  IRender,
-  ITableOptions,
-} from '$lib/components/DataTable'
+import type { IDataTypeFunctionalities, IRender } from '$lib/components/DataTable'
 import type Query from 'arquero/dist/types/query/query'
-import { DataTypeBase } from './DataTypeBase'
+import { DataTypeCommonBase } from './DataTypeCommonBase'
 
-export class DataTypeMatrix extends DataTypeBase implements IDataTypeFunctionalities {
+export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
 
   async render (onlyPaginationChanged: boolean): Promise<IRender> {

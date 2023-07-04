@@ -6,10 +6,10 @@ import type {
   ModifyColumnMetadataFunc,
 } from '$lib/components/DataTable'
 import type Query from 'arquero/dist/types/query/query'
-import { DataTypeBase } from './DataTypeBase'
 import { dev } from '$app/environment'
+import { DataTypeCommonBase } from './DataTypeCommonBase'
 
-export class DataTypeArrayOfObjects extends DataTypeBase implements IDataTypeFunctionalities {
+export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
   modifyColumnMetadata: ModifyColumnMetadataFunc | undefined
 
