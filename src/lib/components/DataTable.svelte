@@ -82,10 +82,10 @@
         internalOptions.saveImpl = options.saveImpl
       }
     }
-    if (!isEqual(internalOptions, options)) {
-      await loadStoredOptions()
-    } else if (options) Object.assign(internalOptions, options)
-    internalOptions = internalOptions
+
+    if (!isEqual(internalOptions, options) && (internalOptions?.saveOptions || options?.saveOptions)) {
+      ;({ internalOptions, internalColumns } = await loadStoredOptions())
+    } else if (options) internalOptions = Object.assign(internalOptions, options)
 
     //DATA
     if (!internalOptions.dataTypeImpl) {
@@ -93,14 +93,29 @@
         if (data && Array.isArray(data) && data.length > 0 && typeof data === 'object') {
           if (Array.isArray(data[0])) {
             if (!dataTypeImpl) dataTypeImpl = new DataTypeMatrix()
-            await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+            await dataTypeImpl
+              .setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+              .then(async () => {
+                if (!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
+                else internalColumns = await dataTypeImpl!.setInternalColumns(internalColumns)
+              })
           } else if (typeof data[0] === 'object') {
             if (!dataTypeImpl) dataTypeImpl = new DataTypeArrayOfObjects()
-            await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+            await dataTypeImpl
+              .setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+              .then(async () => {
+                if (!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
+                else internalColumns = await dataTypeImpl!.setInternalColumns(internalColumns)
+              })
           }
         } else if (data instanceof File) {
           if (!dataTypeImpl) dataTypeImpl = new DataTypeFile()
-          await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+          await dataTypeImpl
+            .setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+            .then(async () => {
+              if (!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
+              else internalColumns = await dataTypeImpl!.setInternalColumns(internalColumns)
+            })
         } else {
           renderStatus = ''
           renderedData = undefined
@@ -108,19 +123,26 @@
         }
       } else {
         internalOptions.dataTypeImpl = options.dataTypeImpl
-        if (data) {
-          if (!dataTypeImpl) dataTypeImpl = options.dataTypeImpl
-          await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
-        }
+        if (!dataTypeImpl) dataTypeImpl = options.dataTypeImpl
+        await dataTypeImpl
+          .setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+          .then(async () => {
+            if (!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
+            else internalColumns = await dataTypeImpl!.setInternalColumns(internalColumns)
+          })
       }
     } else {
-      if (data) {
-        if (!dataTypeImpl) dataTypeImpl = internalOptions.dataTypeImpl
-        await dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
-      }
+      if (!dataTypeImpl) dataTypeImpl = internalOptions.dataTypeImpl
+      await dataTypeImpl
+        .setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+        .then(async () => {
+          if (!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
+          else internalColumns = await dataTypeImpl!.setInternalColumns(internalColumns)
+        })
     }
     //COLUMNS:
-    if (!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
+    // TODO: check to re-implement short version (long version for bug solving)
+    // if (!internalColumns) internalColumns = await dataTypeImpl!.setInternalColumns(columns)
     await render()
     dispatch('initialized')
   }
@@ -335,19 +357,23 @@
   }
 
   async function loadStoredOptions() {
+    let cols: IColumnMetaData[] | undefined
     if (internalOptions) {
       if (browser && internalOptions.saveImpl) {
         const id = options ? options.id : internalOptions.id
         if (id) {
           const { tableOptions, columnMetaData } = await internalOptions.saveImpl.load(id, internalColumns)
-          if (columnMetaData) {
-            internalColumns = columnMetaData
-          }
+          if (columnMetaData) cols = columnMetaData
+          else cols = columns
           if (tableOptions) Object.assign(internalOptions, tableOptions)
           else if (options) Object.assign(internalOptions, options)
         }
       } else Object.assign(internalOptions, options)
     } else Object.assign(internalOptions, options)
+    return {
+      internalOptions,
+      internalColumns: cols,
+    }
   }
 
   function closeModal() {

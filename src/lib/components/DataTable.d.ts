@@ -131,7 +131,7 @@ export interface IStoredOptions {
 }
 
 export interface IDataTypeInfo {
-    data: any[] | any[][] | FetchDataFunc | File
+    data: any[] | any[][] | FetchDataFunc | File | undefined
     internalOptions: ITableOptions
     internalColumns: IColumnMetaData[] | undefined
     renderedData: any[] | any[][] | undefined
