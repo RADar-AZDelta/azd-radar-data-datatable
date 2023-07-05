@@ -32,9 +32,11 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
       if (this.modifyColumnMetadata) this.internalColumns = this.modifyColumnMetadata(this.internalColumns)
     } else this.internalColumns = columns
 
-    this.internalColumns.forEach(col => {
-      if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
-    })
+    if(this.internalOptions){
+      this.internalColumns.forEach(col => {
+        if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
+      })
+    }
 
     return this.internalColumns
   }
@@ -44,7 +46,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
 
     if (!onlyPaginationChanged || !this.filteredAndSortedData) {
       this.filteredAndSortedData = await this.applySort(await this.applyFilter(this.data as any[]))
-      totalRows = this.filteredAndSortedData.length
+      if(this.filteredAndSortedData) totalRows = this.filteredAndSortedData.length
     }
     this.renderedData = await this.applyPagination(this.internalOptions!, this.filteredAndSortedData)
     const originalIndices = (this.renderedData as Record<string, any>[]).reduce<number[]>((acc, cur) => {
@@ -176,7 +178,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
             compareFn = (a, b) => (b[col.id] < a[col.id] ? -1 : b[col.id] > a[col.id] ? 1 : 0)
             break
         }
-        data = data.sort(compareFn)
+        if(data) data = data.sort(compareFn)
       })
     return data
   }

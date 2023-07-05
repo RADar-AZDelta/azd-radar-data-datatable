@@ -50,7 +50,7 @@ export abstract class DataTypeBase implements IDataTypeFunctionalities {
 
   abstract setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]>
   
-  abstract applyPagination(internalOptions: ITableOptions, data: any[] | any[][]): Promise<any[] | any[][]>
+  abstract applyPagination(internalOptions: ITableOptions, data: any[] | any[][]): Promise<any[] | any[][] | undefined>
 
   abstract insertColumns(cols: IColumnMetaData[]): Promise<void | IColumnMetaData[]>
 

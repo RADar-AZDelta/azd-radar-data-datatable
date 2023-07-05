@@ -2,6 +2,7 @@ import { dev } from "$app/environment";
 import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions } from "$lib/components/DataTable";
 import type Query from "arquero/dist/types/query/query";
 import { DataTypeBase } from "./DataTypeBase";
+import { error } from "@sveltejs/kit";
 
 export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctionalities {
     async render(onlyPaginationChanged: boolean): Promise<IRender> {
@@ -63,19 +64,25 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
         if (!columns) throw new Error('Columns property is not provided')
         else this.internalColumns = columns
     
-        this.internalColumns.forEach(col => {
-          if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
-        })
+        if(this.internalOptions){
+          this.internalColumns.forEach(col => {
+            if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
+          })
+        }
     
         return this.internalColumns
       }
     
-      async applyPagination (internalOptions: ITableOptions, data: any[] | any[][]): Promise<any[] | any[][]> {
-        const start = (internalOptions.currentPage! - 1) * internalOptions.rowsPerPage!
-        const end = internalOptions.currentPage! * internalOptions.rowsPerPage!
-        if (dev) console.log(`DataTable: applying pagination row ${start} - ${end}`)
-        data = data.slice(start, end)
-        return data
+      async applyPagination (internalOptions: ITableOptions, data: any[] | any[][]): Promise<any[] | any[][] | undefined> {
+        if(data) {
+          if(internalOptions && internalOptions?.currentPage && internalOptions?.rowsPerPage) {
+            const start = (internalOptions.currentPage! - 1) * internalOptions.rowsPerPage!
+            const end = internalOptions.currentPage! * internalOptions.rowsPerPage!
+            if (dev) console.log(`DataTable: applying pagination row ${start} - ${end}`)
+            data = data.slice(start, end)
+            return data
+          } else return data.slice(0, 20)
+        } else return undefined
       }
     
       async insertColumns (cols: IColumnMetaData[]): Promise<IColumnMetaData[] | void> {

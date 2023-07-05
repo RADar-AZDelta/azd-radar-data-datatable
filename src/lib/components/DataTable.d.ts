@@ -153,7 +153,7 @@ export interface IDataTypeFunctionalities {
   applySort(data: any[] | any[][]): Promise<any[] | any[][] | void>
   setData(data: IDataTypeInfo): Promise<void>
   setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]>
-  applyPagination(internalOptions: ITableOptions, data: any[] | any[][]): Promise<any[] | any[][]>
+  applyPagination(internalOptions: ITableOptions, data: any[] | any[][]): Promise<any[] | any[][] | undefined>
   insertColumns(cols: IColumnMetaData[]): Promise<IColumnMetaData[] | void>
   deleteRows(originalIndices: number[]): Promise<void>
   destroy(): Promise<void>

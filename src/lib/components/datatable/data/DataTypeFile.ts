@@ -60,9 +60,11 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
         }
       } else this.internalColumns = columns
 
-      this.internalColumns!.forEach(col => {
-        if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
-      })
+      if(this.internalOptions && this.internalColumns){
+        this.internalColumns.forEach(col => {
+          if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
+        })
+      }
     
     return (this.internalColumns as IColumnMetaData[])
   }

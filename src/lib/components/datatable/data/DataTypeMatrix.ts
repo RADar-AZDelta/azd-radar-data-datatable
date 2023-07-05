@@ -1,5 +1,5 @@
 import { dev } from '$app/environment'
-import type { IDataTypeFunctionalities, IRender } from '$lib/components/DataTable'
+import type { IDataTypeFunctionalities, IDataTypeInfo, IRender } from '$lib/components/DataTable'
 import type Query from 'arquero/dist/types/query/query'
 import { DataTypeCommonBase } from './DataTypeCommonBase'
 
@@ -7,24 +7,25 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
   filteredAndSortedData: any[] | undefined
 
   async render (onlyPaginationChanged: boolean): Promise<IRender> {
-    let totalRows: number = 0
+    let totalRows: number = 0, originalIndices: number[] = []
 
     if (!onlyPaginationChanged || !this.filteredAndSortedData) {
       this.filteredAndSortedData = await this.applySort(await this.applyFilter(this.data as any[][]))
-      totalRows = this.filteredAndSortedData.length
+      if(this.filteredAndSortedData) totalRows = this.filteredAndSortedData.length
     } else totalRows = this.data!.length
     const paginatedData = await this.applyPagination(this.internalOptions!, this.filteredAndSortedData)
-    this.renderedData = paginatedData.map(row =>
-      this.internalColumns?.reduce((acc, cur, index) => {
-        acc[cur.id!] = row[index]
+    if(paginatedData) {
+      this.renderedData = paginatedData.map(row =>
+        this.internalColumns?.reduce((acc, cur, index) => {
+          acc[cur.id!] = row[index]
+          return acc
+        }, {} as Record<string, any>)
+      )
+      originalIndices = (paginatedData as any[]).reduce((acc, cur) => {
+        acc.push((this.data as any[]).indexOf(cur))
         return acc
-      }, {} as Record<string, any>)
-    )
-
-    const originalIndices = (paginatedData as any[]).reduce((acc, cur) => {
-      acc.push((this.data as any[]).indexOf(cur))
-      return acc
-    }, [])
+      }, [])
+    }
 
     return {
       renderedData: this.renderedData,
@@ -33,6 +34,8 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
       internalColumns: this.internalColumns,
     }
   }
+
+  async setData(data: IDataTypeInfo): Promise<void> {}
 
   async saveToFile (): Promise<void> {
     const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(this.saveOptions)
@@ -161,7 +164,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
             compareFn = (a, b) => (b[index] < a[index] ? -1 : b[index] > a[index] ? 1 : 0)
             break
         }
-        data = data.sort(compareFn)
+        if(data) data = data.sort(compareFn)
       })
     return data
   }

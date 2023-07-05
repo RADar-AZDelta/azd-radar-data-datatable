@@ -7,17 +7,21 @@ import type {
   SortDirection,
   TFilter,
 } from '$lib/components/DataTable'
-import { DataTypeBase } from '$lib/components/datatable/data/DataTypeBase'
+import { DataTypeCommonBase } from '$lib/components/datatable/data/DataTypeCommonBase'
 import type Query from 'arquero/dist/types/query/query'
 
-export class AthenaClass extends DataTypeBase implements IDataTypeFunctionalities {
+export class AthenaClass extends DataTypeCommonBase implements IDataTypeFunctionalities {
+
+
   async setInternalColumns (columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
     if (!columns) throw new Error('Columns property is not provided')
     else this.internalColumns = columns
 
-    this.internalColumns.forEach(col => {
-      if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
-    })
+    if(this.internalOptions){
+      this.internalColumns.forEach(col => {
+        if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
+      })
+    }
 
     return this.internalColumns
   }

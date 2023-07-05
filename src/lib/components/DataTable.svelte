@@ -52,7 +52,7 @@
     internalColumns: IColumnMetaData[] | undefined
 
   let renderStatus: string
-  let dataTypeImpl: IDataTypeFunctionalities | undefined = undefined
+  let dataTypeImpl: IDataTypeFunctionalities
   let originalIndices: number[] //the index of the sorted, filtered and paginated record in the original data
 
   let settingsDialog: HTMLDialogElement
@@ -154,7 +154,7 @@
     renderedData = undefined
     let totalRows: number | undefined
     if (data && dataTypeImpl) {
-      dataTypeImpl.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
+      await dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
     }
     ;({ renderedData, originalIndices, totalRows, internalColumns } = await dataTypeImpl!.render(onlyPaginationChanged))
     internalOptions.totalRows = totalRows
