@@ -70,7 +70,7 @@
 
   async function init() {
     renderStatus = 'initializing'
-    if (dev) console.log('DataTable: init')
+    if (dev) console.log(`DataTable: init ${options?.id}`)
 
     //OPTIONS
     if (!internalOptions.saveImpl && browser) {
@@ -83,7 +83,11 @@
       }
     }
 
-    if (!isEqual(internalOptions, options) && (internalOptions?.saveOptions || options?.saveOptions)) {
+    if (
+      !isEqual(internalOptions, options) &&
+      (internalOptions?.saveOptions !== false || options?.saveOptions !== false)
+    ) {
+      if (dev) console.log('DataTable: Gather options & columns from the Save Implementation')
       ;({ internalOptions, internalColumns } = await loadStoredOptions())
     } else if (options) internalOptions = Object.assign(internalOptions, options)
 
@@ -153,9 +157,6 @@
     if (dev) console.log('DataTable: render')
     renderedData = undefined
     let totalRows: number | undefined
-    if (data && dataTypeImpl) {
-      await dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
-    }
     ;({ renderedData, originalIndices, totalRows, internalColumns } = await dataTypeImpl!.render(onlyPaginationChanged))
     internalOptions.totalRows = totalRows
     renderStatus = 'completed'
@@ -198,7 +199,6 @@
       else if (destinationPosition <= column.position! && column.position! < sourcePosition!) column.position! += 1
     })
     internalColumns = internalColumns
-    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
     if (dev)
       console.log(
         `DataTable: column '${sourceColumn!.id}' position changed from '${sourcePosition}' to '${destinationPosition}'`
@@ -238,7 +238,6 @@
     const inputEl = e.target as HTMLInputElement
     internalColumns!.find(col => col.id == inputEl.name)!.visible = inputEl.checked
     internalColumns = internalColumns
-    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
   }
 
   export async function saveToFile() {
@@ -303,7 +302,6 @@
       }
     }
     internalColumns = internalColumns
-    if (data) dataTypeImpl!.setData({ data, internalOptions, internalColumns, renderedData, modifyColumnMetadata })
   }
 
   export async function executeQueryAndReturnResults(query: Query | object): Promise<any> {
@@ -362,6 +360,7 @@
       if (browser && internalOptions.saveImpl) {
         const id = options ? options.id : internalOptions.id
         if (id) {
+          if (dev) console.log(`loadStoredOptions: Loading options & columns for ${id}`)
           const { tableOptions, columnMetaData } = await internalOptions.saveImpl.load(id, internalColumns)
           if (columnMetaData) cols = columnMetaData
           else cols = columns
@@ -388,7 +387,7 @@
     window.addEventListener(
       'beforeunload',
       e => {
-        if (dev) console.log('onStoreOptions: Storing options before unloading ', internalOptions.saveImpl)
+        if (dev) console.log(`onStoreOptions: Storing options for ${internalOptions.id} before unloading`)
         if (browser && data && internalOptions.saveImpl)
           internalOptions.saveImpl.store(internalOptions, internalColumns!)
       },
@@ -399,7 +398,7 @@
     document.addEventListener(
       'visibilitychange',
       e => {
-        if (dev) console.log('onStoreOptions: Storing options when visiblity changes ', internalOptions.saveImpl)
+        if (dev) console.log(`onStoreOptions: Storing options for ${internalOptions.saveImpl} when visiblity changes`)
         if (browser && data && internalOptions.saveImpl)
           internalOptions.saveImpl.store(internalOptions, internalColumns!)
       },
