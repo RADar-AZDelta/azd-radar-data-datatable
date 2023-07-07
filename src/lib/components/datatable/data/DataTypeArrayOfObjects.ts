@@ -162,7 +162,6 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
   }
 
   async applySort(data: any[]): Promise<any[]> {
-    //TODO: ignore case, use localCompare for strings, convert Dates to milliseconds using .getTime()
     let compareFn: ((a: any[] | any, b: any[] | any) => number) | undefined
     this.internalColumns
       ?.filter(col => col.sortDirection)
@@ -172,14 +171,19 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
         if (dev) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
         switch (col.sortDirection) {
           case 'asc':
-            compareFn = (a, b) => (a[col.id] < b[col.id] ? -1 : a[col.id] > b[col.id] ? 1 : 0)
+            compareFn = (a, b) => (this.standardizeValue(a[col.id]) < this.standardizeValue(b[col.id]) ? -1 : this.standardizeValue(a[col.id]) > this.standardizeValue(b[col.id]) ? 1 : 0)
             break
           case 'desc':
-            compareFn = (a, b) => (b[col.id] < a[col.id] ? -1 : b[col.id] > a[col.id] ? 1 : 0)
+            compareFn = (a, b) => (this.standardizeValue(b[col.id]) < this.standardizeValue(a[col.id]) ? -1 : this.standardizeValue(b[col.id]) > this.standardizeValue(a[col.id]) ? 1 : 0)
             break
         }
         if(data) data = data.sort(compareFn)
       })
     return data
+  }
+
+  standardizeValue (value: string | number | Date): string | number {
+    if(new Date(value).toString() !== "Invalid Date" && !isNaN(new Date(value).getTime())) return new Date(value).getTime()
+    else return value.toString().toLowerCase()
   }
 }

@@ -153,24 +153,31 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
   }
 
   async applySort (data: any[][] | any[]): Promise<any[][]> {
-    //TODO: ignore case, use localCompare for strings, convert Dates to milliseconds using .getTime()
     let compareFn: ((a: any[] | any, b: any[] | any) => number) | undefined
     this.internalColumns
       ?.filter(col => col.sortDirection)
       .slice()
       .reverse() //Sort is applied in reverse order !!!
-      .forEach((col, index) => {
-        if (dev) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
-        switch (col.sortDirection) {
-          case 'asc':
-            compareFn = (a, b) => (a[index] < b[index] ? -1 : a[index] > b[index] ? 1 : 0)
-            break
-          case 'desc':
-            compareFn = (a, b) => (b[index] < a[index] ? -1 : b[index] > a[index] ? 1 : 0)
-            break
+      .forEach((col) => {
+        const index = this.internalColumns?.findIndex((obj) => obj.id == col.id)
+        if(index) {
+          if (dev) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
+          switch (col.sortDirection) {
+            case 'asc':
+              compareFn = (a, b) => (this.standardizeValue(a[index]) < this.standardizeValue(b[index]) ? -1 : this.standardizeValue(a[index]) > this.standardizeValue(b[index]) ? 1 : 0)
+              break
+            case 'desc':
+              compareFn = (a, b) => (this.standardizeValue(b[index]) < this.standardizeValue(a[index]) ? -1 : this.standardizeValue(b[index]) > this.standardizeValue(a[index]) ? 1 : 0)
+              break
+          }
+          if(data) data = data.sort(compareFn)
         }
-        if(data) data = data.sort(compareFn)
       })
     return data
+  }
+
+  standardizeValue (value: string | number | Date): string | number {
+    if(new Date(value).toString() !== "Invalid Date" && !isNaN(new Date(value).getTime())) return new Date(value).getTime()
+    else return value.toString().toLowerCase()
   }
 }
