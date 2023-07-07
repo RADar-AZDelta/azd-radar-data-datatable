@@ -35,7 +35,12 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     }
   }
 
-  async setData(data: IDataTypeInfo): Promise<void> {}
+  async setData(data: IDataTypeInfo): Promise<void> {
+    if (data.data) this.data = data.data as any[]
+    if (data.internalOptions) this.internalOptions = data.internalOptions
+    if (data.internalColumns) this.internalColumns = data.internalColumns
+    if (data.renderedData) this.renderedData = data.renderedData
+  }
 
   async saveToFile (): Promise<void> {
     const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(this.saveOptions)

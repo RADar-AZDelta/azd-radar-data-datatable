@@ -131,9 +131,7 @@ async function fetchData(data: MessageRequestFetchData) {
     } else {
       for (const [column, filter] of [...data.filteredColumns.entries()]) {
         const lowerCaseFilter = filter?.toString().toLowerCase()
-        tempDt = tempDt.filter(escape((d: any) => d[column] && op.lower(d[column]).includes(lowerCaseFilter)))
-        //TODO: test if we can run without escape (better performance)
-        // tempDt = tempDt.params({ column, lowerCaseFilter }).filter((d: any, params: any) => op.lower(d[column]).includes(params.lowerCaseFilter))
+        tempDt = tempDt!.params({ lowerCaseFilter: lowerCaseFilter, column: column }).filter((r: any, params: any) => r[params.column] && op.lower(r[params.column].inclues(params.lowerCaseFilter)))
       }
     }
     //sort
