@@ -20,6 +20,9 @@
   $: toRow = fromRow + rowsPerPage > totalRows ? totalRows : fromRow + rowsPerPage - 1
   $: totalPages = Math.ceil(totalRows / rowsPerPage)
   $: pages = calculatePages(currentPage, totalPages)
+  $: {
+    if(currentPage > totalPages) onChangePage(1)
+  }
 
   function calculatePages(currentPage: number, totalPages: number): (number | null)[] {
     // 7 buttons

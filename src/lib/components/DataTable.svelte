@@ -132,7 +132,11 @@
     if (dev) console.log('DataTable: render')
     renderedData = undefined
     let totalRows: number | undefined
-    ;({ renderedData, originalIndices, totalRows, internalColumns } = await dataTypeImpl!.render(onlyPaginationChanged))
+    if (dataTypeImpl) {
+      ;({ renderedData, originalIndices, totalRows, internalColumns } = await dataTypeImpl!.render(
+        onlyPaginationChanged
+      ))
+    }
     internalOptions.totalRows = totalRows
     renderStatus = 'completed'
     dispatch('renderingComplete')

@@ -6,6 +6,7 @@
   import EditableCell from '$lib/components/EditableCell.svelte'
   import { flip } from 'svelte/animate'
   import DataTable from '$lib/components/DataTable.svelte'
+  import { FetchDataTypeClass } from '$lib/example/FetchDataTypeClass'
 
   const data = [
     {
@@ -295,7 +296,12 @@
 
   <details>
     <summary>Table with a async function as a data source (ex: fetch data from web server)</summary>
-    <DataTable {columns} data={fetchData} bind:this={dataTableFetchFunction} options={{ id: 'function' }} />
+    <DataTable
+      {columns}
+      data={fetchData}
+      bind:this={dataTableFetchFunction}
+      options={{ id: 'function', dataTypeImpl: new FetchDataTypeClass() }}
+    />
   </details>
 
   <hr />
@@ -313,7 +319,7 @@
       data={file}
       bind:this={dataTableFile}
       options={{
-        id: "fileUsagi",
+        id: 'fileUsagi',
         actionColumn: true,
         globalFilter: {
           column: 'all',
