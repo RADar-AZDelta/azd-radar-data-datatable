@@ -131,8 +131,10 @@ async function fetchData(data: MessageRequestFetchData) {
     } else {
       for (const [column, filter] of [...data.filteredColumns.entries()]) {
         const lowerCaseFilter = filter?.toString().toLowerCase()
-        tempDt = tempDt!.params({ lowerCaseFilter: lowerCaseFilter, column: column }).filter((r: any, params: any) => r[params.column] && op.lower(r[params.column].inclues(params.lowerCaseFilter)))
-      }
+        if(lowerCaseFilter) {
+          const reg = new RegExp(lowerCaseFilter)
+          tempDt = tempDt.params({ lowerCaseFilter: lowerCaseFilter, column: column, reg }).filter((r: any, params: any) => op.match(op.lower(r[params.column]), params.reg, 0))}
+        }
     }
     //sort
     for (const [column, sortDirection] of [...data.sortedColumns].reverse()) {
