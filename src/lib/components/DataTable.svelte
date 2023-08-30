@@ -387,7 +387,7 @@
 </script>
 
 <dialog data-name="settings-dialog" bind:this={settingsDialog}>
-  <div data-name="dialog-container" use:clickOutside on:outclick={closeModal}>
+  <div data-name="dialog-container" use:clickOutside on:outClick={closeModal}>
     <button data-name="close-button" on:click={() => settingsDialog.close()}
       ><SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" /></button
     >

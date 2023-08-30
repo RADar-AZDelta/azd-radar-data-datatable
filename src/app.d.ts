@@ -11,7 +11,7 @@ declare global {
 	namespace svelte.JSX {
 		interface HTMLAttributes {
 		  onsaveKey: (e: CustomEvent) => void
-		  onoutclick: (e: CustomEvent) => void
+		  onoutClick: (e: CustomEvent) => void
 		  onescapeKey: (e: CustomEvent) => void
 		  onstoreoptions: (e: CustomEvent) => void
 		}

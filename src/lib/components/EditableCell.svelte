@@ -34,7 +34,7 @@
   use:saveWithKey
   on:saveKey={onClickSave}
   use:clickOutside
-  on:outclick={onClickCancel}
+  on:outClick={onClickCancel}
   use:escapeWithKey
   on:escapeKey={onClickCancel}
   data-name="cell"
