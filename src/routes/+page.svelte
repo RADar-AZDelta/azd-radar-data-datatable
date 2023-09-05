@@ -251,6 +251,7 @@
         rowsPerPageOptions: [7, 15],
         actionColumn: true,
         singleSort: false,
+        paginationOnTop: false
       }}
       let:renderedRow
       let:originalIndex

@@ -431,6 +431,23 @@
           {/each}
         </colgroup>
         <thead>
+          {#if internalOptions.paginationOnTop}
+            <tr data-name="pagination">
+              <th colspan={visibleOrderedColumns.length + (internalOptions.actionColumn ? 1 : 0)}>
+                <div>
+                  <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} {disabled} />
+                  <Pagination
+                    rowsPerPage={internalOptions.rowsPerPage}
+                    currentPage={internalOptions.currentPage}
+                    rowsPerPageOptions={internalOptions.rowsPerPageOptions}
+                    totalRows={internalOptions.totalRows ?? 0}
+                    {disabled}
+                    on:paginationChanged={onPaginationChanged}
+                  />
+                </div>
+              </th>
+            </tr>
+          {/if}
           <tr data-name="titles">
             {#if internalOptions.actionColumn}
               <th data-name="action-Column">

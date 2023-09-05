@@ -49,6 +49,83 @@ div[data-component='svelte-datatable'] {
         vertical-align: middle;
         background-color: inherit;
 
+        tr[data-name='pagination'] {
+          vertical-align: bottom;
+          font-size: 1rem;
+
+          th {
+            div {
+              align-items: center;
+              display: flex;
+
+              button[data-name='settings-button'] {
+                border: none;
+                background-color: inherit;
+              }
+
+              button[data-name='settings-button']:hover {
+                background-color: $gray-x-light;
+              }
+
+              div[data-name='pagination-container'] {
+                width: 100%;
+                margin-left: 5px;
+
+                p {
+                  padding-right: 5px;
+                  padding-left: 5px;
+                }
+
+                select {
+                  cursor: pointer;
+                  display: inline-block;
+                  font-size: 1em;
+                  max-width: 100%;
+                  outline: 0;
+                  height: 25px;
+                  align-self: center;
+                  border-radius: 5px;
+                  border: solid 1px $gray-xx-dark;
+                }
+              }
+
+              div[data-name='pagination-container-pages'] {
+                margin-left: auto;
+                text-align: right;
+                float: right;
+                height: 30px;
+                margin-top: 5px;
+                padding: 0;
+
+                button {
+                  border: none;
+                  border-radius: 5px;
+                  background-color: inherit;
+
+                  &:not([data-active='true']):hover:enabled {
+                    background-color: #333;
+                    color: #fff;
+                    border: none;
+                  }
+
+                  &[data-active='true'] {
+                    color: #333;
+                    font-weight: bolder;
+                    padding-bottom: 2.8px;
+                  }
+
+                  &:disabled {
+                  }
+                }
+
+                input[data-name="pagination-input"] {
+                  width: 50px;
+                }
+              }
+            }
+          }
+        }
+
         tr[data-name='titles'] {
           th:hover {
             background-color: $gray-xx-light;
