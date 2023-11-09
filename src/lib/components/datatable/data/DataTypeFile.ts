@@ -225,7 +225,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
     if (dev) start = performance.now()
     const result = await new Promise<TResult>((resolve, reject) => {
       this.worker!.onmessage = ({ data: { msg: responseMsg, data } }: MessageEvent<PostMessage<TResult>>) => {
-        if (responseMsg === requestMsg) resolve(data as TResult)
+        resolve(data as TResult)
       }
       this.worker!.postMessage({ msg: requestMsg, data })
     })
