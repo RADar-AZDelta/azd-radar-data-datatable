@@ -1,6 +1,6 @@
 {
   "name": "@radar-azdelta/svelte-datatable",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
@@ -50,6 +50,7 @@
   "dependencies": {
     "@types/lodash": "^4.14.194",
     "arquero": "^5.2.0",
+    "comlink": "^4.4.1",
     "lodash.debounce": "^4.0.8",
     "lodash.isequal": "^4.5.0"
   },

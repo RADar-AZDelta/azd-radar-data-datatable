@@ -1,82 +1,28 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
-//import { dev } from '$app/environment'
+import { expose } from 'comlink'
+import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, fromJSON, not } from 'arquero'
 import type Column from 'arquero/dist/types/table/column'
+import type ColumnTable from 'arquero/dist/types/table/column-table'
+import type { TableData } from 'arquero/dist/types/table/table'
 import type {
   MessageRequestSaveToFile,
   MessageRequestFetchData,
   MessageRequestLoadFile,
-  MessageResponseFetchData,
-  PostMessage,
   MessageRequestUpdateRows,
   MessageRequestInsertRows,
   MessageRequestDeleteRows,
-  MessageResponseGetRow,
   MessageRequestGetRow,
   MessageRequestInsertColumns,
   MessageRequestExecuteQueryAndReturnResults,
-  MessageResponseExecuteQueryAndReturnResults,
-  MessageRespnseInsertColumns,
   MessageRequestExecuteExpressionsAndReturnResults,
-  MessageResponseExecuteExpressionsAndReturnResults,
   MessageRequestReplaceValuesOfColumn,
   MessageRequestRenameColumns,
-  MessageResponseGetBlob,
   MessageRequestGetBlob,
 } from './messages'
-import { desc, escape, loadJSON, loadCSV, op, from, queryFrom, fromJSON, not } from 'arquero'
-import type ColumnTable from 'arquero/dist/types/table/column-table'
-import type { TableData } from 'arquero/dist/types/table/table'
 
 let dt: ColumnTable
 let tempDt: ColumnTable | undefined
-
-onmessage = async ({ data: { msg, data } }: MessageEvent<PostMessage<unknown>>) => {
-  switch (msg) {
-    case 'loadFile':
-      await loadFile(data as MessageRequestLoadFile)
-      break
-    case 'getColumnNames':
-      getColumnNames()
-      break
-    case 'fetchData':
-      await fetchData(data as MessageRequestFetchData)
-      break
-    case 'saveToFile':
-      await saveToFile(data as MessageRequestSaveToFile)
-      break
-    case 'getBlob':
-      await getBlob(data as MessageRequestGetBlob)
-      break
-    case 'updateRows':
-      await updateRows(data as MessageRequestUpdateRows)
-      break
-    case 'insertRows':
-      await insertRows(data as MessageRequestInsertRows)
-      break
-    case 'deleteRows':
-      await deleteRows(data as MessageRequestDeleteRows)
-      break
-    case 'getRow':
-      await getRow(data as MessageRequestGetRow)
-      break
-    case 'insertColumns':
-      await insertColumns(data as MessageRequestInsertColumns)
-      break
-    case 'executeQueryAndReturnResults':
-      await executeQueryAndReturnResults(data as MessageRequestExecuteQueryAndReturnResults)
-      break
-    case 'executeExpressionsAndReturnResults':
-      await executeExpressionsAndReturnResults(data as MessageRequestExecuteExpressionsAndReturnResults)
-      break
-    case 'replaceValuesOfColumn':
-      await replaceValuesOfColumn(data as MessageRequestReplaceValuesOfColumn)
-      break
-    case 'renameColumns':
-      await renameColumns(data as MessageRequestRenameColumns)
-      break
-  }
-}
 
 async function loadFile(data: MessageRequestLoadFile) {
   tempDt = undefined
@@ -90,21 +36,11 @@ async function loadFile(data: MessageRequestLoadFile) {
     default:
       throw new Error(`Unknown extension '${data.extension}'`)
   }
-
-  const message: PostMessage<unknown> = {
-    msg: 'loadFile',
-    data: undefined,
-  }
-  postMessage(message)
 }
 
-function getColumnNames() {
+async function getColumnNames() {
   const columnNames = dt.columnNames()
-  const message: PostMessage<string[]> = {
-    msg: 'getColumnNames',
-    data: columnNames,
-  }
-  postMessage(message)
+  return columnNames
 }
 
 async function fetchData(data: MessageRequestFetchData) {
@@ -131,10 +67,11 @@ async function fetchData(data: MessageRequestFetchData) {
     } else {
       for (const [column, filter] of [...data.filteredColumns.entries()]) {
         const lowerCaseFilter = filter?.toString().toLowerCase()
-        if(lowerCaseFilter) {
+        if (lowerCaseFilter) {
           const reg = new RegExp(lowerCaseFilter)
-          tempDt = tempDt.params({ lowerCaseFilter: lowerCaseFilter, column: column, reg }).filter((r: any, params: any) => op.match(op.lower(r[params.column]), params.reg, 0))}
+          tempDt = tempDt.params({ lowerCaseFilter: lowerCaseFilter, column: column, reg }).filter((r: any, params: any) => op.match(op.lower(r[params.column]), params.reg, 0))
         }
+      }
     }
     //sort
     for (const [column, sortDirection] of [...data.sortedColumns].reverse()) {
@@ -151,7 +88,7 @@ async function fetchData(data: MessageRequestFetchData) {
   }
   //pagination
   let totalRows: number = 0, matrix: any[][] = [], indices: any = []
-  if(tempDt) {
+  if (tempDt) {
     totalRows = tempDt.numRows()
     const objects = tempDt.objects({
       limit: data.pagination.rowsPerPage,
@@ -166,11 +103,7 @@ async function fetchData(data: MessageRequestFetchData) {
     matrix = objects.map(obj => Object.values(obj))
   }
 
-  const message: PostMessage<MessageResponseFetchData> = {
-    msg: 'fetchData',
-    data: { totalRows, data: matrix, indices: indices },
-  }
-  postMessage(message)
+  return { totalRows, data: matrix, indices }
 }
 
 async function saveToFile({ fileHandle, options }: MessageRequestSaveToFile) {
@@ -185,7 +118,7 @@ async function saveToFile({ fileHandle, options }: MessageRequestSaveToFile) {
 }
 
 async function getBlob({ extension, options }: MessageRequestGetBlob) {
-  switch(extension) {
+  switch (extension) {
     case 'csv':
       return await createBlobCSV(options)
     default:
@@ -203,13 +136,13 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   const bufferRowSize = options?.bufferRowSize || 5000
 
   const formatValue = (value: any) =>
-    value == null
+    value === null
       ? ''
       : value instanceof Date
-      ? (value as Date).toISOString()
-      : reFormat.test((value += ''))
-      ? '"' + value.replace(/"/g, '""') + '"'
-      : value
+        ? (value as Date).toISOString()
+        : reFormat.test((value += ''))
+          ? '"' + value.replace(/"/g, '""') + '"'
+          : value
 
   let buffer = []
 
@@ -228,12 +161,6 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   }
   await writable.write(buffer.join(''))
   await writable.close()
-
-  const message: PostMessage<URL> = {
-    msg: 'saveToFile',
-    data: undefined,
-  }
-  postMessage(message)
 }
 
 async function createBlobCSV(options?: any) {
@@ -245,10 +172,10 @@ async function createBlobCSV(options?: any) {
     value == null
       ? ''
       : value instanceof Date
-      ? (value as Date).toISOString()
-      : reFormat.test((value += ''))
-      ? '"' + value.replace(/"/g, '""') + '"'
-      : value
+        ? (value as Date).toISOString()
+        : reFormat.test((value += ''))
+          ? '"' + value.replace(/"/g, '""') + '"'
+          : value
 
   let buffer = []
 
@@ -261,75 +188,45 @@ async function createBlobCSV(options?: any) {
     const cells = names.map(col => formatValue(dt.get(col, rowIndex)))
     buffer.push(cells.join(delim) + '\n')
   }
-  const message: PostMessage<MessageResponseGetBlob> = {
-    msg: 'getBlob',
-    data: {
-      buffer
-    }
-  }
-  postMessage(message)
+
+  return { data: { buffer } }
 }
 
-function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
-  for (let [index, row] of rowsByIndex) {
-    for (const [column, value] of Object.entries(row)) {
+async function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
+  for (let [index, row] of rowsByIndex)
+    for (const [column, value] of Object.entries(row))
       if (dt._data[column]) dt._data[column].data[index] = value
-    }
-  }
-
-  const message: PostMessage<unknown> = {
-    msg: 'updateRows',
-    data: undefined,
-  }
-  postMessage(message)
 }
 
-function insertRows({ rows }: MessageRequestInsertRows) {
+async function insertRows({ rows }: MessageRequestInsertRows) {
   tempDt = undefined
 
   const indices: number[] = Array.from({ length: rows.length }, (_, i) => dt._total + i)
   dt = dt.concat(from(rows))
 
-  const message: PostMessage<MessageRespnseInsertColumns> = {
-    msg: 'insertRows',
-    data: {
-      indices,
-    },
-  }
-  postMessage(message)
+  return { data: { indices } }
 }
 
-function deleteRows({ indices }: MessageRequestDeleteRows) {
+async function deleteRows({ indices }: MessageRequestDeleteRows) {
   tempDt = undefined
 
   indices.sort((a, b) => b - a) //sort descending
 
   for (const index of indices) {
     for (const column of Object.keys(dt._data)) {
-      ;(dt._data[column] as Column).data.splice(index, 1)
+      ; (dt._data[column] as Column).data.splice(index, 1)
     }
     dt._total -= 1
     dt._nrows -= 1
   }
-
-  const message: PostMessage<unknown> = {
-    msg: 'deleteRows',
-    data: undefined,
-  }
-  postMessage(message)
 }
 
-function getRow({ index }: MessageRequestGetRow) {
+async function getRow({ index }: MessageRequestGetRow) {
   const row = Object.values(dt.object(index))
-
-  const message: PostMessage<MessageResponseGetRow> = {
-    msg: 'getRow',
-    data: { row },
-  }
-  postMessage(message)
+  return { row }
 }
 
-function insertColumns({ columns }: MessageRequestInsertColumns) {
+async function insertColumns({ columns }: MessageRequestInsertColumns) {
   const obj: Record<string, any> = {}
   // Add a column that is already in the original table
   obj[dt._names[0]] = [dt._data[dt._names[0]].data[0]]
@@ -339,18 +236,6 @@ function insertColumns({ columns }: MessageRequestInsertColumns) {
   }
   // Left join the new table into the original table
   dt = dt.join_left(fromJSON(obj))
-
-  // const existingColumns = Object.keys(dt._data)
-  // for (const col of columns) {
-  //   if (existingColumns.includes(col.id))
-  //     continue
-  //   dt._data[col.id].data = new Array(dt._total).fill(null);
-  // }
-  const message: PostMessage<unknown> = {
-    msg: 'insertColumns',
-    data: undefined,
-  }
-  postMessage(message)
 }
 
 function executeQueryAndReturnResults({
@@ -362,8 +247,8 @@ function executeQueryAndReturnResults({
   for (const [column, filter] of [...filteredColumns].values()) {
     const lowerCaseFilter = filter?.toString().toLowerCase()
     tempDt = tempDt.filter(escape((d: any) => {
-      if(op.lower(d[column])) {
-        if(op.lower(d[column]).includes(lowerCaseFilter)) return d[column]
+      if (op.lower(d[column])) {
+        if (op.lower(d[column]).includes(lowerCaseFilter)) return d[column]
       }
     }))
   }
@@ -378,7 +263,7 @@ function executeQueryAndReturnResults({
     }
   }
   const query = queryFrom(usedQuery)
-  const queriedDt: ColumnTable = query.evaluate(tempDt, () => {})
+  const queriedDt: ColumnTable = query.evaluate(tempDt, () => { })
   const queriedData = queriedDt.objects()
 
   let columns: Record<string, any> = {}
@@ -387,41 +272,26 @@ function executeQueryAndReturnResults({
   const tempQueriedDt = queriedDt.impute(columns)
   const indices = imputedDt.semijoin(tempQueriedDt).indices()
 
-  const message: PostMessage<MessageResponseExecuteQueryAndReturnResults> = {
-    msg: 'executeQueryAndReturnResults',
-    data: { queriedData, indices },
-  }
-  postMessage(message)
+  return { queriedData, indices }
 }
 
 function executeExpressionsAndReturnResults({ expressions }: MessageRequestExecuteExpressionsAndReturnResults) {
   const expressionData: any[] = []
-  for (let expr of Object.keys(expressions)) {
-    expressionData.push(dt.rollup({ [expr]: expressions[expr] }).object())
-  }
-  const message: PostMessage<MessageResponseExecuteExpressionsAndReturnResults> = {
-    msg: 'executeExpressionsAndReturnResults',
-    data: { expressionData },
-  }
-  postMessage(message)
+  for (let expr of Object.keys(expressions)) expressionData.push(dt.rollup({ [expr]: expressions[expr] }).object())
+  return { expressionData }
 }
 
-function replaceValuesOfColumn({ currentValue, updatedValue, column }: MessageRequestReplaceValuesOfColumn) {
+async function replaceValuesOfColumn({ currentValue, updatedValue, column }: MessageRequestReplaceValuesOfColumn) {
   dt.scan((row?: number | undefined, data?: TableData | undefined) => {
-    if(data) {
+    if (data) {
       if (data[column as keyof Object].data[row] == currentValue) {
         data![column as keyof Object].data[row] = updatedValue
       }
     }
   })
-  const message: PostMessage<unknown> = {
-    msg: 'replaceValuesOfColumn',
-    data: undefined,
-  }
-  postMessage(message)
 }
 
-function renameColumns({ columns }: MessageRequestRenameColumns) {
+async function renameColumns({ columns }: MessageRequestRenameColumns) {
   let remove: string[] = []
   for (let [oldCol, newCol] of Object.entries(columns)) {
     if (dt._names.includes(oldCol)) {
@@ -429,11 +299,23 @@ function renameColumns({ columns }: MessageRequestRenameColumns) {
     }
   }
   dt = dt.select(not(remove), columns)
-  const message: PostMessage<unknown> = {
-    msg: 'renameColumns',
-    data: undefined,
-  }
-  postMessage(message)
 }
 
-export default {}
+const exposed = {
+  loadFile,
+  getColumnNames,
+  fetchData,
+  saveToFile,
+  getBlob,
+  updateRows,
+  insertRows,
+  deleteRows,
+  getRow,
+  insertColumns,
+  executeQueryAndReturnResults,
+  executeExpressionsAndReturnResults,
+  replaceValuesOfColumn,
+  renameColumns
+}
+
+expose(exposed)
