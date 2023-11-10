@@ -221,9 +221,8 @@ async function deleteRows({ indices }: MessageRequestDeleteRows) {
   }
 }
 
-async function getRow({ index }: MessageRequestGetRow) {
-  const row = Object.values(dt.object(index))
-  return { row }
+function getRow({ index }: MessageRequestGetRow) {
+  return { row: dt.object(index) }
 }
 
 async function insertColumns({ columns }: MessageRequestInsertColumns) {

@@ -218,6 +218,11 @@
 
     await dataTable.insertRows([dummyRow!])
   }
+
+  async function getRow() {
+    const row = await dataTableFile.getFullRow(1)
+    console.log(row)
+  }
 </script>
 
 <svelte:head>
@@ -356,6 +361,8 @@
       {/each}
     </DataTable>
 
+    <br />
+    <button disabled={!file} on:click={() => getRow()}>Get first row values</button>
     <br />
     <button disabled={!file} on:click={() => onClickSaveButton(dataTableFile)}>Save table</button>
     <br />
