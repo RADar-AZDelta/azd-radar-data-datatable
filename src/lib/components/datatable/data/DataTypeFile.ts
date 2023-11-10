@@ -163,11 +163,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
 
   async getFullRow(originalIndex: number): Promise<Record<string, any>> {
     const fullRow = await this.exposed.getRow({ index: originalIndex })
-    const row = fullRow.row
-    return this.internalColumns!.reduce((acc, column, idx) => {
-      acc[column.id!] = row[idx]
-      return acc
-    }, {} as Record<string, any>)
+    return fullRow.row
   }
 
   async deleteRows(originalIndices: number[]): Promise<void> {
