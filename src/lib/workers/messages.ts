@@ -53,6 +53,12 @@ export interface MessageRequestGetRow {
   index: number
 }
 
+export interface MessageRequestChangeRow {
+  index: number
+  rowsPerPage: number
+  currentPage: number
+}
+
 export interface MessageResponseGetRow {
   row: Record<string, any>
 }

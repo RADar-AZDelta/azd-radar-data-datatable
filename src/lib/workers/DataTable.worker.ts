@@ -19,6 +19,7 @@ import type {
   MessageRequestReplaceValuesOfColumn,
   MessageRequestRenameColumns,
   MessageRequestGetBlob,
+  MessageRequestChangeRow,
 } from './messages'
 
 let dt: ColumnTable
@@ -221,8 +222,26 @@ async function deleteRows({ indices }: MessageRequestDeleteRows) {
   }
 }
 
-function getRow({ index }: MessageRequestGetRow) {
+async function getRow({ index }: MessageRequestGetRow) {
   return { row: dt.object(index) }
+}
+
+async function getNextRow({ index, rowsPerPage, currentPage }: MessageRequestChangeRow) {
+  const currentIndicesIndex = tempDt._index.indexOf(index)
+  const indicesIndex = currentIndicesIndex + 1
+  let newPage: number = currentPage
+  if(indicesIndex % rowsPerPage === 0) newPage++ 
+  const row = tempDt?.object(indicesIndex)
+  return { row, page: newPage }
+}
+
+async function getPreviousRow({ index, rowsPerPage, currentPage }: MessageRequestChangeRow) {
+  const currentIndicesIndex = tempDt._index.indexOf(index)
+  const indicesIndex = currentIndicesIndex - 1
+  let newPage: number = currentPage
+  if((indicesIndex + 1) % rowsPerPage === 0) newPage--
+  const row = tempDt?.object(indicesIndex)
+  return { row, page: newPage }
 }
 
 async function insertColumns({ columns }: MessageRequestInsertColumns) {
@@ -310,6 +329,8 @@ const exposed = {
   insertRows,
   deleteRows,
   getRow,
+  getNextRow,
+  getPreviousRow,
   insertColumns,
   executeQueryAndReturnResults,
   executeExpressionsAndReturnResults,

@@ -265,6 +265,16 @@
     else throw new Error('Getting the full row did not work. Are you using a supported data method?')
   }
 
+  export async function getNextRow(currentIndex: number): Promise<Record<string, any>> {
+    const { row, page } = await dataTypeImpl?.getNextRow(currentIndex, internalOptions.rowsPerPage!, internalOptions.currentPage!)
+    return { row, page }
+  }
+
+  export async function getPreviousRow(currentIndex: number): Promise<Record<string, any>> {
+    const { row, page }  = await dataTypeImpl?.getPreviousRow(currentIndex, internalOptions.rowsPerPage!, internalOptions.currentPage!)
+    return { row, page }
+  }
+
   export async function insertColumns(cols: IColumnMetaData[]) {
     const updatedColumns = await dataTypeImpl!.insertColumns(cols)
     if (updatedColumns) internalColumns = updatedColumns

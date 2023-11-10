@@ -119,7 +119,7 @@ export interface GlobalFilter {
   filter: TFilter
 }
 
-export interface PaginationChangedEventDetail extends IPagination {}
+export interface PaginationChangedEventDetail extends IPagination { }
 
 export interface ICustomStoreOptions {
   load(id: string, columns?: IColumnMetaData[]): IStoredOptions | Promise<IStoredOptions>
@@ -132,11 +132,11 @@ export interface IStoredOptions {
 }
 
 export interface IDataTypeInfo {
-    data: any[] | any[][] | FetchDataFunc | File | undefined
-    internalOptions: ITableOptions
-    internalColumns: IColumnMetaData[] | undefined
-    renderedData: any[] | any[][] | undefined
-    modifyColumnMetadata?: ModifyColumnMetadataFunc
+  data: any[] | any[][] | FetchDataFunc | File | undefined
+  internalOptions: ITableOptions
+  internalColumns: IColumnMetaData[] | undefined
+  renderedData: any[] | any[][] | undefined
+  modifyColumnMetadata?: ModifyColumnMetadataFunc
 }
 
 export interface IDataTypeFunctionalities {
@@ -147,6 +147,8 @@ export interface IDataTypeFunctionalities {
   executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any>
   executeQueryAndReturnResults(query: Query | object): Promise<any>
   getFullRow(originalIndex: number): Promise<Record<string, any> | void>
+  getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<any>
+  getPreviousRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<any>
   insertRows(rows: Record<string, any>[]): Promise<number[] | void>
   updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void>
   renameColumns(columns: Record<string, string>): Promise<void>

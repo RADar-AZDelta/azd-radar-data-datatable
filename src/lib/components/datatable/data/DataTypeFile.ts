@@ -166,6 +166,14 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
     return fullRow.row
   }
 
+  async getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<Record<string, any>> {
+    return await this.exposed.getNextRow({ index: currentIndex, rowsPerPage, currentPage })
+  }
+
+  async getPreviousRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<Record<string, any>> {
+    return await this.exposed.getPreviousRow({ index: currentIndex, rowsPerPage, currentPage })
+  }
+
   async deleteRows(originalIndices: number[]): Promise<void> {
     await this.exposed.deleteRows({ indices: originalIndices })
   }
