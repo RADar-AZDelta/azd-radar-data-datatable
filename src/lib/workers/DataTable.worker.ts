@@ -232,7 +232,7 @@ async function getNextRow({ index, rowsPerPage, currentPage }: MessageRequestCha
   let newPage: number = currentPage
   if(indicesIndex % rowsPerPage === 0) newPage++ 
   const row = tempDt?.object(indicesIndex)
-  return { row, page: newPage }
+  return { row, index: indicesIndex, page: newPage }
 }
 
 async function getPreviousRow({ index, rowsPerPage, currentPage }: MessageRequestChangeRow) {
@@ -241,7 +241,7 @@ async function getPreviousRow({ index, rowsPerPage, currentPage }: MessageReques
   let newPage: number = currentPage
   if((indicesIndex + 1) % rowsPerPage === 0) newPage--
   const row = tempDt?.object(indicesIndex)
-  return { row, page: newPage }
+  return { row, index: indicesIndex, page: newPage }
 }
 
 async function insertColumns({ columns }: MessageRequestInsertColumns) {

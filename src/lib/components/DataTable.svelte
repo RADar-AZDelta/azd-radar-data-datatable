@@ -266,13 +266,11 @@
   }
 
   export async function getNextRow(currentIndex: number): Promise<Record<string, any>> {
-    const { row, page } = await dataTypeImpl?.getNextRow(currentIndex, internalOptions.rowsPerPage!, internalOptions.currentPage!)
-    return { row, page }
+    return await dataTypeImpl?.getNextRow(currentIndex, internalOptions.rowsPerPage!, internalOptions.currentPage!)
   }
 
   export async function getPreviousRow(currentIndex: number): Promise<Record<string, any>> {
-    const { row, page }  = await dataTypeImpl?.getPreviousRow(currentIndex, internalOptions.rowsPerPage!, internalOptions.currentPage!)
-    return { row, page }
+    return await dataTypeImpl?.getPreviousRow(currentIndex, internalOptions.rowsPerPage!, internalOptions.currentPage!)
   }
 
   export async function insertColumns(cols: IColumnMetaData[]) {
