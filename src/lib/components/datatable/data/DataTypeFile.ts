@@ -112,7 +112,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   }
 
   async getBlob(): Promise<Blob> {
-    const { buffer } = await this.exposed.getBlob({ extension: 'csv' })
+    const buffer = await this.exposed.getBlob({ extension: 'csv' })
     const blob = new Blob(buffer, { type: 'text/csv' })
     return blob
   }
@@ -162,8 +162,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   }
 
   async getFullRow(originalIndex: number): Promise<Record<string, any>> {
-    const fullRow = await this.exposed.getRow({ index: originalIndex })
-    return fullRow.row
+    return await this.exposed.getRow({ index: originalIndex })
   }
 
   async getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<Record<string, any>> {
@@ -179,7 +178,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   }
 
   async insertRows(rows: Record<string, any>[]): Promise<number[]> {
-    return await this.exposed.insertRows({ rows }).indices
+    return await this.exposed.insertRows({ rows })
   }
 
   async updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> {

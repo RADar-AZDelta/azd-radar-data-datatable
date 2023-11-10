@@ -40,8 +40,7 @@ async function loadFile(data: MessageRequestLoadFile) {
 }
 
 async function getColumnNames() {
-  const columnNames = dt.columnNames()
-  return columnNames
+  return dt.columnNames()
 }
 
 async function fetchData(data: MessageRequestFetchData) {
@@ -129,7 +128,6 @@ async function getBlob({ extension, options }: MessageRequestGetBlob) {
 
 async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   const writable = await fileHandle.createWritable()
-
   const names: string[] = options?.columns || dt.columnNames()
   //const format = options?.format || {};
   const delim = options?.delimiter || ','
@@ -190,7 +188,7 @@ async function createBlobCSV(options?: any) {
     buffer.push(cells.join(delim) + '\n')
   }
 
-  return { data: { buffer } }
+  return buffer
 }
 
 async function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
@@ -201,11 +199,9 @@ async function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
 
 async function insertRows({ rows }: MessageRequestInsertRows) {
   tempDt = undefined
-
   const indices: number[] = Array.from({ length: rows.length }, (_, i) => dt._total + i)
   dt = dt.concat(from(rows))
-
-  return { data: { indices } }
+  return indices
 }
 
 async function deleteRows({ indices }: MessageRequestDeleteRows) {
@@ -223,14 +219,14 @@ async function deleteRows({ indices }: MessageRequestDeleteRows) {
 }
 
 async function getRow({ index }: MessageRequestGetRow) {
-  return { row: dt.object(index) }
+  return dt.object(index)
 }
 
 async function getNextRow({ index, rowsPerPage, currentPage }: MessageRequestChangeRow) {
   const currentIndicesIndex = tempDt._index.indexOf(index)
   const indicesIndex = currentIndicesIndex + 1
   let newPage: number = currentPage
-  if(indicesIndex % rowsPerPage === 0) newPage++ 
+  if (indicesIndex % rowsPerPage === 0) newPage++
   const row = tempDt?.object(indicesIndex)
   return { row, index: indicesIndex, page: newPage }
 }
@@ -239,7 +235,7 @@ async function getPreviousRow({ index, rowsPerPage, currentPage }: MessageReques
   const currentIndicesIndex = tempDt._index.indexOf(index)
   const indicesIndex = currentIndicesIndex - 1
   let newPage: number = currentPage
-  if((indicesIndex + 1) % rowsPerPage === 0) newPage--
+  if ((indicesIndex + 1) % rowsPerPage === 0) newPage--
   const row = tempDt?.object(indicesIndex)
   return { row, index: indicesIndex, page: newPage }
 }
