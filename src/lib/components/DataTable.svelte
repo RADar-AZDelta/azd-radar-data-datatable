@@ -468,7 +468,7 @@
             {/if}
             {#each visibleOrderedColumns as column, i (column.id)}
               <th
-                title={column.label || column.id}
+                title={column.id}
                 data-direction={column?.sortDirection}
                 data-resizable={column?.resizable}
                 data-key={column?.id}
