@@ -47,7 +47,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
     if (!onlyPaginationChanged || !this.filteredAndSortedData) {
       this.filteredAndSortedData = await this.applySort(await this.applyFilter(this.data as any[]))
       if (this.filteredAndSortedData) totalRows = this.filteredAndSortedData.length
-    }
+    } else totalRows = this.data!.length
     this.renderedData = await this.applyPagination(this.internalOptions!, this.filteredAndSortedData)
     const originalIndices = (this.renderedData as Record<string, any>[]).reduce<number[]>((acc, cur) => {
       acc.push((this.data as Record<string, any>[]).indexOf(cur))
