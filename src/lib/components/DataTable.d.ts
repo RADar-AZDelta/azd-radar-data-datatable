@@ -1,7 +1,7 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
 
-import type Query from "arquero/dist/types/query/query"
+import type Query from 'arquero/dist/types/query/query'
 
 declare module '*.svelte' {
   export { SvelteComponentDev as default } from 'svelte/internal'
@@ -119,7 +119,7 @@ export interface GlobalFilter {
   filter: TFilter
 }
 
-export interface PaginationChangedEventDetail extends IPagination { }
+export type PaginationChangedEventDetail = IPagination
 
 export interface ICustomStoreOptions {
   load(id: string, columns?: IColumnMetaData[]): IStoredOptions | Promise<IStoredOptions>

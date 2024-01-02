@@ -1,0 +1,27 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
+  "plugins": ["@typescript-eslint", "import"],
+  "ignorePatterns": ["*.cjs", "src/app.d.ts"],
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2020
+  },
+  "rules": {
+    "quotes": ["error", "single"],
+    "indent": ["error", 2],
+    "no-multi-spaces": ["error"],
+    // Would not be possible to use async/await in a promise
+    "no-async-promise-executor": "off",
+    // In some places, it needs to be of type "any"
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-prototype-builtins": "off",
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "unknown", "internal", "parent", "sibling", "index", "object", "type"]
+      }
+    ]
+  }
+}

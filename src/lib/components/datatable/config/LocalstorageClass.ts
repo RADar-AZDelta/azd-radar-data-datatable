@@ -13,7 +13,7 @@ export default class LocalStorageOptions implements ICustomStoreOptions {
       rowsPerPageOptions: [5, 10, 20, 50, 100],
       actionColumn: false,
       singleSort: false,
-      defaultColumnWidth: 200
+      defaultColumnWidth: 200,
     }
     if (options) Object.assign(this.storedOptions, options)
   }
@@ -54,7 +54,7 @@ export default class LocalStorageOptions implements ICustomStoreOptions {
       // If there is no id given, exit the method
       if (!this.storedOptions.id) return
       // Save the options and the columns in the localStorage
-      let copyOfOptions = options
+      const copyOfOptions = options
       delete copyOfOptions.dataTypeImpl
       delete copyOfOptions.saveImpl
       localStorage.setItem(`datatable_${this.storedOptions.id}_options`, JSON.stringify(copyOfOptions))

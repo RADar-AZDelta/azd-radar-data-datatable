@@ -28,14 +28,14 @@ let tempDt: ColumnTable | undefined
 async function loadFile(data: MessageRequestLoadFile) {
   tempDt = undefined
   switch (data.extension) {
-    case 'csv':
-      dt = await loadCSV(data.url, {})
-      break
-    case 'json':
-      dt = await loadJSON(data.url, {})
-      break
-    default:
-      throw new Error(`Unknown extension '${data.extension}'`)
+  case 'csv':
+    dt = await loadCSV(data.url, {})
+    break
+  case 'json':
+    dt = await loadJSON(data.url, {})
+    break
+  default:
+    throw new Error(`Unknown extension '${data.extension}'`)
   }
 }
 
@@ -44,7 +44,7 @@ async function getColumnNames() {
 }
 
 async function fetchData(data: MessageRequestFetchData) {
-  if ((!data.onlyPaginationChanged || !tempDt)) {
+  if (!data.onlyPaginationChanged || !tempDt) {
     tempDt = dt
     //filter
     if (data.filteredColumns.size === 1 && [...data.filteredColumns.keys()][0] === 'all') {
@@ -69,25 +69,31 @@ async function fetchData(data: MessageRequestFetchData) {
         const lowerCaseFilter = filter?.toString().toLowerCase()
         if (lowerCaseFilter) {
           const reg = new RegExp(lowerCaseFilter)
-          tempDt = tempDt.params({ lowerCaseFilter: lowerCaseFilter, column: column, reg }).filter((r: any, params: any) => op.match(op.lower(r[params.column]), params.reg, 0))
+          if (!tempDt) return
+          tempDt = tempDt
+            .params({ lowerCaseFilter: lowerCaseFilter, column: column, reg })
+            .filter((r: any, params: any) => op.match(op.lower(r[params.column]), params.reg, 0))
         }
       }
     }
+    if (!tempDt) return
     //sort
     for (const [column, sortDirection] of [...data.sortedColumns].reverse()) {
       //Sort is applied in reverse order !!!
       switch (sortDirection) {
-        case 'asc':
-          tempDt = tempDt.orderby(column)
-          break
-        case 'desc':
-          tempDt = tempDt.orderby(desc(column))
-          break
+      case 'asc':
+        tempDt = tempDt.orderby(column)
+        break
+      case 'desc':
+        tempDt = tempDt.orderby(desc(column))
+        break
       }
     }
   }
   //pagination
-  let totalRows: number = 0, matrix: any[][] = [], indices: any = []
+  let totalRows = 0,
+    matrix: any[][] = [],
+    indices: any = []
   if (tempDt) {
     totalRows = tempDt.numRows()
     const objects = tempDt.objects({
@@ -108,22 +114,13 @@ async function fetchData(data: MessageRequestFetchData) {
 
 async function saveToFile({ fileHandle, options }: MessageRequestSaveToFile) {
   const extension = fileHandle.name.split('.').pop()
-  switch (extension) {
-    case 'csv':
-      await exportCSV({ fileHandle, options })
-      break
-    default:
-      throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
-  }
+  if (extension === 'csv') return await exportCSV({ fileHandle, options })
+  else throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
 }
 
 async function getBlob({ extension, options }: MessageRequestGetBlob) {
-  switch (extension) {
-    case 'csv':
-      return await createBlobCSV(options)
-    default:
-      throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
-  }
+  if (extension === 'csv') return await createBlobCSV(options)
+  else throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
 }
 
 async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
@@ -176,7 +173,7 @@ async function createBlobCSV(options?: any) {
           ? '"' + value.replace(/"/g, '""') + '"'
           : value
 
-  let buffer = []
+  const buffer = []
 
   //write the header
   const cells = names.map(formatValue)
@@ -192,9 +189,8 @@ async function createBlobCSV(options?: any) {
 }
 
 async function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
-  for (let [index, row] of rowsByIndex)
-    for (const [column, value] of Object.entries(row))
-      if (dt._data[column]) dt._data[column].data[index] = value
+  for (const [index, row] of rowsByIndex)
+    for (const [column, value] of Object.entries(row)) if (dt._data[column]) dt._data[column].data[index] = value
 }
 
 async function insertRows({ rows }: MessageRequestInsertRows) {
@@ -211,7 +207,7 @@ async function deleteRows({ indices }: MessageRequestDeleteRows) {
 
   for (const index of indices) {
     for (const column of Object.keys(dt._data)) {
-      ; (dt._data[column] as Column).data.splice(index, 1)
+      ;(dt._data[column] as Column).data.splice(index, 1)
     }
     dt._total -= 1
     dt._nrows -= 1
@@ -244,7 +240,7 @@ async function insertColumns({ columns }: MessageRequestInsertColumns) {
   const obj: Record<string, any> = {}
   // Add a column that is already in the original table
   obj[dt._names[0]] = [dt._data[dt._names[0]].data[0]]
-  for (let col of columns) {
+  for (const col of columns) {
     // Add a new column name with an empty array as values
     obj[col.id] = [undefined]
   }
@@ -260,27 +256,31 @@ function executeQueryAndReturnResults({
   let tempDt = dt
   for (const [column, filter] of [...filteredColumns].values()) {
     const lowerCaseFilter = filter?.toString().toLowerCase()
-    tempDt = tempDt.filter(escape((d: any) => {
-      if (op.lower(d[column])) {
-        if (op.lower(d[column]).includes(lowerCaseFilter)) return d[column]
-      }
-    }))
+    tempDt = tempDt.filter(
+      escape((d: any) => {
+        if (op.lower(d[column])) {
+          if (op.lower(d[column]).includes(lowerCaseFilter)) return d[column]
+        }
+      })
+    )
   }
   for (const [column, sortDirection] of [...sortedColumns].reverse()) {
     switch (sortDirection) {
-      case 'asc':
-        tempDt = tempDt.orderby(column)
-        break
-      case 'desc':
-        tempDt = tempDt.orderby(desc(column))
-        break
+    case 'asc':
+      tempDt = tempDt.orderby(column)
+      break
+    case 'desc':
+      tempDt = tempDt.orderby(desc(column))
+      break
     }
   }
   const query = queryFrom(usedQuery)
-  const queriedDt: ColumnTable = query.evaluate(tempDt, () => { })
+  const queriedDt: ColumnTable = query.evaluate(tempDt, () => {
+    return
+  })
   const queriedData = queriedDt.objects()
 
-  let columns: Record<string, any> = {}
+  const columns: Record<string, any> = {}
   queriedDt._names.forEach(col => (columns[col] = () => 0))
   const imputedDt = tempDt.impute(columns)
   const tempQueriedDt = queriedDt.impute(columns)
@@ -291,23 +291,23 @@ function executeQueryAndReturnResults({
 
 function executeExpressionsAndReturnResults({ expressions }: MessageRequestExecuteExpressionsAndReturnResults) {
   const expressionData: any[] = []
-  for (let expr of Object.keys(expressions)) expressionData.push(dt.rollup({ [expr]: expressions[expr] }).object())
+  for (const expr of Object.keys(expressions)) expressionData.push(dt.rollup({ [expr]: expressions[expr] }).object())
   return { expressionData }
 }
 
 async function replaceValuesOfColumn({ currentValue, updatedValue, column }: MessageRequestReplaceValuesOfColumn) {
   dt.scan((row?: number | undefined, data?: TableData | undefined) => {
-    if (data) {
-      if (data[column as keyof Object].data[row] == currentValue) {
-        data![column as keyof Object].data[row] = updatedValue
+    if (data && row) {
+      if ((<Record<string, any>>data)[column].data[row] === currentValue) {
+        ;(<Record<string, any>>data)[column].data[row] = updatedValue
       }
     }
   })
 }
 
 async function renameColumns({ columns }: MessageRequestRenameColumns) {
-  let remove: string[] = []
-  for (let [oldCol, newCol] of Object.entries(columns)) {
+  const remove: string[] = []
+  for (const [oldCol, newCol] of Object.entries(columns)) {
     if (dt._names.includes(oldCol)) {
       remove.push(newCol)
     }
@@ -331,7 +331,7 @@ const exposed = {
   executeQueryAndReturnResults,
   executeExpressionsAndReturnResults,
   replaceValuesOfColumn,
-  renameColumns
+  renameColumns,
 }
 
 expose(exposed)

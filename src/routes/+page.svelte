@@ -101,7 +101,7 @@
     {
       id: 'name',
       label: 'NAAM',
-      sortDirection: 'asc',
+      // sortDirection: 'asc',
       // sortOrder: 0,
       position: 0,
     },
@@ -256,7 +256,7 @@
         rowsPerPageOptions: [7, 15],
         actionColumn: true,
         singleSort: false,
-        paginationOnTop: false
+        paginationOnTop: false,
       }}
       let:renderedRow
       let:originalIndex

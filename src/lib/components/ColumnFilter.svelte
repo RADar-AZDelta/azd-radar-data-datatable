@@ -25,7 +25,14 @@
 </script>
 
 <div data-name="column-filter">
-  <input id="filter input {column} {Math.random()}" on:input={onInput} type={inputType} {value} placeholder="Filter" {disabled} />
+  <input
+    id="filter input {column} {Math.random()}"
+    on:input={onInput}
+    type={inputType}
+    {value}
+    placeholder="Filter"
+    {disabled}
+  />
   <button on:click={onClick} {disabled} id="Cancel filter {column} {Math.random()}" aria-label="Cancel filter">
     <SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" />
   </button>

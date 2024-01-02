@@ -1,13 +1,13 @@
+import { dev } from '$app/environment'
+import { DataTypeCommonBase } from './DataTypeCommonBase'
 import type {
   IColumnMetaData,
   IDataTypeFunctionalities,
   IDataTypeInfo,
   IRender,
+  ITableOptions,
   ModifyColumnMetadataFunc,
 } from '$lib/components/DataTable'
-import type Query from 'arquero/dist/types/query/query'
-import { dev } from '$app/environment'
-import { DataTypeCommonBase } from './DataTypeCommonBase'
 
 export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -34,7 +34,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
 
     if (this.internalOptions) {
       this.internalColumns.forEach(col => {
-        if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
+        if (!col.width) col.width = this.internalOptions?.defaultColumnWidth
       })
     }
 
@@ -42,13 +42,13 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
   }
 
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
-    let totalRows: number = 0
+    let totalRows = 0
 
     if (!onlyPaginationChanged || !this.filteredAndSortedData) {
       this.filteredAndSortedData = await this.applySort(await this.applyFilter(this.data as any[]))
       if (this.filteredAndSortedData) totalRows = this.filteredAndSortedData.length
-    } else totalRows = this.data!.length
-    this.renderedData = await this.applyPagination(this.internalOptions!, this.filteredAndSortedData)
+    } else totalRows = (<any[]>this.data).length
+    this.renderedData = await this.applyPagination(<ITableOptions>this.internalOptions, this.filteredAndSortedData)
     const originalIndices = (this.renderedData as Record<string, any>[]).reduce<number[]>((acc, cur) => {
       acc.push((this.data as Record<string, any>[]).indexOf(cur))
       return acc
@@ -63,17 +63,18 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
   }
 
   async saveToFile(): Promise<void> {
+    if (!this.internalColumns || !this.renderedData) return
     const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(this.saveOptions)
     let csvArrayObjObjects = ''
-    let keyCounterArrayOfObjects: number = 0
-    for (let row = 0; row <= this.renderedData!.length; row++) {
-      for (let col of this.internalColumns!) {
+    let keyCounterArrayOfObjects = 0
+    for (let row = 0; row <= this.renderedData.length; row++) {
+      for (const col of this.internalColumns) {
         if (row == 0) {
-          csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
+          csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
           keyCounterArrayOfObjects++
         } else {
           const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
-          csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
+          csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
           keyCounterArrayOfObjects++
         }
       }
@@ -86,9 +87,9 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
 
   async getBlob(): Promise<Blob> {
     let csvArrayObjObjects = ''
-    let keyCounterArrayOfObjects: number = 0
+    let keyCounterArrayOfObjects = 0
     for (let row = 0; row <= this.renderedData!.length; row++) {
-      for (let col of this.internalColumns!) {
+      for (const col of this.internalColumns!) {
         if (row == 0) {
           csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
           keyCounterArrayOfObjects++
@@ -110,12 +111,6 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
     for (let i = 0; i < this.data!.length; i++) {
       if ((this.data as any[])![i][column] === currentValue) (this.data as any[])![i][column] = updatedValue
     }
-  }
-
-  async executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<void> {
-  }
-
-  async executeQueryAndReturnResults(query: Query | object): Promise<void> {
   }
 
   async getFullRow(originalIndex: number): Promise<Record<string, any>> {
@@ -159,7 +154,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
         const index = this.internalColumns!.findIndex(c => c.id === col)
         if (index !== -1) this.internalColumns![index].id = columns[col]
 
-        for (let obj of (this.data as any[])!) {
+        for (const obj of (this.data as any[])!) {
           obj[columns[col]] = obj[col]
           delete obj[col]
         }
@@ -183,15 +178,25 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
       ?.filter(col => col.sortDirection)
       .slice()
       .reverse() //Sort is applied in reverse order !!!
-      .forEach((col, index) => {
+      .forEach(col => {
         if (dev) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
         switch (col.sortDirection) {
-          case 'asc':
-            compareFn = (a, b) => (this.standardizeValue(a[col.id]) < this.standardizeValue(b[col.id]) ? -1 : this.standardizeValue(a[col.id]) > this.standardizeValue(b[col.id]) ? 1 : 0)
-            break
-          case 'desc':
-            compareFn = (a, b) => (this.standardizeValue(b[col.id]) < this.standardizeValue(a[col.id]) ? -1 : this.standardizeValue(b[col.id]) > this.standardizeValue(a[col.id]) ? 1 : 0)
-            break
+        case 'asc':
+          compareFn = (a, b) =>
+            this.standardizeValue(a[col.id]) < this.standardizeValue(b[col.id])
+              ? -1
+              : this.standardizeValue(a[col.id]) > this.standardizeValue(b[col.id])
+                ? 1
+                : 0
+          break
+        case 'desc':
+          compareFn = (a, b) =>
+            this.standardizeValue(b[col.id]) < this.standardizeValue(a[col.id])
+              ? -1
+              : this.standardizeValue(b[col.id]) > this.standardizeValue(a[col.id])
+                ? 1
+                : 0
+          break
         }
         if (data) data = data.sort(compareFn)
       })
@@ -199,7 +204,8 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
   }
 
   standardizeValue(value: string | number | Date): string | number {
-    if (new Date(value).toString() !== "Invalid Date" && !isNaN(new Date(value).getTime())) return new Date(value).getTime()
+    if (new Date(value).toString() !== 'Invalid Date' && !isNaN(new Date(value).getTime()))
+      return new Date(value).getTime()
     else return value.toString().toLowerCase()
   }
 }

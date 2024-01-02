@@ -1,4 +1,5 @@
 import { dev } from '$app/environment'
+import { DataTypeCommonBase } from '$lib/components/datatable/data/DataTypeCommonBase'
 import type {
   FetchDataFunc,
   IColumnMetaData,
@@ -7,17 +8,13 @@ import type {
   SortDirection,
   TFilter,
 } from '$lib/components/DataTable'
-import { DataTypeCommonBase } from '$lib/components/datatable/data/DataTypeCommonBase'
-import type Query from 'arquero/dist/types/query/query'
 
 export class AthenaClass extends DataTypeCommonBase implements IDataTypeFunctionalities {
-
-
-  async setInternalColumns (columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
+  async setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
     if (!columns) throw new Error('Columns property is not provided')
     else this.internalColumns = columns
 
-    if(this.internalOptions){
+    if (this.internalOptions) {
       this.internalColumns.forEach(col => {
         if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
       })
@@ -26,13 +23,13 @@ export class AthenaClass extends DataTypeCommonBase implements IDataTypeFunction
     return this.internalColumns
   }
 
-  async render (onlyPaginationChanged: boolean): Promise<IRender> {
+  async render(): Promise<IRender> {
     let start: number
-    const filteredColumns = this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
+    const filteredColumns = this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur) => {
       if (cur && cur.filter) acc.set(cur.id, cur.filter)
       return acc
     }, new Map<string, TFilter>())
-    const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
+    const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur) => {
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc
     }, new Map<string, SortDirection>())
@@ -54,12 +51,12 @@ export class AthenaClass extends DataTypeCommonBase implements IDataTypeFunction
     }
   }
 
-  async saveToFile (): Promise<void> {
+  async saveToFile(): Promise<void> {
     const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(this.saveOptions)
     let csvArrayObjObjects = ''
-    let keyCounterArrayOfObjects: number = 0
+    let keyCounterArrayOfObjects = 0
     for (let row = 0; row <= this.renderedData!.length; row++) {
-      for (let col of this.internalColumns!) {
+      for (const col of this.internalColumns!) {
         if (row == 0) {
           csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
           keyCounterArrayOfObjects++
@@ -75,12 +72,12 @@ export class AthenaClass extends DataTypeCommonBase implements IDataTypeFunction
     await writableArrayOfObjects.write(csvArrayObjObjects)
     await writableArrayOfObjects.close()
   }
-  
-  async getBlob (): Promise<Blob> {
+
+  async getBlob(): Promise<Blob> {
     let csvArrayObjObjects = ''
-    let keyCounterArrayOfObjects: number = 0
+    let keyCounterArrayOfObjects = 0
     for (let row = 0; row <= this.renderedData!.length; row++) {
-      for (let col of this.internalColumns!) {
+      for (const col of this.internalColumns!) {
         if (row == 0) {
           csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
           keyCounterArrayOfObjects++
@@ -92,38 +89,7 @@ export class AthenaClass extends DataTypeCommonBase implements IDataTypeFunction
       }
       keyCounterArrayOfObjects = 0
     }
-    const blob = new Blob([csvArrayObjObjects], { type: 'text/csv'})
+    const blob = new Blob([csvArrayObjObjects], { type: 'text/csv' })
     return blob
   }
-
-  async replaceValuesOfColumn (currentValue: any, updatedValue: any, column: string): Promise<void> {
-  }
-
-  async executeExpressionsAndReturnResults (expressions: Record<string, any>): Promise<void> {
-  }
-
-  async executeQueryAndReturnResults (query: Query | object): Promise<void> {
-  }
-
-  async insertColumns (cols: IColumnMetaData[]): Promise<void> {
-  }
-
-  async getFullRow (originalIndex: number): Promise<void> {
-  }
-
-  async deleteRows (originalIndices: number[]): Promise<void> {
-  }
-
-  async insertRows (rows: Record<string, any>[]): Promise<void> {
-  }
-
-  async updateRows (rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> {
-  }
-
-  async renameColumns (columns: Record<string, string>): Promise<void> {
-  }
-
-  async applyFilter (data: any[] | any[][]): Promise<void> {}
-
-  async applySort(data: any[] | any[][]): Promise<void> {}
 }
