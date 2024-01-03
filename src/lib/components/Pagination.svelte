@@ -3,7 +3,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import debounce from 'lodash.debounce'
-  import { range } from '$lib/utils.js'
+  import { range } from '$lib/utils'
   import SvgIcon from '$lib/components/SvgIcon.svelte'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import type { CustomTableEvents } from './DataTable.d.js'
