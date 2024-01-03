@@ -4,9 +4,7 @@ export function storeOptions(node: Node) {
   }
 
   const handleVisibilityChange = () => {
-    if (document.visibilityState === 'hidden') {
-      node.dispatchEvent(new CustomEvent('storeoptions'))
-    }
+    if (document.visibilityState === 'hidden') node.dispatchEvent(new CustomEvent('storeoptions'))
   }
 
   window.addEventListener('beforeunload', handleBeforeUnload, true)

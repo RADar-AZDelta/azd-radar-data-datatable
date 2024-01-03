@@ -68,12 +68,12 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
     const filteredColumns = this.internalOptions?.globalFilter?.filter
       ? new Map<string, TFilter>([
-        [this.internalOptions!.globalFilter!.column, this.internalOptions!.globalFilter!.filter],
-      ])
+          [this.internalOptions!.globalFilter!.column, this.internalOptions!.globalFilter!.filter],
+        ])
       : this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur) => {
-        if (cur && cur.filter) acc.set(cur.id, cur.filter)
-        return acc
-      }, new Map<string, TFilter>())
+          if (cur && cur.filter) acc.set(cur.id, cur.filter)
+          return acc
+        }, new Map<string, TFilter>())
     const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur) => {
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc

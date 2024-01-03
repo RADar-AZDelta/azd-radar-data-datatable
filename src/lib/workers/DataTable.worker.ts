@@ -27,21 +27,12 @@ let tempDt: ColumnTable | undefined
 
 async function loadFile(data: MessageRequestLoadFile) {
   tempDt = undefined
-  switch (data.extension) {
-  case 'csv':
-    dt = await loadCSV(data.url, {})
-    break
-  case 'json':
-    dt = await loadJSON(data.url, {})
-    break
-  default:
-    throw new Error(`Unknown extension '${data.extension}'`)
-  }
+  if (data.extension === 'csv') dt = await loadCSV(data.url, {})
+  else if (data.extension === 'json') dt = await loadJSON(data.url, {})
+  else throw new Error(`Unknown extension '${data.extension}'`)
 }
 
-async function getColumnNames() {
-  return dt.columnNames()
-}
+const getColumnNames = () => dt.columnNames()
 
 async function fetchData(data: MessageRequestFetchData) {
   if (!data.onlyPaginationChanged || !tempDt) {
@@ -81,12 +72,12 @@ async function fetchData(data: MessageRequestFetchData) {
     for (const [column, sortDirection] of [...data.sortedColumns].reverse()) {
       //Sort is applied in reverse order !!!
       switch (sortDirection) {
-      case 'asc':
-        tempDt = tempDt.orderby(column)
-        break
-      case 'desc':
-        tempDt = tempDt.orderby(desc(column))
-        break
+        case 'asc':
+          tempDt = tempDt.orderby(column)
+          break
+        case 'desc':
+          tempDt = tempDt.orderby(desc(column))
+          break
       }
     }
   }
@@ -115,31 +106,26 @@ async function fetchData(data: MessageRequestFetchData) {
 async function saveToFile({ fileHandle, options }: MessageRequestSaveToFile) {
   const extension = fileHandle.name.split('.').pop()
   if (extension === 'csv') return await exportCSV({ fileHandle, options })
-  else throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
+  throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
 }
 
 async function getBlob({ extension, options }: MessageRequestGetBlob) {
   if (extension === 'csv') return await createBlobCSV(options)
-  else throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
+  throw new Error(`Unknown or not yet implemented export file extension: '${extension}'`)
 }
 
 async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   const writable = await fileHandle.createWritable()
   const names: string[] = options?.columns || dt.columnNames()
-  //const format = options?.format || {};
   const delim = options?.delimiter || ','
   const reFormat = new RegExp(`["${delim}\n\r]`)
   const bufferRowSize = options?.bufferRowSize || 5000
-
-  const formatValue = (value: any) =>
-    value === null
-      ? ''
-      : value instanceof Date
-        ? (value as Date).toISOString()
-        : reFormat.test((value += ''))
-          ? '"' + value.replace(/"/g, '""') + '"'
-          : value
-
+  const formatValue = (value: any) => {
+    if (!value) return ''
+    else if (value instanceof Date) return value.toISOString()
+    else if (reFormat.test((value += ''))) return '"' + value.replace(/"/g, '""') + '"'
+    return value
+  }
   let buffer = []
 
   //write the header
@@ -163,16 +149,12 @@ async function createBlobCSV(options?: any) {
   const names: string[] = options?.columns || dt.columnNames()
   const delim = options?.delimiter || ','
   const reFormat = new RegExp(`["${delim}\n\r]`)
-
-  const formatValue = (value: any) =>
-    value == null
-      ? ''
-      : value instanceof Date
-        ? (value as Date).toISOString()
-        : reFormat.test((value += ''))
-          ? '"' + value.replace(/"/g, '""') + '"'
-          : value
-
+  const formatValue = (value: any) => {
+    if (!value) return ''
+    else if (value instanceof Date) return value.toISOString()
+    else if (reFormat.test((value += ''))) return '"' + value.replace(/"/g, '""') + '"'
+    return value
+  }
   const buffer = []
 
   //write the header
@@ -214,11 +196,10 @@ async function deleteRows({ indices }: MessageRequestDeleteRows) {
   }
 }
 
-async function getRow({ index }: MessageRequestGetRow) {
-  return dt.object(index)
-}
+const getRow = ({ index }: MessageRequestGetRow) => dt.object(index)
 
 async function getNextRow({ index, rowsPerPage, currentPage }: MessageRequestChangeRow) {
+  if (!tempDt) return
   const currentIndicesIndex = tempDt._index.indexOf(index)
   const indicesIndex = currentIndicesIndex + 1
   let newPage: number = currentPage
@@ -228,6 +209,7 @@ async function getNextRow({ index, rowsPerPage, currentPage }: MessageRequestCha
 }
 
 async function getPreviousRow({ index, rowsPerPage, currentPage }: MessageRequestChangeRow) {
+  if (!tempDt) return
   const currentIndicesIndex = tempDt._index.indexOf(index)
   const indicesIndex = currentIndicesIndex - 1
   let newPage: number = currentPage
@@ -240,10 +222,8 @@ async function insertColumns({ columns }: MessageRequestInsertColumns) {
   const obj: Record<string, any> = {}
   // Add a column that is already in the original table
   obj[dt._names[0]] = [dt._data[dt._names[0]].data[0]]
-  for (const col of columns) {
-    // Add a new column name with an empty array as values
-    obj[col.id] = [undefined]
-  }
+  // Add a new column name with an empty array as values in every row
+  for (const col of columns) obj[col.id] = [undefined]
   // Left join the new table into the original table
   dt = dt.join_left(fromJSON(obj))
 }
@@ -258,21 +238,13 @@ function executeQueryAndReturnResults({
     const lowerCaseFilter = filter?.toString().toLowerCase()
     tempDt = tempDt.filter(
       escape((d: any) => {
-        if (op.lower(d[column])) {
-          if (op.lower(d[column]).includes(lowerCaseFilter)) return d[column]
-        }
+        if (op.lower(d[column]) && op.lower(d[column])?.includes(lowerCaseFilter)) return d[column]
       })
     )
   }
   for (const [column, sortDirection] of [...sortedColumns].reverse()) {
-    switch (sortDirection) {
-    case 'asc':
-      tempDt = tempDt.orderby(column)
-      break
-    case 'desc':
-      tempDt = tempDt.orderby(desc(column))
-      break
-    }
+    if (sortDirection === 'asc') tempDt = tempDt.orderby(column)
+    else if (sortDirection === 'desc') tempDt = tempDt.orderby(desc(column))
   }
   const query = queryFrom(usedQuery)
   const queriedDt: ColumnTable = query.evaluate(tempDt, () => {
@@ -298,20 +270,15 @@ function executeExpressionsAndReturnResults({ expressions }: MessageRequestExecu
 async function replaceValuesOfColumn({ currentValue, updatedValue, column }: MessageRequestReplaceValuesOfColumn) {
   dt.scan((row?: number | undefined, data?: TableData | undefined) => {
     if (data && row) {
-      if ((<Record<string, any>>data)[column].data[row] === currentValue) {
-        ;(<Record<string, any>>data)[column].data[row] = updatedValue
-      }
+      const value = (<Record<string, any>>data)[column].data[row]
+      if (value === currentValue) (<Record<string, any>>data)[column].data[row] = updatedValue
     }
   })
 }
 
 async function renameColumns({ columns }: MessageRequestRenameColumns) {
   const remove: string[] = []
-  for (const [oldCol, newCol] of Object.entries(columns)) {
-    if (dt._names.includes(oldCol)) {
-      remove.push(newCol)
-    }
-  }
+  for (const [oldCol, newCol] of Object.entries(columns)) if (dt._names.includes(oldCol)) remove.push(newCol)
   dt = dt.select(not(remove), columns)
 }
 

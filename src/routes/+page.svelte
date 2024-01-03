@@ -6,9 +6,9 @@
   import EditableCell from '$lib/components/EditableCell.svelte'
   import { flip } from 'svelte/animate'
   import DataTable from '$lib/components/DataTable.svelte'
-  import { FetchDataTypeClass } from '$lib/example/FetchDataTypeClass'
+  import { FetchDataTypeClass } from '../examples/FetchDataTypeClass'
 
-  const data = [
+  const data: Record<string, any>[] = [
     {
       name: 'Rory',
       age: 35,
@@ -165,9 +165,13 @@
     }
 
     //PAGINATION
-    const start = (pagination.currentPage - 1) * pagination.rowsPerPage
-    const end = pagination.currentPage * pagination.rowsPerPage
-    fetchedData = fetchedData.slice(start, end)
+    const { currentPage, rowsPerPage } = pagination
+    if (!currentPage || !rowsPerPage) fetchedData = fetchedData.slice(0, 20)
+    else {
+      const start = (currentPage - 1) * rowsPerPage ?? 0
+      const end = currentPage * rowsPerPage
+      fetchedData = fetchedData.slice(start, end)
+    }
 
     await sleep(500)
     return { totalRows, data: fetchedData }
@@ -208,13 +212,14 @@
   }
 
   async function onClickInsertRowsCSV(dataTable: DataTable) {
+    const rows: Record<string, any> = {}
     const dummyRow = dataTable
       .getColumns()
       ?.map(col => col.id)
       .reduce((acc, cur) => {
         acc[cur] = ' insert'
         return acc
-      }, {})
+      }, rows)
 
     await dataTable.insertRows([dummyRow!])
   }

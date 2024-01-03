@@ -1,10 +1,10 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import type { Hex, SortDirection, CustomTableEvents } from './DataTable.d.js'
-  import SvgIcon from './SvgIcon.svelte'
   import { createEventDispatcher } from 'svelte'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
+  import SvgIcon from './SvgIcon.svelte'
+  import type { Hex, SortDirection, CustomTableEvents } from './DataTable.d.js'
 
   export let column: string,
     sortDirection: SortDirection,
@@ -39,17 +39,7 @@
   }
 
   function onClick() {
-    switch (sortDirection) {
-      case 'asc':
-        sortDirection = 'desc'
-        break
-      case 'desc':
-        sortDirection = undefined
-        break
-      default:
-        sortDirection = 'asc'
-        break
-    }
+    sortDirection = sortDirection === 'asc' ? 'desc' : sortDirection === 'desc' ? undefined : 'asc'
     dispatch('columnSortChanged', { column, sortDirection })
   }
 </script>
@@ -58,8 +48,6 @@
   <SvgIcon
     href={iconsSvgUrl}
     id="updown"
-    width="16px"
-    height="16px"
     --up-color={upColor}
     --down-color={downColor}
     --up-opacity={upOpacity}

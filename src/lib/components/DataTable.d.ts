@@ -84,32 +84,32 @@ export interface IColumnMetaData {
 }
 
 export interface CustomTableEvents {
-  columnSortChanged: ColumnSortChangedEventDetail
-  columnFilterChanged: ColumnFilterChangedEventDetail
-  paginationChanged: PaginationChangedEventDetail
+  columnSortChanged: ColumnSortChangedED
+  columnFilterChanged: ColumnFilterChangedED
+  paginationChanged: PaginationChangedED
   settingsVisibilityChanged: void
-  columnPositionChanged: ColumnPositionChangedEventDetail
-  columnWidthChanged: ColumnWidthChangedEventDetail
+  columnPositionChanged: ColumnPositionChangedED
+  columnWidthChanged: ColumnWidthChangedED
 }
 
-export interface ColumnPositionChangedEventDetail {
+export interface ColumnPositionChangedED {
   column: string
   position: number
 }
 
-export interface ColumnWidthChangedEventDetail {
+export interface ColumnWidthChangedED {
   column: string
   width: number
 }
 
-export interface ColumnSortChangedEventDetail {
+export interface ColumnSortChangedED {
   column: string
   sortDirection: SortDirection
 }
 
 export type TFilter = string | number | RegExp | Date | boolean | string[] | undefined | null
 
-export interface ColumnFilterChangedEventDetail {
+export interface ColumnFilterChangedED {
   column: string
   filter: TFilter
 }
@@ -119,7 +119,7 @@ export interface GlobalFilter {
   filter: TFilter
 }
 
-export type PaginationChangedEventDetail = IPagination
+export type PaginationChangedED = IPagination
 
 export interface ICustomStoreOptions {
   load(id: string, columns?: IColumnMetaData[]): IStoredOptions | Promise<IStoredOptions>

@@ -1,4 +1,4 @@
-import { dev } from '$app/environment'
+import { DEV } from 'esm-env'
 import { DataTypeCommonBase } from '$lib/components/datatable/data/DataTypeCommonBase'
 import type {
   FetchDataFunc,
@@ -20,12 +20,8 @@ export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeF
 
   async setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
     if (!columns) throw new Error('Columns property is not provided')
-    else this.internalColumns = columns
-
-    this.internalColumns.forEach(col => {
-      if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
-    })
-
+    this.internalColumns = columns
+    for (let col of this.internalColumns) if (!col.width) col.width = this.internalOptions?.defaultColumnWidth ?? 10
     return this.internalColumns
   }
 
@@ -39,9 +35,9 @@ export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeF
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc
     }, new Map<string, SortDirection>())
-    if (dev) start = performance.now()
+    if (DEV) start = performance.now()
     const results = await (this.data as FetchDataFunc)(filteredColumns, sortedColumns, this.internalOptions!)
-    if (dev) {
+    if (DEV) {
       const end = performance.now()
       console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
     }
@@ -60,23 +56,9 @@ export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeF
   async saveToFile(): Promise<void> {
     if (!this.internalColumns || !this.renderedData) return
     const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(this.saveOptions)
-    let csvArrayObjObjects = ''
-    let keyCounterArrayOfObjects = 0
-    for (let row = 0; row <= this.renderedData.length; row++) {
-      for (const col of this.internalColumns) {
-        if (row == 0) {
-          csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
-          keyCounterArrayOfObjects++
-        } else {
-          const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
-          csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
-          keyCounterArrayOfObjects++
-        }
-      }
-      keyCounterArrayOfObjects = 0
-    }
+    const csv = this.transformToCSV()
     const writableArrayOfObjects = await fileHandle.createWritable()
-    await writableArrayOfObjects.write(csvArrayObjObjects)
+    await writableArrayOfObjects.write(csv)
     await writableArrayOfObjects.close()
   }
 
@@ -114,5 +96,25 @@ export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeF
 
   async renameColumns(): Promise<void> {
     throw new Error('Can not rename a column on a function dataset')
+  }
+
+  private transformToCSV(): string {
+    if (!this.internalColumns || !this.renderedData) return ''
+    let csvArrayObjObjects = ''
+    let keyCounterArrayOfObjects = 0
+    for (let row = 0; row <= this.renderedData.length; row++) {
+      for (const col of this.internalColumns) {
+        if (row == 0) {
+          csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
+          keyCounterArrayOfObjects++
+        } else {
+          const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
+          csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
+          keyCounterArrayOfObjects++
+        }
+      }
+      keyCounterArrayOfObjects = 0
+    }
+    return csvArrayObjObjects
   }
 }

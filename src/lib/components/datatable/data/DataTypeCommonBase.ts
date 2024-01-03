@@ -1,4 +1,4 @@
-import { dev } from '$app/environment'
+import { DEV } from 'esm-env'
 import { DataTypeBase } from './DataTypeBase'
 import type {
   IColumnMetaData,
@@ -91,7 +91,7 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
       if (internalOptions && internalOptions?.currentPage && internalOptions?.rowsPerPage) {
         const start = (internalOptions.currentPage! - 1) * internalOptions.rowsPerPage!
         const end = internalOptions.currentPage! * internalOptions.rowsPerPage!
-        if (dev) console.log(`DataTable: applying pagination row ${start} - ${end}`)
+        if (DEV) console.log(`DataTable: applying pagination row ${start} - ${end}`)
         data = data.slice(start, end)
         return data
       } else return data.slice(0, 20)
@@ -122,7 +122,5 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
     }
   }
 
-  async destroy(): Promise<void> {
-    throw new Error('Method destroy not implemented.')
-  }
+  async destroy(): Promise<void> {}
 }

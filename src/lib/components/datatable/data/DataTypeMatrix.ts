@@ -1,4 +1,4 @@
-import { dev } from '$app/environment'
+import { DEV } from 'esm-env'
 import { DataTypeCommonBase } from './DataTypeCommonBase'
 import type { IDataTypeFunctionalities, IRender } from '$lib/components/DataTable'
 
@@ -37,45 +37,15 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
 
   async saveToFile(): Promise<void> {
     const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(this.saveOptions)
-    let csvMatrix = ''
-    let keyCounterMatrix = 0
-    for (const col of this.internalColumns!) {
-      csvMatrix += col.id + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
-      keyCounterMatrix++
-    }
-    keyCounterMatrix = 0
-    for (const row of (this.data as any[][])!) {
-      for (const cell of row) {
-        const value = cell.toString().replaceAll(',', ';')
-        csvMatrix += value + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
-        keyCounterMatrix++
-      }
-      keyCounterMatrix = 0
-    }
+    const csv = this.transformToCSV()
     const writableMatrix = await fileHandle.createWritable()
-    await writableMatrix.write(csvMatrix)
+    await writableMatrix.write(csv)
     await writableMatrix.close()
   }
 
   async getBlob(): Promise<Blob> {
-    let csvMatrix = ''
-    let keyCounterMatrix = 0
-    for (const col of this.internalColumns!) {
-      csvMatrix += col.id + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
-      keyCounterMatrix++
-    }
-    keyCounterMatrix = 0
-    for (const row of (this.data as any[][])!) {
-      for (const cell of row) {
-        if (cell) {
-          const value = cell.toString().replaceAll(',', ';')
-          csvMatrix += value + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
-          keyCounterMatrix++
-        }
-      }
-      keyCounterMatrix = 0
-    }
-    const blob = new Blob([csvMatrix], { type: 'text/csv' })
+    const csv = this.transformToCSV()
+    const blob = new Blob([csv], { type: 'text/csv' })
     return blob
   }
 
@@ -154,7 +124,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     this.internalColumns
       ?.filter(col => col.filter)
       .forEach(col => {
-        if (dev) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
+        if (DEV) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
         const index = this.internalColumns?.findIndex(c => c.id === col.id)
         data = data.filter(row => row[index!]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
       })
@@ -170,25 +140,25 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
       .forEach(col => {
         const index = this.internalColumns?.findIndex(obj => obj.id == col.id)
         if (index) {
-          if (dev)
+          if (DEV)
             console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
           switch (col.sortDirection) {
-          case 'asc':
-            compareFn = (a, b) =>
-              this.standardizeValue(a[index]) < this.standardizeValue(b[index])
-                ? -1
-                : this.standardizeValue(a[index]) > this.standardizeValue(b[index])
+            case 'asc':
+              compareFn = (a, b) =>
+                this.standardizeValue(a[index]) < this.standardizeValue(b[index])
+                  ? -1
+                  : this.standardizeValue(a[index]) > this.standardizeValue(b[index])
                   ? 1
                   : 0
-            break
-          case 'desc':
-            compareFn = (a, b) =>
-              this.standardizeValue(b[index]) < this.standardizeValue(a[index])
-                ? -1
-                : this.standardizeValue(b[index]) > this.standardizeValue(a[index])
+              break
+            case 'desc':
+              compareFn = (a, b) =>
+                this.standardizeValue(b[index]) < this.standardizeValue(a[index])
+                  ? -1
+                  : this.standardizeValue(b[index]) > this.standardizeValue(a[index])
                   ? 1
                   : 0
-            break
+              break
           }
           if (data) data = data.sort(compareFn)
         }
@@ -196,9 +166,28 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     return data
   }
 
-  standardizeValue(value: string | number | Date): string | number {
+  private standardizeValue(value: string | number | Date): string | number {
     if (new Date(value).toString() !== 'Invalid Date' && !isNaN(new Date(value).getTime()))
       return new Date(value).getTime()
     else return value.toString().toLowerCase()
+  }
+
+  private transformToCSV() {
+    let csvMatrix = ''
+    let keyCounterMatrix = 0
+    for (const col of this.internalColumns!) {
+      csvMatrix += col.id + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
+      keyCounterMatrix++
+    }
+    keyCounterMatrix = 0
+    for (const row of (this.data as any[][])!) {
+      for (const cell of row) {
+        const value = cell.toString().replaceAll(',', ';')
+        csvMatrix += value + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
+        keyCounterMatrix++
+      }
+      keyCounterMatrix = 0
+    }
+    return csvMatrix
   }
 }

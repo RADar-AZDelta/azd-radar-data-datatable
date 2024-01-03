@@ -1,16 +1,14 @@
 <script lang="ts">
-  import SvgIcon from './SvgIcon.svelte'
-  import type { CustomTableEvents } from './DataTable'
   import { createEventDispatcher } from 'svelte'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
+  import SvgIcon from '$lib/components/SvgIcon.svelte'
+  import type { CustomTableEvents } from '$lib/components/DataTable'
 
   export let disabled: boolean
 
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
-  function onClick() {
-    dispatch('settingsVisibilityChanged')
-  }
+  const onClick = () => dispatch('settingsVisibilityChanged')
 </script>
 
 <button
@@ -18,5 +16,7 @@
   on:click={onClick}
   {disabled}
   id="Settings button {Math.random()}"
-  aria-label="Settings button"><SvgIcon href={iconsSvgUrl} id="gear" width="16px" height="16px" /></button
+  aria-label="Settings button"
 >
+  <SvgIcon href={iconsSvgUrl} id="gear" width="16px" height="16px" />
+</button>
