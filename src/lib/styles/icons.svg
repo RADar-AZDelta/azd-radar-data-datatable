@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" version="1.1">
 <defs>
-    <symbol id="updown" viewbox="0 -10 100 110">
+    <symbol id="updown" viewbox="0 0 24 24">
       <g>
         <path
           style="fill-opacity: var(--up-opacity, 1); fill: var(--up-color, #888888);"

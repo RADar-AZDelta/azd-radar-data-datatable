@@ -3,7 +3,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import debounce from 'lodash.debounce'
-  import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import SvgIcon from '$lib/components/SvgIcon.svelte'
   import type { CustomTableEvents, TFilter } from './DataTable.d.js'
 
@@ -26,6 +25,6 @@
     {disabled}
   />
   <button on:click={onClick} {disabled} id="Cancel filter {column} {Math.random()}" aria-label="Cancel filter">
-    <SvgIcon href={iconsSvgUrl} id="x" />
+    <SvgIcon id="x" />
   </button>
 </div>
