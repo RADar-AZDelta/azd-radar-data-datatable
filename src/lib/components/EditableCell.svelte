@@ -1,33 +1,32 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import SvgIcon from './SvgIcon.svelte'
-  import { clickOutside } from '../actions/clickOutside.js'
   import { createEventDispatcher } from 'svelte'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
-  import { escapeWithKey } from '$lib/actions/escapeWithKey'
+  import SvgIcon from '$lib/components/SvgIcon.svelte'
   import { saveWithKey } from '$lib/actions/saveWithKey'
+  import { clickOutside } from '$lib/actions/clickOutside'
+  import { escapeWithKey } from '$lib/actions/escapeWithKey'
 
   export let value: any
-  let editValue: any
-  $: {
-    editValue = value
-  }
-
-  let editMode = false
 
   const dispatch = createEventDispatcher()
 
+  $: editValue = value
+  let editMode = false
+
   function onClickSave() {
     editMode = false
-    dispatch('valueChanged', editValue)
     value = editValue
+    dispatch('valueChanged', editValue)
   }
 
   function onClickCancel() {
     editValue = value
     editMode = false
   }
+
+  const enableEdit = () => (editMode = true)
 </script>
 
 <div
@@ -40,8 +39,9 @@
   data-name="cell"
 >
   {#if !editMode}
+    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <p on:click={() => (editMode = true)}>{value}</p>
+    <p on:click={enableEdit}>{value}</p>
   {:else}
     <textarea bind:value={editValue} />
     <button on:click={onClickSave}><SvgIcon href={iconsSvgUrl} id="checkmark" width="20px" height="20px" /></button>

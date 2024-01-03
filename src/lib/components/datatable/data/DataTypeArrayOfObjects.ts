@@ -1,13 +1,13 @@
+import { DEV } from 'esm-env'
+import { DataTypeCommonBase } from './DataTypeCommonBase'
 import type {
   IColumnMetaData,
   IDataTypeFunctionalities,
   IDataTypeInfo,
   IRender,
+  ITableOptions,
   ModifyColumnMetadataFunc,
 } from '$lib/components/DataTable'
-import type Query from 'arquero/dist/types/query/query'
-import { dev } from '$app/environment'
-import { DataTypeCommonBase } from './DataTypeCommonBase'
 
 export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -32,23 +32,20 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
       if (this.modifyColumnMetadata) this.internalColumns = this.modifyColumnMetadata(this.internalColumns)
     } else this.internalColumns = columns
 
-    if (this.internalOptions) {
-      this.internalColumns.forEach(col => {
-        if (!col.width) col.width = this.internalOptions!.defaultColumnWidth
-      })
-    }
+    if (this.internalOptions)
+      for (let col of this.internalColumns) if (!col.width) col.width = this.internalOptions?.defaultColumnWidth
 
     return this.internalColumns
   }
 
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
-    let totalRows: number = 0
+    let totalRows = 0
 
     if (!onlyPaginationChanged || !this.filteredAndSortedData) {
       this.filteredAndSortedData = await this.applySort(await this.applyFilter(this.data as any[]))
       if (this.filteredAndSortedData) totalRows = this.filteredAndSortedData.length
-    } else totalRows = this.data!.length
-    this.renderedData = await this.applyPagination(this.internalOptions!, this.filteredAndSortedData)
+    } else totalRows = (<any[]>this.data).length
+    this.renderedData = await this.applyPagination(<ITableOptions>this.internalOptions, this.filteredAndSortedData)
     const originalIndices = (this.renderedData as Record<string, any>[]).reduce<number[]>((acc, cur) => {
       acc.push((this.data as Record<string, any>[]).indexOf(cur))
       return acc
@@ -64,63 +61,23 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
 
   async saveToFile(): Promise<void> {
     const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(this.saveOptions)
-    let csvArrayObjObjects = ''
-    let keyCounterArrayOfObjects: number = 0
-    for (let row = 0; row <= this.renderedData!.length; row++) {
-      for (let col of this.internalColumns!) {
-        if (row == 0) {
-          csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
-          keyCounterArrayOfObjects++
-        } else {
-          const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
-          csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
-          keyCounterArrayOfObjects++
-        }
-      }
-      keyCounterArrayOfObjects = 0
-    }
+    const csv = this.transformToCSV()
     const writableArrayOfObjects = await fileHandle.createWritable()
-    await writableArrayOfObjects.write(csvArrayObjObjects)
+    await writableArrayOfObjects.write(csv)
     await writableArrayOfObjects.close()
   }
 
   async getBlob(): Promise<Blob> {
-    let csvArrayObjObjects = ''
-    let keyCounterArrayOfObjects: number = 0
-    for (let row = 0; row <= this.renderedData!.length; row++) {
-      for (let col of this.internalColumns!) {
-        if (row == 0) {
-          csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
-          keyCounterArrayOfObjects++
-        } else {
-          if ((<any[]>this.renderedData)[row - 1][col.id as keyof object]) {
-            const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
-            csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns!.length ? ',' : '\r\n')
-            keyCounterArrayOfObjects++
-          }
-        }
-      }
-      keyCounterArrayOfObjects = 0
-    }
-    const blob = new Blob([csvArrayObjObjects], { type: 'text/csv' })
-    return blob
+    const csv = this.transformToCSV()
+    return new Blob([csv], { type: 'text/csv' })
   }
 
   async replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void> {
-    for (let i = 0; i < this.data!.length; i++) {
-      if ((this.data as any[])![i][column] === currentValue) (this.data as any[])![i][column] = updatedValue
-    }
+    for (let i = 0; i < this.data!.length; i++)
+      if ((this.data as any[])![i][column] === currentValue) (this.data as any[])[i][column] = updatedValue
   }
 
-  async executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<void> {
-  }
-
-  async executeQueryAndReturnResults(query: Query | object): Promise<void> {
-  }
-
-  async getFullRow(originalIndex: number): Promise<Record<string, any>> {
-    return (this.data as any[])[originalIndex]
-  }
+  getFullRow = async (originalIndex: number): Promise<Record<string, any>> => (this.data as any[])[originalIndex]
 
   async getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<any> {
     const newIndex = currentIndex + 1
@@ -143,35 +100,32 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
     const originalIndices = Array.from({ length: rows.length }, (_, i) => data.length + i)
     data!.push(...rows)
     this.data = data
-
     return originalIndices
   }
 
   async updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> {
-    for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) {
-      Object.assign((this.data as any[])![originalIndex], row)
-    }
+    for (const [originalIndex, row] of rowsToUpdateByOriginalIndex)
+      Object.assign((this.data as any[])[originalIndex], row)
   }
 
   async renameColumns(columns: Record<string, string>): Promise<void> {
-    if (this.internalColumns) {
-      Object.keys(columns).forEach(col => {
-        const index = this.internalColumns!.findIndex(c => c.id === col)
-        if (index !== -1) this.internalColumns![index].id = columns[col]
+    if (!this.internalColumns) return
+    Object.keys(columns).forEach(col => {
+      const index = this.internalColumns!.findIndex(c => c.id === col)
+      if (index !== -1) this.internalColumns![index].id = columns[col]
 
-        for (let obj of (this.data as any[])!) {
-          obj[columns[col]] = obj[col]
-          delete obj[col]
-        }
-      })
-    }
+      for (const obj of (this.data as any[])!) {
+        obj[columns[col]] = obj[col]
+        delete obj[col]
+      }
+    })
   }
 
   async applyFilter(data: any[]): Promise<any[]> {
     this.internalColumns
       ?.filter(col => col.filter)
       .forEach(col => {
-        if (dev) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
+        if (DEV) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
         data = data.filter(obj => obj[col.id]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
       })
     return data
@@ -183,23 +137,48 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
       ?.filter(col => col.sortDirection)
       .slice()
       .reverse() //Sort is applied in reverse order !!!
-      .forEach((col, index) => {
-        if (dev) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
-        switch (col.sortDirection) {
-          case 'asc':
-            compareFn = (a, b) => (this.standardizeValue(a[col.id]) < this.standardizeValue(b[col.id]) ? -1 : this.standardizeValue(a[col.id]) > this.standardizeValue(b[col.id]) ? 1 : 0)
-            break
-          case 'desc':
-            compareFn = (a, b) => (this.standardizeValue(b[col.id]) < this.standardizeValue(a[col.id]) ? -1 : this.standardizeValue(b[col.id]) > this.standardizeValue(a[col.id]) ? 1 : 0)
-            break
-        }
+      .forEach(col => {
+        if (DEV) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
+        if (col.sortDirection === 'asc')
+          compareFn = (a, b) => {
+            const colA = this.standardizeValue(a[col.id])
+            const colB = this.standardizeValue(b[col.id])
+            return colA < colB ? -1 : colA > colB ? 1 : 0
+          }
+        else if (col.sortDirection === 'desc')
+          compareFn = (a, b) => {
+            const colA = this.standardizeValue(a[col.id])
+            const colB = this.standardizeValue(b[col.id])
+            return colB < colA ? -1 : colB > colA ? 1 : 0
+          }
         if (data) data = data.sort(compareFn)
       })
     return data
   }
 
-  standardizeValue(value: string | number | Date): string | number {
-    if (new Date(value).toString() !== "Invalid Date" && !isNaN(new Date(value).getTime())) return new Date(value).getTime()
-    else return value.toString().toLowerCase()
+  private standardizeValue(value: string | number | Date): string | number {
+    if (new Date(value).toString() !== 'Invalid Date' && !isNaN(new Date(value).getTime()))
+      return new Date(value).getTime()
+    return value.toString().toLowerCase()
+  }
+
+  private transformToCSV(): string {
+    if (!this.internalColumns || !this.renderedData) return ''
+    let csvArrayObjObjects = ''
+    let keyCounterArrayOfObjects = 0
+    for (let row = 0; row <= this.renderedData.length; row++) {
+      for (const col of this.internalColumns) {
+        if (row == 0) {
+          csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
+          keyCounterArrayOfObjects++
+        } else {
+          const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
+          csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
+          keyCounterArrayOfObjects++
+        }
+      }
+      keyCounterArrayOfObjects = 0
+    }
+    return csvArrayObjObjects
   }
 }

@@ -29,29 +29,29 @@ add the component to a svelte page
 ```svelte
 <script lang="ts">
   import DataTable from '@radar-azdelta/svelte-datatable'
-  
+
   const data = [
     {
       name: 'Rory',
       age: 35,
       country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,'
+      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,',
     },
     {
       name: 'Amethyst',
       age: 35,
       country: 'Belgium',
       telephone: '0800-123-524-634',
-      address: 'Eikstraat 450,Belgrade,Namur,5001,'
-    }
+      address: 'Eikstraat 450,Belgrade,Namur,5001,',
+    },
   ]
 </script>
 
 <DataTable {data} />
 ```
 
-Also add the folowing config to your vite.config.ts, otherwise @radar-azdelta/svelte-datatable worker can't be downloaded. 
+Also add the folowing config to your vite.config.ts, otherwise @radar-azdelta/svelte-datatable worker can't be downloaded.
 
 ```js
 export default defineConfig({
@@ -83,21 +83,21 @@ global options for the DataTable
 
 ```typescript
 interface ITableOptions {
-  id?: string,
-  currentPage?: number,
-  rowsPerPage?: number,
-  rowsPerPageOptions?: number[],
+  id?: string
+  currentPage?: number
+  rowsPerPage?: number
+  rowsPerPageOptions?: number[]
   actionColumn?: boolean
 }
 ```
 
-| Value | Description | Required | Default |
-| ----- | ----------- | -------- | ------- |
-| **id** | identifier for the datatable, so that it settings can be stored in localStorage | no | |
-| **currentPage** | the current page to display | no | 1 |
-| **rowsPerPage** | number of rows visible in a page | no | 20 |
-| **rowsPerPageOptions** | number of rows visible in a page | no | [5, 10, 20, 50, 100] |
-| **actionColumn** | Adds an action column as first column. This can be used to add aditional functionality, for example 'selecting multiple columns', or 'add custom action buttoms', etc... | no | false |
+| Value                  | Description                                                                                                                                                              | Required | Default              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------- |
+| **id**                 | identifier for the datatable, so that it settings can be stored in localStorage                                                                                          | no       |                      |
+| **currentPage**        | the current page to display                                                                                                                                              | no       | 1                    |
+| **rowsPerPage**        | number of rows visible in a page                                                                                                                                         | no       | 20                   |
+| **rowsPerPageOptions** | number of rows visible in a page                                                                                                                                         | no       | [5, 10, 20, 50, 100] |
+| **actionColumn**       | Adds an action column as first column. This can be used to add aditional functionality, for example 'selecting multiple columns', or 'add custom action buttoms', etc... | no       | false                |
 
 #### Columns property
 
@@ -120,48 +120,50 @@ interface IColumnMetaData {
 }
 ```
 
-| Value | Description | Required | Default |
-| ----- | ----------- | -------- | ------- |
-| **id** | id or name of the column | yes | |
-| **label** | id or name of the column | no | |
-| **visible** | is the column visible | no | yes |
-| **sortable** | is the column sortable | no | yes |
-| **filterable** | is the column filterable | no | yes |
-| **resizable** | FUTURE FUNCTIONALITY: can the column width be adjusted | no | yes |
-| **repositionable** | can the column be repositioned | no | yes |
-| **sortDirection** | do not sort (undefined), sort the column 'asc' or 'desc' | no | |
-| **sortOrder** | if multiple columns are sorted, this prop defines the sequence of the order | no | |
-| **filter** | filter the column values | no | |
-| **position** | the visual position (sequence) of the column | no | |
-| **width** | FUTURE FUNCTIONALITY: the width of the column | no | |
+| Value              | Description                                                                 | Required | Default |
+| ------------------ | --------------------------------------------------------------------------- | -------- | ------- |
+| **id**             | id or name of the column                                                    | yes      |         |
+| **label**          | id or name of the column                                                    | no       |         |
+| **visible**        | is the column visible                                                       | no       | yes     |
+| **sortable**       | is the column sortable                                                      | no       | yes     |
+| **filterable**     | is the column filterable                                                    | no       | yes     |
+| **resizable**      | FUTURE FUNCTIONALITY: can the column width be adjusted                      | no       | yes     |
+| **repositionable** | can the column be repositioned                                              | no       | yes     |
+| **sortDirection**  | do not sort (undefined), sort the column 'asc' or 'desc'                    | no       |         |
+| **sortOrder**      | if multiple columns are sorted, this prop defines the sequence of the order | no       |         |
+| **filter**         | filter the column values                                                    | no       |         |
+| **position**       | the visual position (sequence) of the column                                | no       |         |
+| **width**          | FUTURE FUNCTIONALITY: the width of the column                               | no       |         |
 
 #### Data property
 
 - Array of Objects
+
 ```typescript
- const data = [
-    {
-      name: 'Rory',
-      age: 35,
-      country: 'Belgium',
-      telephone: '0800-123-524-634',
-      address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,'
-    },
-    {
-      name: 'Amethyst',
-      age: 35,
-      country: 'Belgium',
-      telephone: '0800-123-524-634',
-      address: 'Eikstraat 450,Belgrade,Namur,5001,'
-    }
-  ]
+const data = [
+  {
+    name: 'Rory',
+    age: 35,
+    country: 'Belgium',
+    telephone: '0800-123-524-634',
+    address: 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,',
+  },
+  {
+    name: 'Amethyst',
+    age: 35,
+    country: 'Belgium',
+    telephone: '0800-123-524-634',
+    address: 'Eikstraat 450,Belgrade,Namur,5001,',
+  },
+]
 ```
 
 - Matrix (requires the columns property)
+
 ```typescript
 const data = [
   ['Rory', 35, 'Belgium', '0800-123-524-634', 'Rue des Taillis 221,Gijzelbrechtegem,West Flanders,8570,'],
-  ['Amethyst', 35, 'Belgium', '0800-123-524-634', 'Eikstraat 450,Belgrade,Namur,5001,']
+  ['Amethyst', 35, 'Belgium', '0800-123-524-634', 'Eikstraat 450,Belgrade,Namur,5001,'],
 ]
 ```
 
@@ -174,12 +176,12 @@ async function fetchData(
   pagination: IPagination
 ): Promise<{ totalRows: number; data: any[][] | any[] }> {
   const response = await fetch(url, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({filteredColumns: [...filteredColumns], sortedColumns: [...sortedColumns], pagination})
-  });
+    body: JSON.stringify({ filteredColumns: [...filteredColumns], sortedColumns: [...sortedColumns], pagination }),
+  })
   const result = response.json()
   return { totalRows: result.totalRows, data: result.data }
 }
@@ -188,12 +190,14 @@ async function fetchData(
 - File (CSV)
 
 ```typescript
-const response = await fetch('https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv');
-const blob = await response.blob();
+const response = await fetch(
+  'https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv'
+)
+const blob = await response.blob()
 const metadata = {
-  type: 'text/csv'
-};
-const data = new File([data], "medicatie_usagi.csv", metadata);
+  type: 'text/csv',
+}
+const data = new File([data], 'medicatie_usagi.csv', metadata)
 ```
 
 ### Setup for development
@@ -209,14 +213,21 @@ pnpm install
 To run the example app, run `pnpm run dev --open` from the project root.
 
 ### Reorder Column
+
 ![reorderColumn](https://github.com/RADar-AZDelta/svelte-datatable/assets/71766353/897b813e-76f7-4739-b815-30fb4dc1857f)
+
 ### Resize Column
+
 ![ResizeColumn](https://github.com/RADar-AZDelta/svelte-datatable/assets/71766353/4d84eae1-dbe3-4c39-b02b-2d7097ce7685)
+
 ### Visible Columns
+
 ![VisibleColumns](https://github.com/RADar-AZDelta/svelte-datatable/assets/71766353/ef02fdfb-d8d0-453e-b28b-9e1195914bfb)
+
 ### Edit cell
+
 Als EditableCell is toegevoegd in het Datatable component dan kan u doubel klikken op de tekst om die aan te passen.  
 escape key kan gebruikt worden om uit de input te gaan zonder aanpassing op te slaan.  
-enter key kan gebruikt worden of check button om de aanpassing op te slaan.  
+enter key kan gebruikt worden of check button om de aanpassing op te slaan.
 
 ![EditCell](https://github.com/RADar-AZDelta/svelte-datatable/assets/71766353/55ffe46d-718e-41b3-b05d-56763829e99c)

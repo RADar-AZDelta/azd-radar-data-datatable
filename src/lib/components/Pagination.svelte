@@ -2,11 +2,11 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import type { CustomTableEvents } from './DataTable.d.js'
-  import { range } from '../utils.js'
-  import SvgIcon from './SvgIcon.svelte'
-  import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import debounce from 'lodash.debounce'
+  import { range } from '$lib/utils'
+  import SvgIcon from '$lib/components/SvgIcon.svelte'
+  import iconsSvgUrl from '$lib/styles/icons.svg?url'
+  import type { CustomTableEvents } from './DataTable.d.js'
 
   export let rowsPerPage: number = 20,
     currentPage: number = 1,
@@ -21,35 +21,34 @@
   $: totalPages = Math.ceil(totalRows / rowsPerPage)
   $: pages = calculatePages(currentPage, totalPages)
   $: {
-    if(currentPage > totalPages) onChangePage(1)
+    if (currentPage > totalPages) onChangePage(1)
   }
 
   function calculatePages(currentPage: number, totalPages: number): (number | null)[] {
-    // 7 buttons
-    // 1   2  3  4  5   6   7 (total pages is less or equal then 7)
-    // 1   2  3  4  5 ... 100
-    // 1 ... 49 50 51 ... 100
-    // 1 ... 96 97 98  99 100
-    if (totalPages < 7) {
-      return range(1, totalPages, 1)
-    } else {
-      if (currentPage < 5) return [1, 2, 3, 4, 5, null, totalPages]
-      else if (currentPage > totalPages - 4) return [1, null, ...range(totalPages - 4, totalPages, 1)]
-      else return [1, null, currentPage - 1, currentPage, currentPage + 1, null, totalPages]
-    }
+    /*
+      7 buttons
+      1   2  3  4  5   6   7 (total pages is less or equal then 7)
+      1   2  3  4  5 ... 100
+      1 ... 49 50 51 ... 100
+      1 ... 96 97 98  99 100
+    */
+    if (totalPages < 7) return range(1, totalPages, 1)
+    if (currentPage < 5) return [1, 2, 3, 4, 5, null, totalPages]
+    else if (currentPage > totalPages - 4) return [1, null, ...range(totalPages - 4, totalPages, 1)]
+    else return [1, null, currentPage - 1, currentPage, currentPage + 1, null, totalPages]
   }
 
   function onChangeRowsPerPage(e: Event) {
     const value = parseInt((e!.target as HTMLSelectElement)!.value)
     dispatch('paginationChanged', { rowsPerPage: value, currentPage })
   }
-  function onChangePage(newPage: number) {
+
+  function onChangePage(newPage: number | null) {
+    if (!newPage) return
     dispatch('paginationChanged', { rowsPerPage, currentPage: newPage })
   }
 
-  const onChangeInputPage = debounce(e => {
-    onChangePage(e.target.value)
-  }, 500)
+  const onChangeInputPage = debounce(e => onChangePage(e.target.value), 500)
 </script>
 
 <div data-name="pagination-container">
@@ -70,7 +69,7 @@
     id="Previous page {Math.random()}"
     aria-label="Previous page"
   >
-    <SvgIcon href={iconsSvgUrl} id="arrow-left" width="16px" height="16px" />
+    <SvgIcon href={iconsSvgUrl} id="arrow-left" />
   </button>
   {#each pages as page, i}
     {#if page}
@@ -89,6 +88,6 @@
     id="Next page {Math.random()}"
     aria-label="Next page"
   >
-    <SvgIcon href={iconsSvgUrl} id="arrow-right" width="16px" height="16px" />
+    <SvgIcon href={iconsSvgUrl} id="arrow-right" />
   </button>
 </div>

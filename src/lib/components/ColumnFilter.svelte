@@ -1,32 +1,31 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import type { CustomTableEvents, TFilter } from './DataTable.d.js'
-  import SvgIcon from './SvgIcon.svelte'
   import { createEventDispatcher } from 'svelte'
   import debounce from 'lodash.debounce'
   import iconsSvgUrl from '$lib/styles/icons.svg?url'
+  import SvgIcon from '$lib/components/SvgIcon.svelte'
+  import type { CustomTableEvents, TFilter } from './DataTable.d.js'
 
   export let column: string, inputType: string, filter: TFilter, disabled: boolean
 
-  let value: TFilter
-
-  $: value = filter ? filter : ''
+  $: value = filter ?? ''
 
   const dispatch = createEventDispatcher<CustomTableEvents>()
-
-  const onInput = debounce(e => {
-    dispatch('columnFilterChanged', { column, filter: e.target.value })
-  }, 500)
-
-  function onClick() {
-    dispatch('columnFilterChanged', { column, filter: undefined })
-  }
+  const onInput = debounce(e => dispatch('columnFilterChanged', { column, filter: e.target.value }), 500)
+  const onClick = () => dispatch('columnFilterChanged', { column, filter: undefined })
 </script>
 
 <div data-name="column-filter">
-  <input id="filter input {column} {Math.random()}" on:input={onInput} type={inputType} {value} placeholder="Filter" {disabled} />
+  <input
+    id="filter input {column} {Math.random()}"
+    on:input={onInput}
+    type={inputType}
+    {value}
+    placeholder="Filter"
+    {disabled}
+  />
   <button on:click={onClick} {disabled} id="Cancel filter {column} {Math.random()}" aria-label="Cancel filter">
-    <SvgIcon href={iconsSvgUrl} id="x" width="16px" height="16px" />
+    <SvgIcon href={iconsSvgUrl} id="x" />
   </button>
 </div>

@@ -1,31 +1,29 @@
 // /* Write your global styles here, in SCSS syntax. Variables and mixins from the src/variables.scss file are available here without importing */ /* Import only what you need from Bulma */
 
-
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 footer {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    text-align: center;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  color: #494949;
+
+  a:link,
+  a:visited,
+  a:active {
+    text-decoration: none;
+  }
+
+  a {
     color: #494949;
+  }
 
-    a:link,
-    a:visited,
-    a:active {
-        text-decoration: none;
-    }
-
-    a {
-        color: #494949;
-    }
-
-    .copyright {
-        color: #494949;
-        text-align: center;
-
-    }
+  .copyright {
+    color: #494949;
+    text-align: center;
+  }
 }

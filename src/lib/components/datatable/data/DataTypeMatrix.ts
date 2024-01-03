@@ -1,13 +1,13 @@
-import { dev } from '$app/environment'
-import type { IDataTypeFunctionalities, IDataTypeInfo, IRender } from '$lib/components/DataTable'
-import type Query from 'arquero/dist/types/query/query'
+import { DEV } from 'esm-env'
 import { DataTypeCommonBase } from './DataTypeCommonBase'
+import type { IDataTypeFunctionalities, IRender } from '$lib/components/DataTable'
 
 export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
 
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
-    let totalRows: number = 0, originalIndices: number[] = []
+    let totalRows = 0,
+      originalIndices: number[] = []
 
     if (!onlyPaginationChanged || !this.filteredAndSortedData) {
       this.filteredAndSortedData = await this.applySort(await this.applyFilter(this.data as any[][]))
@@ -35,70 +35,27 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     }
   }
 
-  async setData(data: IDataTypeInfo): Promise<void> {
-    if (data.data) this.data = data.data as any[]
-    if (data.internalOptions) this.internalOptions = data.internalOptions
-    if (data.internalColumns) this.internalColumns = data.internalColumns
-    if (data.renderedData) this.renderedData = data.renderedData
-  }
-
   async saveToFile(): Promise<void> {
     const fileHandle: FileSystemFileHandle = await (<any>window).showSaveFilePicker(this.saveOptions)
-    let csvMatrix = ''
-    let keyCounterMatrix: number = 0
-    for (let col of this.internalColumns!) {
-      csvMatrix += col.id + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
-      keyCounterMatrix++
-    }
-    keyCounterMatrix = 0
-    for (let row of (this.data as any[][])!) {
-      for (let cell of row) {
-        const value = cell.toString().replaceAll(',', ';')
-        csvMatrix += value + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
-        keyCounterMatrix++
-      }
-      keyCounterMatrix = 0
-    }
+    const csv = this.transformToCSV()
     const writableMatrix = await fileHandle.createWritable()
-    await writableMatrix.write(csvMatrix)
+    await writableMatrix.write(csv)
     await writableMatrix.close()
   }
 
   async getBlob(): Promise<Blob> {
-    let csvMatrix = ''
-    let keyCounterMatrix: number = 0
-    for (let col of this.internalColumns!) {
-      csvMatrix += col.id + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
-      keyCounterMatrix++
-    }
-    keyCounterMatrix = 0
-    for (let row of (this.data as any[][])!) {
-      for (let cell of row) {
-        if (cell) {
-          const value = cell.toString().replaceAll(',', ';')
-          csvMatrix += value + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
-          keyCounterMatrix++
-        }
-      }
-      keyCounterMatrix = 0
-    }
-    const blob = new Blob([csvMatrix], { type: 'text/csv' })
+    const csv = this.transformToCSV()
+    const blob = new Blob([csv], { type: 'text/csv' })
     return blob
   }
 
   async replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void> {
-    let columnIndex = this.internalColumns!.findIndex(col => col.id === column)
+    const columnIndex = this.internalColumns!.findIndex(col => col.id === column)
     for (let i = 0; i < this.data!.length; i++) {
       if ((this.data as any[][])![i][columnIndex] === currentValue) {
-        (this.data as any[][])![i][columnIndex] = updatedValue
+        ;(this.data as any[][])![i][columnIndex] = updatedValue
       }
     }
-  }
-
-  async executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<void> {
-  }
-
-  async executeQueryAndReturnResults(query: Query | object): Promise<void> {
   }
 
   async getFullRow(originalIndex: number): Promise<Record<string, any>> {
@@ -133,7 +90,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
   async insertRows(rows: Record<string, any>[]): Promise<number[]> {
     const originalIndices = Array.from({ length: rows.length }, (_, i) => this.data!.length + i)
     for (const row of rows) {
-      (this.data as any[][])!.push(
+      ;(this.data as any[][])!.push(
         this.internalColumns!.reduce((acc, column) => {
           acc.push(row[column.id])
           return acc
@@ -167,7 +124,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     this.internalColumns
       ?.filter(col => col.filter)
       .forEach(col => {
-        if (dev) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
+        if (DEV) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
         const index = this.internalColumns?.findIndex(c => c.id === col.id)
         data = data.filter(row => row[index!]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
       })
@@ -180,16 +137,27 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
       ?.filter(col => col.sortDirection)
       .slice()
       .reverse() //Sort is applied in reverse order !!!
-      .forEach((col) => {
-        const index = this.internalColumns?.findIndex((obj) => obj.id == col.id)
+      .forEach(col => {
+        const index = this.internalColumns?.findIndex(obj => obj.id == col.id)
         if (index) {
-          if (dev) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
+          if (DEV)
+            console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
           switch (col.sortDirection) {
             case 'asc':
-              compareFn = (a, b) => (this.standardizeValue(a[index]) < this.standardizeValue(b[index]) ? -1 : this.standardizeValue(a[index]) > this.standardizeValue(b[index]) ? 1 : 0)
+              compareFn = (a, b) =>
+                this.standardizeValue(a[index]) < this.standardizeValue(b[index])
+                  ? -1
+                  : this.standardizeValue(a[index]) > this.standardizeValue(b[index])
+                  ? 1
+                  : 0
               break
             case 'desc':
-              compareFn = (a, b) => (this.standardizeValue(b[index]) < this.standardizeValue(a[index]) ? -1 : this.standardizeValue(b[index]) > this.standardizeValue(a[index]) ? 1 : 0)
+              compareFn = (a, b) =>
+                this.standardizeValue(b[index]) < this.standardizeValue(a[index])
+                  ? -1
+                  : this.standardizeValue(b[index]) > this.standardizeValue(a[index])
+                  ? 1
+                  : 0
               break
           }
           if (data) data = data.sort(compareFn)
@@ -198,8 +166,28 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     return data
   }
 
-  standardizeValue(value: string | number | Date): string | number {
-    if (new Date(value).toString() !== "Invalid Date" && !isNaN(new Date(value).getTime())) return new Date(value).getTime()
+  private standardizeValue(value: string | number | Date): string | number {
+    if (new Date(value).toString() !== 'Invalid Date' && !isNaN(new Date(value).getTime()))
+      return new Date(value).getTime()
     else return value.toString().toLowerCase()
+  }
+
+  private transformToCSV() {
+    let csvMatrix = ''
+    let keyCounterMatrix = 0
+    for (const col of this.internalColumns!) {
+      csvMatrix += col.id + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
+      keyCounterMatrix++
+    }
+    keyCounterMatrix = 0
+    for (const row of (this.data as any[][])!) {
+      for (const cell of row) {
+        const value = cell.toString().replaceAll(',', ';')
+        csvMatrix += value + (keyCounterMatrix + 1 < this.internalColumns!.length ? ',' : '\r\n')
+        keyCounterMatrix++
+      }
+      keyCounterMatrix = 0
+    }
+    return csvMatrix
   }
 }

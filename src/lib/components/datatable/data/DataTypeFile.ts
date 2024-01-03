@@ -1,3 +1,6 @@
+import { wrap, type Remote } from 'comlink'
+import DataTableWorker from '$lib/workers/DataTable.worker?worker'
+import { DataTypeCommonBase } from './DataTypeCommonBase'
 import type {
   IColumnMetaData,
   IDataTypeFunctionalities,
@@ -8,9 +11,6 @@ import type {
   TFilter,
 } from '$lib/components/DataTable'
 import type Query from 'arquero/dist/types/query/query'
-import DataTableWorker from '$lib/workers/DataTable.worker?worker'
-import { DataTypeCommonBase } from './DataTypeCommonBase'
-import { wrap, type Remote } from 'comlink'
 
 export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctionalities {
   worker: Worker
@@ -62,20 +62,19 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
       })
     }
 
-    return (this.internalColumns as IColumnMetaData[])
+    return this.internalColumns as IColumnMetaData[]
   }
 
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
-    console.log("RENDERING")
     const filteredColumns = this.internalOptions?.globalFilter?.filter
       ? new Map<string, TFilter>([
-        [this.internalOptions!.globalFilter!.column, this.internalOptions!.globalFilter!.filter],
-      ])
-      : this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
-        if (cur && cur.filter) acc.set(cur.id, cur.filter)
-        return acc
-      }, new Map<string, TFilter>())
-    const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
+          [this.internalOptions!.globalFilter!.column, this.internalOptions!.globalFilter!.filter],
+        ])
+      : this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur) => {
+          if (cur && cur.filter) acc.set(cur.id, cur.filter)
+          return acc
+        }, new Map<string, TFilter>())
+    const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur) => {
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc
     }, new Map<string, SortDirection>())
@@ -85,8 +84,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
       pagination: { rowsPerPage: this.internalOptions?.rowsPerPage, currentPage: this.internalOptions?.currentPage },
       onlyPaginationChanged,
     })
-    console.log('FETCH DATA ', results)
-    let totalRows = results!.totalRows
+    const totalRows = results!.totalRows
     this.renderedData = results!.data.map((row: any) =>
       this.internalColumns?.reduce((acc, cur, index) => {
         acc[cur.id!] = row[index]
@@ -126,24 +124,24 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   }
 
   async executeQueryAndReturnResults(query: Query | object): Promise<any> {
-    const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur, i) => {
+    const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur) => {
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc
     }, new Map<string, SortDirection>())
-    const filteredColumns = this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur, i) => {
+    const filteredColumns = this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur) => {
       if (cur && cur.filter) acc.set(cur.id, cur.filter)
       return acc
     }, new Map<string, TFilter>())
     return await this.exposed.executeQueryAndReturnResults({
       usedQuery: query,
       filteredColumns,
-      sortedColumns
+      sortedColumns,
     })
   }
 
   async insertColumns(cols: IColumnMetaData[]): Promise<IColumnMetaData[]> {
-    let uniqueColumns: IColumnMetaData[] = []
-    for (let col of cols) {
+    const uniqueColumns: IColumnMetaData[] = []
+    for (const col of cols) {
       if (this.internalColumns!.find(c => c.id === col.id)) console.error(`Column with id ${col.id} already exists`)
       else {
         if (!col.position)
@@ -194,12 +192,12 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
 
   async renameColumns(columns: Record<string, string>): Promise<void> {
     await this.exposed.renameColumns({ columns })
-    for (let [oldCol, newCol] of Object.entries(columns)) {
+    for (const [oldCol, newCol] of Object.entries(columns)) {
       if (this.internalColumns!.find(col => col.id === newCol)) {
         const oldIndex = this.internalColumns!.findIndex(col => col.id === oldCol)
         const newIndex = this.internalColumns!.findIndex(col => col.id === newCol)
         this.internalColumns!.splice(newIndex, 1)
-        let { id, ...col } = this.internalColumns![newIndex]
+        const col = this.internalColumns![newIndex]
         this.internalColumns![oldIndex] = Object.assign(col, { id: newCol })
       } else {
         this.internalColumns!.find(col => col.id === oldCol)!.id = newCol
@@ -210,8 +208,4 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   async destroy(): Promise<void> {
     this.worker?.terminate()
   }
-
-  async applyFilter(data: any[] | any[][]): Promise<void> { }
-
-  async applySort(data: any[] | any[][]): Promise<void> { }
 }

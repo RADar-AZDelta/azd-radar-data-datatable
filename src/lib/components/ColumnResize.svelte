@@ -2,18 +2,17 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import type { ColumnPositionChangedEventDetail, CustomTableEvents, IColumnMetaData } from './DataTable'
-  import { resizableColumn } from '../actions/resizableColumn'
+  import { resizableColumn } from '$lib/actions/resizableColumn'
   import { repositionableColumn } from '$lib/actions/repositionableColumn'
+  import type { ColumnPositionChangedED, CustomTableEvents, IColumnMetaData } from './DataTable'
 
-  export let column: IColumnMetaData,
-    minWidth: number = 10
+  export let column: IColumnMetaData
+  export let minWidth: number = 10
 
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
-  function onRepositioned(event: CustomEvent<ColumnPositionChangedEventDetail>) {
+  const onRepositioned = (event: CustomEvent<ColumnPositionChangedED>) =>
     dispatch('columnPositionChanged', event.detail)
-  }
 
   function onResizing(event: CustomEvent<{ x: number }>) {
     const width = column.width! + event.detail.x
@@ -22,9 +21,6 @@
 </script>
 
 <div data-name="column-resize">
-  <!-- {#if column.resizable !== false}
-    <div data-name="column-resize-right" use:resizableColumn on:resizing={onResizing} />
-  {/if} -->
   <div
     data-name="column-reposition"
     draggable={column.repositionable !== false}
