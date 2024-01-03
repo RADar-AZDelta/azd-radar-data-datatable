@@ -14,21 +14,23 @@ import type {
   ICustomStoreOptions,
   IDataTypeFunctionalities,
   IStoredOptions,
+  IRender,
+  IDataTypeInfo,
 } from './components/DataTable'
 import styles from '$lib/styles/data-table.scss?inline'
 
-export {
-  DataTable as default,
+export type {
   ITableOptions,
   IColumnMetaData,
   IPagination,
   FetchDataFunc,
   SortDirection,
   TFilter,
-  EditableCell,
+  IRender,
+  IStoredOptions,
   ICustomStoreOptions,
   IDataTypeFunctionalities,
-  DataTypeCommonBase,
-  IStoredOptions,
-  styles,
+  IDataTypeInfo,
 }
+
+export { DataTable as default, EditableCell, DataTypeCommonBase, styles }
