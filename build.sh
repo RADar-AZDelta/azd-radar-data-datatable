@@ -3,4 +3,4 @@
 # run pnpm adduser (npm adduser if you are using npm) and follow the prompts
 rm -fr ./dist
 pnpm run package
-pnpm publish ./dist
+pnpm publish
