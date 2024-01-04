@@ -17,7 +17,7 @@ import type {
   IRender,
   IDataTypeInfo,
 } from './components/DataTable'
-import styles from '$lib/styles/data-table.scss?inline'
+import styles from '$lib/styles/data-table.scss'
 
 export type {
   ITableOptions,

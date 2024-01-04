@@ -2,7 +2,6 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import SvgIcon from './SvgIcon.svelte'
   import type { Hex, SortDirection, CustomTableEvents } from './DataTable.d.js'
 
@@ -46,7 +45,6 @@
 
 <button id="sort-{column}-{Math.random()}" on:click={onClick} {disabled} aria-label="Sorting">
   <SvgIcon
-    href={iconsSvgUrl}
     id="updown"
     --up-color={upColor}
     --down-color={downColor}

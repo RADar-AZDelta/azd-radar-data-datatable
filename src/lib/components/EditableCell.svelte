@@ -2,7 +2,6 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import SvgIcon from '$lib/components/SvgIcon.svelte'
   import { saveWithKey } from '$lib/actions/saveWithKey'
   import { clickOutside } from '$lib/actions/clickOutside'
@@ -44,7 +43,7 @@
     <p on:click={enableEdit}>{value}</p>
   {:else}
     <textarea bind:value={editValue} />
-    <button on:click={onClickSave}><SvgIcon href={iconsSvgUrl} id="checkmark" width="20px" height="20px" /></button>
+    <button on:click={onClickSave}><SvgIcon id="checkmark" width="20px" height="20px" /></button>
   {/if}
 </div>
 

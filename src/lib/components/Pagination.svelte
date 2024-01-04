@@ -5,7 +5,6 @@
   import debounce from 'lodash.debounce'
   import { range } from '$lib/utils'
   import SvgIcon from '$lib/components/SvgIcon.svelte'
-  import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import type { CustomTableEvents } from './DataTable.d.js'
 
   export let rowsPerPage: number = 20,
@@ -69,7 +68,7 @@
     id="Previous page {Math.random()}"
     aria-label="Previous page"
   >
-    <SvgIcon href={iconsSvgUrl} id="arrow-left" />
+    <SvgIcon id="arrow-left" />
   </button>
   {#each pages as page, i}
     {#if page}
@@ -88,6 +87,6 @@
     id="Next page {Math.random()}"
     aria-label="Next page"
   >
-    <SvgIcon href={iconsSvgUrl} id="arrow-right" />
+    <SvgIcon id="arrow-right" />
   </button>
 </div>

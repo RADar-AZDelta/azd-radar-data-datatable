@@ -17,7 +17,6 @@
   import { DataTypeFile } from '$lib/components/datatable/data/DataTypeFile'
   import { DataTypeMatrix } from '$lib/components/datatable/data/DataTypeMatrix'
   import { DataTypeArrayOfObjects } from '$lib/components/datatable/data/DataTypeArrayOfObjects'
-  import iconsSvgUrl from '$lib/styles/icons.svg?url'
   import type Query from 'arquero/dist/types/query/query'
   import type {
     ColumnFilterChangedED,
@@ -31,6 +30,7 @@
     ModifyColumnMetadataFunc,
     PaginationChangedED,
   } from './DataTable'
+  import '$lib/styles/data-table.scss'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
@@ -357,7 +357,7 @@
 <dialog data-name="settings-dialog" bind:this={settingsDialog}>
   <div data-name="dialog-container" use:clickOutside on:outClick={closeModal}>
     <button data-name="close-button" on:click={() => settingsDialog.close()}>
-      <SvgIcon href={iconsSvgUrl} id="x" />
+      <SvgIcon id="x" />
     </button>
     <div data-name="modal-dialog">
       <h1>Change column visibility:</h1>
@@ -421,7 +421,7 @@
               <th data-name="action-Column">
                 {#if internalOptions.singleSort}
                   <button on:click={toggleFilterVisibility}>
-                    <SvgIcon href={iconsSvgUrl} id="filter" />
+                    <SvgIcon id="filter" />
                   </button>
                 {/if}
               </th>
