@@ -1,6 +1,6 @@
 {
   "name": "@radar-azdelta/svelte-datatable",
-  "version": "0.0.65",
+  "version": "0.0.66",
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
@@ -28,7 +28,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "svelte": "./dist/index.js"
-    }
+    },
+    "./style": "./dist/styles/data-table.scss"
   },
   "files": [
     "dist",

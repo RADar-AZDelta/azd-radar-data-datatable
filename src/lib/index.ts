@@ -17,7 +17,6 @@ import type {
   IRender,
   IDataTypeInfo,
 } from './components/DataTable'
-import styles from '$lib/styles/data-table.scss'
 
 export type {
   ITableOptions,
@@ -33,4 +32,4 @@ export type {
   IDataTypeInfo,
 }
 
-export { DataTable as default, EditableCell, DataTypeCommonBase, styles }
+export { DataTable as default, EditableCell, DataTypeCommonBase }

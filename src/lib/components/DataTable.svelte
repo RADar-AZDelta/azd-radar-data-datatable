@@ -30,7 +30,6 @@
     ModifyColumnMetadataFunc,
     PaginationChangedED,
   } from './DataTable'
-  import '$lib/styles/data-table.scss'
 
   export let data: any[][] | any[] | FetchDataFunc | File | undefined,
     columns: IColumnMetaData[] | undefined = undefined,
