@@ -40,7 +40,10 @@
   {#if !editMode}
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <p on:click={enableEdit}>{value}</p>
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div on:click={enableEdit}>
+      <p>{value}</p>
+    </div>
   {:else}
     <textarea bind:value={editValue} />
     <button on:click={onClickSave}><SvgIcon id="checkmark" width="20px" height="20px" /></button>
@@ -51,5 +54,10 @@
   button {
     border: none;
     background-color: inherit;
+  }
+
+  div {
+    width: 100%;
+    height: 100%;
   }
 </style>
