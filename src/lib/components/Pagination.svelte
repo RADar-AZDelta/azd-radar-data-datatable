@@ -11,7 +11,8 @@
     currentPage: number = 1,
     rowsPerPageOptions: number[] = [5, 10, 20, 50, 100],
     totalRows: number,
-    disabled: boolean
+    disabled: boolean,
+    paginationThroughArrowsOnly: boolean | undefined = undefined
 
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
@@ -70,17 +71,19 @@
   >
     <SvgIcon id="arrow-left" />
   </button>
-  {#each pages as page, i}
-    {#if page}
-      <button data-active={currentPage === page} disabled={!page || disabled} on:click={() => onChangePage(page)}>
-        {page}
-      </button>
-    {:else if pages[0] && pages[2] && pages[2] - pages[0] > 2 && i == 1}
-      <p>...</p>
-    {:else}
-      <input type="number" data-name="pagination-input" on:input={onChangeInputPage} />
-    {/if}
-  {/each}
+  {#if paginationThroughArrowsOnly !== true}
+    {#each pages as page, i}
+      {#if page}
+        <button data-active={currentPage === page} disabled={!page || disabled} on:click={() => onChangePage(page)}>
+          {page}
+        </button>
+      {:else if pages[0] && pages[2] && pages[2] - pages[0] > 2 && i == 1}
+        <p>...</p>
+      {:else}
+        <input type="number" data-name="pagination-input" on:input={onChangeInputPage} />
+      {/if}
+    {/each}
+  {/if}
   <button
     disabled={!totalRows || currentPage === totalPages || disabled}
     on:click={() => onChangePage(currentPage + 1)}

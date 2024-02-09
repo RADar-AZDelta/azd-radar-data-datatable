@@ -11,25 +11,24 @@
 
   const dispatch = createEventDispatcher<CustomTableEvents>()
 
-  const onRepositioned = (event: CustomEvent<ColumnPositionChangedED>) =>
-    dispatch('columnPositionChanged', event.detail)
+  const onRepositioned = (e: CustomEvent<ColumnPositionChangedED>) => dispatch('columnPositionChanged', e.detail)
 
-  function onResizing(event: CustomEvent<{ x: number }>) {
-    const width = column.width! + event.detail.x
+  function onResizing(e: CustomEvent<{ x: number }>) {
+    if (!column.width) return
+    const width = column.width + e.detail.x
     if (width > minWidth) dispatch('columnWidthChanged', { column: column.id, width })
   }
 </script>
 
-<div data-name="column-resize">
-  <div
-    data-name="column-reposition"
-    draggable={column.repositionable !== false}
-    use:repositionableColumn={column}
-    on:repositioned={onRepositioned}
-  >
-    <slot />
+{#if column}
+  {@const { repositionable, resizable } = column}
+  {@const draggable = repositionable !== false}
+  <div data-name="column-resize">
+    <div data-name="column-reposition" {draggable} use:repositionableColumn={column} on:repositioned={onRepositioned}>
+      <slot />
+    </div>
+    {#if resizable !== false}
+      <div data-name="column-resize-left" use:resizableColumn on:resizing={onResizing} />
+    {/if}
   </div>
-  {#if column.resizable !== false}
-    <div data-name="column-resize-left" use:resizableColumn on:resizing={onResizing} />
-  {/if}
-</div>
+{/if}

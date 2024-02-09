@@ -45,6 +45,7 @@ export interface IPagination {
 export interface ITableOptions extends IPagination {
   id?: string
   paginationOnTop?: boolean
+  paginationThroughArrowsOnly?: boolean
   rowsPerPageOptions?: number[]
   actionColumn?: boolean
   totalRows?: number

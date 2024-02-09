@@ -15,16 +15,12 @@
   const onClick = () => dispatch('columnFilterChanged', { column, filter: undefined })
 </script>
 
-<div data-name="column-filter">
-  <input
-    id="filter input {column} {Math.random()}"
-    on:input={onInput}
-    type={inputType}
-    {value}
-    placeholder="Filter"
-    {disabled}
-  />
-  <button on:click={onClick} {disabled} id="Cancel filter {column} {Math.random()}" aria-label="Cancel filter">
-    <SvgIcon id="x" />
-  </button>
-</div>
+{#if column}
+  {@const id = `filter input ${column} ${Math.random()}`}
+  <div data-name="column-filter">
+    <input {id} on:input={onInput} type={inputType} {value} placeholder="Filter" {disabled} />
+    <button on:click={onClick} {disabled} id="Cancel filter {column} {Math.random()}" aria-label="Cancel filter">
+      <SvgIcon id="x" />
+    </button>
+  </div>
+{/if}
