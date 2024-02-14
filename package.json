@@ -22,8 +22,7 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test:unit": "vitest",
     "lint": "pnpm format && prettier --plugin-search-dir . --check . && eslint .",
-    "format": "prettier --plugin-search-dir . --write .",
-    "artifactregistry-login": "npx google-artifactregistry-auth"
+    "format": "prettier --plugin-search-dir . --write ."
   },
   "exports": {
     ".": {
