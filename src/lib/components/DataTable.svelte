@@ -37,15 +37,17 @@
     disabled: boolean = false,
     modifyColumnMetadata: ModifyColumnMetadataFunc | undefined = undefined
 
+  const defaultOptions = {
+    currentPage: 1,
+    rowsPerPage: 20,
+    rowsPerPageOptions: [5, 10, 20, 50, 100],
+    actionColumn: false,
+    singleSort: false,
+    defaultColumnWidth: 200,
+  }
+
   let renderedData: any[][] | any[] | undefined,
-    internalOptions: ITableOptions = {
-      currentPage: 1,
-      rowsPerPage: 20,
-      rowsPerPageOptions: [5, 10, 20, 50, 100],
-      actionColumn: false,
-      singleSort: false,
-      defaultColumnWidth: 200,
-    },
+    internalOptions: ITableOptions = Object.assign(defaultOptions, options ?? {}),
     internalColumns: IColumnMetaData[] | undefined
 
   let renderStatus: string
