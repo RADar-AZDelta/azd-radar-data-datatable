@@ -121,7 +121,7 @@ async function exportCSV({ fileHandle, options }: MessageRequestSaveToFile) {
   const reFormat = new RegExp(`["${delim}\n\r]`)
   const bufferRowSize = options?.bufferRowSize || 5000
   const formatValue = (value: any) => {
-    if (!value) return ''
+    if (!value && value !== 0) return ''
     else if (value instanceof Date) return value.toISOString()
     else if (reFormat.test((value += ''))) return '"' + value.replace(/"/g, '""') + '"'
     return value
