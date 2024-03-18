@@ -526,6 +526,7 @@
                   <slot
                     renderedRow={row}
                     originalIndex={originalIndices[i]}
+                    index={i}
                     columns={visibleOrderedColumns}
                     options={internalOptions}
                   />
@@ -536,6 +537,7 @@
                         name="actionCell"
                         renderedRow={row}
                         originalIndex={originalIndices[i]}
+                        index={i}
                         columns={visibleOrderedColumns}
                         options={internalOptions}
                       />
