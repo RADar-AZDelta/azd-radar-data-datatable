@@ -1,13 +1,6 @@
 import { DEV } from 'esm-env'
 import { DataTypeCommonBase } from './DataTypeCommonBase'
-import type {
-  IColumnMetaData,
-  IDataTypeFunctionalities,
-  IDataTypeInfo,
-  IRender,
-  ITableOptions,
-  ModifyColumnMetadataFunc,
-} from '$lib/components/DataTable'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '$lib/components/DataTable'
 
 export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -32,8 +25,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
       if (this.modifyColumnMetadata) this.internalColumns = this.modifyColumnMetadata(this.internalColumns)
     } else this.internalColumns = columns
 
-    if (this.internalOptions)
-      for (let col of this.internalColumns) if (!col.width) col.width = this.internalOptions?.defaultColumnWidth
+    if (this.internalOptions) for (let col of this.internalColumns) if (!col.width) col.width = this.internalOptions?.defaultColumnWidth
 
     return this.internalColumns
   }
@@ -73,8 +65,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
   }
 
   async replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void> {
-    for (let i = 0; i < this.data!.length; i++)
-      if ((this.data as any[])![i][column] === currentValue) (this.data as any[])[i][column] = updatedValue
+    for (let i = 0; i < this.data!.length; i++) if ((this.data as any[])![i][column] === currentValue) (this.data as any[])[i][column] = updatedValue
   }
 
   getFullRow = async (originalIndex: number): Promise<Record<string, any>> => (this.data as any[])[originalIndex]
@@ -104,8 +95,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
   }
 
   async updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> {
-    for (const [originalIndex, row] of rowsToUpdateByOriginalIndex)
-      Object.assign((this.data as any[])[originalIndex], row)
+    for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) Object.assign((this.data as any[])[originalIndex], row)
   }
 
   async renameColumns(columns: Record<string, string>): Promise<void> {
@@ -157,8 +147,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
   }
 
   private standardizeValue(value: string | number | Date): string | number {
-    if (new Date(value).toString() !== 'Invalid Date' && !isNaN(new Date(value).getTime()))
-      return new Date(value).getTime()
+    if (new Date(value).toString() !== 'Invalid Date' && !isNaN(new Date(value).getTime())) return new Date(value).getTime()
     return value.toString().toLowerCase()
   }
 

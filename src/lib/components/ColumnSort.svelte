@@ -44,11 +44,5 @@
 </script>
 
 <button id="sort-{column}-{Math.random()}" on:click={onClick} {disabled} aria-label="Sorting">
-  <SvgIcon
-    id="updown"
-    --up-color={upColor}
-    --down-color={downColor}
-    --up-opacity={upOpacity}
-    --down-opacity={downOpacity}
-  />
+  <SvgIcon id="updown" --up-color={upColor} --down-color={downColor} --up-opacity={upOpacity} --down-opacity={downOpacity} />
 </button>

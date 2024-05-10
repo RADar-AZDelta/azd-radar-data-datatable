@@ -67,9 +67,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
 
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
     const filteredColumns = this.internalOptions?.globalFilter?.filter
-      ? new Map<string, TFilter>([
-          [this.internalOptions!.globalFilter!.column, this.internalOptions!.globalFilter!.filter],
-        ])
+      ? new Map<string, TFilter>([[this.internalOptions!.globalFilter!.column, this.internalOptions!.globalFilter!.filter]])
       : this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur) => {
           if (cur && cur.filter) acc.set(cur.id, cur.filter)
           return acc
@@ -180,13 +178,10 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   }
 
   async updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>): Promise<void> {
-    const rowsToUpdateByWorkerIndex = [...rowsToUpdateByOriginalIndex].reduce<Map<number, Record<string, any>>>(
-      (acc, [originalIndex, row]) => {
-        acc.set(originalIndex, row) //swap the local index with the worker index
-        return acc
-      },
-      new Map<number, Record<string, any>>()
-    )
+    const rowsToUpdateByWorkerIndex = [...rowsToUpdateByOriginalIndex].reduce<Map<number, Record<string, any>>>((acc, [originalIndex, row]) => {
+      acc.set(originalIndex, row) //swap the local index with the worker index
+      return acc
+    }, new Map<number, Record<string, any>>())
     await this.exposed.updateRows({ rowsByIndex: rowsToUpdateByWorkerIndex })
   }
 

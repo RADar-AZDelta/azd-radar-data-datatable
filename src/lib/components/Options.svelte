@@ -10,12 +10,6 @@
   const onClick = () => dispatch('settingsVisibilityChanged')
 </script>
 
-<button
-  data-name="settings-button"
-  on:click={onClick}
-  {disabled}
-  id="Settings button {Math.random()}"
-  aria-label="Settings button"
->
+<button data-name="settings-button" on:click={onClick} {disabled} id="Settings button {Math.random()}" aria-label="Settings button">
   <SvgIcon id="gear" />
 </button>

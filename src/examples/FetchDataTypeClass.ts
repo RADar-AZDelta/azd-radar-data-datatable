@@ -1,14 +1,6 @@
 import { DEV } from 'esm-env'
 import { DataTypeCommonBase } from '$lib/components/datatable/data/DataTypeCommonBase'
-import type {
-  FetchDataFunc,
-  IColumnMetaData,
-  IDataTypeFunctionalities,
-  IDataTypeInfo,
-  IRender,
-  SortDirection,
-  TFilter,
-} from '$lib/components/DataTable'
+import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, SortDirection, TFilter } from '$lib/components/DataTable'
 
 export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeFunctionalities {
   async setData(data: IDataTypeInfo): Promise<void> {

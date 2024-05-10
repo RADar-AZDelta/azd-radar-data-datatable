@@ -140,8 +140,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
       .forEach(col => {
         const index = this.internalColumns?.findIndex(obj => obj.id == col.id)
         if (index) {
-          if (DEV)
-            console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
+          if (DEV) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
           switch (col.sortDirection) {
             case 'asc':
               compareFn = (a, b) =>
@@ -167,8 +166,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
   }
 
   private standardizeValue(value: string | number | Date): string | number {
-    if (new Date(value).toString() !== 'Invalid Date' && !isNaN(new Date(value).getTime()))
-      return new Date(value).getTime()
+    if (new Date(value).toString() !== 'Invalid Date' && !isNaN(new Date(value).getTime())) return new Date(value).getTime()
     else return value.toString().toLowerCase()
   }
 

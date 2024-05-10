@@ -28,15 +28,7 @@
   const enableEdit = () => (editMode = true)
 </script>
 
-<div
-  use:saveWithKey
-  on:saveKey={onClickSave}
-  use:clickOutside
-  on:outClick={onClickCancel}
-  use:escapeWithKey
-  on:escapeKey={onClickCancel}
-  data-name="cell"
->
+<div use:saveWithKey on:saveKey={onClickSave} use:clickOutside on:outClick={onClickCancel} use:escapeWithKey on:escapeKey={onClickCancel} data-name="cell">
   {#if !editMode}
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <!-- svelte-ignore a11y-click-events-have-key-events -->

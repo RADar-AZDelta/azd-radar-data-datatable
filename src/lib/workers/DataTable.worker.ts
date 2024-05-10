@@ -93,10 +93,7 @@ async function fetchData(data: MessageRequestFetchData) {
     })
     indices = tempDt
       .indices()
-      .slice(
-        (data.pagination.currentPage! - 1) * data.pagination.rowsPerPage!,
-        data.pagination.currentPage! * data.pagination.rowsPerPage!
-      )
+      .slice((data.pagination.currentPage! - 1) * data.pagination.rowsPerPage!, data.pagination.currentPage! * data.pagination.rowsPerPage!)
     matrix = objects.map(obj => Object.values(obj))
   }
 
@@ -171,8 +168,7 @@ async function createBlobCSV(options?: any) {
 }
 
 async function updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
-  for (const [index, row] of rowsByIndex)
-    for (const [column, value] of Object.entries(row)) if (dt._data[column]) dt._data[column].data[index] = value
+  for (const [index, row] of rowsByIndex) for (const [column, value] of Object.entries(row)) if (dt._data[column]) dt._data[column].data[index] = value
 }
 
 async function insertRows({ rows }: MessageRequestInsertRows) {
@@ -228,11 +224,7 @@ async function insertColumns({ columns }: MessageRequestInsertColumns) {
   dt = dt.join_left(fromJSON(obj))
 }
 
-function executeQueryAndReturnResults({
-  usedQuery,
-  filteredColumns,
-  sortedColumns,
-}: MessageRequestExecuteQueryAndReturnResults) {
+function executeQueryAndReturnResults({ usedQuery, filteredColumns, sortedColumns }: MessageRequestExecuteQueryAndReturnResults) {
   let tempDt = dt
   for (const [column, filter] of [...filteredColumns].values()) {
     const lowerCaseFilter = filter?.toString().toLowerCase()

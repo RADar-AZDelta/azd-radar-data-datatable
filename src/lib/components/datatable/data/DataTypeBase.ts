@@ -1,11 +1,4 @@
-import type {
-  FetchDataFunc,
-  IColumnMetaData,
-  IDataTypeFunctionalities,
-  IDataTypeInfo,
-  IRender,
-  ITableOptions,
-} from '$lib/components/DataTable'
+import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions } from '$lib/components/DataTable'
 import type Query from 'arquero/dist/types/query/query'
 
 export abstract class DataTypeBase implements IDataTypeFunctionalities {

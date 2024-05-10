@@ -46,6 +46,8 @@ export interface ITableOptions extends IPagination {
   id?: string
   paginationOnTop?: boolean
   paginationThroughArrowsOnly?: boolean
+  hidePagination?: boolean
+  hideOptions?: boolean
   rowsPerPageOptions?: number[]
   actionColumn?: boolean
   totalRows?: number
@@ -55,6 +57,7 @@ export interface ITableOptions extends IPagination {
   saveOptions?: boolean
   dataTypeImpl?: IDataTypeFunctionalities
   saveImpl?: ICustomStoreOptions
+  hideFilters?: boolean
 }
 
 export type FetchDataFunc = (
