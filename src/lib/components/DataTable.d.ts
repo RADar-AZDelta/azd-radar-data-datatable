@@ -85,6 +85,7 @@ export interface IColumnMetaData {
   position?: number
 
   width?: number
+  [key: string]: any
 }
 
 export interface CustomTableEvents {
