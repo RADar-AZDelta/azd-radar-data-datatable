@@ -129,7 +129,7 @@
     else internalColumns = await dataTypeImpl.setInternalColumns(internalColumns)
   }
 
-  async function render(onlyPaginationChanged = false) {
+  export async function render(onlyPaginationChanged = false) {
     renderStatus = 'rendering'
     dispatch('rendering')
     if (DEV) console.log('DataTable: render')
@@ -214,6 +214,7 @@
 
   export const saveToFile = async () => await dataTypeImpl!.saveToFile()
   export const getBlob = async () => await dataTypeImpl!.getBlob()
+  export const getData = async () => dataTypeImpl!.data
 
   export async function updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
     await dataTypeImpl!.updateRows(rowsToUpdateByOriginalIndex)
@@ -538,10 +539,6 @@
             {/if}
           {:else if $$slots.nodata}
             <slot name="nodata" />
-          {:else}
-            <div data-name="info">
-              <p>No data...</p>
-            </div>
           {/if}
         </tbody>
       </table>

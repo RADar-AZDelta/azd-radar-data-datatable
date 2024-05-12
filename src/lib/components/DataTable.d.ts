@@ -145,6 +145,7 @@ export interface IDataTypeInfo {
 }
 
 export interface IDataTypeFunctionalities {
+  data: any[] | any[][] | FetchDataFunc | File | undefined
   render(onlyPaginationChanged: boolean): Promise<IRender>
   saveToFile(): Promise<void>
   getBlob(): Promise<Blob>
