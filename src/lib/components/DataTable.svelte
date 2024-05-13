@@ -4,7 +4,7 @@
   import { DEV, BROWSER } from 'esm-env'
   import { flip } from 'svelte/animate'
   import { onDestroy } from 'svelte'
-  import isEqual from 'lodash.isequal'
+  import { isEqual } from '$lib/utils'
   import { clickOutside } from '$lib/actions/clickOutside'
   import { storeOptions } from '$lib/actions/storeOptions'
   import Spinner from '$lib/components/Spinner.svelte'

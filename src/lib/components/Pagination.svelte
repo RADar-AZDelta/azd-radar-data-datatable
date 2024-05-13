@@ -1,8 +1,7 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import debounce from 'lodash.debounce'
-  import { range } from '$lib/utils'
+  import { range, debounce } from '$lib/utils'
   import SvgIcon from '$lib/components/SvgIcon.svelte'
   import type { IPaginationProps } from '$lib/interfaces/Types.js'
 
