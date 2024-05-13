@@ -1,23 +1,22 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
   import SvgIcon from '$lib/components/SvgIcon.svelte'
   import { saveWithKey } from '$lib/actions/saveWithKey'
   import { clickOutside } from '$lib/actions/clickOutside'
   import { escapeWithKey } from '$lib/actions/escapeWithKey'
+  import type { IEditableCellProps } from '$lib/interfaces/Types'
 
-  export let value: any
+  let { value, changeValue }: IEditableCellProps = $props()
 
-  const dispatch = createEventDispatcher()
-
-  $: editValue = value
-  let editMode = false
+  let editValue = $state('')
+  let editMode = $state(false)
 
   function onClickSave() {
     editMode = false
     value = editValue
-    dispatch('valueChanged', editValue)
+    console.log('NEW VALUE ', value)
+    changeValue(value)
   }
 
   function onClickCancel() {
@@ -26,19 +25,26 @@
   }
 
   const enableEdit = () => (editMode = true)
+
+  const setEditValue = (value: any) => (editValue = value)
+
+  $effect(() => {
+    setEditValue(value)
+  })
 </script>
 
-<div use:saveWithKey on:saveKey={onClickSave} use:clickOutside on:outClick={onClickCancel} use:escapeWithKey on:escapeKey={onClickCancel} data-name="cell">
+<div use:saveWithKey onsaveKey={onClickSave} use:clickOutside onoutClick={onClickCancel} use:escapeWithKey onescapeKey={onClickCancel} data-name="cell">
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   {#if !editMode}
-    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div on:click={enableEdit}>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <div onclick={enableEdit}>
       <p>{value}</p>
     </div>
   {:else}
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
     <textarea bind:value={editValue} />
-    <button on:click={onClickSave}><SvgIcon id="checkmark" width="20px" height="20px" /></button>
+    <button onclick={onClickSave}><SvgIcon id="checkmark" width="20px" height="20px" /></button>
   {/if}
 </div>
 

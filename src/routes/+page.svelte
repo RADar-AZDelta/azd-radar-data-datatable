@@ -1,12 +1,12 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/components/DataTable.d'
-  import { sleep } from '$lib/utils'
-  import EditableCell from '$lib/components/EditableCell.svelte'
   import { flip } from 'svelte/animate'
+  import { sleep } from '$lib/utils'
   import DataTable from '$lib/components/DataTable.svelte'
+  import EditableCell from '$lib/components/EditableCell.svelte'
   import { FetchDataTypeClass } from '../examples/FetchDataTypeClass'
+  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/interfaces/Types'
 
   const data: Record<string, any>[] = [
     {
@@ -125,14 +125,11 @@
       id: 'address',
       position: 3,
       // sortDirection: 'desc',
-      sortOrder: 1,
+      // sortOrder: 1,
     },
   ]
 
-  let dataTableMatrix: DataTable,
-    dataTableArrayOfObjects: DataTable,
-    dataTableFetchFunction: DataTable,
-    dataTableFile: DataTable
+  let dataTableMatrix: DataTable, dataTableArrayOfObjects: DataTable, dataTableFetchFunction: DataTable, dataTableFile: DataTable
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   // FETCH FUNCTIONS
@@ -242,10 +239,8 @@
   <header>
     <h1>@radar-azdelta/svelte-datatable demo</h1>
     <p>
-      Why yet another datatable component? During the development of <a href="https://github.com/RADar-AZDelta/Keun"
-        >Keun</a
-      >, we needed a datatable component that could handle CSV's with more than 100.000 rows. We didn't find anything
-      that suited our needs, so we developed our own.
+      Why yet another datatable component? During the development of <a href="https://github.com/RADar-AZDelta/Keun">Keun</a>, we needed a datatable component
+      that could handle CSV's with more than 100.000 rows. We didn't find anything that suited our needs, so we developed our own.
     </p>
   </header>
 
@@ -263,30 +258,24 @@
         singleSort: false,
         paginationOnTop: false,
       }}
-      let:renderedRow
-      let:originalIndex
-      let:columns
     >
-      <td>
-        <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
-      </td>
-      {#each columns || [] as column, i (column.id)}
-        <td animate:flip={{ duration: 500 }}>
-          <EditableCell
-            value={renderedRow[column.id]}
-            on:valueChanged={async event =>
-              await dataTableMatrix.updateRows(
-                new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
-              )}
-          />
+      {#snippet rowChild(renderedRow, originalIndex, index, columns, options)}
+        <td>
+          <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
         </td>
-      {/each}
+        {#each columns || [] as column, i (column.id)}
+          <td animate:flip={{ duration: 500 }}>
+            <EditableCell
+              value={renderedRow[column.id]}
+              changeValue={async (value: any) => await dataTableMatrix.updateRows(new Map([[originalIndex, Object.fromEntries([[column.id, value]])]]))}
+            />
+          </td>
+        {/each}
+      {/snippet}
     </DataTable>
 
     <br />
-    <button on:click={() => onClickInsertRows(dataTableMatrix)}
-      >Insert row (remove country filter to view updated records)</button
-    >
+    <button on:click={() => onClickInsertRows(dataTableMatrix)}>Insert row (remove country filter to view updated records)</button>
   </details>
 
   <hr />
@@ -294,9 +283,11 @@
   <details>
     <summary>Table with an array of objects as a data source</summary>
     <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ id: 'array' }}>
-      <td slot="actionCell" let:originalIndex>
+      {#snippet actionCellChild(renderedRow, originalIndex, index, columns, options)}
+      <td>
         <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
       </td>
+      {/snippet}
     </DataTable>
 
     <br />
@@ -307,12 +298,7 @@
 
   <details>
     <summary>Table with a async function as a data source (ex: fetch data from web server)</summary>
-    <DataTable
-      {columns}
-      data={fetchData}
-      bind:this={dataTableFetchFunction}
-      options={{ id: 'function', dataTypeImpl: new FetchDataTypeClass() }}
-    />
+    <DataTable {columns} data={fetchData} bind:this={dataTableFetchFunction} options={{ id: 'function', dataTypeImpl: new FetchDataTypeClass() }} />
   </details>
 
   <hr />
@@ -320,8 +306,7 @@
   <details open>
     <summary
       >Table with a CSV file as a data source (ex: <a
-        href="https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv"
-        >medicatie_usagi.csv</a
+        href="https://raw.githubusercontent.com/RADar-AZDelta/AZDelta-OMOP-CDM/main/drug_exposure/drug_concept_id/medicatie_usagi.csv">medicatie_usagi.csv</a
       >)</summary
     >
     <label for="fileInput">Upload a file</label>
@@ -337,15 +322,13 @@
           filter: undefined,
         },
       }}
-      let:renderedRow
-      let:originalIndex
-      let:columns
       modifyColumnMetadata={columns =>
         columns.map((col, index) => {
           col.editable = index % 2 === 0
           return col
         })}
     >
+    {#snippet rowChild(renderedRow, originalIndex, index, columns, options)}
       <td>
         <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
       </td>
@@ -356,14 +339,12 @@
           {:else}
             <EditableCell
               value={renderedRow[column.id]}
-              on:valueChanged={async event =>
-                await dataTableFile.updateRows(
-                  new Map([[originalIndex, Object.fromEntries([[column.id, event.detail]])]])
-                )}
+              changeValue={async value => await dataTableFile.updateRows(new Map([[originalIndex, Object.fromEntries([[column.id, value]])]]))}
             />
           {/if}
         </td>
       {/each}
+    {/snippet}
     </DataTable>
 
     <br />

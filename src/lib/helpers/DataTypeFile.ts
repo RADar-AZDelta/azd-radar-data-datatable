@@ -1,16 +1,8 @@
 import { wrap, type Remote } from 'comlink'
 import DataTableWorker from '$lib/workers/DataTable.worker?worker'
-import { DataTypeCommonBase } from './DataTypeCommonBase'
-import type {
-  IColumnMetaData,
-  IDataTypeFunctionalities,
-  IDataTypeInfo,
-  IRender,
-  ModifyColumnMetadataFunc,
-  SortDirection,
-  TFilter,
-} from '$lib/components/DataTable'
+import { DataTypeCommonBase } from '$lib/helpers/DataTypeCommonBase'
 import type Query from 'arquero/dist/types/query/query'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ModifyColumnMetadataFunc, SortDirection, TFilter } from '$lib/interfaces/Types'
 
 export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctionalities {
   worker: Worker

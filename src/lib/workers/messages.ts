@@ -1,7 +1,7 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
-import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/components/DataTable'
 import type Query from 'arquero/dist/types/query/query'
+import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/interfaces/Types'
 
 export interface PostMessage<TData> {
   msg: string

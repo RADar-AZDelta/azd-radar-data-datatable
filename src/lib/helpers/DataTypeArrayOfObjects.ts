@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from './DataTypeCommonBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '$lib/components/DataTable'
+import { DataTypeCommonBase } from '$lib/helpers/DataTypeCommonBase'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '$lib/interfaces/Types'
 
 export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -25,7 +25,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
       if (this.modifyColumnMetadata) this.internalColumns = this.modifyColumnMetadata(this.internalColumns)
     } else this.internalColumns = columns
 
-    if (this.internalOptions) for (let col of this.internalColumns) if (!col.width) col.width = this.internalOptions?.defaultColumnWidth
+    if (this.internalOptions) for (const col of this.internalColumns) if (!col.width) col.width = this.internalOptions?.defaultColumnWidth
 
     return this.internalColumns
   }

@@ -3,7 +3,7 @@
 <script lang="ts">
   import { DEV, BROWSER } from 'esm-env'
   import { flip } from 'svelte/animate'
-  import { createEventDispatcher, onDestroy } from 'svelte'
+  import { onDestroy } from 'svelte'
   import isEqual from 'lodash.isequal'
   import { clickOutside } from '$lib/actions/clickOutside'
   import { storeOptions } from '$lib/actions/storeOptions'
@@ -14,28 +14,13 @@
   import ColumnSort from '$lib/components/ColumnSort.svelte'
   import ColumnResize from '$lib/components/ColumnResize.svelte'
   import ColumnFilter from '$lib/components/ColumnFilter.svelte'
-  import { DataTypeFile } from '$lib/components/datatable/data/DataTypeFile'
-  import { DataTypeMatrix } from '$lib/components/datatable/data/DataTypeMatrix'
-  import { DataTypeArrayOfObjects } from '$lib/components/datatable/data/DataTypeArrayOfObjects'
+  import { DataTypeFile } from '$lib/helpers/DataTypeFile'
+  import { DataTypeMatrix } from '$lib/helpers/DataTypeMatrix'
+  import { DataTypeArrayOfObjects } from '$lib/helpers/DataTypeArrayOfObjects'
   import type Query from 'arquero/dist/types/query/query'
-  import type {
-    ColumnFilterChangedED,
-    ColumnPositionChangedED,
-    ColumnSortChangedED,
-    ColumnWidthChangedED,
-    FetchDataFunc,
-    IColumnMetaData,
-    IDataTypeFunctionalities,
-    ITableOptions,
-    ModifyColumnMetadataFunc,
-    PaginationChangedED,
-  } from './DataTable'
+  import type { IColumnMetaData, IDataTypeFunctionalities, ITableOptions, SortDirection, TFilter, IDataTableProps } from '$lib/interfaces/Types'
 
-  export let data: any[][] | any[] | FetchDataFunc | File | undefined,
-    columns: IColumnMetaData[] | undefined = undefined,
-    options: ITableOptions | undefined = undefined,
-    disabled: boolean = false,
-    modifyColumnMetadata: ModifyColumnMetadataFunc | undefined = undefined
+  let { data, columns = undefined, options = undefined, disabled = false, modifyColumnMetadata, initialized, rendering, rendered, rowChild, actionHeaderChild, actionCellChild, loadingChild, noDataChild }: IDataTableProps = $props()
 
   const defaultOptions = {
     currentPage: 1,
@@ -46,25 +31,24 @@
     defaultColumnWidth: 200,
   }
 
-  let renderedData: any[][] | any[] | undefined,
-    internalOptions: ITableOptions = Object.assign(defaultOptions, options ?? {}),
-    internalColumns: IColumnMetaData[] | undefined
+  let renderedData: any[][] | any[] | undefined = $state()
+  let internalOptions: ITableOptions = $state(Object.assign(defaultOptions, options ?? {}))
+  let internalColumns: IColumnMetaData[] | undefined = $state()
 
-  let renderStatus: string
+  let renderStatus: string = $state('')
   let dataTypeImpl: IDataTypeFunctionalities
-  let originalIndices: number[] //the index of the sorted, filtered and paginated record in the original data
+  let originalIndices: number[] = $state([]) //the index of the sorted, filtered and paginated record in the original data
 
   let settingsDialog: HTMLDialogElement
-  let filterVisibility: boolean = !internalOptions.hideFilters
+  let filterVisibility: boolean = $state(!options?.hideFilters ?? true)
+  let visibleOrderedColumns = $derived(internalColumns?.filter(col => col.visible !== false).sort((a, b) => a.position! - b.position!))
 
-  const dispatch = createEventDispatcher()
-
-  $: {
-    options, columns, data
+  $effect(() => {
+    options
+    columns
+    data
     init()
-  }
-
-  $: visibleOrderedColumns = internalColumns?.filter(col => col.visible !== false).sort((a, b) => a.position! - b.position!)
+  })
 
   async function init() {
     renderStatus = 'initializing'
@@ -74,7 +58,7 @@
     await configureData()
     await configureColumns()
     await render()
-    dispatch('initialized')
+    if(initialized) initialized()
   }
 
   async function configureOptions() {
@@ -88,7 +72,7 @@
   async function configureSaveImpl() {
     if (internalOptions.saveImpl || !BROWSER) return
     if (options?.saveImpl) return (internalOptions.saveImpl = options.saveImpl)
-    await import('$lib/components/datatable/config/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
+    await import('$lib/helpers/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
       internalOptions.saveImpl = new LocalStorageOptions(options)
     })
   }
@@ -131,18 +115,17 @@
 
   export async function render(onlyPaginationChanged = false) {
     renderStatus = 'rendering'
-    dispatch('rendering')
+    if(rendering) await rendering()
     if (DEV) console.log('DataTable: render')
     let totalRows: number | undefined
     if (!dataTypeImpl) return
     ;({ renderedData, originalIndices, totalRows, internalColumns } = await dataTypeImpl!.render(onlyPaginationChanged))
     internalOptions.totalRows = totalRows
     renderStatus = 'completed'
-    dispatch('renderingComplete')
+    if(rendered) rendered()
   }
 
-  async function onColumnFilterChanged(event: CustomEvent<ColumnFilterChangedED>) {
-    const { filter, column } = event.detail
+  async function updateColumnFilter(column: string, filter: TFilter) {
     if (internalOptions?.globalFilter) internalOptions.globalFilter.filter = filter
     const filterString = filter ? filter.toString().toLowerCase() : ''
     if (column === 'all') internalColumns?.forEach(column => (column!.filter = filterString))
@@ -156,16 +139,14 @@
     await render()
   }
 
-  async function onColumnWidthChanged(event: CustomEvent<ColumnWidthChangedED>) {
-    const { column, width } = event.detail
+  async function changeColumnWidth(column: string, width: number) {
     const col = internalColumns?.find(col => col.id === column)
     if (col) col.width = width
     internalColumns = internalColumns
     if (DEV) console.log(`DataTable: column '${col!.id}' width changed to '${width}'`)
   }
 
-  async function onColumnPositionChanged(event: CustomEvent<ColumnPositionChangedED>) {
-    const { column, position } = event.detail
+  async function changeColumnPosition(column: string, position: number) {
     const sourceColumn = internalColumns?.find(col => col.id === column)
     if (!sourceColumn) return
     internalColumns?.forEach(col => {
@@ -179,8 +160,7 @@
     if (DEV) console.log(`DataTable: column '${sourceColumn!.id}' position changed from '${sourceColumn?.position}' to '${position}'`)
   }
 
-  async function onColumnSortChanged(event: CustomEvent<ColumnSortChangedED>) {
-    const { column, sortDirection } = event.detail
+  async function changeColumnSort(column: string, sortDirection: SortDirection) {
     if (internalOptions.singleSort) internalColumns?.forEach(col => (col.sortDirection = undefined))
     const internalCol = internalColumns?.find(col => col.id === column)
     if (!internalCol) return
@@ -191,17 +171,17 @@
     await render()
   }
 
-  async function onPaginationChanged(event: CustomEvent<PaginationChangedED>) {
-    const { rowsPerPage, currentPage } = event.detail
+  async function onPaginationChanged(rowsPerPage: number, currentPage: number) {
     if (rowsPerPage !== internalOptions.rowsPerPage) internalOptions.currentPage = 1
     else internalOptions.currentPage = currentPage
     internalOptions.rowsPerPage = rowsPerPage
     internalOptions = internalOptions
-    if (DEV) console.log(`DataTable: pagination changed to ${JSON.stringify(event.detail)}`)
     await render(true)
   }
 
-  const onSettingsVisibilityChanged = () => settingsDialog.showModal()
+  async function changeVisibility() {
+    settingsDialog.showModal()
+  }
 
   async function onColumnVisibilityChanged(e: Event) {
     const inputEl = e.target as HTMLInputElement
@@ -352,8 +332,8 @@
 </script>
 
 <dialog data-name="settings-dialog" bind:this={settingsDialog}>
-  <div data-name="dialog-container" use:clickOutside on:outClick={closeModal}>
-    <button data-name="close-button" on:click={() => settingsDialog.close()}>
+  <div data-name="dialog-container" use:clickOutside onoutClick={closeModal}>
+    <button data-name="close-button" onclick={() => settingsDialog.close()}>
       <SvgIcon id="x" />
     </button>
     <div data-name="modal-dialog">
@@ -364,7 +344,7 @@
             {@const { id, visible, label } = column}
             {@const checked = visible === undefined ? true : visible}
             <div>
-              <input type="checkbox" name={id} {id} {checked} on:change={onColumnVisibilityChanged} />
+              <input type="checkbox" name={id} {id} {checked} onchange={onColumnVisibilityChanged} />
               <label for={id}>{label ?? id}</label><br />
             </div>
           {/each}
@@ -379,7 +359,7 @@
   {@const { singleSort, globalFilter, paginationThroughArrowsOnly, hidePagination, hideOptions, hideFilters } = internalOptions}
   {@const inputType = 'text'}
   <div data-component="svelte-datatable">
-    <div data-component="datatable-content" data-status={renderStatus ?? ''} use:storeOptions on:storeoptions={onStoreOptions}>
+    <div data-component="datatable-content" data-status={renderStatus ?? ''} use:storeOptions onstoreoptions={onStoreOptions}>
       <table>
         {#if visibleOrderedColumns}
           <colgroup>
@@ -396,7 +376,7 @@
                 <th colspan={visibleOrderedColumns.length + (actionColumn ? 1 : 0)}>
                   <div>
                     {#if !hideOptions}
-                      <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} {disabled} />
+                      <Options {disabled} {changeVisibility} />
                     {/if}
                     {#if !hidePagination}
                       <Pagination
@@ -406,7 +386,7 @@
                         totalRows={totalRows ?? 0}
                         {disabled}
                         {paginationThroughArrowsOnly}
-                        on:paginationChanged={onPaginationChanged}
+                        changePagination={onPaginationChanged}
                       />
                     {/if}
                   </div>
@@ -417,7 +397,7 @@
               {#if actionColumn}
                 <th data-name="action-Column">
                   {#if singleSort}
-                    <button on:click={toggleFilterVisibility}>
+                    <button onclick={toggleFilterVisibility}>
                       <SvgIcon id="filter" />
                     </button>
                   {/if}
@@ -432,11 +412,13 @@
                   data-sortable={column?.sortable}
                   animate:flip={{ duration: 500 }}
                 >
-                  <ColumnResize {column} on:columnPositionChanged={onColumnPositionChanged} on:columnWidthChanged={onColumnWidthChanged}>
-                    <p>{column.label || column.id}</p>
-                    {#if column.sortable !== false}
-                      <ColumnSort column={column.id} sortDirection={column.sortDirection} {disabled} on:columnSortChanged={onColumnSortChanged} />
-                    {/if}
+                  <ColumnResize {column} {changeColumnPosition} {changeColumnWidth}>
+                    {#snippet child()}
+                      <p>{column.label || column.id}</p>
+                      {#if column.sortable !== false}
+                        <ColumnSort column={column.id} sortDirection={column.sortDirection} {disabled} {changeColumnSort} />
+                      {/if}
+                    {/snippet}
                   </ColumnResize>
                 </th>
               {/each}
@@ -444,9 +426,10 @@
             {#if !hideFilters}
               <tr data-name="filters">
                 {#if actionColumn}
-                  {#if $$slots.actionHeader}
-                    <slot name="actionHeader" columns={visibleOrderedColumns} options={internalOptions} />
+                  {#if actionHeaderChild}
+                    {@render actionHeaderChild(visibleOrderedColumns, internalOptions)}
                   {:else}
+                    <!-- svelte-ignore element_invalid_self_closing_tag -->
                     <th />
                   {/if}
                 {/if}
@@ -454,7 +437,7 @@
                   {#if filterVisibility}
                     {@const { column, filter } = globalFilter}
                     <th colspan={visibleOrderedColumns.length}>
-                      <ColumnFilter column={column ?? 'all'} {inputType} {filter} {disabled} on:columnFilterChanged={onColumnFilterChanged} />
+                      <ColumnFilter column={column ?? 'all'} {inputType} {filter} {disabled} {updateColumnFilter} />
                     </th>
                   {/if}
                 {:else}
@@ -462,7 +445,7 @@
                     {@const { resizable, id, filterable, filter } = column}
                     <th data-resizable={resizable} data-key={id} data-filterable={filterable} animate:flip={{ duration: 500 }}>
                       {#if filterVisibility === true && filterable !== false}
-                        <ColumnFilter column={id} {inputType} {filter} {disabled} on:columnFilterChanged={onColumnFilterChanged} />
+                        <ColumnFilter column={id} {inputType} {filter} {disabled} {updateColumnFilter}/>
                       {/if}
                     </th>
                   {/each}
@@ -476,7 +459,7 @@
                 <th colspan={visibleOrderedColumns.length + (actionColumn ? 1 : 0)}>
                   <div>
                     {#if !hideOptions}
-                      <Options on:settingsVisibilityChanged={onSettingsVisibilityChanged} {disabled} />
+                      <Options {changeVisibility} {disabled} />
                     {/if}
                     {#if !hidePagination}
                       <Pagination
@@ -486,7 +469,7 @@
                         totalRows={totalRows ?? 0}
                         {disabled}
                         {paginationThroughArrowsOnly}
-                        on:paginationChanged={onPaginationChanged}
+                        changePagination={onPaginationChanged}
                       />
                     {/if}
                   </div>
@@ -499,20 +482,14 @@
           {#if renderedData}
             {#each renderedData as row, i (i)}
               <tr data-index={i}>
-                {#if $$slots.default}
-                  <slot renderedRow={row} originalIndex={originalIndices[i]} index={i} columns={visibleOrderedColumns} options={internalOptions} />
+                {#if rowChild}
+                {@render rowChild(row, originalIndices[i], i, visibleOrderedColumns, internalOptions)}
                 {:else}
                   {#if actionColumn}
-                    {#if $$slots.actionCell}
-                      <slot
-                        name="actionCell"
-                        renderedRow={row}
-                        originalIndex={originalIndices[i]}
-                        index={i}
-                        columns={visibleOrderedColumns}
-                        options={internalOptions}
-                      />
+                    {#if actionCellChild}
+                    {@render actionCellChild(row, originalIndices[i], i, visibleOrderedColumns, internalOptions)}
                     {:else}
+                      <!-- svelte-ignore element_invalid_self_closing_tag -->
                       <td />
                     {/if}
                   {/if}
@@ -525,8 +502,8 @@
               </tr>
             {/each}
           {:else if data}
-            {#if $$slots.loading}
-              <slot name="loading" />
+            {#if loadingChild}
+              {@render loadingChild()}
             {:else}
               <tr data-name="loading" style="height: calc(var(--line-height) * {rowsPerPage})">
                 <td colspan={(visibleOrderedColumns?.length ?? 1) + (actionColumn ? 1 : 0)}>
@@ -537,8 +514,8 @@
                 </td>
               </tr>
             {/if}
-          {:else if $$slots.nodata}
-            <slot name="nodata" />
+          {:else if noDataChild}
+            {@render noDataChild()}
           {/if}
         </tbody>
       </table>

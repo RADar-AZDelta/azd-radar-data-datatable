@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import icons from '$lib/styles/icons.svg?raw'
+  import type { ISvgIconProps } from '$lib/interfaces/Types'
 
   /* 
     With the previous version of SvgIcon Vite would throw an error because of an unsafe attempt to load URL
@@ -32,11 +33,9 @@
     in the static folder won't be given to the package. And even if it would be exported with the package, the path to the file would still be an issue.
   */
 
-  export let width: string = '16px'
-  export let height: string = '16px'
-  export let id: string
+  let { id, width = '16px', height = '16px' }: ISvgIconProps = $props()
 
-  let rendered = false
+  let rendered = $state(false)
 
   onMount(() => {
     // Take the raw svg document (string) & parse it to a seperate HTML document

@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from './DataTypeCommonBase'
-import type { IDataTypeFunctionalities, IRender } from '$lib/components/DataTable'
+import { DataTypeCommonBase } from '$lib/helpers/DataTypeCommonBase'
+import type { IDataTypeFunctionalities, IRender } from '$lib/interfaces/Types'
 
 export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined

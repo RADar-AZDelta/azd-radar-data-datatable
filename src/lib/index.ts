@@ -3,7 +3,7 @@
 
 import { default as DataTable } from './components/DataTable.svelte'
 import { default as EditableCell } from './components/EditableCell.svelte'
-import { DataTypeCommonBase } from './components/datatable/data/DataTypeCommonBase'
+import { DataTypeCommonBase } from './helpers/DataTypeCommonBase'
 import type {
   ITableOptions,
   IColumnMetaData,
@@ -16,7 +16,7 @@ import type {
   IStoredOptions,
   IRender,
   IDataTypeInfo,
-} from './components/DataTable'
+} from './interfaces/Types'
 
 export type {
   ITableOptions,

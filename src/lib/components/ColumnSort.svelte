@@ -1,48 +1,58 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
-  import SvgIcon from './SvgIcon.svelte'
-  import type { Hex, SortDirection, CustomTableEvents } from './DataTable.d.js'
+  import SvgIcon from '$lib/components/SvgIcon.svelte'
+  import type { Hex, SortDirection, IColumnSortProps } from '$lib/interfaces/Types'
 
-  export let column: string,
-    sortDirection: SortDirection,
-    disabled: boolean,
-    filledColor: Hex = '#626262',
-    notFilledColor: Hex = '#FFFFFF',
-    filledOpacity: number = 1,
-    notFilledOpadcity: number = 0
+  let {
+    column,
+    sortDirection,
+    disabled,
+    filledColor = '#626262',
+    notFilledColor = '#FFFFFF',
+    filledOpacity = 1,
+    notFilledOpacity = 0,
+    changeColumnSort,
+  }: IColumnSortProps = $props()
 
-  let upColor: Hex, downColor: Hex, upOpacity: number, downOpacity: number
-  const dispatch = createEventDispatcher<CustomTableEvents>()
+  let upColor: Hex = $state('#626262')
+  let downColor: Hex = $state('#626262')
+  let upOpacity: number = $state(1)
+  let downOpacity: number = $state(1)
 
-  $: switch (sortDirection) {
-    case 'asc':
-      upColor = filledColor
-      downColor = notFilledColor
-      upOpacity = filledOpacity
-      downOpacity = notFilledOpadcity
-      break
-    case 'desc':
-      upColor = notFilledColor
-      downColor = filledColor
-      upOpacity = notFilledOpadcity
-      downOpacity = filledOpacity
-      break
-    default:
-      upColor = filledColor
-      downColor = filledColor
-      upOpacity = filledOpacity
-      downOpacity = filledOpacity
-      break
+  async function updateColors(direction: SortDirection) {
+    switch (direction) {
+      case 'asc':
+        upColor = filledColor
+        downColor = notFilledColor
+        upOpacity = filledOpacity
+        downOpacity = notFilledOpacity
+        break
+      case 'desc':
+        upColor = notFilledColor
+        downColor = filledColor
+        upOpacity = notFilledOpacity
+        downOpacity = filledOpacity
+        break
+      default:
+        upColor = filledColor
+        downColor = filledColor
+        upOpacity = filledOpacity
+        downOpacity = filledOpacity
+        break
+    }
   }
 
   function onClick() {
     sortDirection = sortDirection === 'asc' ? 'desc' : sortDirection === 'desc' ? undefined : 'asc'
-    dispatch('columnSortChanged', { column, sortDirection })
+    changeColumnSort(column, sortDirection)
   }
+
+  $effect(() => {
+    updateColors(sortDirection)
+  })
 </script>
 
-<button id="sort-{column}-{Math.random()}" on:click={onClick} {disabled} aria-label="Sorting">
+<button id="sort-{column}-{Math.random()}" onclick={onClick} {disabled} aria-label="Sorting">
   <SvgIcon id="updown" --up-color={upColor} --down-color={downColor} --up-opacity={upOpacity} --down-opacity={downOpacity} />
 </button>

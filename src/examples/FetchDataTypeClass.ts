@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from '$lib/components/datatable/data/DataTypeCommonBase'
-import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, SortDirection, TFilter } from '$lib/components/DataTable'
+import { DataTypeCommonBase } from '$lib/helpers/DataTypeCommonBase'
+import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, SortDirection, TFilter } from '$lib/interfaces/Types'
 
 export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeFunctionalities {
   async setData(data: IDataTypeInfo): Promise<void> {
@@ -13,7 +13,7 @@ export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeF
   async setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
     if (!columns) throw new Error('Columns property is not provided')
     this.internalColumns = columns
-    for (let col of this.internalColumns) if (!col.width) col.width = this.internalOptions?.defaultColumnWidth ?? 10
+    for (const col of this.internalColumns) if (!col.width) col.width = this.internalOptions?.defaultColumnWidth ?? 10
     return this.internalColumns
   }
 

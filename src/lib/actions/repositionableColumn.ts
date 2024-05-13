@@ -1,4 +1,4 @@
-import type { IColumnMetaData } from '$lib/components/DataTable'
+import type { IColumnMetaData } from '$lib/interfaces/Types'
 
 export function repositionableColumn(node: Node, column: IColumnMetaData) {
   function handleDragStart(event: DragEvent) {

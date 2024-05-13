@@ -1,15 +1,12 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
   import SvgIcon from '$lib/components/SvgIcon.svelte'
-  import type { CustomTableEvents } from '$lib/components/DataTable'
+  import type { IOptionsProps } from '$lib/interfaces/Types'
 
-  export let disabled: boolean
+  let { disabled, changeVisibility }: IOptionsProps = $props()
 
-  const dispatch = createEventDispatcher<CustomTableEvents>()
-
-  const onClick = () => dispatch('settingsVisibilityChanged')
+  const onClick = () => changeVisibility()
 </script>
 
-<button data-name="settings-button" on:click={onClick} {disabled} id="Settings button {Math.random()}" aria-label="Settings button">
+<button data-name="settings-button" onclick={onClick} {disabled} id="Settings button {Math.random()}" aria-label="Settings button">
   <SvgIcon id="gear" />
 </button>

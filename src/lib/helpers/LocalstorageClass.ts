@@ -1,4 +1,4 @@
-import type { IColumnMetaData, ICustomStoreOptions, ITableOptions, IStoredOptions } from '$lib/components/DataTable'
+import type { IColumnMetaData, ICustomStoreOptions, ITableOptions, IStoredOptions } from '$lib/interfaces/Types'
 
 export default class LocalStorageOptions implements ICustomStoreOptions {
   storedOptions: ITableOptions

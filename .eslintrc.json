@@ -15,7 +15,7 @@
     // Would not be possible to use async/await in a promise
     "no-async-promise-executor": "off",
     // In some places, it needs to be of type "any"
-    // "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "no-prototype-builtins": "off",
     "import/order": [

@@ -1,11 +1,5 @@
-//Copyright 2023 RADar-AZDelta
-//SPDX-License-Identifier: gpl3+
-
+import type { Snippet } from 'svelte'
 import type Query from 'arquero/dist/types/query/query'
-
-declare module '*.svelte' {
-  export { SvelteComponentDev as default } from 'svelte/internal'
-}
 
 export type Hex = `#${string}`
 export type SortDirection = 'asc' | 'desc' | undefined | null
@@ -173,4 +167,73 @@ export interface IRender {
   originalIndices: number[]
   totalRows?: number
   internalColumns: IColumnMetaData[] | undefined
+}
+
+export interface IColumnFilterProps {
+  column: string
+  inputType: string
+  filter: TFilter
+  disabled: boolean
+  updateColumnFilter: (column: string, filter: TFilter) => Promise<void>
+}
+
+export interface IColumnResizeProps {
+  column: IColumnMetaData
+  minWidth?: number
+  changeColumnPosition: (column: string, position: number) => Promise<void>
+  changeColumnWidth: (column: string, width: number) => Promise<void>
+  child: Snippet
+}
+
+export interface IColumnSortProps {
+  column: string
+  sortDirection: SortDirection
+  disabled: boolean
+  filledColor?: Hex
+  notFilledColor?: Hex
+  filledOpacity?: number
+  notFilledOpacity?: number
+  changeColumnSort: (column: string, sortDirection: SortDirection) => Promise<void>
+}
+
+export interface IEditableCellProps {
+  value: any
+  changeValue: (value: any) => Promise<void>
+}
+
+export interface IOptionsProps {
+  disabled: boolean
+  changeVisibility: () => Promise<void>
+}
+
+export interface IPaginationProps {
+  rowsPerPage?: number
+  currentPage?: number
+  rowsPerPageOptions?: number[]
+  totalRows: number
+  disabled: boolean
+  paginationThroughArrowsOnly?: boolean
+  changePagination: (rowsPerPage: number, currentPage: number) => Promise<void>
+}
+
+export interface ISvgIconProps {
+  id: string
+  width?: string
+  height?: string
+}
+
+export interface IDataTableProps {
+  data: any[][] | any[] | FetchDataFunc | File | undefined
+  columns?: IColumnMetaData[] | undefined
+  options?: ITableOptions | undefined
+  disabled?: boolean
+  modifyColumnMetadata?: ModifyColumnMetadataFunc
+  initialized?: () => Promise<void>
+  rendering?: () => Promise<void>
+  rendered?: () => Promise<void>
+  rowChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
+  actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  loadingChild?: Snippet
+  noDataChild?: Snippet
 }
