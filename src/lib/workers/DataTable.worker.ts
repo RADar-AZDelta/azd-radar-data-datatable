@@ -53,7 +53,7 @@ async function fetchData(data: MessageRequestFetchData) {
             }
           }
           return expr
-        })
+        }),
       )
     } else {
       for (const [column, filter] of [...data.filteredColumns.entries()]) {
@@ -197,20 +197,20 @@ const getRow = ({ index }: MessageRequestGetRow) => dt.object(index)
 async function getNextRow({ index, rowsPerPage, currentPage }: MessageRequestChangeRow) {
   if (!tempDt) return
   const currentIndicesIndex = tempDt._index.indexOf(index)
-  const indicesIndex = currentIndicesIndex + 1
+  const indicesIndex = tempDt._index[currentIndicesIndex + 1]
   let newPage: number = currentPage
   if (indicesIndex % rowsPerPage === 0) newPage++
-  const row = tempDt?.object(indicesIndex)
+  const row = dt?.object(indicesIndex)
   return { row, index: indicesIndex, page: newPage }
 }
 
 async function getPreviousRow({ index, rowsPerPage, currentPage }: MessageRequestChangeRow) {
   if (!tempDt) return
   const currentIndicesIndex = tempDt._index.indexOf(index)
-  const indicesIndex = currentIndicesIndex - 1
+  const indicesIndex = tempDt._index[currentIndicesIndex > 0 ? currentIndicesIndex - 1 : 0]
   let newPage: number = currentPage
   if ((indicesIndex + 1) % rowsPerPage === 0) newPage--
-  const row = tempDt?.object(indicesIndex)
+  const row = dt?.object(indicesIndex)
   return { row, index: indicesIndex, page: newPage }
 }
 
@@ -231,7 +231,7 @@ function executeQueryAndReturnResults({ usedQuery, filteredColumns, sortedColumn
     tempDt = tempDt.filter(
       escape((d: any) => {
         if (op.lower(d[column]) && op.lower(d[column])?.includes(lowerCaseFilter)) return d[column]
-      })
+      }),
     )
   }
   for (const [column, sortDirection] of [...sortedColumns].reverse()) {
