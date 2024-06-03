@@ -237,3 +237,9 @@ export interface IDataTableProps {
   loadingChild?: Snippet
   noDataChild?: Snippet
 }
+
+export interface IRowNavigation {
+  row: Record<string, any>
+  index: number
+  page: number
+}

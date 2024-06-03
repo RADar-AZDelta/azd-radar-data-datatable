@@ -18,9 +18,23 @@
   import { DataTypeMatrix } from '$lib/helpers/DataTypeMatrix'
   import { DataTypeArrayOfObjects } from '$lib/helpers/DataTypeArrayOfObjects'
   import type Query from 'arquero/dist/types/query/query'
-  import type { IColumnMetaData, IDataTypeFunctionalities, ITableOptions, SortDirection, TFilter, IDataTableProps } from '$lib/interfaces/Types'
+  import type { IColumnMetaData, IDataTypeFunctionalities, ITableOptions, SortDirection, TFilter, IDataTableProps, IRowNavigation } from '$lib/interfaces/Types'
 
-  let { data, columns = undefined, options = undefined, disabled = false, modifyColumnMetadata, initialized, rendering, rendered, rowChild, actionHeaderChild, actionCellChild, loadingChild, noDataChild }: IDataTableProps = $props()
+  let {
+    data,
+    columns = undefined,
+    options = undefined,
+    disabled = false,
+    modifyColumnMetadata,
+    initialized,
+    rendering,
+    rendered,
+    rowChild,
+    actionHeaderChild,
+    actionCellChild,
+    loadingChild,
+    noDataChild,
+  }: IDataTableProps = $props()
 
   const defaultOptions = {
     currentPage: 1,
@@ -58,7 +72,7 @@
     await configureData()
     await configureColumns()
     await render()
-    if(initialized) initialized()
+    if (initialized) initialized()
   }
 
   async function configureOptions() {
@@ -115,14 +129,14 @@
 
   export async function render(onlyPaginationChanged = false) {
     renderStatus = 'rendering'
-    if(rendering) await rendering()
+    if (rendering) await rendering()
     if (DEV) console.log('DataTable: render')
     let totalRows: number | undefined
     if (!dataTypeImpl) return
     ;({ renderedData, originalIndices, totalRows, internalColumns } = await dataTypeImpl!.render(onlyPaginationChanged))
     internalOptions.totalRows = totalRows
     renderStatus = 'completed'
-    if(rendered) rendered()
+    if (rendered) rendered()
   }
 
   async function updateColumnFilter(column: string, filter: TFilter) {
@@ -231,7 +245,7 @@
     return fullRow
   }
 
-  export async function getNextRow(currentIndex: number): Promise<Record<string, any>> {
+  export async function getNextRow(currentIndex: number): Promise<IRowNavigation> {
     const { rowsPerPage, currentPage } = internalOptions
     return await dataTypeImpl?.getNextRow(currentIndex, rowsPerPage ?? 0, currentPage ?? 0)
   }
@@ -445,7 +459,7 @@
                     {@const { resizable, id, filterable, filter } = column}
                     <th data-resizable={resizable} data-key={id} data-filterable={filterable} animate:flip={{ duration: 500 }}>
                       {#if filterVisibility === true && filterable !== false}
-                        <ColumnFilter column={id} {inputType} {filter} {disabled} {updateColumnFilter}/>
+                        <ColumnFilter column={id} {inputType} {filter} {disabled} {updateColumnFilter} />
                       {/if}
                     </th>
                   {/each}
@@ -483,11 +497,11 @@
             {#each renderedData as row, i (i)}
               <tr data-index={i}>
                 {#if rowChild}
-                {@render rowChild(row, originalIndices[i], i, visibleOrderedColumns, internalOptions)}
+                  {@render rowChild(row, originalIndices[i], i, visibleOrderedColumns, internalOptions)}
                 {:else}
                   {#if actionColumn}
                     {#if actionCellChild}
-                    {@render actionCellChild(row, originalIndices[i], i, visibleOrderedColumns, internalOptions)}
+                      {@render actionCellChild(row, originalIndices[i], i, visibleOrderedColumns, internalOptions)}
                     {:else}
                       <!-- svelte-ignore element_invalid_self_closing_tag -->
                       <td />

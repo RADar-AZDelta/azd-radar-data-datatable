@@ -2,7 +2,7 @@ import { wrap, type Remote } from 'comlink'
 import DataTableWorker from '$lib/workers/DataTable.worker?worker'
 import { DataTypeCommonBase } from '$lib/helpers/DataTypeCommonBase'
 import type Query from 'arquero/dist/types/query/query'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ModifyColumnMetadataFunc, SortDirection, TFilter } from '$lib/interfaces/Types'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, IRowNavigation, ModifyColumnMetadataFunc, SortDirection, TFilter } from '$lib/interfaces/Types'
 
 export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctionalities {
   worker: Worker
@@ -153,7 +153,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
     return await this.exposed.getRow({ index: originalIndex })
   }
 
-  async getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<Record<string, any>> {
+  async getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<IRowNavigation> {
     return await this.exposed.getNextRow({ index: currentIndex, rowsPerPage, currentPage })
   }
 

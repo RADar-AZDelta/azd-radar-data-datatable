@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env'
 import { DataTypeCommonBase } from '$lib/helpers/DataTypeCommonBase'
-import type { IDataTypeFunctionalities, IRender } from '$lib/interfaces/Types'
+import type { IDataTypeFunctionalities, IRender, IRowNavigation } from '$lib/interfaces/Types'
 
 export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -65,7 +65,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     }, {} as Record<string, any>)
   }
 
-  async getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<any> {
+  async getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<IRowNavigation> {
     const newIndex = currentIndex + 1
     const row = this.internalColumns!.reduce((acc, column, idx) => {
       acc[column.id] = (this.data as any[][])[newIndex][idx]
