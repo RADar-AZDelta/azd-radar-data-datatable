@@ -23,7 +23,7 @@
   let {
     data,
     columns = undefined,
-    options = undefined,
+    options = $bindable(undefined),
     disabled = false,
     modifyColumnMetadata,
     initialized,

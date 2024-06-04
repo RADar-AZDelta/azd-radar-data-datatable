@@ -10,7 +10,7 @@
   let value = $derived(filter ?? '')
 
   const onInput = debounce(e => updateColumnFilter(column, e.target.value), 500)
-  const onClick = () => updateColumnFilter(column, undefined)
+  const onClick = () => updateColumnFilter(column, '')
 </script>
 
 {#if column}
