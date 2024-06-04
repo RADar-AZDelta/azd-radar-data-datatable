@@ -231,6 +231,7 @@ export interface IDataTableProps {
   initialized?: () => Promise<void>
   rendering?: () => Promise<void>
   rendered?: () => Promise<void>
+  paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
   rowChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
   actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
   actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>

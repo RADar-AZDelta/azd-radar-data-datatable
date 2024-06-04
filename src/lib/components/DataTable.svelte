@@ -25,10 +25,11 @@
     columns = undefined,
     options = $bindable(undefined),
     disabled = false,
-    modifyColumnMetadata,
-    initialized,
-    rendering,
-    rendered,
+    modifyColumnMetadata = undefined,
+    initialized = undefined,
+    rendering = undefined,
+    rendered = undefined,
+    paginationChanged = undefined,
     rowChild,
     actionHeaderChild,
     actionCellChild,
@@ -190,6 +191,7 @@
     else internalOptions.currentPage = currentPage
     internalOptions.rowsPerPage = rowsPerPage
     internalOptions = internalOptions
+    if (paginationChanged) await paginationChanged(currentPage, rowsPerPage)
     await render(true)
   }
 
