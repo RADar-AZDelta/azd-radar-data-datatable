@@ -38,7 +38,7 @@
   {#if !editMode}
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div onclick={enableEdit}>
+    <div onclick={enableEdit} class="cell-container">
       <p>{value}</p>
     </div>
   {:else}
@@ -56,6 +56,7 @@
 
   div {
     width: 100%;
+    min-height: 1rem;
     height: 100%;
   }
 </style>
