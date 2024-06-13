@@ -161,7 +161,9 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
           csvArrayObjObjects += col.id + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
           keyCounterArrayOfObjects++
         } else {
-          const value = (<any[]>this.renderedData)[row - 1][col.id as keyof object].toString().replaceAll(',', ';')
+          let value = (<any[]>this.renderedData)[row - 1][col.id as keyof object]
+          if (value === null || value === undefined) value = ''
+          value = value.toString().replaceAll(',', ';')
           csvArrayObjObjects += value + (keyCounterArrayOfObjects + 1 < this.internalColumns.length ? ',' : '\r\n')
           keyCounterArrayOfObjects++
         }
