@@ -47,7 +47,7 @@
   const onChangeInputPage = debounce(e => onChangePage(e.target.value), 500)
 
   $effect(() => {
-    if (currentPage > totalPages) onChangePage(1)
+    if (currentPage > totalPages && totalPages !== 0) onChangePage(1)
   })
 </script>
 

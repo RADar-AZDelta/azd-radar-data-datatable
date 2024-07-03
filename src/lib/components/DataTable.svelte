@@ -230,13 +230,13 @@
   export async function insertRows(rows: Record<string, any>[]): Promise<number[]> {
     const indices = await dataTypeImpl!.insertRows(rows)
     if (typeof indices == 'number') originalIndices = indices
-    await render(false)
+    await render()
     return originalIndices
   }
 
   export async function deleteRows(originalIndices: number[]) {
     await dataTypeImpl!.deleteRows(originalIndices)
-    await render(false)
+    await render()
   }
 
   export const getColumns = () => internalColumns
@@ -260,7 +260,7 @@
   export async function insertColumns(cols: IColumnMetaData[]) {
     const updatedColumns = await dataTypeImpl!.insertColumns(cols)
     if (updatedColumns) internalColumns = updatedColumns
-    await render(false)
+    await render()
   }
 
   export async function updateColumns(cols: IColumnMetaData[]) {

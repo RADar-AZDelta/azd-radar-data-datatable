@@ -5,8 +5,9 @@
   import { sleep } from '$lib/utils'
   import DataTable from '$lib/components/DataTable.svelte'
   import EditableCell from '$lib/components/EditableCell.svelte'
-  import { FetchDataTypeClass } from '../examples/FetchDataTypeClass'
+  import { query } from 'arquero'
   import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '$lib/interfaces/Types'
+  import { FetchDataTypeClass } from '../examples/FetchDataTypeClass'
 
   const data: Record<string, any>[] = [
     {
@@ -138,7 +139,7 @@
   async function fetchData(
     filteredColumns: Map<string, TFilter>,
     sortedColumns: Map<string, SortDirection>,
-    pagination: IPagination
+    pagination: IPagination,
   ): Promise<{ totalRows: number; data: any[][] | any[] }> {
     //lets simulate a remote fetch call
 
@@ -193,10 +194,6 @@
     }
   }
 
-  async function onClickSaveButton(dataTable: DataTable) {
-    await dataTable.saveToFile()
-  }
-
   async function onClickInsertRows(dataTable: DataTable) {
     const newRow = {
       name: 'Rudy',
@@ -208,23 +205,64 @@
     await dataTable.insertRows([newRow])
   }
 
-  async function onClickInsertRowsCSV(dataTable: DataTable) {
-    const rows: Record<string, any> = {}
-    const dummyRow = dataTable
-      .getColumns()
-      ?.map(col => col.id)
-      .reduce((acc, cur) => {
-        acc[cur] = ' insert'
-        return acc
-      }, rows)
+  // async function onClickSaveButton(dataTable: DataTable) {
+  //   await dataTable.saveToFile()
+  // }
 
-    await dataTable.insertRows([dummyRow!])
-  }
+  // async function getBlob(dataTable: DataTable) {
+  //   const blob = await dataTable.getBlob()
+  //   console.log('BLOB ', blob, ' AND CONTENT ', await blob.text())
+  // }
 
-  async function getRow() {
-    const row = await dataTableFile.getFullRow(1)
-    console.log(row)
-  }
+  // async function updateRows(dataTable: DataTable) {
+  //   await dataTable.updateRows(new Map([[1, { sourceName: 'test update' }]]))
+  // }
+
+  // async function deleteRow(dataTable: DataTable) {
+  //   await dataTable.deleteRows([1])
+  // }
+
+  // async function getNextRow(dataTable: DataTable) {
+  //   console.log(await dataTable.getNextRow(1))
+  // }
+
+  // async function getPrevRow(dataTable: DataTable) {
+  //   console.log(await dataTable.getPreviousRow(1))
+  // }
+
+  // async function onClickInsertRowsCSV(dataTable: DataTable) {
+  //   const rows: Record<string, any> = {}
+  //   const dummyRow = dataTable
+  //     .getColumns()
+  //     ?.map(col => col.id)
+  //     .reduce((acc, cur) => {
+  //       acc[cur] = ' insert'
+  //       return acc
+  //     }, rows)
+  //   await dataTable.insertRows([dummyRow])
+  // }
+
+  // async function getRow(dataTable: DataTable) {
+  //   const row = await dataTable.getFullRow(1)
+  //   console.log(row)
+  // }
+
+  // async function insertColumn(dataTable: DataTable) {
+  //   await dataTable.insertColumns([{ id: 'test', label: 'inserted Col' }])
+  // }
+
+  // async function executeQuery(dataTable: DataTable) {
+  //   const q = query()
+  //     .params({ sourceName: 'Roken' })
+  //     .filter((r: any, p: any) => r.sourceName === p.sourceName)
+  //     .toObject()
+  //   const res = await dataTable.executeQueryAndReturnResults(q)
+  //   console.log('RES ', res)
+  // }
+
+  // async function replaceValuesOfColumn(dataTable: DataTable) {
+  //   await dataTable.replaceValuesOfColumn(0, 20, 'sourceFrequency')
+  // }
 </script>
 
 <svelte:head>
@@ -284,9 +322,9 @@
     <summary>Table with an array of objects as a data source</summary>
     <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ id: 'array' }}>
       {#snippet actionCellChild(renderedRow, originalIndex, index, columns, options)}
-      <td>
-        <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
-      </td>
+        <td>
+          <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
+        </td>
       {/snippet}
     </DataTable>
 
@@ -317,10 +355,8 @@
       options={{
         id: 'fileUsagi',
         actionColumn: true,
-        globalFilter: {
-          column: 'all',
-          filter: undefined,
-        },
+        saveOptions: false,
+        rowsPerPage: 5,
       }}
       modifyColumnMetadata={columns =>
         columns.map((col, index) => {
@@ -328,30 +364,45 @@
           return col
         })}
     >
-    {#snippet rowChild(renderedRow, originalIndex, index, columns, options)}
-      <td>
-        <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
-      </td>
-      {#each columns || [] as column, i (column.id)}
-        <td animate:flip={{ duration: 500 }}>
-          {#if column.editable === false}
-            <p>{renderedRow[column.id]}</p>
-          {:else}
-            <EditableCell
-              value={renderedRow[column.id]}
-              changeValue={async value => await dataTableFile.updateRows(new Map([[originalIndex, Object.fromEntries([[column.id, value]])]]))}
-            />
-          {/if}
+      {#snippet rowChild(renderedRow, originalIndex, index, columns, options)}
+        <td>
+          <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
         </td>
-      {/each}
-    {/snippet}
+        {#each columns || [] as column, i (column.id)}
+          <td animate:flip={{ duration: 500 }}>
+            {#if column.editable === false}
+              <p>{renderedRow[column.id]}</p>
+            {:else}
+              <EditableCell
+                value={renderedRow[column.id]}
+                changeValue={async value => await dataTableFile.updateRows(new Map([[originalIndex, Object.fromEntries([[column.id, value]])]]))}
+              />
+            {/if}
+          </td>
+        {/each}
+      {/snippet}
     </DataTable>
 
-    <br />
-    <button disabled={!file} on:click={() => getRow()}>Get first row values</button>
-    <br />
-    <button disabled={!file} on:click={() => onClickSaveButton(dataTableFile)}>Save table</button>
-    <br />
-    <button disabled={!file} on:click={() => onClickInsertRowsCSV(dataTableFile)}>Insert row</button>
+    <!-- <br />
+    <div class="container">
+      <button disabled={!file} on:click={() => onClickSaveButton(dataTableFile)}>save to file</button>
+      <button disabled={!file} on:click={() => getBlob(dataTableFile)}>get blob</button>
+      <button disabled={!file} on:click={() => updateRows(dataTableFile)}>update rows</button>
+      <button disabled={!file} on:click={() => onClickInsertRowsCSV(dataTableFile)}>insert rows</button>
+      <button disabled={!file} on:click={() => deleteRow(dataTableFile)}>delete rows</button>
+      <button disabled={!file} on:click={() => getRow(dataTableFile)}>get row</button>
+      <button disabled={!file} on:click={() => getNextRow(dataTableFile)}>get next row</button>
+      <button disabled={!file} on:click={() => getPrevRow(dataTableFile)}>get previous row</button>
+      <button disabled={!file} on:click={() => insertColumn(dataTableFile)}>insert column</button>
+      <button disabled={!file} on:click={() => executeQuery(dataTableFile)}>execute query</button>
+      <button disabled={!file} on:click={() => replaceValuesOfColumn(dataTableFile)}>replace values of column</button>
+    </div> -->
   </details>
 </article>
+
+<style>
+  .container {
+    display: grid;
+    grid-template-columns: repeat(6, auto);
+  }
+</style>

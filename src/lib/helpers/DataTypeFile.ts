@@ -2,7 +2,16 @@ import { wrap, type Remote } from 'comlink'
 import DataTableWorker from '$lib/workers/DataTable.worker?worker'
 import { DataTypeCommonBase } from '$lib/helpers/DataTypeCommonBase'
 import type Query from 'arquero/dist/types/query/query'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, IRowNavigation, ModifyColumnMetadataFunc, SortDirection, TFilter } from '$lib/interfaces/Types'
+import type {
+  IColumnMetaData,
+  IDataTypeFunctionalities,
+  IDataTypeInfo,
+  IRender,
+  IRowNavigation,
+  ModifyColumnMetadataFunc,
+  SortDirection,
+  TFilter,
+} from '$lib/interfaces/Types'
 
 export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctionalities {
   worker: Worker
@@ -58,28 +67,22 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   }
 
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
-    const filteredColumns = this.internalOptions?.globalFilter?.filter
-      ? new Map<string, TFilter>([[this.internalOptions!.globalFilter!.column, this.internalOptions!.globalFilter!.filter]])
-      : this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur) => {
-          if (cur && cur.filter) acc.set(cur.id, cur.filter)
-          return acc
-        }, new Map<string, TFilter>())
+    const filteredColumns: Map<string, TFilter> = await this.getFilteredColumns()
     const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur) => {
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc
     }, new Map<string, SortDirection>())
-    const results = await this.exposed.fetchData({
-      filteredColumns,
-      sortedColumns,
-      pagination: { rowsPerPage: this.internalOptions?.rowsPerPage, currentPage: this.internalOptions?.currentPage },
-      onlyPaginationChanged,
-    })
+    const pagination = { rowsPerPage: this.internalOptions?.rowsPerPage, currentPage: this.internalOptions?.currentPage }
+    const results = await this.exposed.fetchData({ filteredColumns, sortedColumns, pagination, onlyPaginationChanged })
     const totalRows = results!.totalRows
     this.renderedData = results!.data.map((row: any) =>
-      this.internalColumns?.reduce((acc, cur, index) => {
-        acc[cur.id!] = row[index]
-        return acc
-      }, {} as Record<string, any>)
+      this.internalColumns?.reduce(
+        (acc, cur, index) => {
+          acc[cur.id!] = row[index]
+          return acc
+        },
+        {} as Record<string, any>,
+      ),
     )
     const originalIndices = (<number[]>results.indices).reduce<number[]>((acc, cur) => {
       acc.push(cur)
@@ -92,6 +95,18 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
       renderedData: this.renderedData,
       internalColumns: this.internalColumns,
     }
+  }
+
+  private async getFilteredColumns() {
+    const globalFilter = this.internalOptions?.globalFilter
+    if (globalFilter?.filter) {
+      const { filter, column } = globalFilter
+      return new Map<string, TFilter>([[column, filter]])
+    } else
+      return this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur) => {
+        if (cur && cur.filter) acc.set(cur.id, cur.filter)
+        return acc
+      }, new Map<string, TFilter>())
   }
 
   async saveToFile(): Promise<void> {
@@ -175,21 +190,6 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
       return acc
     }, new Map<number, Record<string, any>>())
     await this.exposed.updateRows({ rowsByIndex: rowsToUpdateByWorkerIndex })
-  }
-
-  async renameColumns(columns: Record<string, string>): Promise<void> {
-    await this.exposed.renameColumns({ columns })
-    for (const [oldCol, newCol] of Object.entries(columns)) {
-      if (this.internalColumns!.find(col => col.id === newCol)) {
-        const oldIndex = this.internalColumns!.findIndex(col => col.id === oldCol)
-        const newIndex = this.internalColumns!.findIndex(col => col.id === newCol)
-        this.internalColumns!.splice(newIndex, 1)
-        const col = this.internalColumns![newIndex]
-        this.internalColumns![oldIndex] = Object.assign(col, { id: newCol })
-      } else {
-        this.internalColumns!.find(col => col.id === oldCol)!.id = newCol
-      }
-    }
   }
 
   async destroy(): Promise<void> {
