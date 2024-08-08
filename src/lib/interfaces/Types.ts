@@ -52,6 +52,7 @@ export interface ITableOptions extends IPagination {
   dataTypeImpl?: IDataTypeFunctionalities
   saveImpl?: ICustomStoreOptions
   hideFilters?: boolean
+  addRow?: boolean
 }
 
 export type FetchDataFunc = (
@@ -237,6 +238,7 @@ export interface IDataTableProps {
   actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
   loadingChild?: Snippet
   noDataChild?: Snippet
+  addRowChild?: Snippet<[columns: IColumnMetaData[] | undefined, options: ITableOptions]>
 }
 
 export interface IRowNavigation {

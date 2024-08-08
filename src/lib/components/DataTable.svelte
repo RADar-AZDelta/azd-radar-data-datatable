@@ -35,6 +35,7 @@
     actionCellChild,
     loadingChild,
     noDataChild,
+    addRowChild
   }: IDataTableProps = $props()
 
   const defaultOptions = {
@@ -517,6 +518,11 @@
                 {/if}
               </tr>
             {/each}
+            {#if internalOptions.addRow}
+              {#if addRowChild}
+                {@render addRowChild(visibleOrderedColumns, internalOptions)}
+              {/if}
+            {/if}
           {:else if data}
             {#if loadingChild}
               {@render loadingChild()}
