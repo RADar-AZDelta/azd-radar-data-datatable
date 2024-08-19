@@ -35,7 +35,7 @@
     actionCellChild,
     loadingChild,
     noDataChild,
-    addRowChild
+    addRowChild,
   }: IDataTableProps = $props()
 
   const defaultOptions = {
@@ -305,6 +305,11 @@
     await render()
   }
 
+  export async function triggerOptionsAndColumnsSave() {
+    if (DEV) console.log('triggerOptionsAndColumnsSave: Storing options ', internalOptions.saveImpl, ' And columns ', internalColumns)
+    if (BROWSER && internalOptions.saveImpl) internalOptions.saveImpl.store(internalOptions, internalColumns!)
+  }
+
   function onStoreOptions() {
     if (DEV) console.log('onStoreOptions: Storing options ', internalOptions.saveImpl)
     if (BROWSER && internalOptions.saveImpl) internalOptions.saveImpl.store(internalOptions, internalColumns!)
@@ -337,6 +342,7 @@
   const closeModal = () => settingsDialog.close()
 
   function storeOptionsAndColumns() {
+    if (DEV) console.log('storeOptionsAndColumns: Storing options ', internalOptions.saveImpl, ' And columns ', internalColumns)
     if (BROWSER && data && internalOptions.saveImpl) internalOptions.saveImpl.store(internalOptions, internalColumns!)
   }
 
