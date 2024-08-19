@@ -321,7 +321,7 @@
       const id = options ? options.id : internalOptions.id
       if (id) {
         if (DEV) console.log(`loadStoredOptions: Loading options & columns for ${id}`)
-        const { tableOptions, columnMetaData } = await internalOptions.saveImpl.load(id, internalColumns)
+        const { tableOptions, columnMetaData } = await internalOptions.saveImpl.load(id, columns)
         if (columnMetaData) cols = columnMetaData
         else cols = columns
         if (tableOptions) Object.assign(internalOptions, tableOptions)
