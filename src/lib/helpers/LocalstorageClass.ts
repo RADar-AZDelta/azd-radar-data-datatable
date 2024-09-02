@@ -1,4 +1,4 @@
-import type { IColumnMetaData, ICustomStoreOptions, ITableOptions, IStoredOptions } from '$lib/interfaces/Types'
+import type { IColumnMetaData, ICustomStoreOptions, ITableOptions, IStoredOptions } from '../interfaces/Types'
 
 export default class LocalStorageOptions implements ICustomStoreOptions {
   storedOptions: ITableOptions
@@ -34,7 +34,7 @@ export default class LocalStorageOptions implements ICustomStoreOptions {
           acc.set(cur.id, cur)
           return acc
         },
-        new Map<string, IColumnMetaData>()
+        new Map<string, IColumnMetaData>(),
       )
       // Check if storedInternalColumns has the column id, if so push it to the stored columns
       this.storedColumns = internalColumns.map((col: IColumnMetaData) => {

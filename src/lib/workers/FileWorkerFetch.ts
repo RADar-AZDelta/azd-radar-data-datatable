@@ -2,12 +2,12 @@ import { desc, escape, op } from 'arquero'
 import Arquero from './FileWorkerLoad'
 import type { MessageRequestFetchData } from './messages'
 import type Table from 'arquero/dist/types/table/table'
-import type { SortDirection, TFilter } from '$lib/interfaces/Types'
+import type { SortDirection, TFilter } from '../interfaces/Types'
 
 export default class Fetch extends Arquero {
   getColumnNames = () => {
-      const res = this.dt?.columnNames()
-      return res
+    const res = this.dt?.columnNames()
+    return res
   }
 
   async fetchData(data: MessageRequestFetchData) {
@@ -30,7 +30,9 @@ export default class Fetch extends Arquero {
     const filter = [...data.filteredColumns.values()][0]
     const lFilter = filter?.toString().toLowerCase()
     const columns = this.tempDt.columnNames()
-    this.tempDt = this.tempDt.filter(escape((d: any) => columns.reduce((acc: boolean, curr: string) => (acc = acc || op.lower(d[curr])?.includes(lFilter)), false)))
+    this.tempDt = this.tempDt.filter(
+      escape((d: any) => columns.reduce((acc: boolean, curr: string) => (acc = acc || op.lower(d[curr])?.includes(lFilter)), false)),
+    )
   }
 
   async applyMultipleFilters(filteredColumns: Map<string, TFilter>, tempDt: Table) {

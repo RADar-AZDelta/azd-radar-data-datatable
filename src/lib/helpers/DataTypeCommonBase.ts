@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env'
-import { DataTypeBase } from '$lib/helpers/DataTypeBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions } from '$lib/interfaces/Types'
+import { DataTypeBase } from '../helpers/DataTypeBase'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions } from '../interfaces/Types'
 import type Query from 'arquero/dist/types/query/query'
 
 export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctionalities {

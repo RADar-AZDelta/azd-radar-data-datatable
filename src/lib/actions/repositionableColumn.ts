@@ -1,4 +1,4 @@
-import type { IColumnMetaData } from '$lib/interfaces/Types'
+import type { IColumnMetaData } from '../interfaces/Types'
 
 export function repositionableColumn(node: Node, column: IColumnMetaData) {
   function handleDragStart(event: DragEvent) {
@@ -22,7 +22,7 @@ export function repositionableColumn(node: Node, column: IColumnMetaData) {
       node.dispatchEvent(
         new CustomEvent('repositioned', {
           detail: { column: data.column, position: column.position ?? Number.MAX_SAFE_INTEGER },
-        })
+        }),
       )
     } catch (e) {
       console.error(e)

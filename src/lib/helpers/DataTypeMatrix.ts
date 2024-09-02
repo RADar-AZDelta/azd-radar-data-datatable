@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from '$lib/helpers/DataTypeCommonBase'
-import type { IDataTypeFunctionalities, IRender, IRowNavigation } from '$lib/interfaces/Types'
+import { DataTypeCommonBase } from '../helpers/DataTypeCommonBase'
+import type { IDataTypeFunctionalities, IRender, IRowNavigation } from '../interfaces/Types'
 
 export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -16,10 +16,13 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     const paginatedData = await this.applyPagination(this.internalOptions!, this.filteredAndSortedData)
     if (paginatedData) {
       this.renderedData = paginatedData.map(row =>
-        this.internalColumns?.reduce((acc, cur, index) => {
-          acc[cur.id!] = row[index]
-          return acc
-        }, {} as Record<string, any>)
+        this.internalColumns?.reduce(
+          (acc, cur, index) => {
+            acc[cur.id!] = row[index]
+            return acc
+          },
+          {} as Record<string, any>,
+        ),
       )
       originalIndices = (paginatedData as any[]).reduce((acc, cur) => {
         acc.push((this.data as any[]).indexOf(cur))
@@ -59,18 +62,24 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
   }
 
   async getFullRow(originalIndex: number): Promise<Record<string, any>> {
-    return this.internalColumns!.reduce((acc, column, idx) => {
-      acc[column.id] = (this.data as any[][])[originalIndex][idx]
-      return acc
-    }, {} as Record<string, any>)
+    return this.internalColumns!.reduce(
+      (acc, column, idx) => {
+        acc[column.id] = (this.data as any[][])[originalIndex][idx]
+        return acc
+      },
+      {} as Record<string, any>,
+    )
   }
 
   async getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<IRowNavigation> {
     const newIndex = currentIndex + 1
-    const row = this.internalColumns!.reduce((acc, column, idx) => {
-      acc[column.id] = (this.data as any[][])[newIndex][idx]
-      return acc
-    }, {} as Record<string, any>)
+    const row = this.internalColumns!.reduce(
+      (acc, column, idx) => {
+        acc[column.id] = (this.data as any[][])[newIndex][idx]
+        return acc
+      },
+      {} as Record<string, any>,
+    )
     let newPage: number = currentPage
     if (newIndex % rowsPerPage === 0) newPage++
     return { row, index: newIndex, page: newPage }
@@ -78,10 +87,13 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
 
   async getPreviousRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<any> {
     const newIndex = currentIndex - 1
-    const row = this.internalColumns!.reduce((acc, column, idx) => {
-      acc[column.id] = (this.data as any[][])[newIndex][idx]
-      return acc
-    }, {} as Record<string, any>)
+    const row = this.internalColumns!.reduce(
+      (acc, column, idx) => {
+        acc[column.id] = (this.data as any[][])[newIndex][idx]
+        return acc
+      },
+      {} as Record<string, any>,
+    )
     let newPage: number = currentPage
     if ((newIndex + 1) % rowsPerPage === 0) newPage--
     return { row, index: newIndex, page: newPage }
@@ -94,7 +106,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
         this.internalColumns!.reduce((acc, column) => {
           acc.push(row[column.id])
           return acc
-        }, [] as any[])
+        }, [] as any[]),
       )
     }
 
@@ -147,16 +159,16 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
                 this.standardizeValue(a[index]) < this.standardizeValue(b[index])
                   ? -1
                   : this.standardizeValue(a[index]) > this.standardizeValue(b[index])
-                  ? 1
-                  : 0
+                    ? 1
+                    : 0
               break
             case 'desc':
               compareFn = (a, b) =>
                 this.standardizeValue(b[index]) < this.standardizeValue(a[index])
                   ? -1
                   : this.standardizeValue(b[index]) > this.standardizeValue(a[index])
-                  ? 1
-                  : 0
+                    ? 1
+                    : 0
               break
           }
           if (data) data = data.sort(compareFn)

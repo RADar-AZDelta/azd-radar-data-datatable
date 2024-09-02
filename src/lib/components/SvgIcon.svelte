@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import icons from '$lib/styles/icons.svg?raw'
-  import type { ISvgIconProps } from '$lib/interfaces/Types'
+  import icons from '../styles/icons.svg?raw'
+  import type { ISvgIconProps } from '../interfaces/Types'
 
   /* 
     With the previous version of SvgIcon Vite would throw an error because of an unsafe attempt to load URL
@@ -16,7 +16,7 @@
 
     With the use of the component like the following:
 
-    import url from '$lib/styles/icons.svg?url'
+    import url from '../styles/icons.svg?url'
     <SvgIcon href={url} id="x" width="16px" height="16px" />
 
     In Sveltekit2, this has changed because it won't retrieve the url anymore, but it will provide you with an already processed, data:image format.

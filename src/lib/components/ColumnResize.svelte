@@ -1,9 +1,9 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { resizableColumn } from '$lib/actions/resizableColumn'
-  import { repositionableColumn } from '$lib/actions/repositionableColumn'
-  import type { ColumnPositionChangedED, IColumnResizeProps } from '$lib/interfaces/Types'
+  import { resizableColumn } from '../actions/resizableColumn'
+  import { repositionableColumn } from '../actions/repositionableColumn'
+  import type { ColumnPositionChangedED, IColumnResizeProps } from '../interfaces/Types'
 
   let { column, minWidth = 10, changeColumnPosition, changeColumnWidth, child }: IColumnResizeProps = $props()
 

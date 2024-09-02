@@ -4,21 +4,21 @@
   import { DEV, BROWSER } from 'esm-env'
   import { flip } from 'svelte/animate'
   import { onDestroy } from 'svelte'
-  import { isEqual } from '$lib/utils'
-  import { clickOutside } from '$lib/actions/clickOutside'
-  import { storeOptions } from '$lib/actions/storeOptions'
-  import Spinner from '$lib/components/Spinner.svelte'
-  import Options from '$lib/components/Options.svelte'
-  import SvgIcon from '$lib/components/SvgIcon.svelte'
-  import Pagination from '$lib/components/Pagination.svelte'
-  import ColumnSort from '$lib/components/ColumnSort.svelte'
-  import ColumnResize from '$lib/components/ColumnResize.svelte'
-  import ColumnFilter from '$lib/components/ColumnFilter.svelte'
-  import { DataTypeFile } from '$lib/helpers/DataTypeFile'
-  import { DataTypeMatrix } from '$lib/helpers/DataTypeMatrix'
-  import { DataTypeArrayOfObjects } from '$lib/helpers/DataTypeArrayOfObjects'
+  import { isEqual } from '../utils'
+  import { clickOutside } from '../actions/clickOutside'
+  import { storeOptions } from '../actions/storeOptions'
+  import Spinner from '../components/Spinner.svelte'
+  import Options from '../components/Options.svelte'
+  import SvgIcon from '../components/SvgIcon.svelte'
+  import Pagination from '../components/Pagination.svelte'
+  import ColumnSort from '../components/ColumnSort.svelte'
+  import ColumnResize from '../components/ColumnResize.svelte'
+  import ColumnFilter from '../components/ColumnFilter.svelte'
+  import { DataTypeFile } from '../helpers/DataTypeFile'
+  import { DataTypeMatrix } from '../helpers/DataTypeMatrix'
+  import { DataTypeArrayOfObjects } from '../helpers/DataTypeArrayOfObjects'
   import type Query from 'arquero/dist/types/query/query'
-  import type { IColumnMetaData, IDataTypeFunctionalities, ITableOptions, SortDirection, TFilter, IDataTableProps, IRowNavigation } from '$lib/interfaces/Types'
+  import type { IColumnMetaData, IDataTypeFunctionalities, ITableOptions, SortDirection, TFilter, IDataTableProps, IRowNavigation } from '../interfaces/Types'
 
   let {
     data,
@@ -88,7 +88,7 @@
   async function configureSaveImpl() {
     if (internalOptions.saveImpl || !BROWSER) return
     if (options?.saveImpl) return (internalOptions.saveImpl = options.saveImpl)
-    await import('$lib/helpers/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
+    await import('../helpers/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
       internalOptions.saveImpl = new LocalStorageOptions(options)
     })
   }

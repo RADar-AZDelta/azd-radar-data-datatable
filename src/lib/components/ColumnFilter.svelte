@@ -1,9 +1,9 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { debounce } from '$lib/utils'
-  import SvgIcon from '$lib/components/SvgIcon.svelte'
-  import type { IColumnFilterProps } from '$lib/interfaces/Types.js'
+  import { debounce } from '../utils'
+  import SvgIcon from '../components/SvgIcon.svelte'
+  import type { IColumnFilterProps } from '../interfaces/Types.js'
 
   let { column, inputType, filter, disabled, updateColumnFilter }: IColumnFilterProps = $props()
 

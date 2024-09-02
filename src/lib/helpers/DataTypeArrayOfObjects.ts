@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from '$lib/helpers/DataTypeCommonBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '$lib/interfaces/Types'
+import { DataTypeCommonBase } from '../helpers/DataTypeCommonBase'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '../interfaces/Types'
 
 export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
