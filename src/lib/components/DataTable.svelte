@@ -152,6 +152,7 @@
     internalColumns = internalColumns
     if (DEV) console.log(`DataTable: column '${column}' filter changed to '${filter}'`)
     internalOptions.currentPage = 1
+    await configureColumns()
     await render()
   }
 
@@ -184,6 +185,7 @@
     internalColumns = internalColumns
     if (DEV) console.log(`DataTable: column '${column}' sort changed to '${sortDirection}'`)
     internalOptions.currentPage = 1
+    await configureColumns()
     await render()
   }
 
