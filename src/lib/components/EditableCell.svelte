@@ -15,7 +15,6 @@
   function onClickSave() {
     editMode = false
     value = editValue
-    console.log('NEW VALUE ', value)
     changeValue(value)
   }
 

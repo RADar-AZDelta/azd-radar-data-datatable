@@ -47,7 +47,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
         const internalColumnsCopy = this.internalColumns.map(col => col.id)
         this.internalColumns = this.modifyColumnMetaData(this.internalColumns)
         const addedColumns = this.internalColumns.map(col => col.id).filter(x => !internalColumnsCopy.includes(x))
-        if (addedColumns.length > 0) {
+        if (addedColumns.length) {
           const addedCols = this.internalColumns.reduce<IColumnMetaData[]>((acc, cur) => {
             if (addedColumns.includes(cur.id)) acc.push(cur)
             return acc

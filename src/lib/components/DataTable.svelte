@@ -3,7 +3,7 @@
 <script lang="ts">
   import { DEV, BROWSER } from 'esm-env'
   import { flip } from 'svelte/animate'
-  import { onDestroy } from 'svelte'
+  import { onDestroy, onMount, tick } from 'svelte'
   import { isEqual } from '../utils'
   import { clickOutside } from '../actions/clickOutside'
   import { storeOptions } from '../actions/storeOptions'
@@ -59,19 +59,30 @@
   let filterVisibility: boolean = $state(!options?.hideFilters ?? true)
   let visibleOrderedColumns = $derived(internalColumns?.filter(col => col.visible !== false).sort((a, b) => a.position! - b.position!))
 
-  $effect(() => {
-    options
-    columns
-    data
-    init()
+  let initialisationCompleted = $state<boolean>(false)
+
+  onMount(async () => {
+    await init('onMount')
+    await tick()
+    initialisationCompleted = true
   })
 
-  async function init() {
+  $effect(() => {
+    if (initialisationCompleted) {
+      $effect(() => {
+        if (data || columns || options) {
+          init('Effect')
+        }
+      })
+    }
+  })
+
+  async function init(source: string) {
     renderStatus = 'initializing'
     if (DEV) console.log(`DataTable: init ${options?.id}`)
     await configureSaveImpl()
     await configureOptions()
-    await configureData()
+    if (!initialisationCompleted) await configureData()
     await configureColumns()
     await render()
     if (initialized) initialized()
@@ -94,6 +105,7 @@
   }
 
   async function configureData() {
+    if (dataTypeImpl !== undefined) return
     // Check the datatype impl internally
     if (internalOptions.dataTypeImpl) {
       if (!dataTypeImpl) dataTypeImpl = internalOptions.dataTypeImpl
@@ -212,7 +224,10 @@
   }
 
   export const saveToFile = async () => await dataTypeImpl!.saveToFile()
-  export const getBlob = async () => await dataTypeImpl!.getBlob()
+  export const getBlob = async (): Promise<Blob | undefined> => {
+    if (!dataTypeImpl) return
+    return await dataTypeImpl!.getBlob()
+  }
   export const getData = async () => dataTypeImpl!.data
 
   export async function updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
