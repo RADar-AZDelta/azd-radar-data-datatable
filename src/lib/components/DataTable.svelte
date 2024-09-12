@@ -62,7 +62,7 @@
   let initialisationCompleted = $state<boolean>(false)
 
   onMount(async () => {
-    await init('onMount')
+    await init()
     await tick()
     initialisationCompleted = true
   })
@@ -70,19 +70,21 @@
   $effect(() => {
     if (initialisationCompleted) {
       $effect(() => {
-        if (data || columns || options) {
-          init('Effect')
-        }
+        if (columns || options) init()
+      })
+
+      $effect(() => {
+        if (data) init(true)
       })
     }
   })
 
-  async function init(source: string) {
+  async function init(reconfigureData: boolean = false) {
     renderStatus = 'initializing'
     if (DEV) console.log(`DataTable: init ${options?.id}`)
     await configureSaveImpl()
     await configureOptions()
-    if (!initialisationCompleted) await configureData()
+    if (!initialisationCompleted || reconfigureData) await configureData(reconfigureData)
     await configureColumns()
     await render()
     if (initialized) initialized()
@@ -104,8 +106,8 @@
     })
   }
 
-  async function configureData() {
-    if (dataTypeImpl !== undefined) return
+  async function configureData(reconfigure: boolean = false) {
+    if (dataTypeImpl !== undefined && !reconfigure) return
     // Check the datatype impl internally
     if (internalOptions.dataTypeImpl) {
       if (!dataTypeImpl) dataTypeImpl = internalOptions.dataTypeImpl
