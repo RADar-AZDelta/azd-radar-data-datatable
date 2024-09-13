@@ -60,22 +60,21 @@
   let visibleOrderedColumns = $derived(internalColumns?.filter(col => col.visible !== false).sort((a, b) => a.position! - b.position!))
 
   let initialisationCompleted = $state<boolean>(false)
+  let reactiveTrigger: boolean = false
 
   onMount(async () => {
     await init()
-    await tick()
     initialisationCompleted = true
+    await tick()
+    reactiveTrigger = true
   })
 
   $effect(() => {
-    if (initialisationCompleted) {
-      $effect(() => {
-        if (columns || options) init()
-      })
-
-      $effect(() => {
-        if (data) init(true)
-      })
+    if (initialisationCompleted && reactiveTrigger) {
+      data
+      columns
+      options
+      init()
     }
   })
 

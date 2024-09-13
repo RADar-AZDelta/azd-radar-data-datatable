@@ -2,12 +2,11 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import { sleep } from '../utils'
-  import DataTable from '../components/DataTable.svelte'
-  import EditableCell from '../components/EditableCell.svelte'
-  import { query } from 'arquero'
-  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '../interfaces/Types'
+  import { sleep } from '../lib/utils'
+  import DataTable from '../lib/components/DataTable.svelte'
+  import EditableCell from '../lib/components/EditableCell.svelte'
   import { FetchDataTypeClass } from '../examples/FetchDataTypeClass'
+  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '../lib/interfaces/Types'
 
   const data: Record<string, any>[] = [
     {
