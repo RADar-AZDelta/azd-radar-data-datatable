@@ -71,11 +71,14 @@
 
   $effect(() => {
     if (initialisationCompleted && reactiveTrigger) {
-      data
       columns
       options
       init()
     }
+  })
+
+  $effect(() => {
+    if (initialisationCompleted && data && reactiveTrigger) init(true)
   })
 
   async function init(reconfigureData: boolean = false) {
