@@ -372,12 +372,14 @@
     if (BROWSER && data && internalOptions.saveImpl) internalOptions.saveImpl.store(internalOptions, internalColumns!)
   }
 
-  onDestroy(() => {
-    if (dataTypeImpl) dataTypeImpl.destroy()
-  })
-
   if (BROWSER) window.addEventListener('beforeunload', storeOptionsAndColumns, true)
   if (BROWSER && document) document.addEventListener('visibilitychange', storeOptionsAndColumns, true)
+
+  onDestroy(() => {
+    window.removeEventListener('beforeunload', storeOptionsAndColumns, true)
+    document.removeEventListener('visibilitychange', storeOptionsAndColumns, true)
+    if (dataTypeImpl) dataTypeImpl.destroy()
+  })
 </script>
 
 <dialog data-name="settings-dialog" bind:this={settingsDialog}>
