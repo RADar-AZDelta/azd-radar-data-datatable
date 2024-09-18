@@ -531,6 +531,9 @@
         {/if}
         <tbody>
           {#if renderedData}
+            {#if internalOptions.addRow === 'top' && addRowChild}
+              {@render addRowChild(visibleOrderedColumns, internalOptions)}
+            {/if}
             {#each renderedData as row, i (i)}
               <tr data-index={i}>
                 {#if rowChild}
@@ -552,10 +555,8 @@
                 {/if}
               </tr>
             {/each}
-            {#if internalOptions.addRow}
-              {#if addRowChild}
-                {@render addRowChild(visibleOrderedColumns, internalOptions)}
-              {/if}
+            {#if internalOptions.addRow === 'bottom' && addRowChild}
+              {@render addRowChild(visibleOrderedColumns, internalOptions)}
             {/if}
           {:else if data}
             {#if loadingChild}

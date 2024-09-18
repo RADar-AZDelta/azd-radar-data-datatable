@@ -52,7 +52,7 @@ export interface ITableOptions extends IPagination {
   dataTypeImpl?: IDataTypeFunctionalities
   saveImpl?: ICustomStoreOptions
   hideFilters?: boolean
-  addRow?: boolean
+  addRow?: "top" | "bottom" | false
 }
 
 export type FetchDataFunc = (
