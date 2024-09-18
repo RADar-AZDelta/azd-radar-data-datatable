@@ -185,9 +185,11 @@
   async function changeColumnPosition(column: string, position: number) {
     const sourceColumn = internalColumns?.find(col => col.id === column)
     if (!sourceColumn) return
+    // Clone the original position because it will be changed in the forEach and the positions will be switched up
+    const sourceColumnPosition = JSON.parse(JSON.stringify(sourceColumn.position))
     internalColumns?.forEach(col => {
       const colPos = col.position ?? 0
-      const sourcePos = sourceColumn.position ?? 0
+      const sourcePos = sourceColumnPosition
       if (col.id === column) col.position = position
       else if (sourcePos < colPos && colPos <= position) col.position = colPos - 1
       else if (position <= colPos && colPos < sourcePos) col.position = colPos + 1
