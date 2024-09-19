@@ -246,3 +246,19 @@ export interface IRowNavigation {
   index: number
   page: number
 }
+
+export interface IDialogProps {
+  dialog?: HTMLDialogElement
+  width: string | number
+  height: string | number
+  title?: string
+  close?: () => Promise<any>
+  children?: Snippet
+  buttonsChildren?: Snippet
+  canClose?: boolean
+}
+
+export interface ISettingsProps {
+  internalColumns: IColumnMetaData[]
+  disabled: boolean
+}

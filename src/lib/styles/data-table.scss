@@ -55,7 +55,7 @@ div[data-component='svelte-datatable'] {
 
           th {
             div {
-              align-items: center;
+              // align-items: center;
               display: flex;
 
               button[data-name='settings-button'] {
@@ -222,7 +222,7 @@ div[data-component='svelte-datatable'] {
 
           th {
             div {
-              align-items: center;
+              // align-items: center;
               display: flex;
 
               button[data-name='settings-button'] {
@@ -434,7 +434,7 @@ dialog {
 
     div {
       display: flex;
-      align-items: center;
+      // align-items: center;
     }
   }
 }
@@ -444,7 +444,7 @@ section[data-component='modal-container-medium'] {
   height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
+  // align-items: center;
   position: fixed;
   top: 0;
   left: 0;

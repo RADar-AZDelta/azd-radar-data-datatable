@@ -19,6 +19,7 @@
   import { DataTypeArrayOfObjects } from '../helpers/DataTypeArrayOfObjects'
   import type Query from 'arquero/dist/types/query/query'
   import type { IColumnMetaData, IDataTypeFunctionalities, ITableOptions, SortDirection, TFilter, IDataTableProps, IRowNavigation } from '../interfaces/Types'
+  import Settings from './datatable/Settings.svelte'
 
   let {
     data,
@@ -55,7 +56,6 @@
   let dataTypeImpl: IDataTypeFunctionalities
   let originalIndices: number[] = $state([]) //the index of the sorted, filtered and paginated record in the original data
 
-  let settingsDialog: HTMLDialogElement
   let filterVisibility: boolean = $state(!options?.hideFilters ?? true)
   let visibleOrderedColumns = $derived(internalColumns?.filter(col => col.visible !== false).sort((a, b) => a.position! - b.position!))
 
@@ -219,19 +219,6 @@
     await render(true)
   }
 
-  async function changeVisibility() {
-    settingsDialog.showModal()
-  }
-
-  async function onColumnVisibilityChanged(e: Event) {
-    const inputEl = e.target as HTMLInputElement
-    if (!internalColumns) return
-    const columns = internalColumns.find(col => col.id === inputEl.name)
-    if (!columns) return
-    columns.visible = inputEl.checked
-    internalColumns = internalColumns
-  }
-
   export const saveToFile = async () => await dataTypeImpl!.saveToFile()
   export const getBlob = async (): Promise<Blob | undefined> => {
     if (!dataTypeImpl) return
@@ -365,8 +352,6 @@
     }
   }
 
-  const closeModal = () => settingsDialog.close()
-
   function storeOptionsAndColumns() {
     if (DEV) console.log('storeOptionsAndColumns: Storing options ', internalOptions.saveImpl, ' And columns ', internalColumns)
     if (BROWSER && data && internalOptions.saveImpl) internalOptions.saveImpl.store(internalOptions, internalColumns!)
@@ -376,34 +361,11 @@
   if (BROWSER && document) document.addEventListener('visibilitychange', storeOptionsAndColumns, true)
 
   onDestroy(() => {
-    window.removeEventListener('beforeunload', storeOptionsAndColumns, true)
-    document.removeEventListener('visibilitychange', storeOptionsAndColumns, true)
+    // window.removeEventListener('beforeunload', storeOptionsAndColumns, true)
+    // document.removeEventListener('visibilitychange', storeOptionsAndColumns, true)
     if (dataTypeImpl) dataTypeImpl.destroy()
   })
 </script>
-
-<dialog data-name="settings-dialog" bind:this={settingsDialog}>
-  <div data-name="dialog-container" use:clickOutside onoutClick={closeModal}>
-    <button data-name="close-button" onclick={() => settingsDialog.close()}>
-      <SvgIcon id="x" />
-    </button>
-    <div data-name="modal-dialog">
-      <h1>Change column visibility:</h1>
-      <div data-name="modal-body">
-        {#if internalColumns}
-          {#each internalColumns.slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
-            {@const { id, visible, label } = column}
-            {@const checked = visible === undefined ? true : visible}
-            <div>
-              <input type="checkbox" name={id} {id} {checked} onchange={onColumnVisibilityChanged} />
-              <label for={id}>{label ?? id}</label><br />
-            </div>
-          {/each}
-        {/if}
-      </div>
-    </div>
-  </div>
-</dialog>
 
 {#if internalOptions}
   {@const { actionColumn, paginationOnTop, rowsPerPage, currentPage, rowsPerPageOptions, totalRows } = internalOptions}
@@ -427,7 +389,7 @@
                 <th colspan={visibleOrderedColumns.length + (actionColumn ? 1 : 0)}>
                   <div>
                     {#if !hideOptions}
-                      <Options {disabled} {changeVisibility} />
+                      <Settings bind:internalColumns {disabled} />
                     {/if}
                     {#if !hidePagination}
                       <Pagination
@@ -510,7 +472,7 @@
                 <th colspan={visibleOrderedColumns.length + (actionColumn ? 1 : 0)}>
                   <div>
                     {#if !hideOptions}
-                      <Options {changeVisibility} {disabled} />
+                      <Settings bind:internalColumns {disabled} />
                     {/if}
                     {#if !hidePagination}
                       <Pagination
