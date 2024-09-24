@@ -1,30 +1,29 @@
 <script lang="ts">
-  import Dialog from '../general/Dialog.svelte'
   import SvgIcon from '../SvgIcon.svelte'
-  import type { ISettingsProps } from '../../interfaces/Types'
-
-  let { internalColumns = $bindable(), disabled }: ISettingsProps = $props()
+  import Dialog from '../general/Dialog.svelte'
+  import options from '$lib/helpers/Options.svelte'
+  import columns from '$lib/helpers/columns/Columns.svelte'
 
   let dialog = $state<HTMLDialogElement>()
 
   const showModal = (): void => dialog?.showModal()
 
   async function onColumnVisibilityChanged(e: Event): Promise<void> {
-    if (!internalColumns || !internalColumns.length) return
+    if (!columns.internalColumns || !columns.internalColumns.length) return
     const { name, checked } = e.target as HTMLInputElement
-    const column = internalColumns.find(col => col.id === name)
+    const column = columns.internalColumns.find(col => col.id === name)
     if (!column) return
     column.visible = checked
   }
 </script>
 
-<button class="button" onclick={showModal} {disabled} id="Settings button {Math.random()}" aria-label="Settings button">
+<button class="button" onclick={showModal} disabled={options.disabled} id="Settings button {Math.random()}" aria-label="Settings button">
   <SvgIcon id="gear" />
 </button>
 
 <Dialog bind:dialog height="60%" width="40%" title="Change column visibility">
   <div class="container">
-    {#each (internalColumns ?? []).slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
+    {#each (columns.internalColumns ?? []).slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
       {@const { id, visible, label } = column}
       {@const checked = visible === undefined ? true : visible}
       <div class="option-container">

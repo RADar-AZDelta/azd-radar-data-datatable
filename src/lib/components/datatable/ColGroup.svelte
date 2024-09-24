@@ -7,7 +7,7 @@
   {#if options.internalOptions.actionColumn}
     <col data-name="col-action" width="0*" />
   {/if}
-  {#each columns.visibleOrderedColumns as column, _}
+  {#each columns.visibleOrderedColumns ?? [] as column, _}
     <col width={column.width ?? '0*'} />
   {/each}
 </colgroup>

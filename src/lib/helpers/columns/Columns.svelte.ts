@@ -3,7 +3,8 @@ import ColumnsConfig from './ColumnsConfig.svelte'
 import optionsClass from '../Options.svelte'
 import { logWhenDev } from '../../utils'
 import { getContext } from 'svelte'
-import type DataTable from '../datatable/DataTable.svelte'
+import { getDataTable } from '$lib/stores/store.svelte'
+// import type DataTable from '../datatable/DataTable.svelte'
 // import datatable from '../datatable/DataTable.svelte'
 
 class Columns extends ColumnsConfig {
@@ -21,10 +22,7 @@ class Columns extends ColumnsConfig {
         await this.setFilterOnColumn()
         optionsClass.internalOptions.currentPage = 1
         await this.setInternalColumnsInDataImplementation()
-        const dataTable = getContext('dataTable') as DataTable
-        if (!dataTable) return
-        await dataTable.render()
-        // await datatable.render()
+        await getDataTable().dataTable?.render()
     }
 
     private async setFilterInOptions() {
@@ -79,10 +77,7 @@ class Columns extends ColumnsConfig {
         optionsClass.internalOptions.currentPage = 1
         await this.setInternalColumnsInDataImplementation()
         logWhenDev(`DataTable: column '${this.sortColumn}' sort changed to '${sortDirection}'`)
-        // await datatable.render()
-        const dataTable = getContext('dataTable') as DataTable
-        if (!dataTable) return
-        await dataTable.render()
+        await getDataTable().dataTable?.render()
     }
 
     async updateColumns(columns: IColumnMetaData[]) {

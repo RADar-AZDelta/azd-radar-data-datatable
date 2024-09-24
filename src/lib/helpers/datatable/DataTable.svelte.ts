@@ -5,8 +5,6 @@ import options from "../Options.svelte"
 import pagination from "../Pagination"
 import type { IColumnMetaData } from "../../interfaces/Types"
 import type Query from "arquero/dist/types/query/query"
-import { BROWSER } from "esm-env"
-import { getContext, setContext } from "svelte"
 
 export default class DataTable extends DataTableConfig {
     saveToFile = async () => await data.dataTypeImpl?.saveToFile()

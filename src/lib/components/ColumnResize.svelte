@@ -4,18 +4,19 @@
   import { resizableColumn } from '../actions/resizableColumn'
   import { repositionableColumn } from '../actions/repositionableColumn'
   import type { ColumnPositionChangedED, IColumnResizeProps } from '../interfaces/Types'
+    import columns from '$lib/helpers/columns/Columns.svelte'
 
-  let { column, minWidth = 10, changeColumnPosition, changeColumnWidth, child }: IColumnResizeProps = $props()
+  let { column, minWidth = 10, child }: IColumnResizeProps = $props()
 
   const onRepositioned = (e: CustomEvent<ColumnPositionChangedED>) => {
     const { column, position } = e.detail
-    changeColumnPosition(column, position)
+    columns.changeColumnsPosition(column, position)
   }
 
   function onResizing(e: CustomEvent<{ x: number }>) {
     if (!column.width) return
     const width = column.width + e.detail.x
-    if (width > minWidth) changeColumnWidth(column.id, width)
+    if (width > minWidth) columns.changeColumnWidth(column.id, width)
   }
 </script>
 

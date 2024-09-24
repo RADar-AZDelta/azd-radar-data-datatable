@@ -2,6 +2,7 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import SvgIcon from '../components/SvgIcon.svelte'
+  import columns from '$lib/helpers/columns/Columns.svelte'
   import type { Hex, SortDirection, IColumnSortProps } from '../interfaces/Types'
 
   let {
@@ -12,7 +13,6 @@
     notFilledColor = '#FFFFFF',
     filledOpacity = 1,
     notFilledOpacity = 0,
-    changeColumnSort,
   }: IColumnSortProps = $props()
 
   let upColor: Hex = $state('#626262')
@@ -45,7 +45,7 @@
 
   function onClick() {
     sortDirection = sortDirection === 'asc' ? 'desc' : sortDirection === 'desc' ? undefined : 'asc'
-    changeColumnSort(column, sortDirection)
+    columns.changeColumnSort(column, sortDirection)
   }
 
   $effect(() => {

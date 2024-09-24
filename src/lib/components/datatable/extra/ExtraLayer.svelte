@@ -20,7 +20,7 @@
       {@const { disabled } = options}
       <div class="container">
         {#if !hideOptions}
-          <Settings {disabled} />
+          <Settings />
         {/if}
         {#if !hidePagination}
           <Pagination {rowsPerPage} {currentPage} {rowsPerPageOptions} totalRows={totalRows ?? 0} {disabled} {paginationThroughArrowsOnly} {changePagination} />

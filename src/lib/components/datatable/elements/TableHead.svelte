@@ -22,7 +22,6 @@
 <thead>
   {#if options.internalOptions}
     {@const { paginationOnTop, hideOptions, hidePagination, actionColumn, singleSort } = options.internalOptions}
-
     {#if paginationOnTop && (!hideOptions || !hidePagination)}
       <ExtraLayer {paginationChanged} />
     {/if}
@@ -37,11 +36,11 @@
       {#each columns.visibleOrderedColumns ?? [] as column, i (column.id)}
         {@const { id, sortDirection, resizable, sortable } = column}
         <th title={id} data-direction={sortDirection} data-resizable={resizable} data-key={id} data-sortable={sortable} animate:flip={{ duration: 500 }}>
-          <ColumnResize {column} changeColumnPosition={columns.changeColumnsPosition} changeColumnWidth={columns.changeColumnWidth}>
+          <ColumnResize {column}>
             {#snippet child()}
               <p>{column.label || column.id}</p>
               {#if column.sortable !== false}
-                <ColumnSort column={column.id} sortDirection={column.sortDirection} disabled={options.disabled} changeColumnSort={columns.changeColumnSort} />
+                <ColumnSort column={column.id} sortDirection={column.sortDirection} disabled={options.disabled} />
               {/if}
             {/snippet}
           </ColumnResize>
@@ -59,18 +58,16 @@
           {/if}
         {/if}
         {#if options.internalOptions.globalFilter}
-          {#if filterVisibility}
             {@const { column, filter } = options.internalOptions.globalFilter}
             <th colspan={(columns.visibleOrderedColumns ?? []).length}>
-              <ColumnFilter column={column ?? 'all'} inputType="text" {filter} disabled={options.disabled} updateColumnFilter={columns.updateColumnFilter} />
+              <ColumnFilter column={column ?? 'all'} inputType="text" {filter} />
             </th>
-          {/if}
         {:else}
           {#each columns.visibleOrderedColumns ?? [] as column, i (column.id)}
             {@const { resizable, id, filterable, filter } = column}
             <th data-resizable={resizable} data-key={id} data-filterable={filterable} animate:flip={{ duration: 500 }}>
-              {#if filterVisibility === true && filterable !== false}
-                <ColumnFilter column={id} inputType="text" {filter} disabled={options.disabled} updateColumnFilter={columns.updateColumnFilter} />
+              {#if filterable !== false}
+                <ColumnFilter column={id} inputType="text" {filter} />
               {/if}
             </th>
           {/each}

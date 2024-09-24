@@ -1,3 +1,4 @@
+import { getDataTable } from '$lib/stores/store.svelte'
 import optionsClass from './Options.svelte'
 
 class Pagination {
@@ -6,6 +7,7 @@ class Pagination {
         else optionsClass.internalOptions.currentPage = currentPage
         optionsClass.internalOptions.rowsPerPage = rowsPerPage
         if (paginationChanged) await paginationChanged(currentPage, rowsPerPage)
+        getDataTable().dataTable?.render()
         // await render(true)
     }
 
@@ -17,6 +19,7 @@ class Pagination {
     async changePagination(pag: { currentPage?: number; rowsPerPage?: number }) {
         if (pag.currentPage) optionsClass.internalOptions.currentPage = pag.currentPage
         if (pag.rowsPerPage) optionsClass.internalOptions.rowsPerPage = pag.rowsPerPage
+        getDataTable().dataTable?.render()
         // await render(true)
     }
 }

@@ -183,15 +183,11 @@ export interface IColumnFilterProps {
   column: string
   inputType: string
   filter: TFilter
-  disabled: boolean
-  updateColumnFilter: (column: string, filter: TFilter) => Promise<void>
 }
 
 export interface IColumnResizeProps {
   column: IColumnMetaData
   minWidth?: number
-  changeColumnPosition: (column: string, position: number) => Promise<void>
-  changeColumnWidth: (column: string, width: number) => Promise<void>
   child: Snippet
 }
 
@@ -203,7 +199,6 @@ export interface IColumnSortProps {
   notFilledColor?: Hex
   filledOpacity?: number
   notFilledOpacity?: number
-  changeColumnSort: (column: string, sortDirection: SortDirection) => Promise<void>
 }
 
 export interface IEditableCellProps {
@@ -265,10 +260,6 @@ export interface IDialogProps {
   children?: Snippet
   buttonsChildren?: Snippet
   canClose?: boolean
-}
-
-export interface ISettingsProps {
-  disabled: boolean
 }
 
 export interface IColGroupProps {
