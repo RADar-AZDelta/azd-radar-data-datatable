@@ -1,4 +1,7 @@
 //Copyright 2023 RADar-AZDelta
+
+import { DEV } from "esm-env";
+
 //SPDX-License-Identifier: gpl3+
 export const range = (start: number, stop: number, step: number) => Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step)
 
@@ -19,4 +22,8 @@ export function isEqual(x: any, y: any): boolean {
     Object.keys(x).length === Object.keys(y).length &&
     Object.keys(x).every(key => isEqual(x[key], y[key]))
   ) : (x === y);
+}
+
+export function logWhenDev(text: string): void {
+  if (DEV) console.log(text)
 }

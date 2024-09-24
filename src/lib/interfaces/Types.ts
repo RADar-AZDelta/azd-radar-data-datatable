@@ -122,20 +122,29 @@ export interface GlobalFilter {
 export type PaginationChangedED = IPagination
 
 export interface ICustomStoreOptions {
-  load(id: string, columns?: IColumnMetaData[]): IStoredOptions | Promise<IStoredOptions>
+  load(id: string, columns?: IColumnMetaData[]): IStored
+  loadOptions(id: string): ITableOptions
+  loadColumns(id: string, internalColumns?: IColumnMetaData[]): void | IColumnMetaData[]
   store(options: ITableOptions, columns: IColumnMetaData[]): void
+  storeOptions(options: ITableOptions): void
+  storeColumns(id: string | undefined, saveOptions: boolean | undefined, columns?: IColumnMetaData[]): void
 }
 
-export interface IStoredOptions {
+// export interface IStoredOptions {
+//   tableOptions: ITableOptions
+//   columnMetaData: IColumnMetaData[] | undefined
+// }
+
+export interface IStored {
   tableOptions: ITableOptions
   columnMetaData: IColumnMetaData[] | undefined
 }
 
 export interface IDataTypeInfo {
   data: any[] | any[][] | FetchDataFunc | File | undefined
-  internalOptions: ITableOptions
-  internalColumns: IColumnMetaData[] | undefined
-  renderedData: any[] | any[][] | undefined
+  internalOptions?: ITableOptions
+  internalColumns?: IColumnMetaData[] | undefined
+  renderedData?: any[] | any[][] | undefined
   modifyColumnMetadata?: ModifyColumnMetadataFunc
 }
 
@@ -259,6 +268,37 @@ export interface IDialogProps {
 }
 
 export interface ISettingsProps {
-  internalColumns: IColumnMetaData[]
   disabled: boolean
+}
+
+export interface IColGroupProps {
+  visibleOrderedColumns: IColumnMetaData[]
+  actionColumn: boolean
+}
+
+export interface ITableHeadProps {
+  paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+  actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
+}
+
+export interface IExtraLayer {
+  paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+}
+
+export interface ILoaderProps {
+  loadingChild?: Snippet
+}
+
+export interface ITableBodyProps {
+  addRowChild?: Snippet<[columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  rowChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  loadingChild?: Snippet
+  noDataChild?: Snippet
+}
+
+export interface ITableBodyRowProps {
+  row: any
+  index: number
+  actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
 }
