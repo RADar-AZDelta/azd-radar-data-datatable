@@ -1,11 +1,11 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { debounce } from '../utils'
-  import options from '$lib/helpers/Options.svelte'
-  import SvgIcon from '../components/SvgIcon.svelte'
-  import columns from '../helpers/columns/Columns.svelte'
-  import type { IColumnFilterProps } from '../interfaces/Types.js'
+  import { debounce } from '../../../../utils'
+  import options from '../../../../helpers/Options.svelte'
+  import SvgIcon from '../../../general/SvgIcon.svelte'
+  import columns from '../../../../helpers/columns/Columns.svelte'
+  import type { IColumnFilterProps } from '../../../../interfaces/Types.js'
 
   let { column, inputType, filter }: IColumnFilterProps = $props()
 

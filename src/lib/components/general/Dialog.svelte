@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SvgIcon from '../SvgIcon.svelte'
+  import SvgIcon from './SvgIcon.svelte'
   import type { IDialogProps } from '../../interfaces/Types'
 
   let { dialog = $bindable(), width, height, title, children, buttonsChildren, close, canClose = true }: IDialogProps = $props()

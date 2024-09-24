@@ -1,9 +1,9 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import SvgIcon from '../components/SvgIcon.svelte'
-  import columns from '$lib/helpers/columns/Columns.svelte'
-  import type { Hex, SortDirection, IColumnSortProps } from '../interfaces/Types'
+  import SvgIcon from '../../../general/SvgIcon.svelte'
+  import columns from '../../../../helpers/columns/Columns.svelte'
+  import type { Hex, SortDirection, IColumnSortProps } from '../../../../interfaces/Types'
 
   let {
     column,

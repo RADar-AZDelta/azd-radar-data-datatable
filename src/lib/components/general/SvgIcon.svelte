@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import icons from '../styles/icons.svg?raw'
-  import type { ISvgIconProps } from '../interfaces/Types'
+  import icons from '../../styles/icons.svg?raw'
+  import type { ISvgIconProps } from '../../interfaces/Types'
 
   /* 
     With the previous version of SvgIcon Vite would throw an error because of an unsafe attempt to load URL

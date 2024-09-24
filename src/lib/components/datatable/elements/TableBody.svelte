@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ITableBodyProps } from '../../../interfaces/Types'
   import options from '../../../helpers/Options.svelte'
-  import data from '../../../helpers/Data.svelte'
+  import data from '../../../helpers/data/Data.svelte'
   import columns from '../../../helpers/columns/Columns.svelte'
   import Loader from '../extra/Loader.svelte'
   import TableBodyRow from './TableBodyRow.svelte'

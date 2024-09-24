@@ -1,8 +1,8 @@
 <script lang="ts">
-  import SvgIcon from '../SvgIcon.svelte'
-  import Dialog from '../general/Dialog.svelte'
-  import options from '$lib/helpers/Options.svelte'
-  import columns from '$lib/helpers/columns/Columns.svelte'
+  import SvgIcon from '../../general/SvgIcon.svelte'
+  import Dialog from '../../general/Dialog.svelte'
+  import options from '../../../helpers/Options.svelte'
+  import columns from '../../../helpers/columns/Columns.svelte'
 
   let dialog = $state<HTMLDialogElement>()
 

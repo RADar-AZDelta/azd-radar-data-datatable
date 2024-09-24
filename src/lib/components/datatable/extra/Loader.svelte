@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Spinner from '../../Spinner.svelte'
+  import Spinner from '../../general/Spinner.svelte'
   import options from '../../../helpers/Options.svelte'
   import columns from '../../../helpers/columns/Columns.svelte'
   import type { ILoaderProps } from '../../../interfaces/Types'

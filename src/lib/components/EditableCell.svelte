@@ -1,7 +1,7 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import SvgIcon from '../components/SvgIcon.svelte'
+  import SvgIcon from './general/SvgIcon.svelte'
   import { saveWithKey } from '../actions/saveWithKey'
   import { clickOutside } from '../actions/clickOutside'
   import { escapeWithKey } from '../actions/escapeWithKey'

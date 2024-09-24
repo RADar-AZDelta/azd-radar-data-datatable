@@ -3,11 +3,11 @@
   import ExtraLayer from '../extra/ExtraLayer.svelte'
   import options from '../../../helpers/Options.svelte'
   import columns from '../../../helpers/columns/Columns.svelte'
-  import SvgIcon from '../../SvgIcon.svelte'
+  import SvgIcon from '../../general/SvgIcon.svelte'
   import { flip } from 'svelte/animate'
-  import ColumnResize from '../../ColumnResize.svelte'
-  import ColumnSort from '../../ColumnSort.svelte'
-  import ColumnFilter from '../../ColumnFilter.svelte'
+  import ColumnResize from './column/ColumnResize.svelte'
+  import ColumnSort from './column/ColumnSort.svelte'
+  import ColumnFilter from './column/ColumnFilter.svelte'
 
   let { paginationChanged, actionHeaderChild }: ITableHeadProps = $props()
 
@@ -58,10 +58,10 @@
           {/if}
         {/if}
         {#if options.internalOptions.globalFilter}
-            {@const { column, filter } = options.internalOptions.globalFilter}
-            <th colspan={(columns.visibleOrderedColumns ?? []).length}>
-              <ColumnFilter column={column ?? 'all'} inputType="text" {filter} />
-            </th>
+          {@const { column, filter } = options.internalOptions.globalFilter}
+          <th colspan={(columns.visibleOrderedColumns ?? []).length}>
+            <ColumnFilter column={column ?? 'all'} inputType="text" {filter} />
+          </th>
         {:else}
           {#each columns.visibleOrderedColumns ?? [] as column, i (column.id)}
             {@const { resizable, id, filterable, filter } = column}

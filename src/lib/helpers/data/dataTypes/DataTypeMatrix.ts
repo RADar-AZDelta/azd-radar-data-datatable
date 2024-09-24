@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from '../helpers/DataTypeCommonBase'
-import type { IDataTypeFunctionalities, IRender, IRowNavigation } from '../interfaces/Types'
+import { DataTypeCommonBase } from './DataTypeCommonBase'
+import type { IDataTypeFunctionalities, IRender, IRowNavigation } from '../../../interfaces/Types'
 
 export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -12,7 +12,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     if (!onlyPaginationChanged || !this.filteredAndSortedData) {
       this.filteredAndSortedData = await this.applySort(await this.applyFilter(this.data as any[][]))
       if (this.filteredAndSortedData) totalRows = this.filteredAndSortedData.length
-    } else totalRows = this.data!.length
+    } else totalRows = (this.data as any[][]).length
     const paginatedData = await this.applyPagination(this.internalOptions!, this.filteredAndSortedData)
     if (paginatedData) {
       this.renderedData = paginatedData.map(row =>
@@ -54,7 +54,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
 
   async replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void> {
     const columnIndex = this.internalColumns!.findIndex(col => col.id === column)
-    for (let i = 0; i < this.data!.length; i++) {
+    for (let i = 0; i < (this.data as any[][]).length; i++) {
       if ((this.data as any[][])![i][columnIndex] === currentValue) {
         ;(this.data as any[][])![i][columnIndex] = updatedValue
       }
@@ -100,7 +100,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
   }
 
   async insertRows(rows: Record<string, any>[]): Promise<number[]> {
-    const originalIndices = Array.from({ length: rows.length }, (_, i) => this.data!.length + i)
+    const originalIndices = Array.from({ length: rows.length }, (_, i) => (this.data as any[][]).length + i)
     for (const row of rows) {
       ;(this.data as any[][])!.push(
         this.internalColumns!.reduce((acc, column) => {

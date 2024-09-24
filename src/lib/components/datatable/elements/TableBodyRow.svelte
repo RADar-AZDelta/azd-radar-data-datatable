@@ -1,6 +1,6 @@
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import data from '../../../helpers/Data.svelte'
+  import data from '../../../helpers/data/Data.svelte'
   import options from '../../../helpers/Options.svelte'
   import columns from '../../../helpers/columns/Columns.svelte'
   import type { ITableBodyRowProps } from '../../../interfaces/Types'

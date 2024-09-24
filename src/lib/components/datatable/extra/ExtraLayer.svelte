@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IExtraLayer } from '../../../interfaces/Types'
-  import Pagination from '../../Pagination.svelte'
-  import Settings from '../Settings.svelte'
+  import Pagination from '../Pagination.svelte'
+  import Settings from './Settings.svelte'
   import columns from '../../../helpers/columns/Columns.svelte'
   import options from '../../../helpers/Options.svelte'
   import pagination from '../../../helpers/Pagination'

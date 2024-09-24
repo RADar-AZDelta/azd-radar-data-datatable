@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from '../helpers/DataTypeCommonBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '../interfaces/Types'
+import { DataTypeCommonBase } from './DataTypeCommonBase'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '../../../interfaces/Types'
 
 export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -65,7 +65,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
   }
 
   async replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void> {
-    for (let i = 0; i < this.data!.length; i++) if ((this.data as any[])![i][column] === currentValue) (this.data as any[])[i][column] = updatedValue
+    for (let i = 0; i < (this.data as any[]).length; i++) if ((this.data as any[])![i][column] === currentValue) (this.data as any[])[i][column] = updatedValue
   }
 
   getFullRow = async (originalIndex: number): Promise<Record<string, any>> => (this.data as any[])[originalIndex]

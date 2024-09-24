@@ -1,6 +1,6 @@
 import { defaultOptions } from '../constants/options.json'
-import type { ITableOptions } from "../interfaces/Types";
+import type { ITableOptions } from '../interfaces/Types'
 
 export default class Config {
-    static defaultOptions: ITableOptions = defaultOptions
+  static defaultOptions: ITableOptions = defaultOptions
 }

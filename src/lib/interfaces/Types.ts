@@ -52,13 +52,13 @@ export interface ITableOptions extends IPagination {
   dataTypeImpl?: IDataTypeFunctionalities
   saveImpl?: ICustomStoreOptions
   hideFilters?: boolean
-  addRow?: "top" | "bottom" | false
+  addRow?: 'top' | 'bottom' | false
 }
 
 export type FetchDataFunc = (
   filteredColumns: Map<string, TFilter>,
   sortedColumns: Map<string, SortDirection>,
-  pagination: IPagination
+  pagination: IPagination,
 ) => Promise<{ totalRows: number; data: any[][] | any[] }>
 
 export interface IColumnMetaData {
@@ -122,22 +122,10 @@ export interface GlobalFilter {
 export type PaginationChangedED = IPagination
 
 export interface ICustomStoreOptions {
-  load(id: string, columns?: IColumnMetaData[]): IStored
   loadOptions(id: string): ITableOptions
   loadColumns(id: string, internalColumns?: IColumnMetaData[]): void | IColumnMetaData[]
-  store(options: ITableOptions, columns: IColumnMetaData[]): void
   storeOptions(options: ITableOptions): void
   storeColumns(id: string | undefined, saveOptions: boolean | undefined, columns?: IColumnMetaData[]): void
-}
-
-// export interface IStoredOptions {
-//   tableOptions: ITableOptions
-//   columnMetaData: IColumnMetaData[] | undefined
-// }
-
-export interface IStored {
-  tableOptions: ITableOptions
-  columnMetaData: IColumnMetaData[] | undefined
 }
 
 export interface IDataTypeInfo {
@@ -292,4 +280,8 @@ export interface ITableBodyRowProps {
   row: any
   index: number
   actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+}
+
+export interface ITableFootProps {
+  paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
 }

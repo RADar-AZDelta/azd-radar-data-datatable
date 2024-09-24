@@ -1,10 +1,10 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { resizableColumn } from '../actions/resizableColumn'
-  import { repositionableColumn } from '../actions/repositionableColumn'
-  import type { ColumnPositionChangedED, IColumnResizeProps } from '../interfaces/Types'
-    import columns from '$lib/helpers/columns/Columns.svelte'
+  import columns from '../../../../helpers/columns/Columns.svelte'
+  import { resizableColumn } from '../../../../actions/resizableColumn'
+  import { repositionableColumn } from '../../../../actions/repositionableColumn'
+  import type { ColumnPositionChangedED, IColumnResizeProps } from '../../../../interfaces/Types'
 
   let { column, minWidth = 10, child }: IColumnResizeProps = $props()
 
@@ -13,9 +13,10 @@
     columns.changeColumnsPosition(column, position)
   }
 
-  function onResizing(e: CustomEvent<{ x: number }>) {
-    if (!column.width) return
-    const width = column.width + e.detail.x
+  function onResizing(e: CustomEvent<{ x: number; width: number }>) {
+    const columnWidth = column.width ?? e.detail.width
+    if (!columnWidth) return
+    const width = columnWidth + e.detail.x
     if (width > minWidth) columns.changeColumnWidth(column.id, width)
   }
 </script>
