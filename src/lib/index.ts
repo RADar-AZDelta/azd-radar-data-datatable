@@ -2,7 +2,7 @@
 //SPDX-License-Identifier: gpl3+
 
 import { default as DataTable } from './components/DataTable.svelte'
-import { default as EditableCell } from './components/EditableCell.svelte'
+import { default as EditableCell } from './components/datatable/extra/EditableCell.svelte'
 import { DataTypeCommonBase } from './helpers/data/dataTypes/DataTypeCommonBase'
 import type {
   ITableOptions,

@@ -200,13 +200,7 @@ export interface IOptionsProps {
 }
 
 export interface IPaginationProps {
-  rowsPerPage?: number
-  currentPage?: number
-  rowsPerPageOptions?: number[]
-  totalRows: number
-  disabled: boolean
-  paginationThroughArrowsOnly?: boolean
-  changePagination: (rowsPerPage: number, currentPage: number) => Promise<void>
+  paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
 }
 
 export interface ISvgIconProps {
@@ -284,4 +278,8 @@ export interface ITableBodyRowProps {
 
 export interface ITableFootProps {
   paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+}
+
+export interface IFilterRowProps {
+  actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
 }

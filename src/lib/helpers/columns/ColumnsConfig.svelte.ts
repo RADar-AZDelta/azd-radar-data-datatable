@@ -1,5 +1,4 @@
-import { BROWSER } from 'esm-env'
-import { isEqual, logWhenDev } from '../../utils'
+import { isBrowser, isEqual, logWhenDev } from '../../utils'
 import type { IColumnMetaData } from '../../interfaces/Types'
 import options from '../Options.svelte'
 import dataClass from '../data/Data.svelte'
@@ -27,7 +26,7 @@ export default class ColumnsConfig {
 
   async triggerColumnsSave() {
     logWhenDev(`triggerColumnsSave: Storing columns ${options.internalOptions.saveImpl}`)
-    if (!BROWSER || !options.internalOptions.saveImpl) return
+    if (!isBrowser() || !options.internalOptions.saveImpl) return
     const { id, saveOptions } = options.internalOptions
     options.internalOptions.saveImpl.storeColumns(id, saveOptions, this.internalColumns)
   }
@@ -36,7 +35,7 @@ export default class ColumnsConfig {
   private async loadStoredColumns() {
     logWhenDev('Columns: Gather options from the Save Implementation')
     const { id, saveImpl } = options.internalOptions
-    if (!BROWSER || !saveImpl || !id) return (this.internalColumns = this.columns)
+    if (!isBrowser() || !saveImpl || !id) return (this.internalColumns = this.columns)
     logWhenDev(`loadStoredColumns: Loading options & columns for ${id}`)
     const columnMetaData = saveImpl.loadColumns(id, this.columns)
     if (columnMetaData) this.internalColumns = columnMetaData

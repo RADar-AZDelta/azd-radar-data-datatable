@@ -1,6 +1,6 @@
 //Copyright 2023 RADar-AZDelta
 
-import { DEV } from 'esm-env'
+import { DEV, BROWSER } from 'esm-env'
 
 //SPDX-License-Identifier: gpl3+
 export const range = (start: number, stop: number, step: number) => Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step)
@@ -27,3 +27,5 @@ export function isEqual(x: any, y: any): boolean {
 export function logWhenDev(text: string): void {
   if (DEV) console.log(text)
 }
+
+export const isBrowser = () => BROWSER

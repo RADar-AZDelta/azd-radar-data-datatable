@@ -1,20 +1,20 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { range, debounce } from '../../utils'
-  import SvgIcon from '../general/SvgIcon.svelte'
-  import type { IPaginationProps } from '../../interfaces/Types.js'
+  import { range, debounce } from '../utils'
+  import SvgIcon from './general/SvgIcon.svelte'
+  import type { IPaginationProps } from '../interfaces/Types.js'
+  import options from '$lib/helpers/Options.svelte'
+  import pagination from '$lib/helpers/Pagination'
 
-  let {
-    rowsPerPage = 20,
-    currentPage = 1,
-    rowsPerPageOptions = [5, 10, 20, 50, 100],
-    totalRows,
-    disabled,
-    paginationThroughArrowsOnly,
-    changePagination,
-  }: IPaginationProps = $props()
+  let { paginationChanged }: IPaginationProps = $props()
 
+  let disabled = $derived(options.disabled)
+  let currentPage = $state(options.internalOptions.currentPage ?? 1)
+  let rowsPerPage = $state(options.internalOptions.rowsPerPage ?? 20)
+  let rowsPerPageOptions = $state(options.internalOptions.rowsPerPageOptions ?? [5, 10, 20, 50, 100])
+  let totalRows = $state(options.internalOptions.totalRows ?? 0)
+  let paginationThroughArrowsOnly = $state(options.internalOptions.paginationThroughArrowsOnly ?? false)
   let fromRow = $derived(totalRows === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1)
   let toRow = $derived(fromRow + rowsPerPage > totalRows ? totalRows : fromRow + rowsPerPage - 1)
   let totalPages = $derived(Math.ceil(totalRows / rowsPerPage))
@@ -46,6 +46,10 @@
 
   const onChangeInputPage = debounce(e => onChangePage(e.target.value), 500)
 
+  async function changePagination(rowsPerPage: number, currentPage: number) {
+    await pagination.onPaginationChanged(rowsPerPage, currentPage, paginationChanged)
+  }
+
   $effect(() => {
     if (currentPage > totalPages && totalPages !== 0) onChangePage(1)
   })
@@ -58,9 +62,7 @@
       <option {value}>{value}</option>
     {/each}
   </select>
-  <p>
-    {fromRow}-{toRow} of {totalRows}
-  </p>
+  <p>{fromRow}-{toRow} of {totalRows}</p>
 </div>
 <div data-name="pagination-container-pages">
   <button
@@ -71,12 +73,10 @@
   >
     <SvgIcon id="arrow-left" />
   </button>
-  {#if paginationThroughArrowsOnly !== true}
+  {#if !paginationThroughArrowsOnly}
     {#each pages as page, i}
       {#if page}
-        <button data-active={currentPage === page} disabled={!page || disabled} onclick={() => onChangePage(page)}>
-          {page}
-        </button>
+        <button data-active={currentPage === page} disabled={!page || disabled} onclick={() => onChangePage(page)}>{page}</button>
       {:else if pages[0] && pages[2] && pages[2] - pages[0] > 2 && i == 1}
         <p>...</p>
       {:else}

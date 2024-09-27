@@ -76,29 +76,8 @@ export default class DataTable extends DataTableConfig {
   }
 
   async triggerOptionsAndColumnsSave() {
+    debugger
     await options.triggerOptionsSave()
     await columns.triggerColumnsSave()
   }
 }
-
-// let dataTable: DataTable
-// function getTable() {
-//     if (!dataTable) dataTable = new DataTable()
-//     return dataTable
-// }
-
-// export default BROWSER ? getTable() : undefined
-
-// const dataTable = new DataTable()
-
-// setContext('dataTable', new DataTable())
-
-// function getTable() {
-//     const context = getContext('dataTable')
-//     if (context) return getContext('dataTable')
-//     const dataTable = new DataTable()
-//     setContext('dataTable', dataTable)
-//     return dataTable
-// }
-
-// export default getTable() as DataTable

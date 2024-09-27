@@ -4,7 +4,7 @@
   import { flip } from 'svelte/animate'
   import { sleep } from '../lib/utils'
   import DataTable from '../lib/components/DataTable.svelte'
-  import EditableCell from '../lib/components/EditableCell.svelte'
+  import EditableCell from '../lib/components/datatable/extra/EditableCell.svelte'
   import { FetchDataTypeClass } from '../examples/FetchDataTypeClass'
   import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '../lib/interfaces/Types'
 

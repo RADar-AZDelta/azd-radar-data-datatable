@@ -1,7 +1,6 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { BROWSER } from 'esm-env'
   import { onDestroy, onMount } from 'svelte'
   import { storeOptions } from '../actions/storeOptions'
   import type Query from 'arquero/dist/types/query/query'
@@ -33,8 +32,6 @@
     addRowChild,
   }: IDataTableProps = $props()
 
-  // TODO: saving of options & columns does not work
-
   async function setup() {
     const dt = new DataTable()
     getDataTable().setDataTable(dt)
@@ -62,16 +59,14 @@
   export const setDisabled = (value: boolean) => getDataTable().dataTable?.setDisabled(value)
   export const replaceValuesOfColumn = async (curr: any, updated: any, col: string) => await getDataTable().dataTable?.replaceValuesOfColumn(curr, updated, col)
   export const renameColumns = async (columns: Record<string, string>) => await getDataTable().dataTable?.renameColumns(columns)
-  export const triggerOptionsAndColumnsSave = async () => await getDataTable().dataTable?.triggerOptionsAndColumnsSave()
-
-  if (BROWSER && window) window.addEventListener('beforeunload', triggerOptionsAndColumnsSave, true)
-  if (BROWSER && document) document.addEventListener('visibilitychange', triggerOptionsAndColumnsSave, true)
+  export const triggerOptionsAndColumnsSave = async () => {
+    console.log("TRYING TO SAVE")
+    await getDataTable().dataTable?.triggerOptionsAndColumnsSave()
+  }
 
   onMount(async () => await setup())
 
   onDestroy(() => {
-    if (typeof window !== 'undefined') window.removeEventListener('beforeunload', triggerOptionsAndColumnsSave, true)
-    if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', triggerOptionsAndColumnsSave, true)
     getDataTable().dataTable?.destroy()
   })
 </script>

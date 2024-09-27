@@ -1,6 +1,5 @@
-import { BROWSER } from 'esm-env'
 import Config from './Config'
-import { isEqual, logWhenDev } from '../utils'
+import { isBrowser, isEqual, logWhenDev } from '../utils'
 import type { ITableOptions } from '../interfaces/Types'
 
 class Options {
@@ -14,7 +13,7 @@ class Options {
     const optionsAreEqual = isEqual(options, this.options) && this.options !== undefined
     if (optionsAreEqual) return
     this.options = options
-    this.internalOptions = options ?? Config.defaultOptions
+    Object.assign(this.internalOptions, this.options ?? Config.defaultOptions)
     const saveOptions = this.internalOptions.saveOptions !== false || this.options?.saveOptions !== false
     if (!isEqual(this.internalOptions, this.options) && saveOptions) await this.loadStoredOptions()
   }
@@ -25,7 +24,7 @@ class Options {
 
   async triggerOptionsSave() {
     logWhenDev(`triggerOptionsSave: Storing options ${this.internalOptions.saveImpl}`)
-    if (!BROWSER || !this.internalOptions.saveImpl) return
+    if (!isBrowser() || !this.internalOptions.saveImpl) return
     this.internalOptions.saveImpl.storeOptions(this.internalOptions)
   }
 
@@ -33,7 +32,7 @@ class Options {
   private async loadStoredOptions() {
     logWhenDev('Options: Gather options from the Save Implementation')
     const id = this.options?.id ?? this.internalOptions.id
-    if (!BROWSER || !this.internalOptions?.saveImpl || !id) return (this.internalOptions = this.options ?? Config.defaultOptions)
+    if (!isBrowser() || !this.internalOptions?.saveImpl || !id) return Object.assign(this.internalOptions, this.options ?? Config.defaultOptions)
     logWhenDev(`loadStoredOptions: Loading options & columns for ${id}`)
     const tableOptions = this.internalOptions.saveImpl.loadOptions(id)
     if (tableOptions) Object.assign(this.internalOptions, tableOptions)
@@ -42,7 +41,7 @@ class Options {
 
   // Configure the save options implementation
   private async loadSaveImplementation() {
-    if (!this.internalOptions.saveImpl || !BROWSER) return
+    if (this.internalOptions.saveImpl || !isBrowser()) return
     if (this.options?.saveImpl) return (this.internalOptions.saveImpl = this.options.saveImpl)
     await import('../helpers/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
       this.internalOptions.saveImpl = new LocalStorageOptions(this.internalOptions)
