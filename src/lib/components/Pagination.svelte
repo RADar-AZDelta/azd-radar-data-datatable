@@ -4,8 +4,8 @@
   import { range, debounce } from '../utils'
   import SvgIcon from './general/SvgIcon.svelte'
   import type { IPaginationProps } from '../interfaces/Types.js'
-  import options from '$lib/helpers/Options.svelte'
-  import pagination from '$lib/helpers/Pagination'
+  import options from '../helpers/Options.svelte'
+  import pagination from '../helpers/Pagination'
 
   let { paginationChanged }: IPaginationProps = $props()
 

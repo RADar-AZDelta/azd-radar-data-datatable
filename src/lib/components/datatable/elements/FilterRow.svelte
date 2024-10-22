@@ -1,9 +1,9 @@
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import options from '$lib/helpers/Options.svelte'
+  import options from '../../../helpers/Options.svelte'
   import ColumnFilter from './column/ColumnFilter.svelte'
-  import columns from '$lib/helpers/columns/Columns.svelte'
-  import type { IFilterRowProps } from '$lib/interfaces/Types'
+  import columns from '../../../helpers/columns/Columns.svelte'
+  import type { IFilterRowProps } from '../../../interfaces/Types'
 
   let { actionHeaderChild }: IFilterRowProps = $props()
 
