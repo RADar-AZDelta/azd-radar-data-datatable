@@ -18,12 +18,12 @@
       {/if}
     {/if}
     {#if dt?.internalOptions.globalFilter}
-      {@const { column, filter } = dt?.internalOptions.globalFilter}
+      {@const { column, filter } = dt.internalOptions.globalFilter}
       <th colspan={(dt?.visibleOrderedColumns ?? []).length}>
         <ColumnFilter column={column ?? 'all'} inputType="text" {filter} {dt} />
       </th>
     {:else}
-      {#each dt?.visibleOrderedColumns ?? [] as column, i (column.id)}
+      {#each dt?.visibleOrderedColumns ?? [] as column (column.id)}
         {@const { resizable, id, filterable, filter } = column}
         <th data-resizable={resizable} data-key={id} data-filterable={filterable} animate:flip={{ duration: 500 }}>
           {#if filterable !== false}

@@ -21,8 +21,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test:unit": "vitest",
-    "lint": "pnpm format && prettier --plugin-search-dir ./src --check ./src && eslint ./src",
-    "format": "prettier --plugin-search-dir ./src --write ./src"
+    "lint": "pnpm format && prettier ./src --check ./src && eslint ./src",
+    "format": "prettier ./src --write ./src"
   },
   "exports": {
     ".": {
@@ -46,6 +46,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-svelte": "^2.46.1",
+    "globals": "^15.14.0",
     "prettier": "^3.4.2",
     "prettier-plugin-svelte": "^3.3.2",
     "sass": "^1.83.0",
@@ -54,6 +55,7 @@
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.8.1",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
     "vite": "^6.0.3",
     "vitest": "^2.1.8"
   },

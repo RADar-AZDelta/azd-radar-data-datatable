@@ -8,7 +8,7 @@
   {#if dt?.internalOptions?.actionColumn}
     <col data-name="col-action" width="0*" />
   {/if}
-  {#each dt?.visibleOrderedColumns ?? [] as column, _}
+  {#each dt?.visibleOrderedColumns ?? [] as column (column.id)}
     <col width={column.width ?? '0*'} />
   {/each}
 </colgroup>

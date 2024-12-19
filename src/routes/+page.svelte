@@ -2,12 +2,12 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import { sleep } from '@dtlib/utils'
+  // import { sleep } from '@dtlib/utils'
   import DataTable from '@dtlib/components/DataTable.svelte'
   import EditableCell from '@dtlib/components/datatable/extra/EditableCell.svelte'
-  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '@dtlib/interfaces/Types'
+  import type { IColumnMetaData } from '@dtlib/interfaces/Types'
 
-  const data: Record<string, any>[] = [
+  const data: Record<string, string | number>[] = [
     {
       name: 'Rory',
       age: 35,
@@ -128,80 +128,81 @@
     },
   ]
 
-  let dataTableMatrix: DataTable, dataTableArrayOfObjects: DataTable, dataTableFetchFunction: DataTable, dataTableFile: DataTable
+  let dataTableMatrix: DataTable
+  // let dataTableArrayOfObjects: DataTable, dataTableFetchFunction: DataTable, dataTableFile: DataTable
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   // FETCH FUNCTIONS
   ///////////////////////////////////////////////////////////////////////////////////////////////
 
-  async function fetchData(
-    filteredColumns: Map<string, TFilter>,
-    sortedColumns: Map<string, SortDirection>,
-    pagination: IPagination,
-  ): Promise<{ totalRows: number; data: any[][] | any[] }> {
-    //lets simulate a remote fetch call
+  // async function fetchData(
+  //   filteredColumns: Map<string, TFilter>,
+  //   sortedColumns: Map<string, SortDirection>,
+  //   pagination: IPagination,
+  // ): Promise<{ totalRows: number; data: any[][] | any[] }> {
+  //   //lets simulate a remote fetch call
 
-    //FILTER
-    let fetchedData = data
-    for (const [column, filter] of [...filteredColumns].values()) {
-      fetchedData = fetchedData.filter(obj => obj[column]?.toString()?.toLowerCase().indexOf(filter) > -1)
-    }
-    const totalRows = fetchedData.length
+  //   //FILTER
+  //   let fetchedData = data
+  //   for (const [column, filter] of [...filteredColumns].values()) {
+  //     fetchedData = fetchedData.filter(obj => obj[column]?.toString()?.toLowerCase().indexOf(filter) > -1)
+  //   }
+  //   const totalRows = fetchedData.length
 
-    //SORT
-    for (let [column, sortDirection] of [...sortedColumns].reverse()) {
-      switch (sortDirection) {
-        case 'asc':
-          fetchedData = fetchedData.sort((a, b) => (a[column] < b[column] ? -1 : a[column] > b[column] ? 1 : 0))
-          break
-        case 'desc':
-          fetchedData = fetchedData.sort((a, b) => (b[column] < a[column] ? -1 : b[column] > a[column] ? 1 : 0))
-          break
-      }
-    }
+  //   //SORT
+  //   for (let [column, sortDirection] of [...sortedColumns].reverse()) {
+  //     switch (sortDirection) {
+  //       case 'asc':
+  //         fetchedData = fetchedData.sort((a, b) => (a[column] < b[column] ? -1 : a[column] > b[column] ? 1 : 0))
+  //         break
+  //       case 'desc':
+  //         fetchedData = fetchedData.sort((a, b) => (b[column] < a[column] ? -1 : b[column] > a[column] ? 1 : 0))
+  //         break
+  //     }
+  //   }
 
-    //PAGINATION
-    const { currentPage, rowsPerPage } = pagination
-    if (!currentPage || !rowsPerPage) fetchedData = fetchedData.slice(0, 20)
-    else {
-      const start = (currentPage - 1) * rowsPerPage
-      const end = currentPage * rowsPerPage
-      fetchedData = fetchedData.slice(start, end)
-    }
+  //   //PAGINATION
+  //   const { currentPage, rowsPerPage } = pagination
+  //   if (!currentPage || !rowsPerPage) fetchedData = fetchedData.slice(0, 20)
+  //   else {
+  //     const start = (currentPage - 1) * rowsPerPage
+  //     const end = currentPage * rowsPerPage
+  //     fetchedData = fetchedData.slice(start, end)
+  //   }
 
-    await sleep(500)
-    return { totalRows, data: fetchedData }
-  }
+  //   await sleep(500)
+  //   return { totalRows, data: fetchedData }
+  // }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   // BUTTON EVENTS
   ///////////////////////////////////////////////////////////////////////////////////////////////
-  let file: File
+  // let file: File
 
-  function onFileInputChange(e: Event) {
-    const allowedExtensions = ['csv', 'json']
-    const inputFiles = (e.target as HTMLInputElement).files
-    if (!inputFiles) return
+  // function onFileInputChange(e: Event) {
+  //   const allowedExtensions = ['csv', 'json']
+  //   const inputFiles = (e.target as HTMLInputElement).files
+  //   if (!inputFiles) return
 
-    for (const f of inputFiles) {
-      const extension = f.name.split('.').pop()
-      if (extension && allowedExtensions.includes(extension)) {
-        file = f
-        break
-      }
-    }
-  }
+  //   for (const f of inputFiles) {
+  //     const extension = f.name.split('.').pop()
+  //     if (extension && allowedExtensions.includes(extension)) {
+  //       file = f
+  //       break
+  //     }
+  //   }
+  // }
 
-  async function onClickInsertRows(dataTable: DataTable) {
-    const newRow = {
-      name: 'Rudy',
-      age: 45,
-      country: 'Belgium',
-      telephone: '0800-123-524-634',
-      address: 'Machelsesteenweg 343,Montroeul-sur-Haine,Hainaut,7350,',
-    }
-    await dataTable.insertRows([newRow])
-  }
+  // async function onClickInsertRows(dataTable: DataTable) {
+  //   const newRow = {
+  //     name: 'Rudy',
+  //     age: 45,
+  //     country: 'Belgium',
+  //     telephone: '0800-123-524-634',
+  //     address: 'Machelsesteenweg 343,Montroeul-sur-Haine,Hainaut,7350,',
+  //   }
+  //   await dataTable.insertRows([newRow])
+  // }
 
   // async function onClickSaveButton(dataTable: DataTable) {
   //   await dataTable.saveToFile()
@@ -289,11 +290,11 @@
     <td>
       <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
     </td>
-    {#each columns || [] as column, i (column.id)}
+    {#each columns || [] as column (column.id)}
       <td animate:flip={{ duration: 500 }}>
         <EditableCell
           value={renderedRow[column.id]}
-          changeValue={async (value: any) => await dataTableMatrix.updateRows(new Map([[originalIndex, Object.fromEntries([[column.id, value]])]]))}
+          changeValue={async (value: string | number) => await dataTableMatrix.updateRows(new Map([[originalIndex, Object.fromEntries([[column.id, value]])]]))}
         />
       </td>
     {/each}

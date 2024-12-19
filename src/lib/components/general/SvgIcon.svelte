@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  // @ts-ignore
+  // @ts-expect-error ts issue with importing raw
   import icons from '@dtlib/styles/icons.svg?raw'
   import type { ISvgIconProps } from '@dtlib/interfaces/Types'
 

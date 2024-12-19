@@ -4,7 +4,7 @@ export function resizableColumn(node: Node) {
 
   function handleMousedown(evt: Event): void {
     x = (evt as MouseEvent).clientX
-    nodeWidth = evt.currentTarget ? (evt.currentTarget as Node).parentNode?.children[0].getBoundingClientRect().width ?? 30 : 30
+    nodeWidth = evt.currentTarget ? ((evt.currentTarget as Node).parentNode?.children[0].getBoundingClientRect().width ?? 30) : 30
     dispatch(0)
 
     window.addEventListener('mousemove', handleMousemove)

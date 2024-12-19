@@ -34,7 +34,6 @@ export default class DataTableConfig extends Pagination {
     const { renderedData, originalIndices, totalRows, internalColumns } = await this.dataTypeImpl!.render(onlyPaginationChanged)
     this.internalColumns = internalColumns
     this.renderedData = renderedData ?? []
-    console.log("UPDATED RENDERED DATA! ", renderedData)
     this.originalIndices = originalIndices
     await this.updateTotalRows(totalRows ?? 0)
     this.renderStatus = 'completed'
@@ -42,7 +41,7 @@ export default class DataTableConfig extends Pagination {
   }
 
   async updateVariables(variables: Record<string, any>) {
-    for (let [key, value] of Object.entries(variables)) {
+    for (const [key, value] of Object.entries(variables)) {
       if (key === 'disabled') this.disabled = value ?? false
       else (this as Record<string, any>)[key] = value
     }

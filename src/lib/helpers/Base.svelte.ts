@@ -1,5 +1,13 @@
-import Config from "@dtlib/helpers/Config"
-import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, ITableOptions, ModifyColumnMetadataFunc, SortDirection, TFilter } from "@dtlib/interfaces/Types"
+import Config from '@dtlib/helpers/Config'
+import type {
+  FetchDataFunc,
+  IColumnMetaData,
+  IDataTypeFunctionalities,
+  ITableOptions,
+  ModifyColumnMetadataFunc,
+  SortDirection,
+  TFilter,
+} from '@dtlib/interfaces/Types'
 
 export default class Base {
   options = $state<ITableOptions>()
@@ -15,9 +23,9 @@ export default class Base {
   sortDirection: SortDirection = null
   originalIndices = $state<number[]>()
   renderedData = $state<any[] | any[][]>()
-  rendered: Function | undefined = undefined
-  rendering: undefined | Function = undefined
-  initialized: Function | undefined = undefined
+  rendered: (() => void | Promise<void>) | undefined = undefined
+  rendering: undefined | (() => Promise<void> | void) = undefined
+  initialized: (() => Promise<void> | void) | undefined = undefined
   initialisationCompleted = $state<boolean>(false)
   columns = $state<IColumnMetaData[] | undefined>()
   data = $state<any[] | any[][] | FetchDataFunc | File>()

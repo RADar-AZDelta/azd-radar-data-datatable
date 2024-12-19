@@ -12,6 +12,6 @@
     <td></td>
   {/if}
 {/if}
-{#each dt?.visibleOrderedColumns ?? [] as column, j (j)}
+{#each dt?.visibleOrderedColumns ?? [] as column, j (column.id)}
   <td animate:flip={{ duration: 500 }}><p>{row[column.id]}</p></td>
 {/each}

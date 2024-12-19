@@ -57,7 +57,7 @@
 <div data-name="pagination-container">
   <p>Rows:</p>
   <select value={rowsPerPage} onchange={onChangeRowsPerPage} {disabled}>
-    {#each rowsPerPageOptions ?? [] as value}
+    {#each rowsPerPageOptions ?? [] as value (value)}
       <option {value}>{value}</option>
     {/each}
   </select>
@@ -73,7 +73,7 @@
     <SvgIcon id="arrow-left" />
   </button>
   {#if !paginationThroughArrowsOnly}
-    {#each pages as page, i}
+    {#each pages as page, i (page)}
       {#if page}
         <button data-active={currentPage === page} disabled={!page || disabled} onclick={() => onChangePage(page)}>{page}</button>
       {:else if pages[0] && pages[2] && pages[2] - pages[0] > 2 && i == 1}

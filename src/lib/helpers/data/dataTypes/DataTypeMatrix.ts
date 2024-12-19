@@ -63,7 +63,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     const columnIndex = this.internalColumns!.findIndex(col => col.id === column)
     for (let i = 0; i < (this.data as any[][]).length; i++) {
       if ((this.data as any[][])![i][columnIndex] === currentValue) {
-        ; (this.data as any[][])![i][columnIndex] = updatedValue
+        ;(this.data as any[][])![i][columnIndex] = updatedValue
       }
     }
   }
@@ -109,7 +109,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
   async insertRows(rows: Record<string, any>[]): Promise<number[]> {
     const originalIndices = Array.from({ length: rows.length }, (_, i) => (this.data as any[][]).length + i)
     for (const row of rows) {
-      ; (this.data as any[][])!.push(
+      ;(this.data as any[][])!.push(
         this.internalColumns!.reduce((acc, column) => {
           acc.push(row[column.id])
           return acc

@@ -25,7 +25,7 @@
 
   const enableEdit = () => (editMode = true)
 
-  const setEditValue = (value: any) => (editValue = value)
+  const setEditValue = (value: string) => (editValue = value)
 
   $effect(() => {
     setEditValue(value)

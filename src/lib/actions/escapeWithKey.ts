@@ -1,6 +1,6 @@
 export function escapeWithKey(node: Node) {
   const handleEscape = (e: KeyboardEvent) => {
-    e.key === 'Escape' ? node.dispatchEvent(new CustomEvent('escapeKey')) : null
+    if (e.key === 'Escape') node.dispatchEvent(new CustomEvent('escapeKey'))
   }
 
   document.addEventListener('keydown', handleEscape, true)

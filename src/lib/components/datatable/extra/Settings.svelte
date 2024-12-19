@@ -24,7 +24,7 @@
 
 <Dialog bind:dialog height="60%" width="40%" title="Change column visibility">
   <div class="container">
-    {#each ((dt?.internalColumns ?? []) as IColumnMetaData[]).slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
+    {#each ((dt?.internalColumns ?? []) as IColumnMetaData[]).slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column (column.id)}
       {@const { id, visible, label } = column}
       {@const checked = visible === undefined ? true : visible}
       <div class="option-container">

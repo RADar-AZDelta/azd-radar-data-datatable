@@ -23,7 +23,7 @@
       {/if}
     </th>
   {/if}
-  {#each dt?.visibleOrderedColumns ?? [] as column, _ (column.id)}
+  {#each dt?.visibleOrderedColumns ?? [] as column (column.id)}
     {@const { id, sortDirection, resizable, sortable } = column}
     <th title={id} data-direction={sortDirection} data-resizable={resizable} data-key={id} data-sortable={sortable} animate:flip={{ duration: 500 }}>
       <ColumnResize {column} {dt}>

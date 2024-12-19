@@ -1,6 +1,6 @@
 export function saveWithKey(node: Node) {
   const handelSave = (e: KeyboardEvent) => {
-    e.key === 'Enter' ? node.dispatchEvent(new CustomEvent('saveKey')) : null
+    if (e.key === 'Enter') node.dispatchEvent(new CustomEvent('saveKey'))
   }
 
   document.addEventListener('keydown', handelSave, true)

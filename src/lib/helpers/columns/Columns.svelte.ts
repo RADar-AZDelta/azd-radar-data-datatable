@@ -42,7 +42,7 @@ export default class Columns extends ColumnsConfig {
     if (!sourceColumn) return
     // Clone the original position because it will be changed in the forEach and the positions will be switched up
     const sourceColumnPosition = JSON.parse(JSON.stringify(sourceColumn.position))
-    for (let column of this.internalColumns) this.changeColumnPosition(column, sourceColumnPosition)
+    for (const column of this.internalColumns) this.changeColumnPosition(column, sourceColumnPosition)
     logWhenDev(`changeColumnsPosition: column '${sourceColumn!.id}' position changed from '${sourceColumn?.position}' to '${this.position}'`)
   }
 
@@ -68,7 +68,7 @@ export default class Columns extends ColumnsConfig {
 
   async _updateColumns(columns: IColumnMetaData[]) {
     if (!this.internalColumns) return
-    for (let column of columns) await this.updateColumn(column)
+    for (const column of columns) await this.updateColumn(column)
   }
 
   private async updateColumn(column: IColumnMetaData) {

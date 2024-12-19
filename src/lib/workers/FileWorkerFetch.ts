@@ -28,7 +28,7 @@ export default class Fetch extends Arquero {
   private async applyGlobalFilter(data: MessageRequestFetchData) {
     if (!this.tempDt) return
     const filter = [...data.filteredColumns.values()][0]
-    const lFilter = (filter?.toString().toLowerCase() ?? filter as string)
+    const lFilter = filter?.toString().toLowerCase() ?? (filter as string)
     const columns = this.tempDt.columnNames()
     this.tempDt = this.tempDt.filter(
       escape((d: any) => columns.reduce((acc: boolean, curr: string) => (acc = acc || op.lower(d[curr])?.includes(lFilter)), false)),
