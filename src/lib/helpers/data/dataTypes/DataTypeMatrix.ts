@@ -1,9 +1,16 @@
 import { DEV } from 'esm-env'
 import { DataTypeCommonBase } from './DataTypeCommonBase'
-import type { IDataTypeFunctionalities, IRender, IRowNavigation } from '../../../interfaces/Types'
+import type { IDataTypeFunctionalities, IDataTypeInfo, IRender, IRowNavigation } from '../../../interfaces/Types'
 
 export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
+
+  async setData(data: IDataTypeInfo): Promise<void> {
+    if (data.data) this.data = data.data as any[]
+    if (data.internalOptions) this.internalOptions = data.internalOptions
+    if (data.internalColumns) this.internalColumns = data.internalColumns
+    if (data.renderedData) this.renderedData = data.renderedData
+  }
 
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
     let totalRows = 0,

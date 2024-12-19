@@ -9,7 +9,7 @@ export default class Query extends Crud {
     let tempDt = await this.applyMultipleFilters(filteredColumns, this.dt)
     tempDt = await this.sortTempDt(sortedColumns, tempDt)
     const { queriedData, queriedDt } = await this.executeQuery(tempDt, usedQuery)
-    const { indices } = await this.getIndices(queriedDt, tempDt)
+    const { indices } = await this.getIndices(queriedDt, tempDt)    
     return { queriedData, indices }
   }
 

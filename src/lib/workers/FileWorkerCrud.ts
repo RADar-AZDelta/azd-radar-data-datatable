@@ -1,4 +1,4 @@
-import { from, fromJSON, not } from 'arquero'
+import { from, fromJSON } from 'arquero'
 import Save from './FileWorkerSave'
 import type {
   MessageRequestChangeRow,

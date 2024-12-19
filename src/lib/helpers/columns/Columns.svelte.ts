@@ -1,31 +1,19 @@
 import type { IColumnMetaData, SortDirection, TFilter } from '../../interfaces/Types'
 import ColumnsConfig from './ColumnsConfig.svelte'
-import optionsClass from '../Options.svelte'
 import { logWhenDev } from '../../utils'
-import { getDataTable } from '../../stores/store.svelte'
-// import type DataTable from '../datatable/DataTable.svelte'
-// import datatable from '../datatable/DataTable.svelte'
 
-class Columns extends ColumnsConfig {
-  private filter: TFilter = null
-  private filterColumn: string = ''
-  private position: number = 0
-  private positionColumn: string = ''
-  private sortDirection: SortDirection = null
-  private sortColumn: string = ''
-
-  async updateColumnFilter(columnId: string, filter: TFilter) {
+export default class Columns extends ColumnsConfig {
+  async _updateColumnFilter(columnId: string, filter: TFilter) {
     this.filter = filter
     this.filterColumn = columnId
     await this.setFilterInOptions()
     await this.setFilterOnColumn()
-    optionsClass.internalOptions.currentPage = 1
+    this.internalOptions.currentPage = 1
     await this.setInternalColumnsInDataImplementation()
-    await getDataTable().dataTable?.render()
   }
 
   private async setFilterInOptions() {
-    if (optionsClass.internalOptions.globalFilter) optionsClass.internalOptions.globalFilter.filter = this.filter
+    if (this.internalOptions.globalFilter) this.internalOptions.globalFilter.filter = this.filter
   }
 
   private async setFilterOnColumn() {
@@ -66,21 +54,20 @@ class Columns extends ColumnsConfig {
     else if (this.position <= columnPosition && columnPosition < sourceColumnPosition) column.position = columnPosition + 1
   }
 
-  async changeColumnSort(columnId: string, sortDirection: SortDirection) {
+  async _changeColumnSort(columnId: string, sortDirection: SortDirection) {
     if (!this.internalColumns) return
     this.sortDirection = sortDirection
     this.sortColumn = columnId
-    if (optionsClass.internalOptions.singleSort) this.internalColumns.forEach(column => (column.sortDirection = undefined))
+    if (this.internalOptions.singleSort) this.internalColumns.forEach(column => (column.sortDirection = undefined))
     const internalColumn = this.internalColumns.find(column => column.id === this.sortColumn)
     if (!internalColumn) return
     internalColumn.sortDirection = this.sortDirection
-    optionsClass.internalOptions.currentPage = 1
+    this.internalOptions.currentPage = 1
     await this.setInternalColumnsInDataImplementation()
     logWhenDev(`DataTable: column '${this.sortColumn}' sort changed to '${sortDirection}'`)
-    await getDataTable().dataTable?.render()
   }
 
-  async updateColumns(columns: IColumnMetaData[]) {
+  async _updateColumns(columns: IColumnMetaData[]) {
     if (!this.internalColumns) return
     for (let column of columns) await this.updateColumn(column)
   }
@@ -93,10 +80,7 @@ class Columns extends ColumnsConfig {
   }
 
   getTotalColumns() {
-    const { actionColumn } = optionsClass.internalOptions
+    const { actionColumn } = this.internalOptions
     return (this.internalColumns?.length ?? 0) + (actionColumn ? 1 : 0)
   }
 }
-
-const columns = new Columns()
-export default columns

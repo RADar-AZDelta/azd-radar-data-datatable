@@ -1,18 +1,21 @@
 import type { IColumnMetaData } from '../interfaces/Types'
 
 export function repositionableColumn(node: Node, column: IColumnMetaData) {
-  function handleDragStart(event: DragEvent) {
+  function handleDragStart(ev: Event) {
+    const event = ev as DragEvent
     if (column.repositionable === false || !event.dataTransfer) return
     const data = { column: column.id }
     event.dataTransfer.setData('text/plain', JSON.stringify(data))
   }
 
-  function handleDragOver(event: DragEvent) {
+  function handleDragOver(ev: Event) {
+    const event = ev as DragEvent
     if (column.repositionable === false) return
     event.preventDefault()
   }
 
-  function handleDrop(event: DragEvent) {
+  function handleDrop(ev: Event) {
+    const event = ev as DragEvent
     if (column.repositionable === false || !event.dataTransfer) return
     event.preventDefault()
     try {

@@ -35,7 +35,7 @@
 <div use:saveWithKey onsaveKey={onClickSave} use:clickOutside onoutClick={onClickCancel} use:escapeWithKey onescapeKey={onClickCancel} data-name="cell">
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   {#if !editMode}
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div onclick={enableEdit} class="cell-container">
       <p>{value}</p>

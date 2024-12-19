@@ -1,28 +1,19 @@
-import { getDataTable } from '../stores/store.svelte'
-import optionsClass from './Options.svelte'
+import Data from './data/Data.svelte'
 
-class Pagination {
-  async onPaginationChanged(rowsPerPage: number, currentPage: number, paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>) {
-    if (rowsPerPage !== optionsClass.internalOptions.rowsPerPage) optionsClass.internalOptions.currentPage = 1
-    else optionsClass.internalOptions.currentPage = currentPage
-    optionsClass.internalOptions.rowsPerPage = rowsPerPage
-    if (paginationChanged) await paginationChanged(currentPage, rowsPerPage)
-    getDataTable().dataTable?.render()
-    // await render(true)
+export default class Pagination extends Data {
+  async _onPaginationChanged(rowsPerPage: number, currentPage: number) {
+    if (rowsPerPage !== this.internalOptions.rowsPerPage) this.internalOptions.currentPage = 1
+    else this.internalOptions.currentPage = currentPage
+    this.internalOptions.rowsPerPage = rowsPerPage
   }
 
-  getTablePagination() {
-    const { currentPage, rowsPerPage, totalRows } = optionsClass.internalOptions
+  _getTablePagination() {
+    const { currentPage, rowsPerPage, totalRows } = this.internalOptions
     return { currentPage, rowsPerPage, totalRows }
   }
 
-  async changePagination(pag: { currentPage?: number; rowsPerPage?: number }) {
-    if (pag.currentPage) optionsClass.internalOptions.currentPage = pag.currentPage
-    if (pag.rowsPerPage) optionsClass.internalOptions.rowsPerPage = pag.rowsPerPage
-    getDataTable().dataTable?.render()
-    // await render(true)
+  async _changePagination(pag: { currentPage?: number; rowsPerPage?: number }) {
+    if (pag.currentPage) this.internalOptions.currentPage = pag.currentPage
+    if (pag.rowsPerPage) this.internalOptions.rowsPerPage = pag.rowsPerPage
   }
 }
-
-const pagination = new Pagination()
-export default pagination

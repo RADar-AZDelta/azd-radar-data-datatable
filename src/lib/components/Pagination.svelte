@@ -4,17 +4,15 @@
   import { range, debounce } from '../utils'
   import SvgIcon from './general/SvgIcon.svelte'
   import type { IPaginationProps } from '../interfaces/Types.js'
-  import options from '../helpers/Options.svelte'
-  import pagination from '../helpers/Pagination'
 
-  let { paginationChanged }: IPaginationProps = $props()
+  let { paginationChanged, dt }: IPaginationProps = $props()
 
-  let disabled = $derived(options.disabled)
-  let currentPage = $state(options.internalOptions.currentPage ?? 1)
-  let rowsPerPage = $state(options.internalOptions.rowsPerPage ?? 20)
-  let rowsPerPageOptions = $state(options.internalOptions.rowsPerPageOptions ?? [5, 10, 20, 50, 100])
-  let totalRows = $state(options.internalOptions.totalRows ?? 0)
-  let paginationThroughArrowsOnly = $state(options.internalOptions.paginationThroughArrowsOnly ?? false)
+  let disabled = $derived(dt?.disabled)
+  let currentPage = $derived(dt?.internalOptions.currentPage ?? 1)
+  let rowsPerPage = $derived(dt?.internalOptions.rowsPerPage ?? 20)
+  let rowsPerPageOptions = $derived(dt?.internalOptions.rowsPerPageOptions ?? [5, 10, 20, 50, 100])
+  let totalRows = $derived(dt?.internalOptions.totalRows ?? 0)
+  let paginationThroughArrowsOnly = $derived(dt?.internalOptions.paginationThroughArrowsOnly ?? false)
   let fromRow = $derived(totalRows === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1)
   let toRow = $derived(fromRow + rowsPerPage > totalRows ? totalRows : fromRow + rowsPerPage - 1)
   let totalPages = $derived(Math.ceil(totalRows / rowsPerPage))
@@ -47,7 +45,8 @@
   const onChangeInputPage = debounce(e => onChangePage(e.target.value), 500)
 
   async function changePagination(rowsPerPage: number, currentPage: number) {
-    await pagination.onPaginationChanged(rowsPerPage, currentPage, paginationChanged)
+    await dt?.onPaginationChanged(rowsPerPage, currentPage)
+    if (paginationChanged) await paginationChanged(rowsPerPage, currentPage)
   }
 
   $effect(() => {
@@ -57,7 +56,7 @@
 
 <div data-name="pagination-container">
   <p>Rows:</p>
-  <select bind:value={rowsPerPage} onchange={onChangeRowsPerPage} {disabled}>
+  <select value={rowsPerPage} onchange={onChangeRowsPerPage} {disabled}>
     {#each rowsPerPageOptions ?? [] as value}
       <option {value}>{value}</option>
     {/each}

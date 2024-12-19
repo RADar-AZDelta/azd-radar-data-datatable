@@ -1,7 +1,6 @@
 import { DEV } from 'esm-env'
 import { DataTypeBase } from './DataTypeBase'
 import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions } from '../../../interfaces/Types'
-import type Query from 'arquero/dist/types/query/query'
 
 export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctionalities {
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
@@ -24,7 +23,7 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
     throw new Error('Method executeExpressionsAndReturnResults not implemented.')
   }
 
-  async executeQueryAndReturnResults(query: object | Query): Promise<any> {
+  async executeQueryAndReturnResults(query: object): Promise<any> {
     throw new Error('Method executeQueryAndReturnResults not implemented.')
   }
 

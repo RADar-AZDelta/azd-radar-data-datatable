@@ -13,7 +13,6 @@ import type {
   MessageRequestExecuteQueryAndReturnResults,
   MessageRequestExecuteExpressionsAndReturnResults,
   MessageRequestReplaceValuesOfColumn,
-  MessageRequestRenameColumns,
   MessageRequestGetBlob,
   MessageRequestChangeRow,
 } from './messages'

@@ -1,8 +1,8 @@
 //Copyright 2023 RADar-AZDelta
+//SPDX-License-Identifier: gpl3+
 
 import { DEV, BROWSER } from 'esm-env'
 
-//SPDX-License-Identifier: gpl3+
 export const range = (start: number, stop: number, step: number) => Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step)
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))

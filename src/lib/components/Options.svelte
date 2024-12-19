@@ -3,10 +3,8 @@
   import type { IOptionsProps } from '../interfaces/Types'
 
   let { disabled, changeVisibility }: IOptionsProps = $props()
-
-  const onClick = () => changeVisibility()
 </script>
 
-<button data-name="settings-button" onclick={onClick} {disabled} id="Settings button {Math.random()}" aria-label="Settings button">
+<button data-name="settings-button" onclick={changeVisibility} {disabled} id="Settings button {Math.random()}" aria-label="Settings button">
   <SvgIcon id="gear" />
 </button>

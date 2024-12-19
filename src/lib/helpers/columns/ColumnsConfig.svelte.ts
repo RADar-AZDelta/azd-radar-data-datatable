@@ -1,16 +1,10 @@
 import { isBrowser, isEqual, logWhenDev } from '../../utils'
 import type { IColumnMetaData } from '../../interfaces/Types'
-import options from '../Options.svelte'
-import dataClass from '../data/Data.svelte'
+import Options from '../Options.svelte'
 
-export default class ColumnsConfig {
-  internalColumns = $state<IColumnMetaData[] | undefined>()
-  columns = $state<IColumnMetaData[] | undefined>()
-  visibleOrderedColumns = $derived(this.internalColumns?.filter(col => col.visible !== false).sort((a, b) => a.position! - b.position!))
-
+export default class ColumnsConfig extends Options {
   // Configure the internalColumns
   async configureColumns(columns: IColumnMetaData[]): Promise<void> {
-    console.log('CONFIGURE COLUMNS')
     const columnsAreEqual = isEqual(columns, this.columns)
     if (columnsAreEqual) return
     this.columns = columns
@@ -19,22 +13,22 @@ export default class ColumnsConfig {
 
   // Set the internalColumns in the data implementation
   async setInternalColumnsInDataImplementation() {
-    if (!dataClass.dataTypeImpl) return
-    if (!this.internalColumns) this.internalColumns = await dataClass.dataTypeImpl.setInternalColumns(this.columns)
-    else this.internalColumns = await dataClass.dataTypeImpl.setInternalColumns(this.internalColumns)
+    if (!this.dataTypeImpl) return
+    if (!this.internalColumns) this.internalColumns = await this.dataTypeImpl.setInternalColumns(this.columns)
+    else this.internalColumns = await this.dataTypeImpl.setInternalColumns(this.internalColumns)
   }
 
   async triggerColumnsSave() {
-    logWhenDev(`triggerColumnsSave: Storing columns ${options.internalOptions.saveImpl}`)
-    if (!isBrowser() || !options.internalOptions.saveImpl) return
-    const { id, saveOptions } = options.internalOptions
-    options.internalOptions.saveImpl.storeColumns(id, saveOptions, this.internalColumns)
+    logWhenDev(`triggerColumnsSave: Storing columns ${this.internalOptions.saveImpl}`)
+    if (!isBrowser() || !this.internalOptions.saveImpl) return
+    const { id, saveOptions } = this.internalOptions
+    this.internalOptions.saveImpl.storeColumns(id, saveOptions, this.internalColumns)
   }
 
   // Check if there are columns stored in the storage & combine them if needed
   private async loadStoredColumns() {
     logWhenDev('Columns: Gather options from the Save Implementation')
-    const { id, saveImpl } = options.internalOptions
+    const { id, saveImpl } = this.internalOptions
     if (!isBrowser() || !saveImpl || !id) return (this.internalColumns = this.columns)
     logWhenDev(`loadStoredColumns: Loading options & columns for ${id}`)
     const columnMetaData = saveImpl.loadColumns(id, this.columns)

@@ -1,21 +1,19 @@
 import Config from './Config'
 import { isBrowser, isEqual, logWhenDev } from '../utils'
 import type { ITableOptions } from '../interfaces/Types'
+import Base from './Base.svelte'
 
-class Options {
-  internalOptions = $state<ITableOptions>(Config.defaultOptions)
-  options = $state<ITableOptions>()
-  disabled = $state<boolean>(false)
-
+export default class Options extends Base {
   // Configure the internalOptions
   async configureOptions(options: ITableOptions | undefined): Promise<void> {
-    await this.loadSaveImplementation()
     const optionsAreEqual = isEqual(options, this.options) && this.options !== undefined
-    if (optionsAreEqual) return
+    if (optionsAreEqual && this.internalOptionsSet) return await this.loadSaveImplementation()
     this.options = options
     Object.assign(this.internalOptions, this.options ?? Config.defaultOptions)
     const saveOptions = this.internalOptions.saveOptions !== false || this.options?.saveOptions !== false
     if (!isEqual(this.internalOptions, this.options) && saveOptions) await this.loadStoredOptions()
+    this.internalOptionsSet = true
+    await this.loadSaveImplementation()
   }
 
   async updateTotalRows(totalRows: number) {
@@ -33,6 +31,7 @@ class Options {
     logWhenDev('Options: Gather options from the Save Implementation')
     const id = this.options?.id ?? this.internalOptions.id
     if (!isBrowser() || !this.internalOptions?.saveImpl || !id) return Object.assign(this.internalOptions, this.options ?? Config.defaultOptions)
+    console.log("AFTER LOAD ", this.internalOptions?.actionColumn)
     logWhenDev(`loadStoredOptions: Loading options & columns for ${id}`)
     const tableOptions = this.internalOptions.saveImpl.loadOptions(id)
     if (tableOptions) Object.assign(this.internalOptions, tableOptions)
@@ -42,12 +41,12 @@ class Options {
   // Configure the save options implementation
   private async loadSaveImplementation() {
     if (this.internalOptions.saveImpl || !isBrowser()) return
-    if (this.options?.saveImpl) return (this.internalOptions.saveImpl = this.options.saveImpl)
+    if (this.options?.saveImpl) {
+      this.internalOptions.saveImpl = this.options.saveImpl
+      return
+    }
     await import('../helpers/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
       this.internalOptions.saveImpl = new LocalStorageOptions(this.internalOptions)
     })
   }
 }
-
-const options = new Options()
-export default options

@@ -3,16 +3,12 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import { storeOptions } from '../actions/storeOptions'
-  import type Query from 'arquero/dist/types/query/query'
-  import type { IColumnMetaData, IDataTableProps, IRowNavigation } from '../interfaces/Types'
-  import DataTable from '../helpers/datatable/DataTable.svelte'
   import ColGroup from './datatable/ColGroup.svelte'
+  import DataTable from '../helpers/datatable/DataTable.svelte'
   import TableHead from './datatable/elements/TableHead.svelte'
-  import { getDataTable } from '../stores/store.svelte'
   import TableFoot from './datatable/elements/TableFoot.svelte'
   import TableBody from './datatable/elements/TableBody.svelte'
-  import columnsClass from '../helpers/columns/Columns.svelte'
-  import optionsClass from '../helpers/Options.svelte'
+  import type { IColumnMetaData, IDataTableProps, IRowNavigation } from '../interfaces/Types'
 
   let {
     data,
@@ -32,56 +28,55 @@
     addRowChild,
   }: IDataTableProps = $props()
 
+  let dt = $state<DataTable>(new DataTable())
+
   async function setup() {
-    const dt = new DataTable()
-    getDataTable().setDataTable(dt)
-    getDataTable().dataTable?.updateVariables({ rendered, rendering, initialized, modifyColumnMetadata, options, columns, data, disabled })
-    await getDataTable().dataTable?.init()
+    await dt.updateVariables({ rendered, rendering, initialized, modifyColumnMetadata, options, columns, data, disabled })
+    await dt.init()
   }
 
-  export const render = async (onlyPaginationChanged = false) => await getDataTable().dataTable?.render(onlyPaginationChanged)
-  export const saveToFile = async () => await getDataTable().dataTable?.saveToFile()
-  export const getBlob = async (): Promise<Blob | undefined> => await getDataTable().dataTable?.getBlob()
-  export const getData = async () => getDataTable().dataTable?.data
-  export const updateRows = async (rows: Map<number, Record<string, any>>) => await getDataTable().dataTable?.updateRows(rows)
-  export const insertRows = async (rows: Record<string, any>[]) => await getDataTable().dataTable?.insertRows(rows)
-  export const deleteRows = async (originalIndices: number[]) => await getDataTable().dataTable?.deleteRows(originalIndices)
-  export const getColumns = () => getDataTable().dataTable?.getColumns()
-  export const getFullRow = async (originalIndex: number) => await getDataTable().dataTable?.getFullRow(originalIndex)
-  export const getNextRow = async (currentIndex: number): Promise<IRowNavigation> => await getDataTable().dataTable?.getNextRow(currentIndex)
-  export const getPreviousRow = async (currentIndex: number): Promise<Record<string, any>> => await getDataTable().dataTable?.getPreviousRow(currentIndex)
-  export const insertColumns = async (cols: IColumnMetaData[]) => await getDataTable().dataTable?.insertColumns(cols)
-  export const updateColumns = async (cols: IColumnMetaData[]) => await getDataTable().dataTable?.updateColumns(cols)
-  export const executeQueryAndReturnResults = async (query: Query | object) => await getDataTable().dataTable?.executeQueryAndReturnResults(query)
-  export const executeExpressionsAndReturnResults = async (exp: Record<string, any>) => await getDataTable().dataTable?.executeExpressionsAndReturnResults(exp)
-  export const getTablePagination = () => getDataTable().dataTable?.getTablePagination()
-  export const changePagination = async (pag: { currentPage?: number; rowsPerPage?: number }) => await getDataTable().dataTable?.changePagination(pag)
-  export const setDisabled = (value: boolean) => getDataTable().dataTable?.setDisabled(value)
-  export const replaceValuesOfColumn = async (curr: any, updated: any, col: string) => await getDataTable().dataTable?.replaceValuesOfColumn(curr, updated, col)
-  export const renameColumns = async (columns: Record<string, string>) => await getDataTable().dataTable?.renameColumns(columns)
-  export const triggerOptionsAndColumnsSave = async () => {
-    console.log("TRYING TO SAVE")
-    await getDataTable().dataTable?.triggerOptionsAndColumnsSave()
-  }
+  export const render = async (onlyPaginationChanged = false) => await dt?.render(onlyPaginationChanged)
+  export const saveToFile = async () => await dt?.saveToFile()
+  export const getBlob = async (): Promise<Blob | undefined> => await dt?.getBlob()
+  export const getData = async () => dt?.data
+  export const updateRows = async (rows: Map<number, Record<string, any>>) => await dt?.updateRows(rows)
+  export const insertRows = async (rows: Record<string, any>[]) => await dt?.insertRows(rows)
+  export const deleteRows = async (originalIndices: number[]) => await dt?.deleteRows(originalIndices)
+  export const getColumns = () => dt?.getColumns()
+  export const getFullRow = async (originalIndex: number) => await dt?.getFullRow(originalIndex)
+  export const getNextRow = async (currentIndex: number): Promise<IRowNavigation> => await dt?.getNextRow(currentIndex)
+  export const getPreviousRow = async (currentIndex: number): Promise<Record<string, any>> => await dt?.getPreviousRow(currentIndex)
+  export const insertColumns = async (cols: IColumnMetaData[]) => await dt?.insertColumns(cols)
+  export const updateColumns = async (cols: IColumnMetaData[]) => await dt?.updateColumns(cols)
+  export const executeQueryAndReturnResults = async (query: object) => await dt?.executeQueryAndReturnResults(query)
+  export const executeExpressionsAndReturnResults = async (exp: Record<string, any>) => await dt?.executeExpressionsAndReturnResults(exp)
+  export const getTablePagination = () => dt?.getTablePagination()
+  export const changePagination = async (pag: { currentPage?: number; rowsPerPage?: number }) => await dt?.changePagination(pag)
+  export const setDisabled = (value: boolean) => dt?.setDisabled(value)
+  export const replaceValuesOfColumn = async (curr: any, updated: any, col: string) => await dt?.replaceValuesOfColumn(curr, updated, col)
+  export const renameColumns = async (columns: Record<string, string>) => await dt?.renameColumns(columns)
+  export const triggerOptionsAndColumnsSave = async () => await dt?.triggerOptionsAndColumnsSave()
 
-  onMount(async () => await setup())
+  onMount(async () => {
+    await setup()
+  })
 
   onDestroy(() => {
-    getDataTable().dataTable?.destroy()
+    dt?.destroy()
   })
 </script>
 
-{#if optionsClass.internalOptions}
-  {@const renderStatus = getDataTable().dataTable?.renderStatus}
+{#if dt?.internalOptions}
+  {@const renderStatus = dt?.renderStatus}
   <div data-component="svelte-datatable">
     <div data-component="datatable-content" data-status={renderStatus ?? ''} use:storeOptions onstoreoptions={triggerOptionsAndColumnsSave}>
       <table>
-        {#if columnsClass.visibleOrderedColumns}
-          <ColGroup />
-          <TableHead {paginationChanged} {actionHeaderChild} />
-          <TableFoot {paginationChanged} />
+        {#if dt?.visibleOrderedColumns}
+          <ColGroup {dt} />
+          <TableHead {paginationChanged} {actionHeaderChild} {dt} />
+          <TableFoot {paginationChanged} {dt} />
         {/if}
-        <TableBody {actionCellChild} {addRowChild} {loadingChild} {noDataChild} {rowChild} />
+        <TableBody {actionCellChild} {addRowChild} {loadingChild} {noDataChild} {rowChild} {dt} />
       </table>
     </div>
   </div>

@@ -1,24 +1,20 @@
 <script lang="ts">
   import Settings from './Settings.svelte'
   import Pagination from '../../Pagination.svelte'
-  import options from '../../../helpers/Options.svelte'
-  import columns from '../../../helpers/columns/Columns.svelte'
   import type { IExtraLayer } from '../../../interfaces/Types'
 
-  let { paginationChanged }: IExtraLayer = $props()
-
-  // TODO: go further here
+  let { paginationChanged, dt }: IExtraLayer = $props()
 </script>
 
 <tr class="row">
-  <th colspan={columns.getTotalColumns()}>
-    {#if options.internalOptions}
+  <th colspan={dt?.getTotalColumns()}>
+    {#if dt?.internalOptions}
       <div class="container">
-        {#if !options.internalOptions.hideOptions}
-          <Settings />
+        {#if !dt?.internalOptions.hideOptions}
+          <Settings {dt} />
         {/if}
-        {#if !options.internalOptions.hidePagination}
-          <Pagination {paginationChanged} />
+        {#if !dt?.internalOptions.hidePagination}
+          <Pagination {paginationChanged} {dt} />
         {/if}
       </div>
     {/if}

@@ -1,20 +1,19 @@
 <script lang="ts">
   import ExtraLayer from '../extra/ExtraLayer.svelte'
-  import options from '../../../helpers/Options.svelte'
   import TitleRow from './TitleRow.svelte'
   import FilterRow from './FilterRow.svelte'
   import type { ITableHeadProps } from '../../../interfaces/Types'
 
-  let { paginationChanged, actionHeaderChild }: ITableHeadProps = $props()
+  let { paginationChanged, actionHeaderChild, dt }: ITableHeadProps = $props()
 </script>
 
 <thead>
-  {#if options.internalOptions}
-    {@const { paginationOnTop, hideOptions, hidePagination } = options.internalOptions}
+  {#if dt?.internalOptions}
+    {@const { paginationOnTop, hideOptions, hidePagination } = dt.internalOptions}
     {#if paginationOnTop && (!hideOptions || !hidePagination)}
-      <ExtraLayer {paginationChanged} />
+      <ExtraLayer {paginationChanged} {dt} />
     {/if}
-    <TitleRow />
-    <FilterRow {actionHeaderChild} />
+    <TitleRow {dt} />
+    <FilterRow {actionHeaderChild} {dt} />
   {/if}
 </thead>

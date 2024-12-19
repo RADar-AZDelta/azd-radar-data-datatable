@@ -1,23 +1,22 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import columns from '../../../../helpers/columns/Columns.svelte'
   import { resizableColumn } from '../../../../actions/resizableColumn'
   import { repositionableColumn } from '../../../../actions/repositionableColumn'
   import type { ColumnPositionChangedED, IColumnResizeProps } from '../../../../interfaces/Types'
 
-  let { column, minWidth = 10, child }: IColumnResizeProps = $props()
+  let { column, minWidth = 10, child, dt }: IColumnResizeProps = $props()
 
   const onRepositioned = (e: CustomEvent<ColumnPositionChangedED>) => {
     const { column, position } = e.detail
-    columns.changeColumnsPosition(column, position)
+    dt?.changeColumnsPosition(column, position)
   }
 
   function onResizing(e: CustomEvent<{ x: number; width: number }>) {
     const columnWidth = column.width ?? e.detail.width
     if (!columnWidth) return
     const width = columnWidth + e.detail.x
-    if (width > minWidth) columns.changeColumnWidth(column.id, width)
+    if (width > minWidth) dt?.changeColumnWidth(column.id, width)
   }
 </script>
 

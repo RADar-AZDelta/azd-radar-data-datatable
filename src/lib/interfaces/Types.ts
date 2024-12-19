@@ -1,4 +1,5 @@
 import type { Snippet } from 'svelte'
+import type DataTable from '../helpers/datatable/DataTable.svelte'
 import type Query from 'arquero/dist/types/query/query'
 
 export type Hex = `#${string}`
@@ -171,12 +172,14 @@ export interface IColumnFilterProps {
   column: string
   inputType: string
   filter: TFilter
+  dt: DataTable
 }
 
 export interface IColumnResizeProps {
   column: IColumnMetaData
   minWidth?: number
   child: Snippet
+  dt: DataTable
 }
 
 export interface IColumnSortProps {
@@ -187,6 +190,7 @@ export interface IColumnSortProps {
   notFilledColor?: Hex
   filledOpacity?: number
   notFilledOpacity?: number
+  dt: DataTable
 }
 
 export interface IEditableCellProps {
@@ -201,6 +205,7 @@ export interface IOptionsProps {
 
 export interface IPaginationProps {
   paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+  dt: DataTable
 }
 
 export interface ISvgIconProps {
@@ -245,21 +250,23 @@ export interface IDialogProps {
 }
 
 export interface IColGroupProps {
-  visibleOrderedColumns: IColumnMetaData[]
-  actionColumn: boolean
+  dt: DataTable
 }
 
 export interface ITableHeadProps {
   paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
   actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
+  dt: DataTable
 }
 
 export interface IExtraLayer {
   paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+  dt: DataTable
 }
 
 export interface ILoaderProps {
   loadingChild?: Snippet
+  dt: DataTable
 }
 
 export interface ITableBodyProps {
@@ -268,18 +275,30 @@ export interface ITableBodyProps {
   actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
   loadingChild?: Snippet
   noDataChild?: Snippet
+  dt: DataTable
 }
 
 export interface ITableBodyRowProps {
   row: any
   index: number
   actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  dt: DataTable
 }
 
 export interface ITableFootProps {
   paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+  dt: DataTable
 }
 
 export interface IFilterRowProps {
   actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
+  dt: DataTable
+}
+
+export interface ITitleRowProps {
+  dt: DataTable
+}
+
+export interface ISettingsProps {
+  dt: DataTable
 }

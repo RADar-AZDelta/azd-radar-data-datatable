@@ -1,20 +1,17 @@
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import data from '../../../helpers/data/Data.svelte'
-  import options from '../../../helpers/Options.svelte'
-  import columns from '../../../helpers/columns/Columns.svelte'
   import type { ITableBodyRowProps } from '../../../interfaces/Types'
 
-  let { row, index, actionCellChild }: ITableBodyRowProps = $props()
+  let { row, index, actionCellChild, dt }: ITableBodyRowProps = $props()
 </script>
 
-{#if options.internalOptions.actionColumn}
+{#if dt?.internalOptions?.actionColumn}
   {#if actionCellChild}
-    {@render actionCellChild(row, data.originalIndices[index], index, columns.visibleOrderedColumns, options.internalOptions)}
+    {@render actionCellChild(row, dt?.originalIndices?.[index] ?? -1, index, dt?.visibleOrderedColumns, dt?.internalOptions)}
   {:else}
     <td></td>
   {/if}
 {/if}
-{#each columns.visibleOrderedColumns as column, j (j)}
+{#each dt?.visibleOrderedColumns ?? [] as column, j (j)}
   <td animate:flip={{ duration: 500 }}><p>{row[column.id]}</p></td>
 {/each}

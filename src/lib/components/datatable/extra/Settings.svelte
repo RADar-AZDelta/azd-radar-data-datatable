@@ -1,29 +1,30 @@
 <script lang="ts">
   import SvgIcon from '../../general/SvgIcon.svelte'
   import Dialog from '../../general/Dialog.svelte'
-  import options from '../../../helpers/Options.svelte'
-  import columns from '../../../helpers/columns/Columns.svelte'
+  import type { IColumnMetaData, ISettingsProps } from '../../../interfaces/Types'
+
+  let { dt }: ISettingsProps = $props()
 
   let dialog = $state<HTMLDialogElement>()
 
   const showModal = (): void => dialog?.showModal()
 
   async function onColumnVisibilityChanged(e: Event): Promise<void> {
-    if (!columns.internalColumns || !columns.internalColumns.length) return
+    if (!dt?.internalColumns || !dt?.internalColumns.length) return
     const { name, checked } = e.target as HTMLInputElement
-    const column = columns.internalColumns.find(col => col.id === name)
+    const column = dt?.internalColumns.find((col: IColumnMetaData) => col.id === name)
     if (!column) return
     column.visible = checked
   }
 </script>
 
-<button class="button" onclick={showModal} disabled={options.disabled} id="Settings button {Math.random()}" aria-label="Settings button">
+<button class="button" onclick={showModal} disabled={dt?.disabled ?? false} id="Settings button {Math.random()}" aria-label="Settings button">
   <SvgIcon id="gear" />
 </button>
 
 <Dialog bind:dialog height="60%" width="40%" title="Change column visibility">
   <div class="container">
-    {#each (columns.internalColumns ?? []).slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
+    {#each ((dt?.internalColumns ?? []) as IColumnMetaData[]).slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) as column}
       {@const { id, visible, label } = column}
       {@const checked = visible === undefined ? true : visible}
       <div class="option-container">

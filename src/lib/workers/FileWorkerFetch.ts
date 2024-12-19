@@ -28,7 +28,7 @@ export default class Fetch extends Arquero {
   private async applyGlobalFilter(data: MessageRequestFetchData) {
     if (!this.tempDt) return
     const filter = [...data.filteredColumns.values()][0]
-    const lFilter = filter?.toString().toLowerCase()
+    const lFilter = (filter?.toString().toLowerCase() ?? filter as string)
     const columns = this.tempDt.columnNames()
     this.tempDt = this.tempDt.filter(
       escape((d: any) => columns.reduce((acc: boolean, curr: string) => (acc = acc || op.lower(d[curr])?.includes(lFilter)), false)),
@@ -63,7 +63,7 @@ export default class Fetch extends Arquero {
     const { rowsPerPage, currentPage } = data.pagination
     const objects = this.tempDt.objects({ limit: rowsPerPage, offset: (currentPage! - 1) * rowsPerPage! })
     indices = this.tempDt.indices().slice((currentPage! - 1) * rowsPerPage!, currentPage! * rowsPerPage!)
-    matrix = objects.map(obj => Object.values(obj))
+    matrix = objects.map((obj: Record<any, any>) => Object.values(obj))
     return { totalRows, data: matrix, indices }
   }
 }
