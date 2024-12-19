@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@sveltejs/kit':
-        specifier: ^2.12.1
-        version: 2.12.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.14.4)(vite@6.0.3(@types/node@20.17.10)(sass@1.83.0)))(svelte@5.14.4)(vite@6.0.3(@types/node@20.17.10)(sass@1.83.0))
       arquero:
         specifier: 5.4.1
         version: 5.4.1
@@ -20,10 +17,16 @@ importers:
       esm-env:
         specifier: ^1.2.1
         version: 1.2.1
+      svelte:
+        specifier: 5.14.4
+        version: 5.14.4
     devDependencies:
       '@sveltejs/adapter-static':
         specifier: ^3.0.6
         version: 3.0.6(@sveltejs/kit@2.12.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.14.4)(vite@6.0.3(@types/node@20.17.10)(sass@1.83.0)))(svelte@5.14.4)(vite@6.0.3(@types/node@20.17.10)(sass@1.83.0)))
+      '@sveltejs/kit':
+        specifier: ^2.12.1
+        version: 2.12.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.14.4)(vite@6.0.3(@types/node@20.17.10)(sass@1.83.0)))(svelte@5.14.4)(vite@6.0.3(@types/node@20.17.10)(sass@1.83.0))
       '@sveltejs/package':
         specifier: ^2.3.7
         version: 2.3.7(svelte@5.14.4)(typescript@5.7.2)
@@ -60,9 +63,6 @@ importers:
       sass:
         specifier: ^1.83.0
         version: 1.83.0
-      svelte:
-        specifier: 5.14.4
-        version: 5.14.4
       svelte-check:
         specifier: ^4.1.1
         version: 4.1.1(svelte@5.14.4)(typescript@5.7.2)
