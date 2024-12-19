@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Settings from './Settings.svelte'
-  import Pagination from '../../Pagination.svelte'
-  import type { IExtraLayer } from '../../../interfaces/Types'
+  import Settings from '@dtlib/components/datatable/extra/Settings.svelte'
+  import Pagination from '@dtlib/components/Pagination.svelte'
+  import type { IExtraLayer } from '@dtlib/interfaces/Types'
 
   let { paginationChanged, dt }: IExtraLayer = $props()
 </script>

@@ -1,5 +1,5 @@
-import { logWhenDev } from '../../utils'
-import Pagination from '../Pagination'
+import { logWhenDev } from '@dtlib/utils'
+import Pagination from '@dtlib/helpers/Pagination'
 
 export default class DataTableConfig extends Pagination {
   constructor() {

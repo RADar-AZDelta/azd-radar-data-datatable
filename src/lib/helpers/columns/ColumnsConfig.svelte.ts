@@ -1,6 +1,6 @@
-import { isBrowser, isEqual, logWhenDev } from '../../utils'
-import type { IColumnMetaData } from '../../interfaces/Types'
-import Options from '../Options.svelte'
+import Options from '@dtlib/helpers/Options.svelte'
+import { isBrowser, isEqual, logWhenDev } from '@dtlib/utils'
+import type { IColumnMetaData } from '@dtlib/interfaces/Types'
 
 export default class ColumnsConfig extends Options {
   // Configure the internalColumns

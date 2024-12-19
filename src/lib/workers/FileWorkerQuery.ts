@@ -1,7 +1,7 @@
 import { queryFrom } from 'arquero'
-import Crud from './FileWorkerCrud'
-import type { MessageRequestExecuteExpressionsAndReturnResults, MessageRequestExecuteQueryAndReturnResults } from './messages'
+import Crud from '@dtlib/workers/FileWorkerCrud'
 import type Table from 'arquero/dist/types/table/table'
+import type { MessageRequestExecuteExpressionsAndReturnResults, MessageRequestExecuteQueryAndReturnResults } from '@dtlib/workers/messages'
 
 export default class Query extends Crud {
   async executeQueryAndReturnResults({ usedQuery, filteredColumns, sortedColumns }: MessageRequestExecuteQueryAndReturnResults) {
@@ -9,7 +9,7 @@ export default class Query extends Crud {
     let tempDt = await this.applyMultipleFilters(filteredColumns, this.dt)
     tempDt = await this.sortTempDt(sortedColumns, tempDt)
     const { queriedData, queriedDt } = await this.executeQuery(tempDt, usedQuery)
-    const { indices } = await this.getIndices(queriedDt, tempDt)    
+    const { indices } = await this.getIndices(queriedDt, tempDt)
     return { queriedData, indices }
   }
 

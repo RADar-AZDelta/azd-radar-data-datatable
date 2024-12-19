@@ -1,7 +1,7 @@
 import { wrap, type Remote } from 'comlink'
 // @ts-expect-error Appareantly it can't find the file, but it exists
-import DataTableWorker from '../../../workers/DataTable.worker?worker'
-import { DataTypeCommonBase } from './DataTypeCommonBase'
+import DataTableWorker from '@dtlib/workers/DataTable.worker?worker'
+import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
 import type Query from 'arquero/dist/types/query/query'
 import type {
   IColumnMetaData,
@@ -12,7 +12,7 @@ import type {
   ModifyColumnMetadataFunc,
   SortDirection,
   TFilter,
-} from '../../../interfaces/Types'
+} from '@dtlib/interfaces/Types'
 
 export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctionalities {
   worker: Worker

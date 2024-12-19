@@ -1,6 +1,6 @@
 import { loadCSV, loadJSON } from 'arquero'
 import type Table from 'arquero/dist/types/table/table'
-import type { MessageRequestLoadFile } from './messages'
+import type { MessageRequestLoadFile } from '@dtlib/workers/messages'
 
 export default class Arquero {
   dt: Table | undefined

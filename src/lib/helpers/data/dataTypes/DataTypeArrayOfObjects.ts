@@ -1,6 +1,6 @@
-import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from './DataTypeCommonBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '../../../interfaces/Types'
+import { isDev } from '@dtlib/utils'
+import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '@dtlib/interfaces/Types'
 
 export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -115,7 +115,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
     this.internalColumns
       ?.filter(col => col.filter)
       .forEach(col => {
-        if (DEV) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
+        if (isDev()) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
         data = data.filter(obj => obj[col.id]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
       })
     return data
@@ -128,7 +128,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
       .slice()
       .reverse() //Sort is applied in reverse order !!!
       .forEach(col => {
-        if (DEV) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
+        if (isDev()) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
         if (col.sortDirection === 'asc')
           compareFn = (a, b) => {
             const colA = this.standardizeValue(a[col.id])

@@ -1,4 +1,4 @@
-import Data from './data/Data.svelte'
+import Data from '@dtlib/helpers/data/Data.svelte'
 
 export default class Pagination extends Data {
   async _onPaginationChanged(rowsPerPage: number, currentPage: number) {

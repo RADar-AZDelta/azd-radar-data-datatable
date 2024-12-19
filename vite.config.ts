@@ -11,7 +11,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@datatable': path.resolve(__dirname, 'src/lib')
+      '@dtlib': path.resolve(__dirname, 'src/lib')
     }
   }
 })

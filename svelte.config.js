@@ -12,7 +12,7 @@ const config = {
   kit: {
     adapter: adapter(),
     alias: {
-      '@datatable': "src/lib"
+      '@dtlib': "src/lib"
     }
   },
 }

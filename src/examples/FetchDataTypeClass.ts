@@ -1,5 +1,5 @@
-import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from '../lib/helpers/data/dataTypes/DataTypeCommonBase'
+import { isDev } from '@dtlib/utils'
+import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
 import type {
   FetchDataFunc,
   IColumnMetaData,
@@ -8,7 +8,7 @@ import type {
   IRender,
   SortDirection,
   TFilter,
-} from '../lib/interfaces/Types'
+} from '@dtlib/interfaces/Types'
 
 export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeFunctionalities {
   async setData(data: IDataTypeInfo): Promise<void> {
@@ -35,9 +35,9 @@ export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeF
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc
     }, new Map<string, SortDirection>())
-    if (DEV) start = performance.now()
+    if (isDev()) start = performance.now()
     const results = await (this.data as FetchDataFunc)(filteredColumns, sortedColumns, this.internalOptions!)
-    if (DEV) {
+    if (isDev()) {
       const end = performance.now()
       console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
     }

@@ -1,5 +1,5 @@
-import DataTableConfig from './DataTableConfig.svelte'
-import type { IColumnMetaData, SortDirection, TFilter } from '../../interfaces/Types'
+import DataTableConfig from '@dtlib/helpers/datatable/DataTableConfig.svelte'
+import type { IColumnMetaData, SortDirection, TFilter } from '@dtlib/interfaces/Types'
 
 export default class DataTable extends DataTableConfig {
   constructor() {
@@ -20,7 +20,7 @@ export default class DataTable extends DataTableConfig {
   changePagination = async (pag: { currentPage?: number; rowsPerPage?: number }) => await this._changePagination(pag).then(async () => await this.render())
   onPaginationChanged = async (rowsPerPage: number, currentPage: number) => await this._onPaginationChanged(rowsPerPage, currentPage).then(async () => await this.render())
   replaceValuesOfColumn = async (currentValue: any, updatedValue: any, column: string) => await this.dataTypeImpl?.replaceValuesOfColumn(currentValue, updatedValue, column)
-  
+
   async updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
     await this.dataTypeImpl?.updateRows(rowsToUpdateByOriginalIndex)
     for (const [originalIndex, row] of rowsToUpdateByOriginalIndex) await this.updateRow(originalIndex, row)

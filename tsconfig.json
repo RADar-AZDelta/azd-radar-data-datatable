@@ -10,7 +10,7 @@
       "skipLibCheck": true,
       "baseUrl": ".",
       "paths": {
-        "@datatable/*": ["src/lib/*"]
+        "@dtlib/*": ["src/lib/*"]
       }
     }
   }

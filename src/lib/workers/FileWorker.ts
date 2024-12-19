@@ -1,3 +1,3 @@
-import FileWorkerQuery from './FileWorkerQuery'
+import FileWorkerQuery from '@dtlib/workers/FileWorkerQuery'
 
-export default class FileWorker extends FileWorkerQuery {}
+export default class FileWorker extends FileWorkerQuery { }

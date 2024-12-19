@@ -1,8 +1,8 @@
 import { desc, escape, op } from 'arquero'
-import Arquero from './FileWorkerLoad'
-import type { MessageRequestFetchData } from './messages'
+import Arquero from '@dtlib/workers/FileWorkerLoad'
 import type Table from 'arquero/dist/types/table/table'
-import type { SortDirection, TFilter } from '../interfaces/Types'
+import type { SortDirection, TFilter } from '@dtlib/interfaces/Types'
+import type { MessageRequestFetchData } from '@dtlib/workers/messages'
 
 export default class Fetch extends Arquero {
   getColumnNames = () => {

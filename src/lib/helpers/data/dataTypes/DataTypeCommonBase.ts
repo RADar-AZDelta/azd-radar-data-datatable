@@ -1,6 +1,6 @@
-import { DEV } from 'esm-env'
-import { DataTypeBase } from './DataTypeBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions } from '../../../interfaces/Types'
+import { isDev } from '@dtlib/utils'
+import { DataTypeBase } from '@dtlib/helpers/data/dataTypes/DataTypeBase'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions } from '@dtlib/interfaces/Types'
 
 export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctionalities {
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
@@ -84,7 +84,7 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
       if (internalOptions && internalOptions?.currentPage && internalOptions?.rowsPerPage) {
         const start = (internalOptions.currentPage! - 1) * internalOptions.rowsPerPage!
         const end = internalOptions.currentPage! * internalOptions.rowsPerPage!
-        if (DEV) console.log(`DataTable: applying pagination row ${start} - ${end}`)
+        if (isDev()) console.log(`DataTable: applying pagination row ${start} - ${end}`)
         data = data.slice(start, end)
         return data
       } else return data.slice(0, 20)
@@ -111,9 +111,9 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
 
   async deleteRows(originalIndices: number[]): Promise<void> {
     for (const originalIndex of originalIndices!.sort((a, b) => b - a)) {
-      ;(this.data as any[])!.splice(originalIndex, 1)
+      ; (this.data as any[])!.splice(originalIndex, 1)
     }
   }
 
-  async destroy(): Promise<void> {}
+  async destroy(): Promise<void> { }
 }

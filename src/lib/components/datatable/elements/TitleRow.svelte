@@ -1,9 +1,9 @@
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import ColumnResize from './column/ColumnResize.svelte'
-  import ColumnSort from './column/ColumnSort.svelte'
-  import SvgIcon from '../../general/SvgIcon.svelte'
-  import type { ITitleRowProps } from '../../../interfaces/Types'
+  import SvgIcon from '@dtlib/components/general/SvgIcon.svelte'
+  import ColumnResize from '@dtlib/components/datatable/elements/column/ColumnResize.svelte'
+  import ColumnSort from '@dtlib/components/datatable/elements/column/ColumnSort.svelte'
+  import type { ITitleRowProps } from '@dtlib/interfaces/Types'
 
   let { dt }: ITitleRowProps = $props()
 

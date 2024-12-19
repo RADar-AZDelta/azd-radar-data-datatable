@@ -28,4 +28,6 @@ export function logWhenDev(text: string): void {
   if (DEV) console.log(text)
 }
 
+export const isDev = () => DEV
+
 export const isBrowser = () => BROWSER

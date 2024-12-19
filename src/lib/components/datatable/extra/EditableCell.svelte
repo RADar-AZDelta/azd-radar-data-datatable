@@ -1,11 +1,11 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import SvgIcon from '../../general/SvgIcon.svelte'
-  import { saveWithKey } from '../../../actions/saveWithKey'
-  import { clickOutside } from '../../../actions/clickOutside'
-  import { escapeWithKey } from '../../../actions/escapeWithKey'
-  import type { IEditableCellProps } from '../../../interfaces/Types'
+  import { saveWithKey } from '@dtlib/actions/saveWithKey'
+  import { clickOutside } from '@dtlib/actions/clickOutside'
+  import { escapeWithKey } from '@dtlib/actions/escapeWithKey'
+  import SvgIcon from '@dtlib/components/general/SvgIcon.svelte'
+  import type { IEditableCellProps } from '@dtlib/interfaces/Types'
 
   let { value, changeValue }: IEditableCellProps = $props()
 

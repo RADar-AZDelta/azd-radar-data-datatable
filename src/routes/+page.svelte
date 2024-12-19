@@ -2,10 +2,10 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import { sleep } from '../lib/utils'
-  import DataTable from '../lib/components/DataTable.svelte'
-  import EditableCell from '../lib/components/datatable/extra/EditableCell.svelte'
-  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '../lib/interfaces/Types'
+  import { sleep } from '@dtlib/utils'
+  import DataTable from '@dtlib/components/DataTable.svelte'
+  import EditableCell from '@dtlib/components/datatable/extra/EditableCell.svelte'
+  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '@dtlib/interfaces/Types'
 
   const data: Record<string, any>[] = [
     {

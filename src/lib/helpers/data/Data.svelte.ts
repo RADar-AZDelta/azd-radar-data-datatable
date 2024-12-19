@@ -1,8 +1,8 @@
-import Columns from '../columns/Columns.svelte'
-import { DataTypeFile } from './dataTypes/DataTypeFile'
-import { DataTypeMatrix } from './dataTypes/DataTypeMatrix'
-import { DataTypeArrayOfObjects } from './dataTypes/DataTypeArrayOfObjects'
-import type { IDataTypeInfo } from '../../interfaces/Types'
+import Columns from '@dtlib/helpers/columns/Columns.svelte'
+import { DataTypeFile } from '@dtlib/helpers/data/dataTypes/DataTypeFile'
+import { DataTypeMatrix } from '@dtlib/helpers/data/dataTypes/DataTypeMatrix'
+import { DataTypeArrayOfObjects } from '@dtlib/helpers/data/dataTypes/DataTypeArrayOfObjects'
+import type { IDataTypeInfo } from '@dtlib/interfaces/Types'
 
 export default class Data extends Columns {
   // Configure the data implementation

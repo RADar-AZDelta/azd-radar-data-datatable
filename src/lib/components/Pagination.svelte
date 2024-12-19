@@ -1,9 +1,9 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { range, debounce } from '../utils'
-  import SvgIcon from './general/SvgIcon.svelte'
-  import type { IPaginationProps } from '../interfaces/Types.js'
+  import { range, debounce } from '@dtlib/utils'
+  import SvgIcon from '@dtlib/components/general/SvgIcon.svelte'
+  import type { IPaginationProps } from '@dtlib/interfaces/Types.js'
 
   let { paginationChanged, dt }: IPaginationProps = $props()
 

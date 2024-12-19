@@ -1,5 +1,5 @@
 import { from, fromJSON } from 'arquero'
-import Save from './FileWorkerSave'
+import Save from '@dtlib/workers/FileWorkerSave'
 import type {
   MessageRequestChangeRow,
   MessageRequestDeleteRows,
@@ -8,7 +8,7 @@ import type {
   MessageRequestInsertRows,
   MessageRequestReplaceValuesOfColumn,
   MessageRequestUpdateRows,
-} from './messages'
+} from '@dtlib/workers/messages'
 import type Column from 'arquero/dist/types/table/column'
 import type { TableData } from 'arquero/dist/types/table/table'
 

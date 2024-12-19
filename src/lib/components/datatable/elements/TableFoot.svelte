@@ -1,12 +1,12 @@
 <script lang="ts">
-  import ExtraLayer from '../extra/ExtraLayer.svelte'
-  import type { ITableFootProps } from '../../../interfaces/Types'
+  import ExtraLayer from '@dtlib/components/datatable/extra/ExtraLayer.svelte'
+  import type { ITableFootProps } from '@dtlib/interfaces/Types'
 
   let { paginationChanged, dt }: ITableFootProps = $props()
 </script>
 
 {#if !dt?.internalOptions?.hidePagination || !dt?.internalOptions?.hideOptions}
   <tfoot>
-    <ExtraLayer {paginationChanged} {dt}/>
+    <ExtraLayer {paginationChanged} {dt} />
   </tfoot>
 {/if}

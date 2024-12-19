@@ -1,6 +1,6 @@
-import type { IColumnMetaData, SortDirection, TFilter } from '../../interfaces/Types'
-import ColumnsConfig from './ColumnsConfig.svelte'
-import { logWhenDev } from '../../utils'
+import { logWhenDev } from '@dtlib/utils'
+import ColumnsConfig from '@dtlib/helpers/columns/ColumnsConfig.svelte'
+import type { IColumnMetaData, SortDirection, TFilter } from '@dtlib/interfaces/Types'
 
 export default class Columns extends ColumnsConfig {
   async _updateColumnFilter(columnId: string, filter: TFilter) {
@@ -29,7 +29,6 @@ export default class Columns extends ColumnsConfig {
   async changeColumnWidth(columnId: string, width: number) {
     if (!this.internalColumns) return
     const column = this.internalColumns.find(column => column.id === columnId)
-    console.log('COL ', column)
     if (!column) return
     column.width = width
     logWhenDev(`changeColumnWidth: column '${column}' width changed to '${width}'`)

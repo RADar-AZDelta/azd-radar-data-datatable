@@ -1,6 +1,6 @@
-import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from './DataTypeCommonBase'
-import type { IDataTypeFunctionalities, IDataTypeInfo, IRender, IRowNavigation } from '../../../interfaces/Types'
+import { isDev } from '@dtlib/utils'
+import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
+import type { IDataTypeFunctionalities, IDataTypeInfo, IRender, IRowNavigation } from '@dtlib/interfaces/Types'
 
 export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
@@ -63,7 +63,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     const columnIndex = this.internalColumns!.findIndex(col => col.id === column)
     for (let i = 0; i < (this.data as any[][]).length; i++) {
       if ((this.data as any[][])![i][columnIndex] === currentValue) {
-        ;(this.data as any[][])![i][columnIndex] = updatedValue
+        ; (this.data as any[][])![i][columnIndex] = updatedValue
       }
     }
   }
@@ -109,7 +109,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
   async insertRows(rows: Record<string, any>[]): Promise<number[]> {
     const originalIndices = Array.from({ length: rows.length }, (_, i) => (this.data as any[][]).length + i)
     for (const row of rows) {
-      ;(this.data as any[][])!.push(
+      ; (this.data as any[][])!.push(
         this.internalColumns!.reduce((acc, column) => {
           acc.push(row[column.id])
           return acc
@@ -143,7 +143,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     this.internalColumns
       ?.filter(col => col.filter)
       .forEach(col => {
-        if (DEV) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
+        if (isDev()) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
         const index = this.internalColumns?.findIndex(c => c.id === col.id)
         data = data.filter(row => row[index!]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
       })
@@ -159,7 +159,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
       .forEach(col => {
         const index = this.internalColumns?.findIndex(obj => obj.id == col.id)
         if (index) {
-          if (DEV) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
+          if (isDev()) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
           switch (col.sortDirection) {
             case 'asc':
               compareFn = (a, b) =>

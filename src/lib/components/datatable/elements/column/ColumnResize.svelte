@@ -1,9 +1,9 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { resizableColumn } from '../../../../actions/resizableColumn'
-  import { repositionableColumn } from '../../../../actions/repositionableColumn'
-  import type { ColumnPositionChangedED, IColumnResizeProps } from '../../../../interfaces/Types'
+  import { resizableColumn } from '@dtlib/actions/resizableColumn'
+  import { repositionableColumn } from '@dtlib/actions/repositionableColumn'
+  import type { ColumnPositionChangedED, IColumnResizeProps } from '@dtlib/interfaces/Types'
 
   let { column, minWidth = 10, child, dt }: IColumnResizeProps = $props()
 
