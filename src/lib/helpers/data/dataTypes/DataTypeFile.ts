@@ -1,5 +1,4 @@
 import { wrap, type Remote } from 'comlink'
-// @ts-expect-error Appareantly it can't find the file, but it exists
 import DataTableWorker from '@dtlib/workers/DataTable.worker?worker'
 import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
 import type Query from 'arquero/dist/types/query/query'
@@ -40,7 +39,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   }
 
   async setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
-    if (!columns && this.setup) {
+    if ((!columns || !columns.length) && this.setup) {
       //get columns from worker
       const receivedCols: string[] = await this.exposed.getColumnNames()
       this.internalColumns = receivedCols.map((key, index) => ({ id: key, position: index + 1 }))

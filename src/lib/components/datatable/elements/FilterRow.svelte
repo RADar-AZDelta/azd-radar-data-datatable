@@ -8,22 +8,24 @@
   let filterVisibility = $derived<boolean>(dt?.internalOptions.hideFilters ?? true)
 </script>
 
-{#if filterVisibility}
+{#if filterVisibility && dt}
+  {@const { visibleOrderedColumns, internalOptions: options } = dt}
+  {@const columns = visibleOrderedColumns ?? []}
   <tr data-name="filters">
-    {#if dt?.internalOptions.actionColumn}
+    {#if options.actionColumn}
       {#if actionHeaderChild}
-        {@render actionHeaderChild(dt?.visibleOrderedColumns ?? [], dt?.internalOptions)}
+        {@render actionHeaderChild({ columns, options })}
       {:else}
         <th></th>
       {/if}
     {/if}
-    {#if dt?.internalOptions.globalFilter}
-      {@const { column, filter } = dt.internalOptions.globalFilter}
-      <th colspan={(dt?.visibleOrderedColumns ?? []).length}>
+    {#if options.globalFilter}
+      {@const { column, filter } = options.globalFilter}
+      <th colspan={columns.length}>
         <ColumnFilter column={column ?? 'all'} inputType="text" {filter} {dt} />
       </th>
     {:else}
-      {#each dt?.visibleOrderedColumns ?? [] as column (column.id)}
+      {#each columns as column (column.id)}
         {@const { resizable, id, filterable, filter } = column}
         <th data-resizable={resizable} data-key={id} data-filterable={filterable} animate:flip={{ duration: 500 }}>
           {#if filterable !== false}

@@ -4,31 +4,26 @@
   import type { ITableBodyProps } from '@dtlib/interfaces/Types'
 
   let { addRowChild, rowChild, actionCellChild, loadingChild, noDataChild, dt }: ITableBodyProps = $props()
-
-  $effect(() => {
-    console.log(dt?.renderedData)
-  })
 </script>
 
 <tbody>
   {#if dt && dt?.renderedData}
-    {@const { renderedData, originalIndices } = dt}
-    {@const { visibleOrderedColumns } = dt}
-    {@const { internalOptions } = dt}
-    {#if internalOptions.addRow === 'top' && addRowChild}
-      {@render addRowChild(visibleOrderedColumns, dt.internalOptions)}
+    {@const { renderedData, originalIndices, internalOptions: options, visibleOrderedColumns } = dt}
+    {@const columns = visibleOrderedColumns ?? []}
+    {#if options.addRow === 'top' && addRowChild}
+      {@render addRowChild({ columns, options })}
     {/if}
-    {#each renderedData as row, i (i)}
-      <tr data-index={i}>
+    {#each renderedData as renderedRow, index (index)}
+      <tr data-index={index}>
         {#if rowChild}
-          {@render rowChild(row, (originalIndices ?? [])[i], i, visibleOrderedColumns, internalOptions)}
+          {@render rowChild({ renderedRow, originalIndex: (originalIndices ?? [])[index], index, columns, options })}
         {:else}
-          <TableBodyRow {row} index={i} {actionCellChild} {dt} />
+          <TableBodyRow row={renderedRow} {index} {actionCellChild} {dt} />
         {/if}
       </tr>
     {/each}
-    {#if internalOptions.addRow === 'bottom' && addRowChild}
-      {@render addRowChild(visibleOrderedColumns, internalOptions)}
+    {#if options.addRow === 'bottom' && addRowChild}
+      {@render addRowChild({ columns, options })}
     {/if}
   {:else if dt}
     <Loader {loadingChild} {dt} />

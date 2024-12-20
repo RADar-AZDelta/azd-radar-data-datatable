@@ -1,4 +1,4 @@
-import { isDev } from '@dtlib/utils'
+import { isDev, logWhenDev } from '@dtlib/utils'
 import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
 import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, SortDirection, TFilter } from '@dtlib/interfaces/Types'
 
@@ -11,14 +11,15 @@ export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeF
   }
 
   async setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
-    if (!columns) throw new Error('Columns property is not provided')
+    if (!columns || !columns.length) throw new Error('Columns property is not provided')
     this.internalColumns = columns
     for (const col of this.internalColumns) if (!col.width) col.width = this.internalOptions?.defaultColumnWidth ?? 10
     return this.internalColumns
   }
 
   async render(): Promise<IRender> {
-    let start: number
+    let start: number, end: number
+    if (isDev()) start = performance.now()
     const filteredColumns = this.internalColumns!.reduce<Map<string, TFilter>>((acc, cur) => {
       if (cur && cur.filter) acc.set(cur.id, cur.filter)
       return acc
@@ -27,15 +28,12 @@ export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeF
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc
     }, new Map<string, SortDirection>())
-    if (isDev()) start = performance.now()
     const results = await (this.data as FetchDataFunc)(filteredColumns, sortedColumns, this.internalOptions!)
-    if (isDev()) {
-      const end = performance.now()
-      console.log(`DataTable: fetchData function took: ${Math.round(end - start!)} ms`)
-    }
     const originalIndices = Array.from({ length: results.data.length }, (_, i) => i)
     const totalRows = results.totalRows
     this.renderedData = results.data
+    if (isDev()) end = performance.now()
+    logWhenDev(`DataTable: fetchData function took: ${Math.round(end! - start!)} ms`)
 
     return {
       originalIndices,

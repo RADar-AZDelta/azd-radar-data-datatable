@@ -1,4 +1,4 @@
-import { isDev } from '@dtlib/utils'
+import { logWhenDev } from '@dtlib/utils'
 import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
 import type { IDataTypeFunctionalities, IDataTypeInfo, IRender, IRowNavigation } from '@dtlib/interfaces/Types'
 
@@ -143,7 +143,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     this.internalColumns
       ?.filter(col => col.filter)
       .forEach(col => {
-        if (isDev()) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
+        logWhenDev(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
         const index = this.internalColumns?.findIndex(c => c.id === col.id)
         data = data.filter(row => row[index!]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
       })
@@ -159,7 +159,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
       .forEach(col => {
         const index = this.internalColumns?.findIndex(obj => obj.id == col.id)
         if (index) {
-          if (isDev()) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
+          logWhenDev(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
           switch (col.sortDirection) {
             case 'asc':
               compareFn = (a, b) =>

@@ -14,7 +14,7 @@ export default class ColumnsConfig extends Options {
   // Set the internalColumns in the data implementation
   async setInternalColumnsInDataImplementation() {
     if (!this.dataTypeImpl) return
-    if (!this.internalColumns) this.internalColumns = await this.dataTypeImpl.setInternalColumns(this.columns)
+    if (!this.internalColumns || !this.internalColumns.length) this.internalColumns = await this.dataTypeImpl.setInternalColumns(this.columns)
     else this.internalColumns = await this.dataTypeImpl.setInternalColumns(this.internalColumns)
   }
 

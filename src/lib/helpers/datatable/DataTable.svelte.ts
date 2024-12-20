@@ -22,7 +22,7 @@ export default class DataTable extends DataTableConfig {
   onPaginationChanged = async (rowsPerPage: number, currentPage: number) =>
     await this._onPaginationChanged(rowsPerPage, currentPage).then(async () => await this.render())
   replaceValuesOfColumn = async (currentValue: any, updatedValue: any, column: string) =>
-    await this.dataTypeImpl?.replaceValuesOfColumn(currentValue, updatedValue, column)
+    await this.dataTypeImpl?.replaceValuesOfColumn(currentValue, updatedValue, column).then(async () => await this.render())
 
   async updateRows(rowsToUpdateByOriginalIndex: Map<number, Record<string, any>>) {
     await this.dataTypeImpl?.updateRows(rowsToUpdateByOriginalIndex)

@@ -1,6 +1,6 @@
 import type { Snippet } from 'svelte'
-import type DataTable from '@dtlib/helpers/datatable/DataTable.svelte'
 import type Query from 'arquero/dist/types/query/query'
+import type DataTable from '@dtlib/helpers/datatable/DataTable.svelte'
 
 export type Hex = `#${string}`
 export type SortDirection = 'asc' | 'desc' | undefined | null
@@ -224,12 +224,12 @@ export interface IDataTableProps {
   rendering?: () => Promise<void>
   rendered?: () => Promise<void>
   paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
-  rowChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
-  actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
-  actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  rowChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
+  actionHeaderChild?: Snippet<[{ columns: IColumnMetaData[]; options: ITableOptions }]>
+  actionCellChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
   loadingChild?: Snippet
   noDataChild?: Snippet
-  addRowChild?: Snippet<[columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  addRowChild?: Snippet<[{ columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
 }
 
 export interface IRowNavigation {
@@ -255,7 +255,7 @@ export interface IColGroupProps {
 
 export interface ITableHeadProps {
   paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
-  actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
+  actionHeaderChild?: Snippet<[{ columns: IColumnMetaData[]; options: ITableOptions }]>
   dt: DataTable
 }
 
@@ -270,9 +270,9 @@ export interface ILoaderProps {
 }
 
 export interface ITableBodyProps {
-  addRowChild?: Snippet<[columns: IColumnMetaData[] | undefined, options: ITableOptions]>
-  rowChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
-  actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  addRowChild?: Snippet<[{ columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
+  rowChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
+  actionCellChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
   loadingChild?: Snippet
   noDataChild?: Snippet
   dt: DataTable
@@ -281,7 +281,7 @@ export interface ITableBodyProps {
 export interface ITableBodyRowProps {
   row: any
   index: number
-  actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  actionCellChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
   dt: DataTable
 }
 
@@ -291,7 +291,7 @@ export interface ITableFootProps {
 }
 
 export interface IFilterRowProps {
-  actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
+  actionHeaderChild?: Snippet<[{ columns: IColumnMetaData[]; options: ITableOptions }]>
   dt: DataTable
 }
 

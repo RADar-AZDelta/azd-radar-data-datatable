@@ -13,9 +13,9 @@ export default class Query extends Crud {
     return { queriedData, indices }
   }
 
-  private async executeQuery(tempDt: Table, usedQuery: object | Query) {
-    const query = queryFrom(usedQuery)
-    const queriedDt = query.evaluate(tempDt, () => true)
+  private async executeQuery(tempDt: Table, query: object) {
+    const newQuery = queryFrom(query)
+    const queriedDt = newQuery.evaluate(tempDt, () => true)
     const queriedData = queriedDt.objects()
     return { queriedData, queriedDt }
   }

@@ -1,4 +1,4 @@
-import { isDev } from '@dtlib/utils'
+import { logWhenDev } from '@dtlib/utils'
 import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
 import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '@dtlib/interfaces/Types'
 
@@ -15,7 +15,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
   }
 
   async setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
-    if (!columns) {
+    if (!columns || !columns.length) {
       //columns is not defined, and data is an array of objects => extract the columns from the first object
       this.internalColumns = Object.keys((this.data as any[])[0]).map((key, index) => ({
         id: key,
@@ -115,7 +115,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
     this.internalColumns
       ?.filter(col => col.filter)
       .forEach(col => {
-        if (isDev()) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
+        logWhenDev(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
         data = data.filter(obj => obj[col.id]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
       })
     return data
@@ -128,7 +128,7 @@ export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataT
       .slice()
       .reverse() //Sort is applied in reverse order !!!
       .forEach(col => {
-        if (isDev()) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
+        logWhenDev(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id}'`)
         if (col.sortDirection === 'asc')
           compareFn = (a, b) => {
             const colA = this.standardizeValue(a[col.id])

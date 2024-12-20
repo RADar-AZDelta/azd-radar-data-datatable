@@ -31,7 +31,6 @@ export default class Options extends Base {
     logWhenDev('Options: Gather options from the Save Implementation')
     const id = this.options?.id ?? this.internalOptions.id
     if (!isBrowser() || !this.internalOptions?.saveImpl || !id) return Object.assign(this.internalOptions, this.options ?? Config.defaultOptions)
-    console.log('AFTER LOAD ', this.internalOptions?.actionColumn)
     logWhenDev(`loadStoredOptions: Loading options & columns for ${id}`)
     const tableOptions = this.internalOptions.saveImpl.loadOptions(id)
     if (tableOptions) Object.assign(this.internalOptions, tableOptions)
