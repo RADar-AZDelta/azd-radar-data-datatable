@@ -102,6 +102,12 @@
     "mappingStatus": "SEMI-APPROVED"
   },
   {
+    "sourceName": "Source 800",
+    "sourceCode": "D9PDUVSS",
+    "sourceFrequency": 48,
+    "mappingStatus": "FLAGGED"
+  },
+  {
     "sourceName": "Source 18",
     "sourceCode": "GXQD05IC",
     "sourceFrequency": 68,

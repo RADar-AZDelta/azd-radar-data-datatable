@@ -8,7 +8,7 @@
   import TableHead from '@dtlib/components/datatable/elements/TableHead.svelte'
   import TableFoot from '@dtlib/components/datatable/elements/TableFoot.svelte'
   import TableBody from '@dtlib/components/datatable/elements/TableBody.svelte'
-  import type { IColumnMetaData, IDataTableProps, IRowNavigation } from '@dtlib/interfaces/Types'
+  import type { IColumnMetaData, IDataTableProps, IRowNavigation, ITableFilter } from '@dtlib/interfaces/Types'
 
   let {
     data,
@@ -48,9 +48,7 @@
   export const getPreviousRow = async (currentIndex: number): Promise<Record<string, any>> => await dt?.getPreviousRow(currentIndex)
   export const insertColumns = async (cols: IColumnMetaData[]) => await dt?.insertColumns(cols)
   export const updateColumns = async (cols: IColumnMetaData[]) => await dt?.updateColumns(cols)
-  // TODO: Find a solution to avoid using "op" in the query! This means that the user must know that he needs "arquero" and he must use the "op" methods to make a filter. Filters like X === A don't work but must be op.equal(X, A) instead.
-  // Queries aren't in the most recent arquero package so can they be replaced with something else?
-  export const executeQueryAndReturnResults = async (query: object) => await dt?.executeQueryAndReturnResults(query)
+  export const executeQueryAndReturnResults = async (query: ITableFilter) => await dt?.executeQueryAndReturnResults(query)
   export const executeExpressionsAndReturnResults = async (exp: Record<string, any>) => await dt?.executeExpressionsAndReturnResults(exp)
   export const getTablePagination = () => dt?.getTablePagination()
   export const changePagination = async (pag: { currentPage?: number; rowsPerPage?: number }) => await dt?.changePagination(pag)

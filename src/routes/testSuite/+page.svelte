@@ -1,14 +1,11 @@
 <script lang="ts">
   import { tick } from 'svelte'
-  import { op, query } from 'arquero'
   import { flip } from 'svelte/animate'
   import data from './testData.json'
   import DataTable from '@dtlib/components/DataTable.svelte'
   import EditableCell from '@dtlib/components/datatable/extra/EditableCell.svelte'
   import type { ITableOptions } from '@dtlib'
-  import type Query from 'arquero/dist/types/query/query'
-  import type { TableExpr } from 'arquero/dist/types/table/transformable'
-  import type { ModifyColumnMetadataFunc } from '@dtlib/interfaces/Types'
+  import type { ITableFilter, ModifyColumnMetadataFunc } from '@dtlib/interfaces/Types'
 
   let file = $state<File>(setFile())
   let datatable = $state<DataTable>()
@@ -167,12 +164,8 @@
 
   async function executeQueryAndReturnResults() {
     if (!datatable) return
-    const params: Record<string, string> = { type: 'FLAGGED' }
-    const expr: TableExpr = (r: any, p: any) => {
-      return op.equal(r.mappingStatus, p.type)
-    }
-    const q = (query().params(params) as Query).filter(expr).toObject()
-    const queryResult = await datatable.executeQueryAndReturnResults(q)
+    const query: ITableFilter = (row, index) => row.mappingStatus === 'FLAGGED'
+    const queryResult = await datatable.executeQueryAndReturnResults(query)
     console.info(`Query result for rows with mappingStatus = MAPPED from executeQueryAndReturnResults method:\n`, queryResult)
   }
 

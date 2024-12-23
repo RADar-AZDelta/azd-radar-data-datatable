@@ -1,5 +1,5 @@
 import DataTableConfig from '@dtlib/helpers/datatable/DataTableConfig.svelte'
-import type { IColumnMetaData, SortDirection, TFilter } from '@dtlib/interfaces/Types'
+import type { IColumnMetaData, ITableFilter, SortDirection, TFilter } from '@dtlib/interfaces/Types'
 
 export default class DataTable extends DataTableConfig {
   constructor() {
@@ -15,7 +15,7 @@ export default class DataTable extends DataTableConfig {
   updateColumnFilter = async (columnId: string, filter: TFilter) => await this._updateColumnFilter(columnId, filter).then(async () => await this.render())
   changeColumnSort = async (columnId: string, sortDirection: SortDirection) =>
     await this._changeColumnSort(columnId, sortDirection).then(async () => await this.render())
-  executeQueryAndReturnResults = async (query: object) => await this.dataTypeImpl?.executeQueryAndReturnResults(query)
+  executeQueryAndReturnResults = async (query: ITableFilter) => await this.dataTypeImpl?.executeQueryAndReturnResults(query)
   executeExpressionsAndReturnResults = async (expressions: Record<string, any>) => await this.dataTypeImpl?.executeExpressionsAndReturnResults(expressions)
   getTablePagination = () => this._getTablePagination()
   changePagination = async (pag: { currentPage?: number; rowsPerPage?: number }) => await this._changePagination(pag).then(async () => await this.render())

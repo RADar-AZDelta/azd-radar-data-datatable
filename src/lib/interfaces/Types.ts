@@ -1,5 +1,4 @@
 import type { Snippet } from 'svelte'
-import type Query from 'arquero/dist/types/query/query'
 import type DataTable from '@dtlib/helpers/datatable/DataTable.svelte'
 
 export type Hex = `#${string}`
@@ -144,7 +143,7 @@ export interface IDataTypeFunctionalities {
   getBlob(): Promise<Blob>
   replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void>
   executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any>
-  executeQueryAndReturnResults(query: Query | object): Promise<any>
+  executeQueryAndReturnResults(query: ITableFilter): Promise<any>
   getFullRow(originalIndex: number): Promise<Record<string, any> | void>
   getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<any>
   getPreviousRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<any>
@@ -302,3 +301,5 @@ export interface ITitleRowProps {
 export interface ISettingsProps {
   dt: DataTable
 }
+
+export type ITableFilter = (row: Record<string, any>, index: number) => boolean

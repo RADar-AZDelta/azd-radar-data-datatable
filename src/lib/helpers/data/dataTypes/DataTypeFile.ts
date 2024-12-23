@@ -1,13 +1,13 @@
-import { wrap, type Remote } from 'comlink'
+import { proxy, wrap, type Remote } from 'comlink'
 import DataTableWorker from '@dtlib/workers/DataTable.worker?worker'
 import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
-import type Query from 'arquero/dist/types/query/query'
 import type {
   IColumnMetaData,
   IDataTypeFunctionalities,
   IDataTypeInfo,
   IRender,
   IRowNavigation,
+  ITableFilter,
   ModifyColumnMetadataFunc,
   SortDirection,
   TFilter,
@@ -128,7 +128,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
     return await this.exposed.executeExpressionsAndReturnResults({ expressions })
   }
 
-  async executeQueryAndReturnResults(query: Query | object): Promise<any> {
+  async executeQueryAndReturnResults(usedQuery: ITableFilter): Promise<any> {
     const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur) => {
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc
@@ -137,11 +137,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
       if (cur && cur.filter) acc.set(cur.id, cur.filter)
       return acc
     }, new Map<string, TFilter>())
-    return await this.exposed.executeQueryAndReturnResults({
-      usedQuery: query,
-      filteredColumns,
-      sortedColumns,
-    })
+    return await this.exposed.executeQueryAndReturnResults(proxy({ usedQuery, filteredColumns, sortedColumns }))
   }
 
   async insertColumns(cols: IColumnMetaData[]): Promise<IColumnMetaData[]> {

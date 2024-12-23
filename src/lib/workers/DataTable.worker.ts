@@ -48,6 +48,7 @@ const executeQueryAndReturnResults = async (opts: MessageRequestExecuteQueryAndR
 
 const executeExpressionsAndReturnResults = async (opts: MessageRequestExecuteExpressionsAndReturnResults) =>
   await fileWorker.executeExpressionsAndReturnResults(opts)
+
 const replaceValuesOfColumn = async (opts: MessageRequestReplaceValuesOfColumn) => await fileWorker.replaceValuesOfColumn(opts)
 
 const exposed = {

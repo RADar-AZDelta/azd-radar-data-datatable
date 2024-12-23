@@ -1,6 +1,6 @@
 import { logWhenDev } from '@dtlib/utils'
 import { DataTypeBase } from '@dtlib/helpers/data/dataTypes/DataTypeBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions } from '@dtlib/interfaces/Types'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableFilter, ITableOptions } from '@dtlib/interfaces/Types'
 
 export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctionalities {
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
@@ -23,7 +23,7 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
     throw new Error('Method executeExpressionsAndReturnResults not implemented.')
   }
 
-  async executeQueryAndReturnResults(query: object): Promise<any> {
+  async executeQueryAndReturnResults(query: ITableFilter): Promise<any> {
     throw new Error('Method executeQueryAndReturnResults not implemented.')
   }
 
