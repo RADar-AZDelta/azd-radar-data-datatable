@@ -1,58 +1,27 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import icons from '../../styles/icons.svg?raw'
+  import iconsSvg from '../../styles/icons.svg?raw'
   import type { ISvgIconProps } from '../../interfaces/Types'
-
-  /* 
-    With the previous version of SvgIcon Vite would throw an error because of an unsafe attempt to load URL
-    https://github.com/RADar-AZDelta/svelte-datatable/blob/594d38d6ecec09b516046172d2a45cecc0c55d7b/src/lib/components/SvgIcon.svelte
-
-    In Sveltekit2, the implementation of Vite has changed.
-    Previously (Sveltekit1) when importing an .svg file, it would just give you the url to the page & then you could use the following syntax:
-
-    <svg class={$$props.class} {width} {height}>
-      <use href={`${href}#${id}`} />
-    </svg>
-
-    With the use of the component like the following:
-
-    import url from '../styles/icons.svg?url'
-    <SvgIcon href={url} id="x" width="16px" height="16px" />
-
-    In Sveltekit2, this has changed because it won't retrieve the url anymore, but it will provide you with an already processed, data:image format.
-    This throws the following error:
-
-    Unsafe attempt to load URL data:image/svg+xml,...#ID from frame with URL. Domains, protocols and ports must match.
-
-    This comes because the href in the use tag expects an url from the same domain & the protocol & port must match.
-  
-    This next approach isn't the best way to approach this (I strongly believe so), but at the moment I couldn't find a better way to implement a component to
-    dynamically use svg icons from a seperate .svg file that is not in the static folder.
-
-    If the .svg file is placed in the static folder, the previous version would work perfectly, but because this is a package, the icons
-    in the static folder won't be given to the package. And even if it would be exported with the package, the path to the file would still be an issue.
-  */
 
   let { id, width = '16px', height = '16px' }: ISvgIconProps = $props()
 
   let rendered = $state(false)
+  let icon = $state<string | undefined>(undefined)
 
-  onMount(() => {
-    // Take the raw svg document (string) & parse it to a seperate HTML document
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(icons, 'image/svg+xml')
-    const svgSelector = doc.querySelector('svg')
-    if (!svgSelector) return
-    // Create a new element with the parsed svg in
-    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
-    defs.innerHTML = svgSelector.innerHTML
-    document.body.appendChild(defs)
+  async function init() {
+    // Find the correct symbol with id X in the svg via a regex
+    const regex = new RegExp(`<symbol([^>]*)id=["']${id}["']([^>]*)>([\\s\\S]*?)<\\/symbol>`, 'g')
+    const match = iconsSvg.match(regex)?.at(0) ?? undefined
+    if (!match) return
+    // Replace the symbol tag with a svg tag and add the width & height
+    icon = match.replace('<symbol', `<svg width="${width}" height="${height}"`)
     rendered = true
+  }
+
+  $effect(() => {
+    init()
   })
 </script>
 
-<svg {width} {height}>
-  {#if rendered}
-    <use href="#{id}" />
-  {/if}
-</svg>
+{#if rendered && icon}
+  {@html icon}
+{/if}
