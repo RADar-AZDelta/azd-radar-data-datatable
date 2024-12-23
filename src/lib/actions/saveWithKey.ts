@@ -3,7 +3,7 @@ export function saveWithKey(node: Node) {
     if (e.key === 'Enter') node.dispatchEvent(new CustomEvent('saveKey'))
   }
 
-  document.addEventListener('keydown', handelSave, true)
+  node.addEventListener('keypress', handelSave, true)
 
   return {
     destroy() {
