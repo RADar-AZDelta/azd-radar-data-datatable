@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import icons from '../styles/icons.svg?raw'
+  import icons from '../../styles/icons.svg?raw'
   import type { ISvgIconProps } from '../../interfaces/Types'
 
   /* 

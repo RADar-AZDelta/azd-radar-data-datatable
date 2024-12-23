@@ -1,5 +1,5 @@
 import { proxy, wrap, type Remote } from 'comlink'
-import DataTableWorker from '../workers/DataTable.worker?worker'
+import DataTableWorker from '../../../workers/DataTable.worker?worker'
 import { DataTypeCommonBase } from '../../../helpers/data/dataTypes/DataTypeCommonBase'
 import type {
   FetchDataFunc,
@@ -25,7 +25,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
     this.worker = new DataTableWorker()
     this.exposed = wrap(this.worker)
   }
-  
+
   async setData(data: IDataTypeInfo): Promise<void> {
     if (data.data) this.data = data.data as File
     if (data.internalOptions) this.internalOptions = data.internalOptions
