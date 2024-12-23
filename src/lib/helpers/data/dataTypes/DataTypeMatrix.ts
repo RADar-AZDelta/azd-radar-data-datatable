@@ -1,6 +1,6 @@
-import { logWhenDev } from '@dtlib/utils'
-import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
-import type { IDataTypeFunctionalities, IDataTypeInfo, IRender, IRowNavigation } from '@dtlib/interfaces/Types'
+import { logWhenDev } from '../../../utils'
+import { DataTypeCommonBase } from '../../../helpers/data/dataTypes/DataTypeCommonBase'
+import type { IDataTypeFunctionalities, IDataTypeInfo, IRender, IRowNavigation } from '../../../interfaces/Types'
 
 export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined

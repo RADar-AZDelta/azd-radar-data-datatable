@@ -1,6 +1,6 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
-import type { IColumnMetaData, IPagination, ITableFilter, SortDirection, TFilter } from '@dtlib/interfaces/Types'
+import type { IColumnMetaData, IPagination, ITableFilter, SortDirection, TFilter } from '../interfaces/Types'
 
 export interface PostMessage<TData> {
   msg: string

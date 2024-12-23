@@ -1,6 +1,6 @@
-import { logWhenDev } from '@dtlib/utils'
-import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '@dtlib/interfaces/Types'
+import { logWhenDev } from '../../../utils'
+import { DataTypeCommonBase } from '../../../helpers/data/dataTypes/DataTypeCommonBase'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions, ModifyColumnMetadataFunc } from '../../../interfaces/Types'
 
 export class DataTypeArrayOfObjects extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined

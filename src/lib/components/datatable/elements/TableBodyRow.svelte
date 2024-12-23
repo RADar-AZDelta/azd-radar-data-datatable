@@ -1,6 +1,6 @@
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import type { ITableBodyRowProps } from '@dtlib/interfaces/Types'
+  import type { ITableBodyRowProps } from '../../../interfaces/Types'
 
   let { row: renderedRow, index, actionCellChild, dt }: ITableBodyRowProps = $props()
 </script>

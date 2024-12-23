@@ -1,6 +1,6 @@
 <script lang="ts">
-  import ExtraLayer from '@dtlib/components/datatable/extra/ExtraLayer.svelte'
-  import type { ITableFootProps } from '@dtlib/interfaces/Types'
+  import ExtraLayer from '../../../components/datatable/extra/ExtraLayer.svelte'
+  import type { ITableFootProps } from '../../../interfaces/Types'
 
   let { paginationChanged, dt }: ITableFootProps = $props()
 </script>

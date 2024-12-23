@@ -1,7 +1,7 @@
-import Config from '@dtlib/helpers/Config'
-import Base from '@dtlib/helpers/Base.svelte'
-import { isBrowser, isEqual, logWhenDev } from '@dtlib/utils'
-import type { ITableOptions } from '@dtlib/interfaces/Types'
+import Config from '../helpers/Config'
+import Base from '../helpers/Base.svelte'
+import { isBrowser, isEqual, logWhenDev } from '../utils'
+import type { ITableOptions } from '../interfaces/Types'
 
 export default class Options extends Base {
   // Configure the internalOptions
@@ -44,7 +44,7 @@ export default class Options extends Base {
       this.internalOptions.saveImpl = this.options.saveImpl
       return
     }
-    await import('@dtlib/helpers/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
+    await import('../helpers/LocalstorageClass').then(({ default: LocalStorageOptions }) => {
       this.internalOptions.saveImpl = new LocalStorageOptions(this.internalOptions)
     })
   }

@@ -1,9 +1,9 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
 
-import { default as DataTable } from '@dtlib/components/DataTable.svelte'
-import { default as EditableCell } from '@dtlib/components/datatable/extra/EditableCell.svelte'
-import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
+import { default as DataTable } from './components/DataTable.svelte'
+import { default as EditableCell } from './components/datatable/extra/EditableCell.svelte'
+import { DataTypeCommonBase } from './helpers/data/dataTypes/DataTypeCommonBase'
 import type {
   ITableOptions,
   IColumnMetaData,
@@ -15,7 +15,7 @@ import type {
   IDataTypeFunctionalities,
   IRender,
   IDataTypeInfo,
-} from '@dtlib/interfaces/Types'
+} from './interfaces/Types'
 
 export type {
   ITableOptions,

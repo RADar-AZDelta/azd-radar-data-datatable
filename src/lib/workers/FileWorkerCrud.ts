@@ -1,5 +1,5 @@
 import { from, fromJSON } from 'arquero'
-import Save from '@dtlib/workers/FileWorkerSave'
+import Save from '../workers/FileWorkerSave'
 import type {
   MessageRequestChangeRow,
   MessageRequestDeleteRows,
@@ -8,7 +8,7 @@ import type {
   MessageRequestInsertRows,
   MessageRequestReplaceValuesOfColumn,
   MessageRequestUpdateRows,
-} from '@dtlib/workers/messages'
+} from '../workers/messages'
 
 export default class Crud extends Save {
   insertRows({ rows }: MessageRequestInsertRows) {

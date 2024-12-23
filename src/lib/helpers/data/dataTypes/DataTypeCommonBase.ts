@@ -1,6 +1,6 @@
-import { logWhenDev } from '@dtlib/utils'
-import { DataTypeBase } from '@dtlib/helpers/data/dataTypes/DataTypeBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableFilter, ITableOptions } from '@dtlib/interfaces/Types'
+import { logWhenDev } from '../../../utils'
+import { DataTypeBase } from '../../../helpers/data/dataTypes/DataTypeBase'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableFilter, ITableOptions } from '../../../interfaces/Types'
 
 export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctionalities {
   async render(onlyPaginationChanged: boolean): Promise<IRender> {

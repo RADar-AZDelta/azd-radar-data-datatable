@@ -11,9 +11,6 @@ const config = {
   },
   kit: {
     adapter: adapter(),
-    alias: {
-      '@dtlib': "src/lib"
-    }
   },
 }
 

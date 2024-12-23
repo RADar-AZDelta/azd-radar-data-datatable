@@ -1,5 +1,5 @@
-import Fetch from '@dtlib/workers/FileWorkerFetch'
-import type { MessageRequestGetBlob, MessageRequestSaveToFile } from '@dtlib/workers/messages'
+import Fetch from '../workers/FileWorkerFetch'
+import type { MessageRequestGetBlob, MessageRequestSaveToFile } from '../workers/messages'
 
 export default class Save extends Fetch {
   async saveToFile({ fileHandle, options }: MessageRequestSaveToFile) {

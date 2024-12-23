@@ -1,9 +1,9 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { debounce } from '@dtlib/utils'
-  import SvgIcon from '@dtlib/components/general/SvgIcon.svelte'
-  import type { IColumnFilterProps } from '@dtlib/interfaces/Types.js'
+  import { debounce } from '../../../../utils'
+  import SvgIcon from '../../../../components/general/SvgIcon.svelte'
+  import type { IColumnFilterProps } from '../../../../interfaces/Types.js'
 
   let { column, inputType, filter, dt }: IColumnFilterProps = $props()
 

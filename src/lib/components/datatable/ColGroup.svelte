@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IColGroupProps } from '@dtlib/interfaces/Types'
+  import type { IColGroupProps } from '../../interfaces/Types'
 
   let { dt }: IColGroupProps = $props()
 </script>

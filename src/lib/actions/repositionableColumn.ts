@@ -1,4 +1,4 @@
-import type { IColumnMetaData } from '@dtlib/interfaces/Types'
+import type { IColumnMetaData } from '../interfaces/Types'
 
 export function repositionableColumn(node: Node, column: IColumnMetaData) {
   function handleDragStart(ev: Event) {
