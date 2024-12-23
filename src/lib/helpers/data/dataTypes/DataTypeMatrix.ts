@@ -1,9 +1,16 @@
-import { DEV } from 'esm-env'
-import { DataTypeCommonBase } from '../helpers/DataTypeCommonBase'
-import type { IDataTypeFunctionalities, IRender, IRowNavigation } from '../interfaces/Types'
+import { logWhenDev } from '@dtlib/utils'
+import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
+import type { IDataTypeFunctionalities, IDataTypeInfo, IRender, IRowNavigation } from '@dtlib/interfaces/Types'
 
 export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunctionalities {
   filteredAndSortedData: any[] | undefined
+
+  async setData(data: IDataTypeInfo): Promise<void> {
+    if (data.data) this.data = data.data as any[]
+    if (data.internalOptions) this.internalOptions = data.internalOptions
+    if (data.internalColumns) this.internalColumns = data.internalColumns
+    if (data.renderedData) this.renderedData = data.renderedData
+  }
 
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
     let totalRows = 0,
@@ -12,7 +19,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     if (!onlyPaginationChanged || !this.filteredAndSortedData) {
       this.filteredAndSortedData = await this.applySort(await this.applyFilter(this.data as any[][]))
       if (this.filteredAndSortedData) totalRows = this.filteredAndSortedData.length
-    } else totalRows = this.data!.length
+    } else totalRows = (this.data as any[][]).length
     const paginatedData = await this.applyPagination(this.internalOptions!, this.filteredAndSortedData)
     if (paginatedData) {
       this.renderedData = paginatedData.map(row =>
@@ -54,7 +61,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
 
   async replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void> {
     const columnIndex = this.internalColumns!.findIndex(col => col.id === column)
-    for (let i = 0; i < this.data!.length; i++) {
+    for (let i = 0; i < (this.data as any[][]).length; i++) {
       if ((this.data as any[][])![i][columnIndex] === currentValue) {
         ;(this.data as any[][])![i][columnIndex] = updatedValue
       }
@@ -100,7 +107,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
   }
 
   async insertRows(rows: Record<string, any>[]): Promise<number[]> {
-    const originalIndices = Array.from({ length: rows.length }, (_, i) => this.data!.length + i)
+    const originalIndices = Array.from({ length: rows.length }, (_, i) => (this.data as any[][]).length + i)
     for (const row of rows) {
       ;(this.data as any[][])!.push(
         this.internalColumns!.reduce((acc, column) => {
@@ -136,7 +143,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
     this.internalColumns
       ?.filter(col => col.filter)
       .forEach(col => {
-        if (DEV) console.log(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
+        logWhenDev(`DataTable: applying filter '${col.filter}' on column '${col.id}'`)
         const index = this.internalColumns?.findIndex(c => c.id === col.id)
         data = data.filter(row => row[index!]?.toString()?.toLowerCase().indexOf(col.filter) > -1)
       })
@@ -152,7 +159,7 @@ export class DataTypeMatrix extends DataTypeCommonBase implements IDataTypeFunct
       .forEach(col => {
         const index = this.internalColumns?.findIndex(obj => obj.id == col.id)
         if (index) {
-          if (DEV) console.log(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
+          logWhenDev(`DataTable: applying sort order '${col.sortDirection}' on column '${col.id} at index ${index}'`)
           switch (col.sortDirection) {
             case 'asc':
               compareFn = (a, b) =>

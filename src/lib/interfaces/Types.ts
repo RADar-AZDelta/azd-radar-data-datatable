@@ -1,5 +1,5 @@
 import type { Snippet } from 'svelte'
-import type Query from 'arquero/dist/types/query/query'
+import type DataTable from '@dtlib/helpers/datatable/DataTable.svelte'
 
 export type Hex = `#${string}`
 export type SortDirection = 'asc' | 'desc' | undefined | null
@@ -52,13 +52,13 @@ export interface ITableOptions extends IPagination {
   dataTypeImpl?: IDataTypeFunctionalities
   saveImpl?: ICustomStoreOptions
   hideFilters?: boolean
-  addRow?: "top" | "bottom" | false
+  addRow?: 'top' | 'bottom' | false
 }
 
 export type FetchDataFunc = (
   filteredColumns: Map<string, TFilter>,
   sortedColumns: Map<string, SortDirection>,
-  pagination: IPagination
+  pagination: IPagination,
 ) => Promise<{ totalRows: number; data: any[][] | any[] }>
 
 export interface IColumnMetaData {
@@ -122,20 +122,17 @@ export interface GlobalFilter {
 export type PaginationChangedED = IPagination
 
 export interface ICustomStoreOptions {
-  load(id: string, columns?: IColumnMetaData[]): IStoredOptions | Promise<IStoredOptions>
-  store(options: ITableOptions, columns: IColumnMetaData[]): void
-}
-
-export interface IStoredOptions {
-  tableOptions: ITableOptions
-  columnMetaData: IColumnMetaData[] | undefined
+  loadOptions(id: string): ITableOptions
+  loadColumns(id: string, internalColumns?: IColumnMetaData[]): void | IColumnMetaData[]
+  storeOptions(options: ITableOptions): void
+  storeColumns(id: string | undefined, saveOptions: boolean | undefined, columns?: IColumnMetaData[]): void
 }
 
 export interface IDataTypeInfo {
   data: any[] | any[][] | FetchDataFunc | File | undefined
-  internalOptions: ITableOptions
-  internalColumns: IColumnMetaData[] | undefined
-  renderedData: any[] | any[][] | undefined
+  internalOptions?: ITableOptions
+  internalColumns?: IColumnMetaData[] | undefined
+  renderedData?: any[] | any[][] | undefined
   modifyColumnMetadata?: ModifyColumnMetadataFunc
 }
 
@@ -146,7 +143,7 @@ export interface IDataTypeFunctionalities {
   getBlob(): Promise<Blob>
   replaceValuesOfColumn(currentValue: any, updatedValue: any, column: string): Promise<void>
   executeExpressionsAndReturnResults(expressions: Record<string, any>): Promise<any>
-  executeQueryAndReturnResults(query: Query | object): Promise<any>
+  executeQueryAndReturnResults(query: ITableFilter): Promise<any>
   getFullRow(originalIndex: number): Promise<Record<string, any> | void>
   getNextRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<any>
   getPreviousRow(currentIndex: number, rowsPerPage: number, currentPage: number): Promise<any>
@@ -174,16 +171,14 @@ export interface IColumnFilterProps {
   column: string
   inputType: string
   filter: TFilter
-  disabled: boolean
-  updateColumnFilter: (column: string, filter: TFilter) => Promise<void>
+  dt: DataTable
 }
 
 export interface IColumnResizeProps {
   column: IColumnMetaData
   minWidth?: number
-  changeColumnPosition: (column: string, position: number) => Promise<void>
-  changeColumnWidth: (column: string, width: number) => Promise<void>
   child: Snippet
+  dt: DataTable
 }
 
 export interface IColumnSortProps {
@@ -194,7 +189,7 @@ export interface IColumnSortProps {
   notFilledColor?: Hex
   filledOpacity?: number
   notFilledOpacity?: number
-  changeColumnSort: (column: string, sortDirection: SortDirection) => Promise<void>
+  dt: DataTable
 }
 
 export interface IEditableCellProps {
@@ -208,13 +203,8 @@ export interface IOptionsProps {
 }
 
 export interface IPaginationProps {
-  rowsPerPage?: number
-  currentPage?: number
-  rowsPerPageOptions?: number[]
-  totalRows: number
-  disabled: boolean
-  paginationThroughArrowsOnly?: boolean
-  changePagination: (rowsPerPage: number, currentPage: number) => Promise<void>
+  paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+  dt: DataTable
 }
 
 export interface ISvgIconProps {
@@ -233,12 +223,12 @@ export interface IDataTableProps {
   rendering?: () => Promise<void>
   rendered?: () => Promise<void>
   paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
-  rowChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
-  actionHeaderChild?: Snippet<[columns: IColumnMetaData[], options: ITableOptions]>
-  actionCellChild?: Snippet<[renderedRow: any, originalIndex: number, index: number, columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  rowChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
+  actionHeaderChild?: Snippet<[{ columns: IColumnMetaData[]; options: ITableOptions }]>
+  actionCellChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
   loadingChild?: Snippet
   noDataChild?: Snippet
-  addRowChild?: Snippet<[columns: IColumnMetaData[] | undefined, options: ITableOptions]>
+  addRowChild?: Snippet<[{ columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
 }
 
 export interface IRowNavigation {
@@ -246,3 +236,70 @@ export interface IRowNavigation {
   index: number
   page: number
 }
+
+export interface IDialogProps {
+  dialog?: HTMLDialogElement
+  width: string | number
+  height: string | number
+  title?: string
+  close?: () => Promise<any>
+  children?: Snippet
+  buttonsChildren?: Snippet
+  canClose?: boolean
+}
+
+export interface IColGroupProps {
+  dt: DataTable
+}
+
+export interface ITableHeadProps {
+  paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+  actionHeaderChild?: Snippet<[{ columns: IColumnMetaData[]; options: ITableOptions }]>
+  dt: DataTable
+}
+
+export interface IExtraLayer {
+  paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+  dt: DataTable
+}
+
+export interface ILoaderProps {
+  loadingChild?: Snippet
+  dt: DataTable
+}
+
+export interface ITableBodyProps {
+  addRowChild?: Snippet<[{ columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
+  rowChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
+  actionCellChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
+  loadingChild?: Snippet
+  noDataChild?: Snippet
+  dt: DataTable
+}
+
+export interface ITableBodyRowProps {
+  row: any
+  index: number
+  actionCellChild?: Snippet<[{ renderedRow: any; originalIndex: number; index: number; columns: IColumnMetaData[] | undefined; options: ITableOptions }]>
+  dt: DataTable
+}
+
+export interface ITableFootProps {
+  paginationChanged?: (page: number, rowsPerPage: number) => Promise<void>
+  dt: DataTable
+}
+
+export interface IFilterRowProps {
+  actionHeaderChild?: Snippet<[{ columns: IColumnMetaData[]; options: ITableOptions }]>
+  dt: DataTable
+}
+
+export interface ITitleRowProps {
+  dt: DataTable
+}
+
+export interface ISettingsProps {
+  dt: DataTable
+}
+
+export type ITableFilter = (row: Record<string, any>, index: number) => boolean

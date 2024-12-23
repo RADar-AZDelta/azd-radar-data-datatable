@@ -1,5 +1,5 @@
-import Fetch from './FileWorkerFetch'
-import type { MessageRequestGetBlob, MessageRequestSaveToFile } from './messages'
+import Fetch from '@dtlib/workers/FileWorkerFetch'
+import type { MessageRequestGetBlob, MessageRequestSaveToFile } from '@dtlib/workers/messages'
 
 export default class Save extends Fetch {
   async saveToFile({ fileHandle, options }: MessageRequestSaveToFile) {
@@ -47,7 +47,7 @@ export default class Save extends Fetch {
 
   private async createCSVBody(names: string[], delim: string, reFormat: RegExp, buffer?: number, writable?: FileSystemWritableFileStream) {
     let body = []
-    if(!this.dt) return []
+    if (!this.dt) return []
     for (let rowIndex = 0; rowIndex < this.dt.totalRows(); rowIndex++) {
       if (buffer && writable && rowIndex % buffer === 0) {
         await writable.write(body.join(''))

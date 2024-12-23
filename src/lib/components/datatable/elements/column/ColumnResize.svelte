@@ -1,21 +1,22 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { resizableColumn } from '../actions/resizableColumn'
-  import { repositionableColumn } from '../actions/repositionableColumn'
-  import type { ColumnPositionChangedED, IColumnResizeProps } from '../interfaces/Types'
+  import { resizableColumn } from '@dtlib/actions/resizableColumn'
+  import { repositionableColumn } from '@dtlib/actions/repositionableColumn'
+  import type { ColumnPositionChangedED, IColumnResizeProps } from '@dtlib/interfaces/Types'
 
-  let { column, minWidth = 10, changeColumnPosition, changeColumnWidth, child }: IColumnResizeProps = $props()
+  let { column, minWidth = 10, child, dt }: IColumnResizeProps = $props()
 
   const onRepositioned = (e: CustomEvent<ColumnPositionChangedED>) => {
     const { column, position } = e.detail
-    changeColumnPosition(column, position)
+    dt?.changeColumnsPosition(column, position)
   }
 
-  function onResizing(e: CustomEvent<{ x: number }>) {
-    if (!column.width) return
-    const width = column.width + e.detail.x
-    if (width > minWidth) changeColumnWidth(column.id, width)
+  function onResizing(e: CustomEvent<{ x: number; width: number }>) {
+    const columnWidth = column.width ?? e.detail.width
+    if (!columnWidth) return
+    const width = columnWidth + e.detail.x
+    if (width > minWidth) dt?.changeColumnWidth(column.id, width)
   }
 </script>
 

@@ -2,13 +2,13 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import { sleep } from '../lib/utils'
-  import DataTable from '../lib/components/DataTable.svelte'
-  import EditableCell from '../lib/components/EditableCell.svelte'
+  import { sleep } from '@dtlib/utils'
+  import DataTable from '@dtlib/components/DataTable.svelte'
+  import EditableCell from '@dtlib/components/datatable/extra/EditableCell.svelte'
   import { FetchDataTypeClass } from '../examples/FetchDataTypeClass'
-  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '../lib/interfaces/Types'
+  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '@dtlib/interfaces/Types'
 
-  const data: Record<string, any>[] = [
+  const data: Record<string, string | number>[] = [
     {
       name: 'Rory',
       age: 35,
@@ -18,77 +18,77 @@
     },
     {
       name: 'Amethyst',
-      age: 35,
+      age: 40,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Eikstraat 450,Belgrade,Namur,5001,',
     },
     {
       name: 'Bob',
-      age: 35,
+      age: 45,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Rue du Château 143,Lochristi,East Flanders,9080,',
     },
     {
       name: 'Cindy',
-      age: 35,
+      age: 50,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Rue Libert 93,Warsage,Liège,4608,',
     },
     {
       name: 'Derek',
-      age: 35,
+      age: 10,
       country: 'USA',
       telephone: '0800-123-524-634',
       address: '123 Main Street, New York, NY 10001',
     },
     {
       name: 'Eve',
-      age: 35,
+      age: 2,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Rue du Pont Simon 204,Antwerpen,Antwerp,2040,',
     },
     {
       name: 'Frank',
-      age: 35,
+      age: 72,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Rue du Vert Galant 190,Poulseur,Liège,4171,',
     },
     {
       name: 'Gina',
-      age: 35,
+      age: 80,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Poolse Winglaan 288,Sint-Kwintens-Lennik,Flemish Brabant,1750,',
     },
     {
       name: 'Hannah',
-      age: 35,
+      age: 3,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Rue de la Poste 335,Ramsdonk,Flemish Brabant,1880,',
     },
     {
       name: 'Ivan',
-      age: 35,
+      age: 566,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Rue du Centre 259,Marquain,Hainaut,7522,',
     },
     {
       name: 'Jenny',
-      age: 35,
+      age: 45,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Rue des Campanules 311,Strombeek-Bever,Flemish Brabant,1853,',
     },
     {
       name: 'Karl',
-      age: 35,
+      age: 78,
       country: 'Belgium',
       telephone: '0800-123-524-634',
       address: 'Rue Engeland 373,Neerrepen,Limburg,3700,',
@@ -107,7 +107,7 @@
     },
     {
       id: 'age',
-      sortable: false,
+      sortable: true,
       position: 1,
     },
     {
@@ -129,7 +129,8 @@
     },
   ]
 
-  let dataTableMatrix: DataTable, dataTableArrayOfObjects: DataTable, dataTableFetchFunction: DataTable, dataTableFile: DataTable
+  let dataTableMatrix: DataTable
+  let dataTableArrayOfObjects: DataTable, dataTableFetchFunction: DataTable, dataTableFile: DataTable
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   // FETCH FUNCTIONS
@@ -145,7 +146,13 @@
     //FILTER
     let fetchedData = data
     for (const [column, filter] of [...filteredColumns].values()) {
-      fetchedData = fetchedData.filter(obj => obj[column]?.toString()?.toLowerCase().indexOf(filter) > -1)
+      fetchedData = fetchedData.filter(
+        obj =>
+          obj[column]
+            ?.toString()
+            ?.toLowerCase()
+            .indexOf(filter as string) > -1,
+      )
     }
     const totalRows = fetchedData.length
 
@@ -165,7 +172,7 @@
     const { currentPage, rowsPerPage } = pagination
     if (!currentPage || !rowsPerPage) fetchedData = fetchedData.slice(0, 20)
     else {
-      const start = (currentPage - 1) * rowsPerPage ?? 0
+      const start = (currentPage - 1) * rowsPerPage
       const end = currentPage * rowsPerPage
       fetchedData = fetchedData.slice(start, end)
     }
@@ -203,65 +210,6 @@
     }
     await dataTable.insertRows([newRow])
   }
-
-  // async function onClickSaveButton(dataTable: DataTable) {
-  //   await dataTable.saveToFile()
-  // }
-
-  // async function getBlob(dataTable: DataTable) {
-  //   const blob = await dataTable.getBlob()
-  //   console.log('BLOB ', blob, ' AND CONTENT ', await blob.text())
-  // }
-
-  // async function updateRows(dataTable: DataTable) {
-  //   await dataTable.updateRows(new Map([[1, { sourceName: 'test update' }]]))
-  // }
-
-  // async function deleteRow(dataTable: DataTable) {
-  //   await dataTable.deleteRows([1])
-  // }
-
-  // async function getNextRow(dataTable: DataTable) {
-  //   console.log(await dataTable.getNextRow(1))
-  // }
-
-  // async function getPrevRow(dataTable: DataTable) {
-  //   console.log(await dataTable.getPreviousRow(1))
-  // }
-
-  // async function onClickInsertRowsCSV(dataTable: DataTable) {
-  //   const rows: Record<string, any> = {}
-  //   const dummyRow = dataTable
-  //     .getColumns()
-  //     ?.map(col => col.id)
-  //     .reduce((acc, cur) => {
-  //       acc[cur] = ' insert'
-  //       return acc
-  //     }, rows)
-  //   await dataTable.insertRows([dummyRow])
-  // }
-
-  // async function getRow(dataTable: DataTable) {
-  //   const row = await dataTable.getFullRow(1)
-  //   console.log(row)
-  // }
-
-  // async function insertColumn(dataTable: DataTable) {
-  //   await dataTable.insertColumns([{ id: 'test', label: 'inserted Col' }])
-  // }
-
-  // async function executeQuery(dataTable: DataTable) {
-  //   const q = query()
-  //     .params({ sourceName: 'Roken' })
-  //     .filter((r: any, p: any) => r.sourceName === p.sourceName)
-  //     .toObject()
-  //   const res = await dataTable.executeQueryAndReturnResults(q)
-  //   console.log('RES ', res)
-  // }
-
-  // async function replaceValuesOfColumn(dataTable: DataTable) {
-  //   await dataTable.replaceValuesOfColumn(0, 20, 'sourceFrequency')
-  // }
 </script>
 
 <svelte:head>
@@ -271,6 +219,37 @@
     content="The Svelte Radar DataTable is a datatable component that can handle CSV's with more than 100.000 rows. It does not only work with CSV's but also with a fetch function, matrix of data or a list of objects."
   />
 </svelte:head>
+
+<a href="/testSuite">Test suite</a>
+
+<DataTable
+  {columns}
+  data={matrix}
+  bind:this={dataTableMatrix}
+  options={{
+    id: 'matrix',
+    rowsPerPage: 7,
+    rowsPerPageOptions: [7, 15],
+    actionColumn: true,
+    singleSort: false,
+    saveOptions: true,
+    paginationOnTop: false,
+  }}
+>
+  {#snippet rowChild({ renderedRow, originalIndex, columns })}
+    <td>
+      <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
+    </td>
+    {#each columns || [] as column (column.id)}
+      <td animate:flip={{ duration: 500 }}>
+        <EditableCell
+          value={renderedRow[column.id]}
+          changeValue={async (value: string | number) => await dataTableMatrix.updateRows(new Map([[originalIndex, Object.fromEntries([[column.id, value]])]]))}
+        />
+      </td>
+    {/each}
+  {/snippet}
+</DataTable>
 
 <article>
   <header>
@@ -296,11 +275,11 @@
         paginationOnTop: false,
       }}
     >
-      {#snippet rowChild(renderedRow, originalIndex, index, columns, options)}
+      {#snippet rowChild({ renderedRow, originalIndex, columns })}
         <td>
           <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
         </td>
-        {#each columns || [] as column, i (column.id)}
+        {#each columns || [] as column (column.id)}
           <td animate:flip={{ duration: 500 }}>
             <EditableCell
               value={renderedRow[column.id]}
@@ -320,7 +299,7 @@
   <details>
     <summary>Table with an array of objects as a data source</summary>
     <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ id: 'array' }}>
-      {#snippet actionCellChild(renderedRow, originalIndex, index, columns, options)}
+      {#snippet actionCellChild({ originalIndex })}
         <td>
           <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
         </td>
@@ -363,11 +342,11 @@
           return col
         })}
     >
-      {#snippet rowChild(renderedRow, originalIndex, index, columns, options)}
+      {#snippet rowChild({ renderedRow, originalIndex, columns })}
         <td>
           <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
         </td>
-        {#each columns || [] as column, i (column.id)}
+        {#each columns || [] as column (column.id)}
           <td animate:flip={{ duration: 500 }}>
             {#if column.editable === false}
               <p>{renderedRow[column.id]}</p>
@@ -381,27 +360,5 @@
         {/each}
       {/snippet}
     </DataTable>
-
-    <!-- <br />
-    <div class="container">
-      <button disabled={!file} on:click={() => onClickSaveButton(dataTableFile)}>save to file</button>
-      <button disabled={!file} on:click={() => getBlob(dataTableFile)}>get blob</button>
-      <button disabled={!file} on:click={() => updateRows(dataTableFile)}>update rows</button>
-      <button disabled={!file} on:click={() => onClickInsertRowsCSV(dataTableFile)}>insert rows</button>
-      <button disabled={!file} on:click={() => deleteRow(dataTableFile)}>delete rows</button>
-      <button disabled={!file} on:click={() => getRow(dataTableFile)}>get row</button>
-      <button disabled={!file} on:click={() => getNextRow(dataTableFile)}>get next row</button>
-      <button disabled={!file} on:click={() => getPrevRow(dataTableFile)}>get previous row</button>
-      <button disabled={!file} on:click={() => insertColumn(dataTableFile)}>insert column</button>
-      <button disabled={!file} on:click={() => executeQuery(dataTableFile)}>execute query</button>
-      <button disabled={!file} on:click={() => replaceValuesOfColumn(dataTableFile)}>replace values of column</button>
-    </div> -->
   </details>
 </article>
-
-<style>
-  .container {
-    display: grid;
-    grid-template-columns: repeat(6, auto);
-  }
-</style>

@@ -1,4 +1,4 @@
-import type { IColumnMetaData, ICustomStoreOptions, ITableOptions, IStoredOptions } from '../interfaces/Types'
+import type { IColumnMetaData, ICustomStoreOptions, ITableOptions } from '@dtlib/interfaces/Types'
 
 export default class LocalStorageOptions implements ICustomStoreOptions {
   storedOptions: ITableOptions
@@ -18,15 +18,18 @@ export default class LocalStorageOptions implements ICustomStoreOptions {
     if (options) Object.assign(this.storedOptions, options)
   }
 
-  load = (id: string, internalColumns?: IColumnMetaData[]): IStoredOptions => {
+  loadOptions = (id: string): ITableOptions => {
     // If the id is not filled in, it will return the standard options
     this.storedOptions.id = id
     const optionsName = `datatable_${id}_options`
-    const columnsName = `datatable_${id}_columns`
     // Check the settings and apply them to the standard settings
     const storedOptions = localStorage.getItem(optionsName)
     if (storedOptions) Object.assign(this.storedOptions, JSON.parse(storedOptions))
-    // Check the stored columns settings and apply them to the current columns
+    return this.storedOptions
+  }
+
+  loadColumns = (id: string, internalColumns?: IColumnMetaData[]): void | IColumnMetaData[] => {
+    const columnsName = `datatable_${id}_columns`
     const storedColumns = localStorage.getItem(columnsName)
     if (storedColumns && internalColumns) {
       const storedInternalColumns: Map<string, IColumnMetaData> = JSON.parse(storedColumns).reduce(
@@ -42,23 +45,27 @@ export default class LocalStorageOptions implements ICustomStoreOptions {
         return col
       })
     }
-    return { tableOptions: this.storedOptions, columnMetaData: this.storedColumns }
+    return this.storedColumns
   }
 
-  store = (options: ITableOptions, columns: IColumnMetaData[] | undefined): void => {
+  storeOptions = (options: ITableOptions) => {
     const optionsName = `datatable_${this.storedOptions.id}_options`
-    const columnsName = `datatable_${this.storedOptions.id}_columns`
-    // If the save option is disabled, remove the saved items in the localStorage with the id from the DataTable
-    if (options.saveOptions === false) return this.removeFromStorage(optionsName, columnsName)
     if (!this.storedOptions.id) return
-    // Save the options and the columns in the localStorage
+    // If the save option is disabled, remove the saved items in the localStorage with the id from the DataTable
+    if (options.saveOptions === false) return this.removeFromStorage(optionsName)
     const { dataTypeImpl, saveImpl, ...opts } = options
     localStorage.setItem(optionsName, JSON.stringify(opts))
+  }
+
+  storeColumns = (id: string | undefined, saveOptions: boolean | undefined, columns?: IColumnMetaData[]) => {
+    const columnsName = `datatable_${id}_columns`
+    if (!id) return
+    // If the save option is disabled, remove the saved items in the localStorage with the id from the DataTable
+    if (saveOptions === false) return this.removeFromStorage(columnsName)
     if (columns) localStorage.setItem(columnsName, JSON.stringify(columns))
   }
 
-  private removeFromStorage(optionsName: string, columnsName: string) {
-    if (localStorage.getItem(optionsName)) localStorage.removeItem(optionsName)
-    if (localStorage.getItem(columnsName)) localStorage.removeItem(columnsName)
+  private removeFromStorage(name: string) {
+    if (localStorage.getItem(name)) localStorage.removeItem(name)
   }
 }

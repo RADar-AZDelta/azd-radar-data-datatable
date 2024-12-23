@@ -1,8 +1,7 @@
 import { desc, escape, op } from 'arquero'
-import Arquero from './FileWorkerLoad'
-import type { MessageRequestFetchData } from './messages'
-import type Table from 'arquero/dist/types/table/table'
-import type { SortDirection, TFilter } from '../interfaces/Types'
+import Arquero from '@dtlib/workers/FileWorkerLoad'
+import type { SortDirection, TFilter } from '@dtlib/interfaces/Types'
+import type { MessageRequestFetchData } from '@dtlib/workers/messages'
 
 export default class Fetch extends Arquero {
   getColumnNames = () => {
@@ -28,14 +27,14 @@ export default class Fetch extends Arquero {
   private async applyGlobalFilter(data: MessageRequestFetchData) {
     if (!this.tempDt) return
     const filter = [...data.filteredColumns.values()][0]
-    const lFilter = filter?.toString().toLowerCase()
+    const lFilter = filter?.toString().toLowerCase() ?? (filter as string)
     const columns = this.tempDt.columnNames()
     this.tempDt = this.tempDt.filter(
       escape((d: any) => columns.reduce((acc: boolean, curr: string) => (acc = acc || op.lower(d[curr])?.includes(lFilter)), false)),
     )
   }
 
-  async applyMultipleFilters(filteredColumns: Map<string, TFilter>, tempDt: Table) {
+  async applyMultipleFilters(filteredColumns: Map<string, TFilter>, tempDt: any) {
     for (const [column, filter] of [...filteredColumns.entries()]) {
       const lFilter = filter?.toString().toLowerCase()
       if (!lFilter) continue
@@ -45,7 +44,7 @@ export default class Fetch extends Arquero {
     return tempDt
   }
 
-  async sortTempDt(sortedColumns: Map<string, SortDirection>, tempDt: Table) {
+  async sortTempDt(sortedColumns: Map<string, SortDirection>, tempDt: any) {
     for (const [column, sortDirection] of [...sortedColumns].reverse()) {
       //Sort is applied in reverse order !!!
       if (sortDirection === 'asc') tempDt = tempDt.orderby(column)
@@ -63,7 +62,7 @@ export default class Fetch extends Arquero {
     const { rowsPerPage, currentPage } = data.pagination
     const objects = this.tempDt.objects({ limit: rowsPerPage, offset: (currentPage! - 1) * rowsPerPage! })
     indices = this.tempDt.indices().slice((currentPage! - 1) * rowsPerPage!, currentPage! * rowsPerPage!)
-    matrix = objects.map(obj => Object.values(obj))
+    matrix = objects.map((obj: Record<any, any>) => Object.values(obj))
     return { totalRows, data: matrix, indices }
   }
 }

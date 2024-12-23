@@ -1,7 +1,6 @@
-import { DEV } from 'esm-env'
-import { DataTypeBase } from '../helpers/DataTypeBase'
-import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableOptions } from '../interfaces/Types'
-import type Query from 'arquero/dist/types/query/query'
+import { logWhenDev } from '@dtlib/utils'
+import { DataTypeBase } from '@dtlib/helpers/data/dataTypes/DataTypeBase'
+import type { IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableFilter, ITableOptions } from '@dtlib/interfaces/Types'
 
 export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctionalities {
   async render(onlyPaginationChanged: boolean): Promise<IRender> {
@@ -24,7 +23,7 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
     throw new Error('Method executeExpressionsAndReturnResults not implemented.')
   }
 
-  async executeQueryAndReturnResults(query: object | Query): Promise<any> {
+  async executeQueryAndReturnResults(query: ITableFilter): Promise<any> {
     throw new Error('Method executeQueryAndReturnResults not implemented.')
   }
 
@@ -68,7 +67,7 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
   }
 
   async setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
-    if (!columns) throw new Error('Columns property is not provided')
+    if (!columns || !columns.length) throw new Error('Columns property is not provided')
     else this.internalColumns = columns
 
     if (this.internalOptions) {
@@ -85,7 +84,7 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
       if (internalOptions && internalOptions?.currentPage && internalOptions?.rowsPerPage) {
         const start = (internalOptions.currentPage! - 1) * internalOptions.rowsPerPage!
         const end = internalOptions.currentPage! * internalOptions.rowsPerPage!
-        if (DEV) console.log(`DataTable: applying pagination row ${start} - ${end}`)
+        logWhenDev(`DataTable: applying pagination row ${start} - ${end}`)
         data = data.slice(start, end)
         return data
       } else return data.slice(0, 20)

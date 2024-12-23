@@ -1,7 +1,6 @@
 //Copyright 2023 RADar-AZDelta
 //SPDX-License-Identifier: gpl3+
-import type Query from 'arquero/dist/types/query/query'
-import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '../interfaces/Types'
+import type { IColumnMetaData, IPagination, ITableFilter, SortDirection, TFilter } from '@dtlib/interfaces/Types'
 
 export interface PostMessage<TData> {
   msg: string
@@ -72,7 +71,7 @@ export interface MessageRespnseInsertColumns {
 }
 
 export interface MessageRequestExecuteQueryAndReturnResults {
-  usedQuery: Query | object
+  usedQuery: ITableFilter
   filteredColumns: Map<string, TFilter>
   sortedColumns: Map<string, SortDirection>
 }

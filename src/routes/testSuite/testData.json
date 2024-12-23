@@ -1,0 +1,308 @@
+[
+  {
+    "sourceName": "Source 1",
+    "sourceCode": "COEN1U00",
+    "sourceFrequency": 77,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 2",
+    "sourceCode": "ISX9O69F",
+    "sourceFrequency": 100,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 3",
+    "sourceCode": "D9PDUVUR",
+    "sourceFrequency": 38,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 4",
+    "sourceCode": "KOY7IJ5R",
+    "sourceFrequency": 52,
+    "mappingStatus": "UNMAPPED"
+  },
+  {
+    "sourceName": "Source 5",
+    "sourceCode": "YI1W05C0",
+    "sourceFrequency": 55,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 6",
+    "sourceCode": "9W3EH11D",
+    "sourceFrequency": 90,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 7",
+    "sourceCode": "QMGJ6HBF",
+    "sourceFrequency": 69,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 8",
+    "sourceCode": "XFUCGS5J",
+    "sourceFrequency": 67,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 9",
+    "sourceCode": "EI257JTO",
+    "sourceFrequency": 81,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 10",
+    "sourceCode": "F8S9SCEM",
+    "sourceFrequency": 34,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 11",
+    "sourceCode": "WYYBZRM4",
+    "sourceFrequency": 87,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 12",
+    "sourceCode": "F9Z8FVUD",
+    "sourceFrequency": 28,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 13",
+    "sourceCode": "ARNWEEVN",
+    "sourceFrequency": 21,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 14",
+    "sourceCode": "29UUC6A4",
+    "sourceFrequency": 84,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 15",
+    "sourceCode": "PVI1YQAA",
+    "sourceFrequency": 60,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 16",
+    "sourceCode": "9E9DMO75",
+    "sourceFrequency": 22,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 17",
+    "sourceCode": "U4B98839",
+    "sourceFrequency": 70,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 800",
+    "sourceCode": "D9PDUVSS",
+    "sourceFrequency": 48,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 18",
+    "sourceCode": "GXQD05IC",
+    "sourceFrequency": 68,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 19",
+    "sourceCode": "VMX3W65Q",
+    "sourceFrequency": 37,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 20",
+    "sourceCode": "HT2D909H",
+    "sourceFrequency": 14,
+    "mappingStatus": "UNMAPPED"
+  },
+  {
+    "sourceName": "Source 21",
+    "sourceCode": "V7GI8MQX",
+    "sourceFrequency": 55,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 22",
+    "sourceCode": "1UAMPVYL",
+    "sourceFrequency": 17,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 23",
+    "sourceCode": "2M71HN3E",
+    "sourceFrequency": 36,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 24",
+    "sourceCode": "50D9KHUM",
+    "sourceFrequency": 36,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 25",
+    "sourceCode": "M473R4IY",
+    "sourceFrequency": 65,
+    "mappingStatus": "UNMAPPED"
+  },
+  {
+    "sourceName": "Source 26",
+    "sourceCode": "QGLKAG42",
+    "sourceFrequency": 34,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 27",
+    "sourceCode": "O2I6EIL2",
+    "sourceFrequency": 30,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 28",
+    "sourceCode": "GEQS6KN8",
+    "sourceFrequency": 95,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 29",
+    "sourceCode": "NJI25C22",
+    "sourceFrequency": 4,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 30",
+    "sourceCode": "KR8UC1FD",
+    "sourceFrequency": 11,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 31",
+    "sourceCode": "GDQCNZ3M",
+    "sourceFrequency": 50,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 32",
+    "sourceCode": "3A6A47E7",
+    "sourceFrequency": 89,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 33",
+    "sourceCode": "OIJEZ5O5",
+    "sourceFrequency": 3,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 34",
+    "sourceCode": "JTYI79EI",
+    "sourceFrequency": 24,
+    "mappingStatus": "UNMAPPED"
+  },
+  {
+    "sourceName": "Source 35",
+    "sourceCode": "2JO569EB",
+    "sourceFrequency": 46,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 36",
+    "sourceCode": "HVLKOSIC",
+    "sourceFrequency": 31,
+    "mappingStatus": "SEMI-APPROVED"
+  },
+  {
+    "sourceName": "Source 37",
+    "sourceCode": "WOCH1LGU",
+    "sourceFrequency": 56,
+    "mappingStatus": "UNMAPPED"
+  },
+  {
+    "sourceName": "Source 38",
+    "sourceCode": "9IF1PX1L",
+    "sourceFrequency": 30,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 39",
+    "sourceCode": "4I8UKE16",
+    "sourceFrequency": 64,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 40",
+    "sourceCode": "AA5BN724",
+    "sourceFrequency": 4,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 41",
+    "sourceCode": "EJV8UVZC",
+    "sourceFrequency": 32,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 42",
+    "sourceCode": "NMIC3ZDB",
+    "sourceFrequency": 64,
+    "mappingStatus": "UNMAPPED"
+  },
+  {
+    "sourceName": "Source 43",
+    "sourceCode": "OMCW542T",
+    "sourceFrequency": 71,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 44",
+    "sourceCode": "QUQS7U86",
+    "sourceFrequency": 31,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 45",
+    "sourceCode": "ALBCP1SN",
+    "sourceFrequency": 7,
+    "mappingStatus": "UNMAPPED"
+  },
+  {
+    "sourceName": "Source 46",
+    "sourceCode": "HRCNTAJ1",
+    "sourceFrequency": 14,
+    "mappingStatus": "UNMAPPED"
+  },
+  {
+    "sourceName": "Source 47",
+    "sourceCode": "OQ3TKHOI",
+    "sourceFrequency": 30,
+    "mappingStatus": "UNMAPPED"
+  },
+  {
+    "sourceName": "Source 48",
+    "sourceCode": "I5S14DWM",
+    "sourceFrequency": 87,
+    "mappingStatus": "APPROVED"
+  },
+  {
+    "sourceName": "Source 49",
+    "sourceCode": "A8DXSVKP",
+    "sourceFrequency": 85,
+    "mappingStatus": "FLAGGED"
+  },
+  {
+    "sourceName": "Source 50",
+    "sourceCode": "T5HM8S7M",
+    "sourceFrequency": 26,
+    "mappingStatus": "FLAGGED"
+  }
+]

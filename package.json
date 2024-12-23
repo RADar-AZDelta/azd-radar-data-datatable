@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "vite dev --host=127.0.0.1",
     "unlighthouse": "pnpm dlx unlighthouse --site https://radar-azdelta.github.io/svelte-datatable/",
-    "build": "vite build && pnpm package",
+    "build": "vite build",
     "preview": "vite build && vite preview --host=127.0.0.1",
     "package": "svelte-kit sync && svelte-package",
     "prepublishOnly": "pnpm run package",
@@ -21,8 +21,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test:unit": "vitest",
-    "lint": "pnpm format && prettier --plugin-search-dir ./src --check ./src && eslint ./src",
-    "format": "prettier --plugin-search-dir ./src --write ./src"
+    "lint": "pnpm format && prettier ./src --check ./src && eslint ./src",
+    "format": "prettier ./src --write ./src"
   },
   "exports": {
     ".": {
@@ -37,31 +37,35 @@
     "!dist/**/*.spec.*"
   ],
   "devDependencies": {
-    "@sveltejs/adapter-static": "^3.0.2",
-    "@sveltejs/package": "^2.3.2",
-    "@sveltejs/vite-plugin-svelte": "^3.1.1",
-    "@typescript-eslint/eslint-plugin": "^7.15.0",
-    "@typescript-eslint/parser": "^7.15.0",
-    "eslint": "^8.57.0",
+    "@sveltejs/adapter-static": "^3.0.8",
+    "@sveltejs/kit": "^2.15.0",
+    "@sveltejs/package": "^2.3.7",
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "@typescript-eslint/parser": "^8.18.1",
+    "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-svelte": "^2.41.0",
-    "prettier": "^3.3.2",
-    "prettier-plugin-svelte": "^3.2.5",
-    "sass": "^1.77.6",
-    "svelte": "5.0.0-next.130",
-    "svelte-check": "^3.8.4",
-    "svelte-preprocess": "^5.1.4",
-    "tslib": "^2.6.3",
-    "typescript": "^5.5.3",
-    "vite": "^5.3.2",
-    "vitest": "^1.6.0"
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-svelte": "^2.46.1",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "prettier-plugin-svelte": "^3.3.2",
+    "sass": "^1.83.0",
+    "svelte-check": "^4.1.1",
+    "svelte-preprocess": "^6.0.3",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vite": "6.0.5",
+    "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@sveltejs/kit": "^2.5.18",
-    "arquero": "^5.4.1",
-    "comlink": "^4.4.1",
-    "esm-env": "^1.0.0"
+    "arquero": "7.2.0",
+    "comlink": "^4.4.2",
+    "esm-env": "^1.2.1"
+  },
+  "peerDependencies": {
+    "svelte": "5.14.4"
   },
   "type": "module",
   "svelte": "./dist/index.js",

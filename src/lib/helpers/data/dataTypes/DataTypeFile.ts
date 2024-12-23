@@ -1,17 +1,17 @@
-import { wrap, type Remote } from 'comlink'
-import DataTableWorker from '../workers/DataTable.worker?worker'
-import { DataTypeCommonBase } from '../helpers/DataTypeCommonBase'
-import type Query from 'arquero/dist/types/query/query'
+import { proxy, wrap, type Remote } from 'comlink'
+import DataTableWorker from '@dtlib/workers/DataTable.worker?worker'
+import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
 import type {
   IColumnMetaData,
   IDataTypeFunctionalities,
   IDataTypeInfo,
   IRender,
   IRowNavigation,
+  ITableFilter,
   ModifyColumnMetadataFunc,
   SortDirection,
   TFilter,
-} from '../interfaces/Types'
+} from '@dtlib/interfaces/Types'
 
 export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctionalities {
   worker: Worker
@@ -39,7 +39,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
   }
 
   async setInternalColumns(columns: IColumnMetaData[] | undefined): Promise<IColumnMetaData[]> {
-    if (!columns && this.setup) {
+    if ((!columns || !columns.length) && this.setup) {
       //get columns from worker
       const receivedCols: string[] = await this.exposed.getColumnNames()
       this.internalColumns = receivedCols.map((key, index) => ({ id: key, position: index + 1 }))
@@ -128,7 +128,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
     return await this.exposed.executeExpressionsAndReturnResults({ expressions })
   }
 
-  async executeQueryAndReturnResults(query: Query | object): Promise<any> {
+  async executeQueryAndReturnResults(usedQuery: ITableFilter): Promise<any> {
     const sortedColumns = this.internalColumns!.reduce<Map<string, SortDirection>>((acc, cur) => {
       if (cur && cur.sortDirection) acc.set(cur.id, cur.sortDirection)
       return acc
@@ -137,11 +137,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
       if (cur && cur.filter) acc.set(cur.id, cur.filter)
       return acc
     }, new Map<string, TFilter>())
-    return await this.exposed.executeQueryAndReturnResults({
-      usedQuery: query,
-      filteredColumns,
-      sortedColumns,
-    })
+    return await this.exposed.executeQueryAndReturnResults(proxy({ usedQuery, filteredColumns, sortedColumns }))
   }
 
   async insertColumns(cols: IColumnMetaData[]): Promise<IColumnMetaData[]> {

@@ -13,11 +13,10 @@ import type {
   MessageRequestExecuteQueryAndReturnResults,
   MessageRequestExecuteExpressionsAndReturnResults,
   MessageRequestReplaceValuesOfColumn,
-  MessageRequestRenameColumns,
   MessageRequestGetBlob,
   MessageRequestChangeRow,
-} from './messages'
-import FileWorker from './FileWorker'
+} from '@dtlib/workers/messages'
+import FileWorker from '@dtlib/workers/FileWorker'
 
 const fileWorker = new FileWorker()
 
@@ -49,6 +48,7 @@ const executeQueryAndReturnResults = async (opts: MessageRequestExecuteQueryAndR
 
 const executeExpressionsAndReturnResults = async (opts: MessageRequestExecuteExpressionsAndReturnResults) =>
   await fileWorker.executeExpressionsAndReturnResults(opts)
+
 const replaceValuesOfColumn = async (opts: MessageRequestReplaceValuesOfColumn) => await fileWorker.replaceValuesOfColumn(opts)
 
 const exposed = {
