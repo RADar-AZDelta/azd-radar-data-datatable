@@ -1,7 +1,7 @@
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import ColumnFilter from '@dtlib/components/datatable/elements/column/ColumnFilter.svelte'
-  import type { IFilterRowProps } from '@dtlib/interfaces/Types'
+  import ColumnFilter from '../../../components/datatable/elements/column/ColumnFilter.svelte'
+  import type { IFilterRowProps } from '../../../interfaces/Types'
 
   let { actionHeaderChild, dt }: IFilterRowProps = $props()
 

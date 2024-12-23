@@ -1,7 +1,7 @@
 import { from } from 'arquero'
-import Crud from '@dtlib/workers/FileWorkerCrud'
-import type { ITableFilter, SortDirection } from '@dtlib/interfaces/Types'
-import type { MessageRequestExecuteExpressionsAndReturnResults, MessageRequestExecuteQueryAndReturnResults } from '@dtlib/workers/messages'
+import Crud from '../workers/FileWorkerCrud'
+import type { ITableFilter, SortDirection } from '../interfaces/Types'
+import type { MessageRequestExecuteExpressionsAndReturnResults, MessageRequestExecuteQueryAndReturnResults } from '../workers/messages'
 
 export default class Query extends Crud {
   async executeQueryAndReturnResults(proxy: MessageRequestExecuteQueryAndReturnResults) {

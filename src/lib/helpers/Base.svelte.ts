@@ -1,4 +1,4 @@
-import Config from '@dtlib/helpers/Config'
+import Config from '../helpers/Config'
 import type {
   FetchDataFunc,
   IColumnMetaData,
@@ -7,7 +7,7 @@ import type {
   ModifyColumnMetadataFunc,
   SortDirection,
   TFilter,
-} from '@dtlib/interfaces/Types'
+} from '../interfaces/Types'
 
 export default class Base {
   options = $state<ITableOptions>()

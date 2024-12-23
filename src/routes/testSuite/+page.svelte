@@ -1,12 +1,12 @@
 <script lang="ts">
+  import { tick } from 'svelte'
   import { flip } from 'svelte/animate'
   import data from './testData.json'
-  import DataTable from '@dtlib/components/DataTable.svelte'
-  import EditableCell from '@dtlib/components/datatable/extra/EditableCell.svelte'
-  import type { ITableOptions } from '@dtlib'
-  import type { ITableFilter, ModifyColumnMetadataFunc } from '@dtlib/interfaces/Types'
+  import DataTable from '../../lib/components/DataTable.svelte'
+  import EditableCell from '../../lib/components/datatable/extra/EditableCell.svelte'
+  import type { ITableOptions, ITableFilter, ModifyColumnMetadataFunc } from '../../lib/interfaces/Types'
 
-  let file = $state<File>(setFile())
+  let file = $state<File>()
   let datatable = $state<DataTable>()
   let options: ITableOptions = {
     id: 'testingDatatable',
@@ -52,6 +52,28 @@
   function setFile() {
     const blob = jsonToCsv(data)
     return new File([blob], 'file.csv', { type: 'text/csv' })
+  }
+
+  async function onFileInputChange(e: Event) {
+    await setFileOnInputChange(e)
+    await tick()
+    if (!datatable) return
+    await datatable.render()
+  }
+  async function setFileOnInputChange(e: Event) {
+    const inputFiles = (e.target as HTMLInputElement).files
+    if (!inputFiles) return
+    for (const f of inputFiles) {
+      const extension = f.name.split('.').pop()
+      if (!extension) continue
+      file = f
+      break
+    }
+  }
+
+  function downloadTestFile() {
+    const blob = jsonToCsv(data)
+    download(blob, 'datatable-test.csv')
   }
 
   ////////////////////////////////////////// Testing method //////////////////////////////////////////
@@ -214,6 +236,10 @@
     {/snippet}
   </DataTable>
 {/if}
+
+<label for="fileInput">Upload a file</label>
+<input id="fileInput" type="file" accept=".csv" onchange={onFileInputChange} />
+<button onclick={downloadTestFile}>Download testing file</button>
 
 <div class="container">
   <button onclick={deleteRow}>delete row</button>

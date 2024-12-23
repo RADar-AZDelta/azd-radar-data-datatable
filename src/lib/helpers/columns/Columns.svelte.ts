@@ -1,6 +1,6 @@
-import { logWhenDev } from '@dtlib/utils'
-import ColumnsConfig from '@dtlib/helpers/columns/ColumnsConfig.svelte'
-import type { IColumnMetaData, SortDirection, TFilter } from '@dtlib/interfaces/Types'
+import { logWhenDev } from '../../utils'
+import ColumnsConfig from '../../helpers/columns/ColumnsConfig.svelte'
+import type { IColumnMetaData, SortDirection, TFilter } from '../../interfaces/Types'
 
 export default class Columns extends ColumnsConfig {
   async _updateColumnFilter(columnId: string, filter: TFilter) {

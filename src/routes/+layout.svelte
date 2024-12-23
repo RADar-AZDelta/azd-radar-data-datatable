@@ -1,7 +1,7 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script>
-  import '@dtlib/styles/data-table.scss'
+  import '../lib/styles/data-table.scss'
   import '../app.scss'
 </script>
 

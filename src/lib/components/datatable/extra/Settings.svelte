@@ -1,7 +1,7 @@
 <script lang="ts">
-  import SvgIcon from '@dtlib/components/general/SvgIcon.svelte'
-  import Dialog from '@dtlib/components/general/Dialog.svelte'
-  import type { IColumnMetaData, ISettingsProps } from '@dtlib/interfaces/Types'
+  import SvgIcon from '../../../components/general/SvgIcon.svelte'
+  import Dialog from '../../../components/general/Dialog.svelte'
+  import type { IColumnMetaData, ISettingsProps } from '../../../interfaces/Types'
 
   let { dt }: ISettingsProps = $props()
 

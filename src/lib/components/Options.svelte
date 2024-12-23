@@ -1,6 +1,6 @@
 <script lang="ts">
-  import SvgIcon from '@dtlib/components/general/SvgIcon.svelte'
-  import type { IOptionsProps } from '@dtlib/interfaces/Types'
+  import SvgIcon from '../components/general/SvgIcon.svelte'
+  import type { IOptionsProps } from '../interfaces/Types'
 
   let { disabled, changeVisibility }: IOptionsProps = $props()
 </script>

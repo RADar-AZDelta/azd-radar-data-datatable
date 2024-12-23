@@ -1,4 +1,4 @@
-import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableFilter, ITableOptions } from '@dtlib/interfaces/Types'
+import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, ITableFilter, ITableOptions } from '../../../interfaces/Types'
 
 export abstract class DataTypeBase implements IDataTypeFunctionalities {
   data: any[] | any[][] | File | FetchDataFunc | undefined

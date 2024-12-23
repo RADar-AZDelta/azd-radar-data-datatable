@@ -1,5 +1,5 @@
 import type { Snippet } from 'svelte'
-import type DataTable from '@dtlib/helpers/datatable/DataTable.svelte'
+import type DataTable from '../helpers/datatable/DataTable.svelte'
 
 export type Hex = `#${string}`
 export type SortDirection = 'asc' | 'desc' | undefined | null

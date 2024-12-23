@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Loader from '@dtlib/components/datatable/extra/Loader.svelte'
-  import TableBodyRow from '@dtlib/components/datatable/elements/TableBodyRow.svelte'
-  import type { ITableBodyProps } from '@dtlib/interfaces/Types'
+  import Loader from '../../../components/datatable/extra/Loader.svelte'
+  import TableBodyRow from '../../../components/datatable/elements/TableBodyRow.svelte'
+  import type { ITableBodyProps } from '../../../interfaces/Types'
 
   let { addRowChild, rowChild, actionCellChild, loadingChild, noDataChild, dt }: ITableBodyProps = $props()
 </script>

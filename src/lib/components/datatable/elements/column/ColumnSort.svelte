@@ -1,8 +1,8 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import SvgIcon from '@dtlib/components/general/SvgIcon.svelte'
-  import type { Hex, SortDirection, IColumnSortProps } from '@dtlib/interfaces/Types'
+  import SvgIcon from '../../../../components/general/SvgIcon.svelte'
+  import type { Hex, SortDirection, IColumnSortProps } from '../../../../interfaces/Types'
 
   let {
     column,

@@ -15,8 +15,8 @@ import type {
   MessageRequestReplaceValuesOfColumn,
   MessageRequestGetBlob,
   MessageRequestChangeRow,
-} from '@dtlib/workers/messages'
-import FileWorker from '@dtlib/workers/FileWorker'
+} from '../workers/messages'
+import FileWorker from '../workers/FileWorker'
 
 const fileWorker = new FileWorker()
 

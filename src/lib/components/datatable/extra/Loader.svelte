@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Spinner from '@dtlib/components/general/Spinner.svelte'
-  import type { ILoaderProps } from '@dtlib/interfaces/Types'
+  import Spinner from '../../general/Spinner.svelte'
+  import type { ILoaderProps } from '../../../interfaces/Types'
 
   let { loadingChild, dt }: ILoaderProps = $props()
 </script>

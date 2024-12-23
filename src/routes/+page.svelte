@@ -2,11 +2,12 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { flip } from 'svelte/animate'
-  import { sleep } from '@dtlib/utils'
-  import DataTable from '@dtlib/components/DataTable.svelte'
-  import EditableCell from '@dtlib/components/datatable/extra/EditableCell.svelte'
+  import { sleep } from '../lib/utils'
+  import DataTable from '../lib/components/DataTable.svelte'
+  import EditableCell from '../lib/components/datatable/extra/EditableCell.svelte'
   import { FetchDataTypeClass } from '../examples/FetchDataTypeClass'
-  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '@dtlib/interfaces/Types'
+  import type { IColumnMetaData, IPagination, SortDirection, TFilter } from '../lib/interfaces/Types'
+    import { tick } from 'svelte'
 
   const data: Record<string, string | number>[] = [
     {
@@ -186,7 +187,7 @@
   ///////////////////////////////////////////////////////////////////////////////////////////////
   let file: File
 
-  function onFileInputChange(e: Event) {
+  async function onFileInputChange(e: Event) {
     const allowedExtensions = ['csv', 'json']
     const inputFiles = (e.target as HTMLInputElement).files
     if (!inputFiles) return
@@ -198,6 +199,9 @@
         break
       }
     }
+
+    await tick()
+    await dataTableFile?.render()
   }
 
   async function onClickInsertRows(dataTable: DataTable) {

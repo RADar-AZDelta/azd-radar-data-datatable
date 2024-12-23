@@ -1,4 +1,4 @@
-import type { IColumnMetaData, ICustomStoreOptions, ITableOptions } from '@dtlib/interfaces/Types'
+import type { IColumnMetaData, ICustomStoreOptions, ITableOptions } from '../interfaces/Types'
 
 export default class LocalStorageOptions implements ICustomStoreOptions {
   storedOptions: ITableOptions

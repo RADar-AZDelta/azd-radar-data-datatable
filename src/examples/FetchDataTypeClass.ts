@@ -1,6 +1,6 @@
-import { isDev, logWhenDev } from '@dtlib/utils'
-import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
-import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, SortDirection, TFilter } from '@dtlib/interfaces/Types'
+import { isDev, logWhenDev } from '../lib/utils'
+import { DataTypeCommonBase } from '../lib/helpers/data/dataTypes/DataTypeCommonBase'
+import type { FetchDataFunc, IColumnMetaData, IDataTypeFunctionalities, IDataTypeInfo, IRender, SortDirection, TFilter } from '../lib/interfaces/Types'
 
 export class FetchDataTypeClass extends DataTypeCommonBase implements IDataTypeFunctionalities {
   async setData(data: IDataTypeInfo): Promise<void> {

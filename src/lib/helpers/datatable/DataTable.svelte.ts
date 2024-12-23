@@ -1,5 +1,5 @@
-import DataTableConfig from '@dtlib/helpers/datatable/DataTableConfig.svelte'
-import type { IColumnMetaData, ITableFilter, SortDirection, TFilter } from '@dtlib/interfaces/Types'
+import DataTableConfig from '../../helpers/datatable/DataTableConfig.svelte'
+import type { IColumnMetaData, ITableFilter, SortDirection, TFilter } from '../../interfaces/Types'
 
 export default class DataTable extends DataTableConfig {
   constructor() {

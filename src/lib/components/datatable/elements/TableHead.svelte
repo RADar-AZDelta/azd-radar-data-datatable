@@ -1,8 +1,8 @@
 <script lang="ts">
-  import TitleRow from '@dtlib/components/datatable/elements/TitleRow.svelte'
-  import ExtraLayer from '@dtlib/components/datatable/extra/ExtraLayer.svelte'
-  import FilterRow from '@dtlib/components/datatable/elements/FilterRow.svelte'
-  import type { ITableHeadProps } from '@dtlib/interfaces/Types'
+  import TitleRow from '../../../components/datatable/elements/TitleRow.svelte'
+  import ExtraLayer from '../../../components/datatable/extra/ExtraLayer.svelte'
+  import FilterRow from '../../../components/datatable/elements/FilterRow.svelte'
+  import type { ITableHeadProps } from '../../../interfaces/Types'
 
   let { paginationChanged, actionHeaderChild, dt }: ITableHeadProps = $props()
 </script>

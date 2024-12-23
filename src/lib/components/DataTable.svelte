@@ -2,13 +2,13 @@
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import { storeOptions } from '@dtlib/actions/storeOptions'
-  import DataTable from '@dtlib/helpers/datatable/DataTable.svelte'
-  import ColGroup from '@dtlib/components/datatable/ColGroup.svelte'
-  import TableHead from '@dtlib/components/datatable/elements/TableHead.svelte'
-  import TableFoot from '@dtlib/components/datatable/elements/TableFoot.svelte'
-  import TableBody from '@dtlib/components/datatable/elements/TableBody.svelte'
-  import type { IColumnMetaData, IDataTableProps, IRowNavigation, ITableFilter } from '@dtlib/interfaces/Types'
+  import { storeOptions } from '../actions/storeOptions'
+  import DataTable from '../helpers/datatable/DataTable.svelte'
+  import ColGroup from '../components/datatable/ColGroup.svelte'
+  import TableHead from '../components/datatable/elements/TableHead.svelte'
+  import TableFoot from '../components/datatable/elements/TableFoot.svelte'
+  import TableBody from '../components/datatable/elements/TableBody.svelte'
+  import type { IColumnMetaData, IDataTableProps, IRowNavigation, ITableFilter } from '../interfaces/Types'
 
   let {
     data,

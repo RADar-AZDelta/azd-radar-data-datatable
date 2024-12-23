@@ -1,7 +1,8 @@
 import { proxy, wrap, type Remote } from 'comlink'
-import DataTableWorker from '@dtlib/workers/DataTable.worker?worker'
-import { DataTypeCommonBase } from '@dtlib/helpers/data/dataTypes/DataTypeCommonBase'
+import DataTableWorker from '../workers/DataTable.worker?worker'
+import { DataTypeCommonBase } from '../../../helpers/data/dataTypes/DataTypeCommonBase'
 import type {
+  FetchDataFunc,
   IColumnMetaData,
   IDataTypeFunctionalities,
   IDataTypeInfo,
@@ -11,7 +12,7 @@ import type {
   ModifyColumnMetadataFunc,
   SortDirection,
   TFilter,
-} from '@dtlib/interfaces/Types'
+} from '../../../interfaces/Types'
 
 export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctionalities {
   worker: Worker
@@ -24,7 +25,7 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
     this.worker = new DataTableWorker()
     this.exposed = wrap(this.worker)
   }
-
+  
   async setData(data: IDataTypeInfo): Promise<void> {
     if (data.data) this.data = data.data as File
     if (data.internalOptions) this.internalOptions = data.internalOptions
