@@ -9,8 +9,6 @@ import type {
   MessageRequestReplaceValuesOfColumn,
   MessageRequestUpdateRows,
 } from '@dtlib/workers/messages'
-import type Column from 'arquero/dist/types/table/column'
-import type { TableData } from 'arquero/dist/types/table/table'
 
 export default class Crud extends Save {
   insertRows({ rows }: MessageRequestInsertRows) {
@@ -25,7 +23,7 @@ export default class Crud extends Save {
     if (!this.dt) return
     const obj: Record<string, any> = {}
     // Add a column that is already in the original table
-    obj[this.dt._names[0]] = [this.dt._data[this.dt._names[0]].data[0]]
+    obj[this.dt._names[0]] = [this.dt._data[this.dt._names[0]][0]]
     // Add a new column name with an empty array as values in every row
     for (const col of columns) obj[col.id] = [undefined]
     // Left join the new table into the original table
@@ -56,14 +54,14 @@ export default class Crud extends Save {
 
   async updateRows({ rowsByIndex }: MessageRequestUpdateRows) {
     for (const [index, row] of rowsByIndex)
-      for (const [column, value] of Object.entries(row)) if (this.dt?._data[column]) this.dt._data[column].data[index] = value
+      for (const [column, value] of Object.entries(row)) if (this.dt?._data[column]) this.dt._data[column][index] = value
   }
 
   async replaceValuesOfColumn({ currentValue, updatedValue, column }: MessageRequestReplaceValuesOfColumn) {
-    this.dt?.scan((row?: number | undefined, data?: TableData | undefined) => {
+    this.dt?.scan((row?: number | undefined, data?: any | undefined) => {
       if (!data || row === undefined || row === null) return
-      const value = (<Record<string, any>>data)[column].data[row]
-      if (value === currentValue) (<Record<string, any>>data)[column].data[row] = updatedValue
+      const value = (<Record<string, any>>data)[column][row]
+      if (value === currentValue) (<Record<string, any>>data)[column][row] = updatedValue
     })
   }
 
@@ -72,7 +70,7 @@ export default class Crud extends Save {
     indices.sort((a, b) => b - a) //sort descending
 
     for (const index of indices) {
-      for (const column of Object.keys(this.dt?._data)) (this.dt?._data[column] as Column).data.splice(index, 1)
+      for (const column of Object.keys(this.dt?._data)) (this.dt?._data[column] as any).splice(index, 1)
       this.dt!._total -= 1
       this.dt!._nrows -= 1
     }

@@ -1,6 +1,5 @@
 import { desc, escape, op } from 'arquero'
 import Arquero from '@dtlib/workers/FileWorkerLoad'
-import type Table from 'arquero/dist/types/table/table'
 import type { SortDirection, TFilter } from '@dtlib/interfaces/Types'
 import type { MessageRequestFetchData } from '@dtlib/workers/messages'
 
@@ -35,7 +34,7 @@ export default class Fetch extends Arquero {
     )
   }
 
-  async applyMultipleFilters(filteredColumns: Map<string, TFilter>, tempDt: Table) {
+  async applyMultipleFilters(filteredColumns: Map<string, TFilter>, tempDt: any) {
     for (const [column, filter] of [...filteredColumns.entries()]) {
       const lFilter = filter?.toString().toLowerCase()
       if (!lFilter) continue
@@ -45,7 +44,7 @@ export default class Fetch extends Arquero {
     return tempDt
   }
 
-  async sortTempDt(sortedColumns: Map<string, SortDirection>, tempDt: Table) {
+  async sortTempDt(sortedColumns: Map<string, SortDirection>, tempDt: any) {
     for (const [column, sortDirection] of [...sortedColumns].reverse()) {
       //Sort is applied in reverse order !!!
       if (sortDirection === 'asc') tempDt = tempDt.orderby(column)

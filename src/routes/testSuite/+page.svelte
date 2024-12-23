@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { tick } from 'svelte'
   import { flip } from 'svelte/animate'
   import data from './testData.json'
   import DataTable from '@dtlib/components/DataTable.svelte'
@@ -37,11 +36,6 @@
     downloadLink.click()
   }
 
-  function downloadTestFile() {
-    const blob = jsonToCsv(data)
-    download(blob, 'datatable-test.csv')
-  }
-
   function jsonToCsv(json: Record<string, string | number | boolean>[]) {
     const firstObject = json[0] ?? json.filter(j => j)[0]
     const fields = Object.keys(firstObject)
@@ -53,25 +47,6 @@
     const csv = csvFields.join('\r\n').replaceAll('"', '')
     const blob = new Blob([csv], { type: 'text/csv' })
     return blob
-  }
-
-  async function onFileInputChange(e: Event) {
-    await setFileOnInputChange(e)
-    await tick()
-    if (!datatable) return
-    await datatable.render()
-  }
-
-  async function setFileOnInputChange(e: Event) {
-    const inputFiles = (e.target as HTMLInputElement).files
-    if (!inputFiles) return
-
-    for (const f of inputFiles) {
-      const extension = f.name.split('.').pop()
-      if (!extension) continue
-      file = f
-      break
-    }
   }
 
   function setFile() {
@@ -239,10 +214,6 @@
     {/snippet}
   </DataTable>
 {/if}
-
-<label for="fileInput">Upload a file</label>
-<input id="fileInput" type="file" accept=".csv" onchange={onFileInputChange} />
-<button onclick={downloadTestFile}>Download testing file</button>
 
 <div class="container">
   <button onclick={deleteRow}>delete row</button>
