@@ -302,4 +302,4 @@ export interface ISettingsProps {
   dt: DataTable
 }
 
-export type ITableFilter = (row: Record<string, any>, index: number) => boolean
+export type ITableFilter = (props: {row: Record<string, any>, index: number}) => boolean

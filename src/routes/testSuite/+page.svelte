@@ -161,7 +161,8 @@
 
   async function executeQueryAndReturnResults() {
     if (!datatable) return
-    const query: ITableFilter = (row, index) => row.mappingStatus === 'FLAGGED'
+    const param = 'APPROVED'
+    const query: ITableFilter = ({row, index}) => row.mappingStatus === param
     const queryResult = await datatable.executeQueryAndReturnResults(query)
     console.info(`Query result for rows with mappingStatus = MAPPED from executeQueryAndReturnResults method:\n`, queryResult)
   }

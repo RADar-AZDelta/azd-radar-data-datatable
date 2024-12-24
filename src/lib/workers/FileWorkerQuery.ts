@@ -21,7 +21,7 @@ export default class Query extends Crud {
   }
 
   private async useFilter(data: any[], query: ITableFilter) {
-    const mappedResults = await Promise.all(data.map(async (row, index) => await query(row, index) ? row : undefined))
+    const mappedResults = await Promise.all(data.map(async (row, index) => await query({ row, index }) ? row : undefined))
     const results = mappedResults.filter(row => row)
     return { results }
   }
