@@ -1,7 +1,7 @@
 <!-- Copyright 2023 RADar-AZDelta -->
 <!-- SPDX-License-Identifier: gpl3+ -->
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte'
+  import { onDestroy } from 'svelte'
   import { storeOptions } from '../actions/storeOptions'
   import DataTable from '../helpers/datatable/DataTable.svelte'
   import ColGroup from '../components/datatable/ColGroup.svelte'
@@ -32,13 +32,13 @@
 
   async function setup() {
     await dt.updateVariables({ rendered, rendering, initialized, modifyColumnMetadata, options, columns, data, disabled })
-    await dt.init()
+    await dt.init(true)
   }
 
   export const render = async (onlyPaginationChanged = false) => await dt?.render(onlyPaginationChanged)
   export const saveToFile = async () => await dt?.saveToFile()
   export const getBlob = async (): Promise<Blob | undefined> => await dt?.getBlob()
-  export const getData = async () => dt?.data
+  export const getData = async () => dt?.getData()
   export const updateRows = async (rows: Map<number, Record<string, any>>) => await dt?.updateRows(rows)
   export const insertRows = async (rows: Record<string, any>[]) => await dt?.insertRows(rows)
   export const deleteRows = async (originalIndices: number[]) => await dt?.deleteRows(originalIndices)
@@ -57,8 +57,8 @@
   export const renameColumns = async (columns: Record<string, string>) => await dt?.renameColumns(columns)
   export const triggerOptionsAndColumnsSave = async () => await dt?.triggerOptionsAndColumnsSave()
 
-  onMount(async () => {
-    await setup()
+  $effect(() => {
+    setup()
   })
 
   onDestroy(() => {
