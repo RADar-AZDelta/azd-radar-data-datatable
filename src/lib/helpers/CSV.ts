@@ -22,7 +22,7 @@ export default class CSV {
     // ASCII = MS DOS or MAC
     // In UTF-8 "," is a seperator so this messes up the working of the table
     // It must be a seperatorList encoded CSV file
-    static async isValid(file: File): Promise<{file: File, valid: boolean}> {
+    static async isValid(file: File): Promise<{ file: File, valid: boolean }> {
         file = await this.fixPossibleFileIssues(file)
         return { file, valid: true }
     }
@@ -31,17 +31,29 @@ export default class CSV {
         const text = await Reader.readFileAsText(file)
         if (!text) throw Error('Could not read the file')
         const updatedText = await this.fixInvalidCSV(text)
+        // const updatedText = text
         const updatedFile = await this.textToFile(updatedText, file.name, 'text/csv')
         return updatedFile
     }
 
     private static async fixInvalidCSV(text: string): Promise<string> {
-        text = text.replaceAll("\n\"", '\n')
-        text = text.replaceAll("\"\n", "\n")
-        text = text.replaceAll("\"\t", "\t")
-        text = text.replaceAll("\"\r", "\r")
-        text = text.replaceAll("\"\"", "\"")
+          let lines = text.split('\n')
+        lines = lines.map(line => this.fixCsvLine(line))
+        text = lines.join('\n')
         return text
+    }
+
+    private static fixCsvLine(line: string) {
+        let fixedLine = line.replace(/,\\"/g, '","').replace(/\\"/g, '"');
+        fixedLine = fixedLine.replace(
+            /(^|,)([^",\n]*|".*?")(?=,|$)/g,
+            (match, prefix, field) => {
+                if (field.startsWith('"') && field.endsWith('"')) return match;
+                return `${prefix}"${field}"`;
+            }
+        );
+        fixedLine = fixedLine.replace(/[^\x20-\x7E]/g, '')
+        return fixedLine;
     }
 
     private static async textToFile(text: string, name: string, type: string): Promise<File> {
