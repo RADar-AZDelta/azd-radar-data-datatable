@@ -1,6 +1,5 @@
-import { detect } from 'jschardet'
 import { proxy, wrap, type Remote } from 'comlink'
-import Reader from '../../FileReader'
+import CSV from '../../CSV'
 import DataTableWorker from '../../../workers/DataTable.worker?worker'
 import { DataTypeCommonBase } from '../../../helpers/data/dataTypes/DataTypeCommonBase'
 import type {
@@ -33,10 +32,14 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
     if (data.internalColumns) this.internalColumns = data.internalColumns
     if (data.renderedData) this.renderedData = data.renderedData
     this.modifyColumnMetaData = data.modifyColumnMetadata
-    const url = URL.createObjectURL(this.data as File)
-    const extension = (this.data as File)!.name.split('.').pop()!
-    await this.exposed.loadFile({ url, extension })
+    await this.loadFileInWorker(this.data as File)
     this.setup = true
+  }
+
+  private async loadFileInWorker(file: File): Promise<void> {
+    const url = URL.createObjectURL(file)
+    const extension = file.name.split('.').pop()!
+    await this.exposed.loadFile({ url, extension })
     URL.revokeObjectURL(url)
   }
 
@@ -192,25 +195,10 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
 
   async validate() {
     if (!this.data) return false
-    const isValidEncoding = await this.isNotAscii()
-    if(!isValidEncoding) return false
-    const isValidUTF8 = await this.isUTF8()
-    if(isValidUTF8) return false
+    const { file } = await CSV.isValid(this.data as File)
+    this.data = file
+    await this.loadFileInWorker(this.data as File)
     return true
-  }
-
-  private async isUTF8() {
-    const arrayBuffer = await Reader.readFileAsArrayBuffer(this.data as File)
-    if (!arrayBuffer) return 
-    const view = new Uint8Array(arrayBuffer)
-    return view[0] === 0xEF && view[1] === 0xBB && view[2] === 0xBF
-  }
-
-  private async isNotAscii() {
-    const text = await Reader.readFileAsText(this.data as File)
-    if(!text) return
-    const encoding = detect(text).encoding
-    return encoding !== 'ascii'
   }
 
   async destroy(): Promise<void> {
