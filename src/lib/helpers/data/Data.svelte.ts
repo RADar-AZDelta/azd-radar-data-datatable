@@ -13,7 +13,7 @@ export default class Data extends Columns {
     else if (data instanceof File) await this.setDataTypeImplForFile()
     else if (Array.isArray(data) && data.length && Array.isArray(data[0])) await this.setDataTypeImplForMatrix()
     else if (Array.isArray(data) && data.length && typeof data[0] === 'object') await this.setDataTypeImplForArrayOfObjects()
-    await this.setDataViaImplementation(setDataOptions)
+    return await this.setDataViaImplementation(setDataOptions)
   }
 
   private async setDataTypeImplFromOptions() {
@@ -35,5 +35,6 @@ export default class Data extends Columns {
   private async setDataViaImplementation(setDataOptions: IDataTypeInfo) {
     if (!this.dataTypeImpl) return
     await this.dataTypeImpl.setData({ ...setDataOptions, internalOptions: this.internalOptions, internalColumns: this.internalColumns })
+    return await this.dataTypeImpl.validate()
   }
 }

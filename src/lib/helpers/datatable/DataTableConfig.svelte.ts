@@ -20,7 +20,10 @@ export default class DataTableConfig extends Pagination {
     logWhenDev(`DataTable: init ${this.options?.id}`)
     await this.configureOptions(this.options)
     await this.configureColumns(this.columns ?? [])
-    if (!this.initialisationCompleted) await this.configureData({ data: this.data, modifyColumnMetadata: this.modifyColumnMetadata }, reconfigureData)
+    if (!this.initialisationCompleted) {
+      const validData = await this.configureData({ data: this.data, modifyColumnMetadata: this.modifyColumnMetadata }, reconfigureData)
+      if (!validData) throw new Error('Invalid format, make sure the format is not ASCII & not UTF8 encoded');
+    }
     await this.setInternalColumnsInDataImplementation()
     await this.render()
     if (this.initialized) this.initialized()

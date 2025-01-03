@@ -29,10 +29,12 @@
   }: IDataTableProps = $props()
 
   let dt = $state<DataTable>(new DataTable())
+  let error = $state<string | undefined>()
 
   async function setup() {
+    error = undefined
     await dt.updateVariables({ rendered, rendering, initialized, modifyColumnMetadata, options, columns, data, disabled })
-    await dt.init(true)
+    await dt.init(true).catch(err => (error = err))
   }
 
   export const render = async (onlyPaginationChanged = false) => await dt?.render(onlyPaginationChanged)
@@ -68,6 +70,9 @@
 
 {#if dt?.internalOptions}
   {@const renderStatus = dt?.renderStatus}
+  {#if error}
+  <p class="error">{error}</p>
+  {/if}
   <div data-component="svelte-datatable">
     <div data-component="datatable-content" data-status={renderStatus ?? ''} use:storeOptions onstoreoptions={triggerOptionsAndColumnsSave}>
       <table>
@@ -81,3 +86,10 @@
     </div>
   </div>
 {/if}
+
+<style>
+  .error {
+    padding: 0.5rem;
+    background-color: coral;
+  }
+</style>

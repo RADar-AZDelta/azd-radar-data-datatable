@@ -1,8 +1,9 @@
+import { detect } from 'jschardet'
 import { proxy, wrap, type Remote } from 'comlink'
+import Reader from '../../FileReader'
 import DataTableWorker from '../../../workers/DataTable.worker?worker'
 import { DataTypeCommonBase } from '../../../helpers/data/dataTypes/DataTypeCommonBase'
 import type {
-  FetchDataFunc,
   IColumnMetaData,
   IDataTypeFunctionalities,
   IDataTypeInfo,
@@ -187,6 +188,29 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
       return acc
     }, new Map<number, Record<string, any>>())
     await this.exposed.updateRows({ rowsByIndex: rowsToUpdateByWorkerIndex })
+  }
+
+  async validate() {
+    if (!this.data) return false
+    const isValidEncoding = await this.isNotAscii()
+    if(!isValidEncoding) return false
+    const isValidUTF8 = await this.isUTF8()
+    if(isValidUTF8) return false
+    return true
+  }
+
+  private async isUTF8() {
+    const arrayBuffer = await Reader.readFileAsArrayBuffer(this.data as File)
+    if (!arrayBuffer) return 
+    const view = new Uint8Array(arrayBuffer)
+    return view[0] === 0xEF && view[1] === 0xBB && view[2] === 0xBF
+  }
+
+  private async isNotAscii() {
+    const text = await Reader.readFileAsText(this.data as File)
+    if(!text) return
+    const encoding = detect(text).encoding
+    return encoding !== 'ascii'
   }
 
   async destroy(): Promise<void> {

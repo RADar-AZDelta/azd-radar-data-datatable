@@ -111,9 +111,13 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
 
   async deleteRows(originalIndices: number[]): Promise<void> {
     for (const originalIndex of originalIndices!.sort((a, b) => b - a)) {
-      ;(this.data as any[])!.splice(originalIndex, 1)
+      ; (this.data as any[])!.splice(originalIndex, 1)
     }
   }
 
-  async destroy(): Promise<void> {}
+  async validate(): Promise<boolean> {
+    return true
+  }
+
+  async destroy(): Promise<void> { }
 }

@@ -242,7 +242,7 @@
 >
   {#snippet rowChild({ renderedRow, originalIndex, columns })}
     <td>
-      <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
+      <button onclick={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
     </td>
     {#each columns || [] as column (column.id)}
       <td animate:flip={{ duration: 500 }}>
@@ -281,7 +281,7 @@
     >
       {#snippet rowChild({ renderedRow, originalIndex, columns })}
         <td>
-          <button on:click={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
+          <button onclick={async () => await dataTableMatrix.deleteRows([originalIndex])}>Delete row</button>
         </td>
         {#each columns || [] as column (column.id)}
           <td animate:flip={{ duration: 500 }}>
@@ -295,7 +295,7 @@
     </DataTable>
 
     <br />
-    <button on:click={() => onClickInsertRows(dataTableMatrix)}>Insert row (remove country filter to view updated records)</button>
+    <button onclick={() => onClickInsertRows(dataTableMatrix)}>Insert row (remove country filter to view updated records)</button>
   </details>
 
   <hr />
@@ -305,13 +305,13 @@
     <DataTable {data} bind:this={dataTableArrayOfObjects} options={{ id: 'array' }}>
       {#snippet actionCellChild({ originalIndex })}
         <td>
-          <button on:click={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
+          <button onclick={async () => await dataTableArrayOfObjects.deleteRows([originalIndex])}>Delete row</button>
         </td>
       {/snippet}
     </DataTable>
 
     <br />
-    <button on:click={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert row</button>
+    <button onclick={() => onClickInsertRows(dataTableArrayOfObjects)}>Insert row</button>
   </details>
 
   <hr />
@@ -330,7 +330,7 @@
       >)</summary
     >
     <label for="fileInput">Upload a file</label>
-    <input id="fileInput" type="file" accept=".csv" on:change={onFileInputChange} />
+    <input id="fileInput" type="file" accept=".csv" onchange={onFileInputChange} />
     <DataTable
       data={file}
       bind:this={dataTableFile}
@@ -338,7 +338,7 @@
         id: 'fileUsagi',
         actionColumn: true,
         saveOptions: false,
-        rowsPerPage: 5,
+        rowsPerPage: 5
       }}
       modifyColumnMetadata={columns =>
         columns.map((col, index) => {
@@ -348,7 +348,7 @@
     >
       {#snippet rowChild({ renderedRow, originalIndex, columns })}
         <td>
-          <button on:click={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
+          <button onclick={async () => await dataTableFile.deleteRows([originalIndex])}>Delete row</button>
         </td>
         {#each columns || [] as column (column.id)}
           <td animate:flip={{ duration: 500 }}>

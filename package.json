@@ -62,7 +62,8 @@
   "dependencies": {
     "arquero": "7.2.0",
     "comlink": "^4.4.2",
-    "esm-env": "^1.2.1"
+    "esm-env": "^1.2.1",
+    "jschardet": "^3.1.4"
   },
   "peerDependencies": {
     "svelte": "5.14.4"
