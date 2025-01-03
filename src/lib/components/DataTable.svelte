@@ -34,7 +34,7 @@
   async function setup() {
     error = undefined
     await dt.updateVariables({ rendered, rendering, initialized, modifyColumnMetadata, options, columns, data, disabled })
-    await dt.init(true).catch(err => (error = err))
+    await dt.init(true)
   }
 
   export const render = async (onlyPaginationChanged = false) => await dt?.render(onlyPaginationChanged)
