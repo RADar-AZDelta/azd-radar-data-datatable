@@ -37,7 +37,9 @@ export default class CSV {
     }
 
     private static async fixInvalidCSV(text: string): Promise<string> {
-          let lines = text.split('\n')
+        let lines = text.split('\n')
+        // Pop the last line because it's an empty one
+        lines.pop()
         lines = lines.map(line => this.fixCsvLine(line))
         text = lines.join('\n')
         return text
