@@ -29,6 +29,7 @@ export default class Query extends Crud {
   private async getIndices(queriedDt: any, tempDt: any, sortedColumns: Map<string, SortDirection>) {
     const columns: Record<string, any> = {}
     queriedDt._names.forEach((col: any) => (columns[col] = () => 0))
+    if(!Object.keys(columns).length) return { indices: [] }
     const imputedDt = tempDt.impute(columns)
     const tempQueriedDt = queriedDt.impute(columns)
     let joined = imputedDt.semijoin(tempQueriedDt)
