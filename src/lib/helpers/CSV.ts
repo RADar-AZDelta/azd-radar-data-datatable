@@ -31,15 +31,14 @@ export default class CSV {
         const text = await Reader.readFileAsText(file)
         if (!text) throw Error('Could not read the file')
         const updatedText = await this.fixInvalidCSV(text)
-        // const updatedText = text
-        const updatedFile = await this.textToFile(updatedText, file.name, 'text/csv')
+        const updatedFile = await this.textToFile(updatedText, file.name, 'text/csv;charset=windows-1252')
         return updatedFile
     }
 
     private static async fixInvalidCSV(text: string): Promise<string> {
         let lines = text.split('\n')
         // Pop the last line because it's an empty one
-        if(lines.at(-1)?.includes(',,,,')) lines.pop()
+        if (lines.at(-1)?.includes(',,,,')) lines.pop()
         lines = lines.map(line => this.fixCsvLine(line))
         text = lines.join('\n')
         return text
@@ -54,7 +53,7 @@ export default class CSV {
                 return `${prefix}"${field}"`;
             }
         );
-        fixedLine = fixedLine.replace(/[^\x20-\x7E]/g, '')
+        fixedLine = fixedLine.replace(/[^\x20-\x7E\xA0-\xFF]/g, '');
         return fixedLine;
     }
 
