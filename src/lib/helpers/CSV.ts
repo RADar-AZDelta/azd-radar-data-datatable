@@ -37,8 +37,8 @@ export default class CSV {
 
     private static async fixInvalidCSV(text: string): Promise<string> {
         let lines = text.split('\n')
-        // Pop the last line because it's an empty one
-        if (lines.at(-1)?.includes(',,,,')) lines.pop()
+        // The last line of the file could be an empty one, so remove it if necessary
+        lines = lines.filter(line => line.length)
         lines = lines.map(line => this.fixCsvLine(line))
         text = lines.join('\n')
         return text
