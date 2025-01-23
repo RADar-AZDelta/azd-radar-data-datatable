@@ -193,14 +193,6 @@ export class DataTypeFile extends DataTypeCommonBase implements IDataTypeFunctio
     await this.exposed.updateRows({ rowsByIndex: rowsToUpdateByWorkerIndex })
   }
 
-  async validate() {
-    if (!this.data) return false
-    const { file } = await CSV.isValid(this.data as File)
-    this.data = file
-    await this.loadFileInWorker(this.data as File)
-    return true
-  }
-
   async destroy(): Promise<void> {
     this.worker?.terminate()
   }

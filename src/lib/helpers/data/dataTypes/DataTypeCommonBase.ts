@@ -115,9 +115,5 @@ export class DataTypeCommonBase extends DataTypeBase implements IDataTypeFunctio
     }
   }
 
-  async validate(): Promise<boolean> {
-    return true
-  }
-
   async destroy(): Promise<void> { }
 }

@@ -35,6 +35,5 @@ export default class Data extends Columns {
   private async setDataViaImplementation(setDataOptions: IDataTypeInfo) {
     if (!this.dataTypeImpl) return
     await this.dataTypeImpl.setData({ ...setDataOptions, internalOptions: this.internalOptions, internalColumns: this.internalColumns })
-    return await this.dataTypeImpl.validate()
   }
 }

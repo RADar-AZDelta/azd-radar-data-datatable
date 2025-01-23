@@ -157,7 +157,6 @@ export interface IDataTypeFunctionalities {
   applyPagination(internalOptions: ITableOptions, data: any[] | any[][]): Promise<any[] | any[][] | undefined>
   insertColumns(cols: IColumnMetaData[]): Promise<IColumnMetaData[] | void>
   deleteRows(originalIndices: number[]): Promise<void>
-  validate(): Promise<boolean>
   destroy(): Promise<void>
 }
 

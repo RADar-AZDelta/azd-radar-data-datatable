@@ -52,7 +52,5 @@ export abstract class DataTypeBase implements IDataTypeFunctionalities {
 
   abstract deleteRows(originalIndices: number[]): Promise<void>
 
-  abstract validate(): Promise<boolean>
-
   abstract destroy(): Promise<void>
 }
