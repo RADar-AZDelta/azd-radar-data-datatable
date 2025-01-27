@@ -11,7 +11,7 @@
 
   const data: Record<string, string | number>[] = [
     {
-      name: 'Rory',
+      name: 'Polleke',
       age: 35,
       country: 'Belgium',
       telephone: '0800-123-524-634',

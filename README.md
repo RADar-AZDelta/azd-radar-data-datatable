@@ -1,8 +1,12 @@
 # @radar-azdelta/svelte-datatable
 
 Why yet another datatable component?
-During the development of [Keun](https://github.com/RADar-AZDelta/Keun), we needed a datatable component that could handle CSV's with more than 100.000 rows.
+During the development of [Keun](https://github.com/RADar-AZDelta/Keun), we needed a datatable component that could handle CSV's with more than 110.000 rows.
 We didn't find anything that suited our needs, so we developed our own.
+
+I've updated this! Proud of myself😋
+
+Forgot to change this!
 
 ## Features
 
